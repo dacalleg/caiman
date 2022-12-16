@@ -1,0 +1,34 @@
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Connection</h4>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="baudrate" class="form-label">Baudrate</label>
+      <input type="number" class="form-control" id="baudrate" [(ngModel)]="options.baudRate">
+    </div>
+    <div class="mb-3">
+      <label for="databits" class="form-label">Data Bits</label>
+      <input type="number" class="form-control" id="databits" [(ngModel)]="options.dataBits">
+    </div>
+    <div class="mb-3">
+      <label for="databits" class="form-label">Stop Bits</label>
+      <input type="number" class="form-control" id="stopbits" [(ngModel)]="options.stopBits">
+    </div>
+    <div class="mb-3">
+      <label for="parity" class="form-label">Parity</label>
+      <select class="form-control" [(ngModel)]="options.parity" id="parity">
+        <option [ngValue]="'none'">None</option>
+        <option [ngValue]="'even'">Even</option>
+        <option [ngValue]="'odd'">Odd</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="readtimeout" class="form-label">Read Timeout</label>
+      <input type="number" class="form-control" id="readtimeout" [(ngModel)]="options.readTimeout">
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="connect()">Connect</button>
+  </div>
+</ng-template>

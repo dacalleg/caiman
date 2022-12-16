@@ -1,0 +1,58 @@
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Variable edit</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body" *ngIf="variable">
+    <h3>Data</h3>
+    <div class="mb-3">
+      <label for="address" class="form-label">Address</label>
+      <input type="text" class="form-control" id="address" [(ngModel)]="variable.address">
+    </div>
+    <div class="mb-3">
+      <label for="name" class="form-label">Name</label>
+      <input type="text" class="form-control" id="name" [(ngModel)]="variable.name">
+    </div>
+    <div class="mb-3">
+      <label for="size" class="form-label">Size</label>
+      <select class="form-control" id="size" [(ngModel)]="variable.bit" (ngModelChange)="onPatternChange($event)">
+        <option [ngValue]="8">1 Byte</option>
+        <option [ngValue]="16">2 Byte</option>
+        <option [ngValue]="32">4 Byte</option>
+        <option [ngValue]="64">8 Byte</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="byteorder" class="form-label">Byte Order</label>
+      <select class="form-control" id="byteorder" [(ngModel)]="byteorder" (ngModelChange)="onPatternChange($event)">
+        <option value="" *ngIf="variable.bit === 8">No order</option>
+        <option value="<" *ngIf="variable.bit !== 8">Little Endian</option>
+        <option value=">" *ngIf="variable.bit !== 8">Big Endian</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="signed" class="form-label">Signed</label>
+      <select class="form-control" id="signed" [(ngModel)]="signed" (ngModelChange)="onPatternChange($event)">
+        <option [ngValue]="false">Unsigned</option>
+        <option [ngValue]="true">Signed</option>
+      </select>
+    </div>
+    <ng-container *ngIf="variable.values && variable.values.length > 0">
+      <h3>Value Mappings</h3>
+      <div class="mb-3">
+        <div *ngFor="let mapping of variable.values">
+          <div class="highlight p-1 my-2"><span class="me-1">{{mapping[0]}}</span>:<span class="ms-1">{{mapping[1]}}</span></div>
+        </div>
+      </div>
+    </ng-container>
+    <h3>Export</h3>
+    <div class="highlight p-4">
+      <pre>{{variable|exportToModbusNavel|async|json}}</pre>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="save()">Save</button>
+  </div>
+
+
+</ng-template>

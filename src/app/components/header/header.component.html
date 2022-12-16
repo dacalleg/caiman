@@ -1,0 +1,61 @@
+<nav class="navbar navbar-expand-md navbar-light bg-light">
+  <div class="container-fluid">
+    <div class="navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav">
+        <li class="nav-item" ngbDropdown>
+          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown1" role="button">
+            File
+          </a>
+          <div ngbDropdownMenu aria-labelledby="navbarDropdown1" class="dropdown-menu">
+            <a ngbDropdownItem (click)="importSnet2()">Open .snet2</a>
+            <hr class="dropdown-divider">
+            <a ngbDropdownItem (click)="settings()">Settings</a>
+            <a ngbDropdownItem (click)="optimization()">Optimization</a>
+            <hr class="dropdown-divider">
+            <a ngbDropdownItem (click)="close()">Close</a>
+          </div>
+        </li>
+        <li class="nav-item" ngbDropdown *ngIf="(project$|async)">
+          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown2" role="button">
+            View
+          </a>
+          <div ngbDropdownMenu aria-labelledby="navbarDropdown2" class="dropdown-menu">
+            <a ngbDropdownItem (click)="hexAddress()" [disabled]="(project$|async)?.view?.addressFormat === 16">Numbers in Hex</a>
+            <a ngbDropdownItem (click)="decAddress()"  [disabled]="(project$|async)?.view?.addressFormat === 10">Numbers in Dec</a>
+            <hr class="dropdown-divider">
+            <a ngbDropdownItem (click)="modbusAddress(true)" [disabled]="(project$|async)?.view?.modbus === true">Modbus Address</a>
+            <a ngbDropdownItem (click)="modbusAddress(false)" [disabled]="(project$|async)?.view?.modbus === false">Serami Address</a>
+          </div>
+        </li>
+        <li class="nav-item" ngbDropdown *ngIf="(project$|async)">
+          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown3" role="button">
+            BLE
+          </a>
+          <div ngbDropdownMenu aria-labelledby="navbarDropdown3" class="dropdown-menu">
+            <a ngbDropdownItem (click)="connectBLE()">Connect</a>
+            <a ngbDropdownItem (click)="disconnect()" *ngIf="(isDeviceConnected$|async)">Disconnect</a>
+          </div>
+        </li>
+        <li class="nav-item" ngbDropdown *ngIf="(project$|async)">
+          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown3" role="button">
+            SERIAL
+          </a>
+          <div ngbDropdownMenu aria-labelledby="navbarDropdown3" class="dropdown-menu">
+            <a ngbDropdownItem (click)="connectSerial()" *ngIf="!(isDeviceConnected$|async)">Connect</a>
+            <a ngbDropdownItem (click)="disconnect()" *ngIf="(isDeviceConnected$|async)">Disconnect</a>
+          </div>
+        </li>
+        <li class="nav-item" ngbDropdown *ngIf="(project$|async)">
+          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown4" role="button">
+            Export
+          </a>
+          <div ngbDropdownMenu aria-labelledby="navbarDropdown4" class="dropdown-menu">
+            <a ngbDropdownItem (click)="exportForNavelMicropython()">Export for Navel(Micropython)</a>
+            <a ngbDropdownItem (click)="exportForNova()">Export for Nova</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<input #file type="file" (change)="onFileChange($event)" class="d-none">

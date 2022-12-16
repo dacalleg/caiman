@@ -1,0 +1,40 @@
+<ng-template #content let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Settings</h4>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body" >
+      <h3>Input</h3>
+      <div class="text-end">
+        <button class="btn btn-primary mb-2 btn-sm" (click)="addInput()">Aggiungi Input</button>
+      </div>
+      <div class="row" *ngFor="let input of inputs; let i = index">
+        <div class="col">
+          <label [for]="'input_' + i" class="from-label">Variabile</label>
+          <select [id]="'input_' + i" class="form-control" [(ngModel)]="input.variable">
+            <option [ngValue]="variable" *ngFor="let variable of variables$|async">{{variable.name}}</option>
+          </select>
+        </div>
+        <div class="col">
+          <label [for]="'input_from_' + i" class="from-label">Valore iniziale</label>
+          <input [id]="'input_from_' + i" type="number" class="form-control" [(ngModel)]="input.from">
+        </div>
+      </div>
+      <h3>OUTPUT</h3>
+      <div class="row">
+        <div class="col">
+          <label for="output_variable" class="from-label">Variabile</label>
+          <select id="output_variable" class="form-control" [(ngModel)]="output.variable">
+            <option [ngValue]="variable" *ngFor="let variable of variables$|async">{{variable.name}}</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="output_target" class="from-label">Target</label>
+          <input type="number" class="form-control" [(ngModel)]="output.target">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-dark" (click)="runOptimization()">Save</button>
+    </div>
+  </ng-template>

@@ -1,0 +1,27 @@
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Settings</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body" *ngIf="option">
+    <h3>Formats</h3>
+
+    <div class="mb-3">
+      <label for="numberFormat" class="form-label">Number Format</label>
+      <select class="form-select" aria-label="Default select example" [(ngModel)]="option.addressFormat"
+              id="numberFormat">
+        <option [ngValue]="10">Decimal</option>
+        <option [ngValue]="16">Hex</option>
+      </select>
+    </div>
+
+    <h3>Options</h3>
+    <div class="mb-3">
+      <label for="modbuseepromoffset" class="form-label">EEprom offset for Modbus</label>
+      <input type="number" class="form-control" id="modbuseepromoffset" [ngModel]="option.modbusEEpromOffset" [min]="0">
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="save()">Save</button>
+  </div>
+</ng-template>

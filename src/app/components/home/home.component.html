@@ -1,0 +1,51 @@
+<div class="container-fluid" *ngIf="(project$|async) as project">
+  <ng-container *ngIf="project.variables.length > 0">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Search variable by name or address..." aria-describedby="button-addon2" (keydown)="onSearchChange($event)">
+          <button class="btn btn-primary" type="button" id="button-addon2">Search</button>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <ul ngbNav #nav="ngbNav" class="nav-tabs">
+          <li ngbNavItem *ngFor="let group of groups$|async" (shown)="onGroupSelected(group)">
+            <a ngbNavLink>{{group}}</a>
+            <ng-template ngbNavContent>
+              <div class="row">
+                <div class="col text-end my-2">
+                  <button class="btn btn-sm btn-primary mx-2" (click)="hideAll(group)">Hide All</button>
+                  <button class="btn btn-sm btn-primary" (click)="showAll(group)">Show All</button>
+                </div>
+              </div>
+              <div class="row align-items-stretch">
+                <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2  my-2" *ngFor="let variable of variables$|async|varByGroup:group">
+                  <div class="card h-100">
+                    <div class="card-body h-100">
+                      <app-variable-tease [variable]="variable"></app-variable-tease>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </li>
+        </ul>
+        <div [ngbNavOutlet]="nav"></div>
+      </div>
+    </div>
+  </ng-container>
+
+  <div class="text-center h-100 d-flex" *ngIf="project.variables.length == 0">
+    <div class="container">
+      <div class="row">
+        <div class="col p-3">
+          <div class="mb-5"><img src="assets/logo.svg" style="width: 350px"></div>
+          <div> You have not loaded any projects. <br>Import a .snet2 file using the "File" menu.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

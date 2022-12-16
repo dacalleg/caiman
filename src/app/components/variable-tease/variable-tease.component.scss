@@ -1,0 +1,78 @@
+.eeprom
+{
+  background-color: #aaffa4;
+}
+
+.ram
+{
+  background-color: #ffe8a4;
+}
+
+.hide
+{
+  opacity: 0.2;
+}
+
+
+bi
+{
+  width: 21px;
+  cursor: pointer;
+}
+
+.name
+{
+  font-size: 16px;
+  margin:5px 0;
+}
+
+.border
+{
+  border-radius: 5px;
+  padding: 2px 8px;
+}
+
+.data
+{
+  font-size: 13px;
+  color:#666;
+}
+
+.bytetype
+{
+  font-size: 12px;
+  font-weight: bold;
+  margin-right: 2px;
+}
+
+.byte
+{
+  color: #0000a4;
+
+}
+
+.word{
+  color: #a40000;
+
+}
+
+.dword
+{
+  color: #00a400;
+}
+
+.readonly
+{
+  color: #000;
+}
+
+.byteorder
+{
+  text-transform: uppercase;
+}
+
+.value
+{
+  font-weight: bold;
+  font-size: 35px;
+}

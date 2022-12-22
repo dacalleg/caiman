@@ -47,8 +47,8 @@ export class SeramiParserService {
               binaryMask: this.hex2bin(mask.toString(16)),
               hexMask: mask.toString(16),
               bits: null,
-              readExp: ["1 if (x & " + mask + ") > 0 else 0"],
-              writeExp: ["crv | (1 << " + index + ") if x > 0 else crv & ~(1 << " + index + ")"]
+              readExpPy: ["1 if (x & " + mask + ") > 0 else 0"],
+              writeExpPy: ["crv | (1 << " + index + ") if x > 0 else crv & ~(1 << " + index + ")"]
             } as Variable;
 
             index++;
@@ -119,13 +119,16 @@ export class SeramiParserService {
       binaryMask: this.hex2bin(mask.toString(16)),
       hexMask: mask.toString(16),
       bit: bit,
-      readExp: redexp.length !== 0 ? redexp : null,
+      readExp: this.nodeChildValue("expreval", node),
+      readExpPy: redexp.length !== 0 ? redexp : null,
+      writeExpPy: null,
       writeExp: null,
       values: this.values(this.nodeChildValue("customvaluemsg", node)),
       bits: this.getChildrens("bitsdescrption", node),
       write: false,
       pattern: this.getPattern(type, bit, reverse, signed),
-      signed: signed
+      signed: signed,
+      formatstring: this.nodeChildValue("formatstring", node)
     };
   }
 
@@ -146,9 +149,10 @@ export class SeramiParserService {
       memory: memory ? "eeprom" : "ram",
       bit: bit,
       write: false,
-      readExp: ["x.rsplit(b'\\x00')[0].decode(\"ascii\")"],
+      readExpPy: ["x.rsplit(b'\\x00')[0].decode(\"ascii\")"],
       pattern: this.getPattern(type, bit, false),
-      signed: false
+      signed: false,
+      formatstring: this.nodeChildValue("formatstring", node)
     };
   }
 

@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
-import {ComponentStore} from "@ngrx/component-store";
-import {Project, Variable, ViewOption} from "../classes/interfaces";
-import {SeramiParserService} from "./serami-parser.service";
-import {first, map} from "rxjs";
+import { Injectable } from '@angular/core';
+import { ComponentStore } from "@ngrx/component-store";
+import { Project, Variable, ViewOption } from "../classes/interfaces";
+import { SeramiParserService } from "./serami-parser.service";
+import { first, map } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -32,19 +32,25 @@ export class StoreService {
 
   setAddressFormat(format: number) {
     this.componentStore.setState((project) => {
-      return {...project, view: {...project.view, addressFormat: format}}
+      return { ...project, view: { ...project.view, addressFormat: format } }
+    });
+  }
+
+  setExtendedView(enable: boolean) {
+    this.componentStore.setState((project) => {
+      return { ...project, view: { ...project.view, extendedView: enable } }
     });
   }
 
   setAddressModbus(modbus: boolean) {
     this.componentStore.setState((project) => {
-      return {...project, view: {...project.view, modbus: modbus}}
+      return { ...project, view: { ...project.view, modbus: modbus } }
     });
   }
 
   setViewOptions(view: ViewOption) {
     this.componentStore.setState((project) => {
-      return {...project, view: {...view}}
+      return { ...project, view: { ...view } }
     });
   }
 
@@ -59,7 +65,7 @@ export class StoreService {
           v.hide = false;
         return v;
       });
-      return {...project, variables: variables} as Project;
+      return { ...project, variables: variables } as Project;
     })
   }
 
@@ -70,7 +76,7 @@ export class StoreService {
           v.hide = true;
         return v;
       });
-      return {...project, variables: variables} as Project;
+      return { ...project, variables: variables } as Project;
     })
   }
 
@@ -85,7 +91,7 @@ export class StoreService {
     this.seramiParser.parse(xml).pipe(first()).subscribe(data => {
       this.componentStore.setState({
         variables: data,
-        view: {addressFormat: 16, modbus: false, modbusEEpromOffset: 4096}
+        view: { addressFormat: 16, modbus: false, modbusEEpromOffset: 4096, extendedView: false }
       });
     });
   }
@@ -99,7 +105,8 @@ export class StoreService {
       variables: [], view: {
         addressFormat: 16,
         modbus: false,
-        modbusEEpromOffset: 4096
+        modbusEEpromOffset: 4096,
+        extendedView: false
       }
     } as Project;
   }

@@ -12,7 +12,7 @@ import {ComponentStore} from "@ngrx/component-store";
 import {VariableTeaseComponent} from "./components/variable-tease/variable-tease.component";
 import {AddressPipe} from "./pipes/address.pipe";
 import {BootstrapIconsModule} from "ng-bootstrap-icons";
-import {Eye, EyeSlash, Search, InfoCircle} from 'ng-bootstrap-icons/icons';
+import {Eye, EyeSlash, Search, InfoCircle, Pen} from 'ng-bootstrap-icons/icons';
 import {OptionModalComponent} from './components/option-modal/option-modal.component';
 import {FormsModule} from "@angular/forms";
 import {NumberFormatPipe} from "./pipes/number-format.pipe";
@@ -24,12 +24,14 @@ import { SerialModalComponent } from './components/serial-modal/serial-modal.com
 import { VariableEditComponent } from './components/variable-edit/variable-edit.component';
 import { ExportToModbusNavelPipe } from './pipes/export-to-modbus-navel.pipe';
 import { OptimizationComponent } from './components/optimization/optimization.component';
+import { HttpClientModule } from '@angular/common/http';
 
 const icons = {
   Eye,
   EyeSlash,
   Search,
-  InfoCircle
+  InfoCircle,
+  Pen
 };
 
 
@@ -58,6 +60,7 @@ const icons = {
     AppRoutingModule,
     NgbModule,
     FormsModule,
+    HttpClientModule,
     BootstrapIconsModule.pick(icons)
   ],
   providers: [ComponentStore],

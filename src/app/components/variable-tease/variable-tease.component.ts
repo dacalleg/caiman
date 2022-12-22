@@ -1,10 +1,8 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { DeviceData, Project, Variable, ViewOption } from "../../classes/interfaces";
+import { Project, VariableValue, Variable, ViewOption } from "../../classes/interfaces";
 import { StoreService } from "../../services/store.service";
-import { concatMap, debounceTime, filter, map, skipWhile, Subject, takeUntil } from "rxjs";
-import struct from "../../classes/struct";
+import { concatMap, debounceTime, filter, from, map, Observable, Subject, switchMap, takeUntil, tap } from "rxjs";
 import { DeviceService } from "../../services/device.service";
-import { TypePipe } from "../../pipes/type.pipe";
 import { ModalService } from "../../services/modal.service";
 
 @Component({
@@ -16,41 +14,39 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
   @Input() variable: Variable | null;
   destroy$: Subject<void>;
   viewOpt: ViewOption | null;
-  deviceData: DeviceData | null;
   writeMode: boolean;
-  writeSubject: Subject<string>;
+  writeSubject: Subject<number>;
   fullmask: number;
+  value$: Observable<VariableValue>;
+  project$: Observable<Project>;
+  newValue: number;
 
   constructor(private Store: StoreService, private Device: DeviceService, private Modal: ModalService) {
     this.variable = null;
     this.destroy$ = new Subject<void>();
     this.viewOpt = null;
-    this.deviceData = null;
     this.writeMode = false;
-    this.writeSubject = new Subject<string>();
+    this.writeSubject = new Subject<number>();
     this.fullmask = 0;
+    this.newValue = 0;
 
     this.writeSubject.pipe(
-      debounceTime(1000), 
-      map(value => {
-        const s = struct(this.variable?.pattern);
-        const typePipe = new TypePipe();
-        const type = typePipe.transform(this.variable);
-        if (type === "string")
-          return s.pack(value);
-        else
-          return s.pack(+value);
-      }), 
-      concatMap(value => this.Device.write(this.variable!, new Uint8Array(value))
-    )).subscribe((ret) => {
-      console.log(ret);
-    })
+        debounceTime(1000),
+        tap(() => this.writeMode = false),
+        map(value => {
+          return { variable: this.variable, value: value } as VariableValue
+        }),
+        concatMap(value => this.Device.write([value])
+      )).subscribe();
 
-    this.Device.getStream().pipe(
-      takeUntil(this.destroy$),
-      skipWhile(() => this.writeMode),
-      filter(item => this.variable !== null && this.variable.address >= item.startAddress && this.variable.address < (item.startAddress + item.buffer.length) && item.buffer.length >= (this.variable.bit / 8) && item.memory === this.variable.memory),
-    ).subscribe(value => this.deviceData = value);
+    this.value$ = this.Device.getStream().pipe(
+      switchMap((variables) => from(variables)),
+      filter(variable => !this.writeMode && variable.variable.sanitizedName === this.variable!.sanitizedName),
+      tap(value => this.newValue = value.value)
+    )
+
+    this.project$ = this.Store.getProject();
+
     this.Store.getProject().pipe(takeUntil(this.destroy$), map((prj: Project) => prj.view)).subscribe(option => {
       this.viewOpt = option;
     });
@@ -75,9 +71,8 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
     this.destroy$.next();
   }
 
-  write($event: Event) {
-    let target = $event.target as HTMLInputElement;
-    this.writeSubject.next(target.value)
+  write(value: number) {
+    this.writeSubject.next(+value);
   }
 
   toggleWrite() {

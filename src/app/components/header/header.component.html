@@ -25,9 +25,12 @@
             <hr class="dropdown-divider">
             <a ngbDropdownItem (click)="modbusAddress(true)" [disabled]="(project$|async)?.view?.modbus === true">Modbus Address</a>
             <a ngbDropdownItem (click)="modbusAddress(false)" [disabled]="(project$|async)?.view?.modbus === false">Serami Address</a>
+            <hr class="dropdown-divider">
+            <a ngbDropdownItem (click)="setExtentedView(true)" [disabled]="(project$|async)?.view?.extendedView === true">Extended View</a>
+            <a ngbDropdownItem (click)="setExtentedView(false)" [disabled]="(project$|async)?.view?.extendedView === false">Simplified View</a>
           </div>
         </li>
-        <li class="nav-item" ngbDropdown *ngIf="(project$|async)">
+        <li class="nav-item d-none" ngbDropdown *ngIf="(project$|async)">
           <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown3" role="button">
             BLE
           </a>
@@ -36,7 +39,7 @@
             <a ngbDropdownItem (click)="disconnect()" *ngIf="(isDeviceConnected$|async)">Disconnect</a>
           </div>
         </li>
-        <li class="nav-item" ngbDropdown *ngIf="(project$|async)">
+        <li class="nav-item d-none" ngbDropdown *ngIf="(project$|async)">
           <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown3" role="button">
             SERIAL
           </a>

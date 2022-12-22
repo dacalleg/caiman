@@ -44,7 +44,7 @@ export class OptimizationComponent implements OnInit {
   }
 
   async runOptimization() {
-    let optim = new Optimization();
+    /*let optim = new Optimization();
     const typePipe = new TypePipe();
     let obj = async (X: number[]) => {
       let i = 0;
@@ -71,7 +71,7 @@ export class OptimizationComponent implements OnInit {
     }
 
     let solution = await optim.nelderMead(obj, this.inputs.map(item => item.from), { minErrorDelta: 0.001, zeroDelta: 1 });
-    console.log("solution is at " + JSON.stringify(solution));
+    console.log("solution is at " + JSON.stringify(solution));*/
   }
 
 

@@ -1,4 +1,4 @@
-import {Observable} from "rxjs";
+import { Observable } from "rxjs";
 
 export interface Variable {
   address: number
@@ -14,15 +14,18 @@ export interface Variable {
   min?: number
   name: string
   pattern: string
-  readExp?: string[] | null
+  readExp?: string | null
+  readExpPy?: string[] | null
   readonly: boolean
   sanitizedName: string
   type: string
   values?: string[][] | null
   write: boolean
-  writeExp?: string[] | null
+  writeExp?: string | null
+  writeExpPy?: string[] | null
   hide?: boolean,
-  signed: boolean
+  signed: boolean,
+  formatstring: string
 }
 
 export interface Project {
@@ -34,6 +37,7 @@ export interface ViewOption {
   addressFormat: number;
   modbus: boolean;
   modbusEEpromOffset: number;
+  extendedView: boolean;
 }
 
 export interface DeviceData {
@@ -57,8 +61,7 @@ export interface SerialConnectionSettings {
   readTimeout: number;
 }
 
-export interface BLESerialDevice
-{
+export interface BLESerialDevice {
   device: any;
   server: any;
   service: any;
@@ -66,31 +69,36 @@ export interface BLESerialDevice
   rx: any;
 }
 
-export interface Channel
-{
-  connect(settings: SerialConnectionSettings): Observable<any>;
-  write(data: Uint8Array): Observable<Uint8Array>;
+export interface VariableValue {
+  variable: Variable;
+  value: number;
+}
+
+export interface Channel {
+  connect(): Observable<void>;
+  write(variables: VariableValue[]): Observable<VariableValue[]>;
+  read(variables: Variable[]): Observable<VariableValue[]>;
+  setVariableStream(variables: Variable[]): Observable<void>;
+  getStream(): Observable<VariableValue[]>;
+  ping(): Observable<void>;
   close(): void;
 }
 
 
-export interface ChannelProtocol
-{
+export interface ChannelProtocol {
   readVariable(variable: Variable): Observable<Uint8Array>;
   writeVariable(variable: Variable, buffer: Uint8Array): Observable<Uint8Array>;
 }
 
 
-export interface OptimizationInput
-{
-    variable: Variable|null;
-    from: number;
-    to: number;
+export interface OptimizationInput {
+  variable: Variable | null;
+  from: number;
+  to: number;
 }
 
 
-export interface OptimizationOutput
-{
-    variable: Variable|null;
-    target: number;
+export interface OptimizationOutput {
+  variable: Variable | null;
+  target: number;
 }

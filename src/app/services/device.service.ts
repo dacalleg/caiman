@@ -1,113 +1,61 @@
 import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
-  catchError,
-  concatMap, filter, finalize,
-  from,
-  map,
+  filter,
+  Observable,
   of,
   repeat,
-  retry,
   Subject,
-  switchMap, take,
-  takeUntil, tap, throwError,
+  switchMap,
+  takeUntil,
+  tap,
+  throwError,
 } from "rxjs";
-import { Channel, ChannelProtocol, DeviceData, SerialConnectionSettings, Variable } from "../classes/interfaces";
-import { Serami } from "../classes/serami";
-import { SerialChannel } from "../classes/serial-channel";
-import { BleChannel } from "../classes/ble.channel";
-import { VariableValueFormatterPipe } from '../pipes/variable-value-formatter.pipe';
+import { Channel, Variable, VariableValue } from "../classes/interfaces";
 
 @Injectable({
   providedIn: 'root'
 })
 export class DeviceService {
-  private stream$: Subject<DeviceData>;
   private monitoredVariables: Variable[];
-  private monitoredVariablesChange$: Subject<void>;
-  private stop: Subject<void>;
+  private monitoredVariables$: BehaviorSubject<Variable[]>;
+
+  private stop$: Subject<void>;
   private connected$: BehaviorSubject<boolean>;
-  private channel: Channel;
-  private protocol: ChannelProtocol;
+  private channel: Channel | null;
+  private stream$: Subject<VariableValue[]>;
 
   constructor() {
-    this.stream$ = new Subject<DeviceData>();
     this.monitoredVariables = [];
-    this.monitoredVariablesChange$ = new Subject<void>();
-    this.stop = new Subject();
+    this.stop$ = new Subject();
     this.connected$ = new BehaviorSubject<boolean>(false);
-    this.channel = new BleChannel();
-    this.protocol = new Serami(this.channel)
+    this.channel = null
+    this.monitoredVariables$ = new BehaviorSubject<Variable[]>([]);
+    this.stream$ = new Subject();
   }
 
-  setChannel(channel: string | null) {
-    if (channel === null)
-      this.channel = new BleChannel();
-    switch (channel) {
-      case "BLE":
-        this.channel = new BleChannel();
-        break
-      case "SERIAL":
-        this.channel = new SerialChannel();
-        break;
-    }
-    this.protocol = new Serami(this.channel);
+  setChannel(channel: Channel) {
+    this.channel = channel;
   }
 
-  startRead(options: SerialConnectionSettings) {
-    const connect$ = this.channel.connect(options);
-    const read$ = of(void 0).pipe(
-      switchMap(() => of(this.monitoredVariables).pipe(
-        filter(items => items.length > 0),
-        take(1),
-        map(items => {
-          const ret = [] as Variable[];
-          const names = [] as string[];
-          items.forEach(item => {
-            const name = item.address + "_" + item.bit + "_" + item.memory;
-            if (!names.includes(name)) {
-              names.push(name);
-              ret.push(item);
-            }
-
-          })
-          return ret;
-        }),
-        switchMap(variables => of(...variables)),
-      )),
-      concatMap(variable => from(this.protocol.readVariable(variable)).pipe(
-        retry(3),
-        catchError(val => {
-          console.log(val);
-          this.stopRead();
-          return throwError(val)
-        }),
-        map(data => {
-          return { startAddress: variable.address, buffer: data, memory: variable.memory } as DeviceData;
-        })
+  startRead() {
+    if (this.channel) {
+      return of(0).pipe(
+        switchMap(() => this.channel!.connect()),
+        switchMap(() => this.monitoredVariables$),
+        filter((variables) => variables.length > 0),
+        switchMap((variables) => this.channel!.setVariableStream(variables)),
+        switchMap(() => this.channel!.getStream()),
+        tap(data => this.stream$.next(data)),
+        takeUntil(this.stop$)
       )
-      ),
-      takeUntil(this.monitoredVariablesChange$),
-      repeat(),
-      takeUntil(this.stop)
-    );
-    connect$.pipe(
-      tap(() => this.connected$.next(true)),
-      switchMap(() => read$),
-      catchError(val => {
-        console.log(val);
-        this.connected$.next(false)
-        return throwError(val);
-      }),
-      finalize(() => {
-        this.connected$.next(false);
-        this.channel.close();
-      }),
-    ).subscribe(value => this.stream$.next(value));
+    }
+    else
+      return throwError(() => new Error("Channel is null, call set channel before"))
   }
 
   getStream() {
-    return this.stream$.asObservable();
+    return this.stream$;
   }
 
   isConnected() {
@@ -120,6 +68,7 @@ export class DeviceService {
       .sort((a, b) => {
         return a.address - b.address;
       });
+    this.monitoredVariables$.next(this.monitoredVariables);
   }
 
   addMonitoredVariable(variable: Variable) {
@@ -129,30 +78,31 @@ export class DeviceService {
       .sort((a, b) => {
         return a.address - b.address;
       });
+    this.monitoredVariables$.next(this.monitoredVariables);
   }
 
   changeMonitoredVariables(variables: Variable[]) {
     this.monitoredVariables = variables;
-    this.monitoredVariablesChange$.next();
+    this.monitoredVariables$.next(this.monitoredVariables);
   }
 
   stopRead() {
-    this.stop.next();
+    this.stop$.next();
   }
 
-  write(variable: Variable, buffer: Uint8Array) {
-    return this.protocol.writeVariable(variable, buffer);
+  write(variables: VariableValue[]): Observable<VariableValue[]> {
+    if (this.channel) {
+      return this.channel.write(variables);
+    }
+    else
+      return throwError(() => new Error("Channel is null, call set channel before"))
   }
 
-  read(variable: Variable) {
-    return this.protocol.readVariable(variable).pipe(
-      map(buffer => {
-        return { startAddress: variable.address, buffer: buffer, memory: variable.memory } as DeviceData;
-      }),
-      map(data => {
-        const pipe = new VariableValueFormatterPipe();
-        return pipe.transform(data, variable);
-      })
-    )
+  read(variables: Variable[]) {
+    if (this.channel) {
+      return this.channel.read(variables);
+    }
+    else
+      return throwError(() => new Error("Channel is null, call set channel before"))
   }
 }

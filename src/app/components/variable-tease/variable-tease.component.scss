@@ -1,11 +1,11 @@
 .eeprom
 {
-  background-color: #aaffa4;
+  border-left: 5px solid #aaffa4;
 }
 
 .ram
 {
-  background-color: #ffe8a4;
+  border-left: 5px solid #ffe8a4;
 }
 
 .hide
@@ -16,14 +16,16 @@
 
 bi
 {
-  width: 21px;
+  width: 16px;
   cursor: pointer;
 }
 
 .name
 {
   font-size: 16px;
-  margin:5px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .border
@@ -74,5 +76,46 @@ bi
 .value
 {
   font-weight: bold;
-  font-size: 35px;
+  font-size: 1vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+@keyframes ldio-sgbedotv3i {
+  0% { transform: rotate(0deg) }
+  50% { transform: rotate(180deg) }
+  100% { transform: rotate(360deg) }
+}
+.ldio-sgbedotv3i div {
+  position: absolute;
+  animation: ldio-sgbedotv3i 0.45s linear infinite;
+  width: 86.4px;
+  height: 86.4px;
+  top: 10.8px;
+  left: 10.8px;
+  border-radius: 50%;
+  box-shadow: 0 2.16px 0 0 #1d0e0b;
+  transform-origin: 43.2px 44.28px;
+}
+.loadingio-spinner-eclipse-e14gotp89x9 {
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  overflow: hidden;
+  background: none;
+  position: relative;
+}
+.ldio-sgbedotv3i {
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  transform-origin: 0 0; /* see note above */
+}
+.ldio-sgbedotv3i div { box-sizing: content-box; }
+
+.type
+{
+  font-size: 12px;
 }

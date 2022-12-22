@@ -22,11 +22,7 @@
               </div>
               <div class="row align-items-stretch">
                 <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2  my-2" *ngFor="let variable of variables$|async|varByGroup:group">
-                  <div class="card h-100">
-                    <div class="card-body h-100">
-                      <app-variable-tease [variable]="variable"></app-variable-tease>
-                    </div>
-                  </div>
+                    <app-variable-tease [variable]="variable"></app-variable-tease>
                 </div>
               </div>
             </ng-template>

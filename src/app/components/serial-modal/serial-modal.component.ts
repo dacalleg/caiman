@@ -38,8 +38,8 @@ export class SerialModalComponent implements OnInit {
   }
 
   connect() {
-    this.Device.setChannel(this.channel);
-    this.Device.startRead(this.options);
+    /*this.Device.setChannel(this.channel);
+    this.Device.startRead(this.options);*/
     if(this.modal)
       this.modal.close();
   }

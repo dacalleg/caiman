@@ -145,7 +145,7 @@ export class Serami implements ChannelProtocol {
   }
 
   sendToChannel(data: Uint8Array): Observable<number> {
-    return this.channel.write(new Uint8Array([0, 2, ...data])).pipe(map(res => {
+    /*return this.channel.write(new Uint8Array([0, 2, ...data])).pipe(map(res => {
       if (((data[0] + data[1] + res[1]) & 255) == res[0]) {
         return res[1];
       } else {
@@ -154,6 +154,7 @@ export class Serami implements ChannelProtocol {
     }),
       retry(3),
       catchError(err => of()),
-    ) as Observable<number>;
+    ) as Observable<number>;*/
+    return of(0);
   }
 }

@@ -3,7 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  agua_endpoint: "https://extraflame.agua-iot.com",
+  agua_hostname: "extraflame.agua-iot.com",
+  agua_id_brand: "1",
+  agua_customer_code: "195764"
 };
 
 /*

@@ -1,36 +1,37 @@
 import {Injectable} from '@angular/core';
-import {from, Observable, shareReplay} from "rxjs";
-import {Channel, SerialConnectionSettings} from "./interfaces";
+import {from, Observable, of, shareReplay, throwError} from "rxjs";
+import {Channel, SerialConnectionSettings, Variable, VariableValue} from "./interfaces";
 import {Lock} from "./lock";
 
-@Injectable({
-  providedIn: 'root'
-})
 export class SerialChannel implements Channel{
   port: any;
   open: boolean;
   lock: Lock;
-  settings: SerialConnectionSettings|null;
+  settings: SerialConnectionSettings;
   connection$: Observable<void>|null;
 
-  constructor() {
+  constructor(settings: SerialConnectionSettings) {
     this.connection$ = null;
     this.open = false;
     this.lock = new Lock();
-    this.settings = null;
+    this.settings = settings;
   }
 
-  connect(settings: SerialConnectionSettings) {
-    this.connection$ = from(this._connect(settings));
-    return this.connection$;
+  connect() {
+    if(this.settings){
+      this.connection$ = from(this._connect(this.settings));
+      return this.connection$;
+    }
+    throw throwError(() => new Error("Settings Missing, call setSettings before connect."));  
   }
 
   close() {
     return from(this._close());
   }
 
-  write(data: Uint8Array) {
-    return from(this.sendToDevice(data))
+  write(variables: VariableValue[]): Observable<VariableValue[]> {
+    throw new Error("Method not implemented.");
+    //return from(this.sendToDevice(data))
   }
 
   async _close() {
@@ -74,5 +75,18 @@ export class SerialChannel implements Channel{
         }
       }, timeout);
     })
+  }
+
+  read(variables: Variable[]): Observable<VariableValue[]> {
+    throw new Error('Method not implemented.');
+  }
+  setVariableStream(variables: Variable[]): Observable<void> {
+    throw new Error('Method not implemented.');
+  }
+  getStream(): Observable<VariableValue[]> {
+    throw new Error('Method not implemented.');
+  }
+  ping(): Observable<void> {
+    throw new Error('Method not implemented.');
   }
 }

@@ -1,46 +1,67 @@
-<ng-container *ngIf="variable">
-  <div class="d-flex flex-column justify-content-between h-100">
-    <div [ngClass]="{'hide': variable.hide}">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex">
-          <div *ngIf="variable.bit === 8" class="border bytetype byte"><ng-container *ngIf="variable.signed">SIGNED </ng-container>BYTE</div>
-          <div *ngIf="variable.bit === 16" class="border bytetype word"><ng-container *ngIf="variable.signed">SIGNED </ng-container>WORD</div>
-          <div *ngIf="variable.bit === 32" class="border bytetype dword"><ng-container *ngIf="variable.signed">SIGNED </ng-container>DWORD</div>
-          <div *ngIf="variable.readonly" class="border bytetype readonly">READONLY</div>
-          <div *ngIf="(variable.pattern|byteorder) !== null"
-               class="border bytetype byteorder">{{variable.pattern|byteorder}}</div>
-        </div>
-
-        <div class="text-end"><strong>{{variable.address|address:variable.memory:viewOpt|numberFormat:viewOpt }}</strong>
-        </div>
-      </div>
-      <div class="d-flex align-items-stretch">
-        <div class="mx-2" [ngClass]="{'eeprom': variable.memory === 'eeprom', 'ram': variable.memory === 'ram' }"
-             style="width: 10px"></div>
-        <div>
-          <small class="fst-italic">{{variable|type}}</small>
-          <div class="d-block fw-bolder mb-0 name">{{variable.name}}</div>
-          <small class="d-inline-block border mt-2">{{variable.sanitizedName}}</small>
-          <div class="data">
-            <div class="mt-3">Byte: {{variable.bit / 8 }}</div>
-            <div class="" *ngIf="variable.mask && variable.mask !== fullmask">Mask: {{variable.mask|numberFormat:viewOpt}}</div>
-            <div >Min: {{variable.min}}</div>
-            <div >Max: {{variable.max}}</div>
-            <div *ngIf="variable.pattern">Pattern: {{variable.pattern}}</div>
+<div class="card h-100" *ngIf="variable"
+  [ngClass]="{'eeprom': variable.memory === 'eeprom', 'ram': variable.memory === 'ram' }">
+  <div class="card-body h-100">
+    <div class="d-flex flex-column justify-content-between h-100">
+      <div [ngClass]="{'hide': variable.hide}">
+        <div class="d-flex justify-content-between align-items-center mb-4"
+          *ngIf="(project$|async)?.view?.extendedView">
+          <div class="d-flex">
+            <div *ngIf="variable.bit === 8" class="border bytetype byte">
+              <ng-container *ngIf="variable.signed">SIGNED </ng-container>BYTE
+            </div>
+            <div *ngIf="variable.bit === 16" class="border bytetype word">
+              <ng-container *ngIf="variable.signed">SIGNED </ng-container>WORD
+            </div>
+            <div *ngIf="variable.bit === 32" class="border bytetype dword">
+              <ng-container *ngIf="variable.signed">SIGNED </ng-container>DWORD
+            </div>
+            <div *ngIf="variable.readonly" class="border bytetype readonly">READONLY</div>
+            <div *ngIf="(variable.pattern|byteorder) !== null" class="border bytetype byteorder">
+              {{variable.pattern|byteorder}}</div>
+          </div>
+          <div class="text-end">
+            <strong>{{variable.address|address:variable.memory:viewOpt|numberFormat:viewOpt}}</strong>
           </div>
         </div>
-        <div class="d-flex flex-grow-1 align-items-center justify-content-center">
-          <div class="value" *ngIf="!writeMode">{{deviceData|variableValueFormatter:variable}}</div>
-          <input type="text" *ngIf="writeMode" [value]="deviceData|variableValueFormatter:variable" (change)="write($event)" class="form-control ms-5">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="me-2" style="max-width: 50%">
+            <small class="type fst-italic" *ngIf="(project$|async)?.view?.extendedView">{{variable|type}}</small>
+            <div class="d-block fw-bolder mb-0 name" [title]="variable.name">{{variable.name}}</div>
+            <div class="data" *ngIf="(project$|async)?.view?.extendedView">
+              <small class="d-inline-block border mt-2">{{variable.sanitizedName}}</small>
+              <div class="mt-3">Byte: {{variable.bit / 8 }}</div>
+              <div class="" *ngIf="variable.mask && variable.mask !== fullmask">Mask:
+                {{variable.mask|numberFormat:viewOpt}}</div>
+              <div>Min: {{variable.min}}</div>
+              <div>Max: {{variable.max}}</div>
+              <div *ngIf="variable.pattern">Pattern: {{variable.pattern}}</div>
+            </div>
+          </div>
+          <ng-container *ngIf="(value$|async|variableValueFormatter) as value">
+            <div class="value flex-grow-1 text-end" *ngIf="!writeMode"  [title]="value">{{value}}</div>
+          </ng-container>
+          <svg *ngIf="!(value$|async)" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="background: none; display: block; shape-rendering: auto;" width="40px" height="40px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+            <path d="M10 50A40 40 0 0 0 90 50A40 42 0 0 1 10 50" fill="#1d0e0b" stroke="none">
+              <animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
+            </path>
+          </svg> 
+          <div class="d-flex flex-grow-1 align-items-center justify-content-end" *ngIf="writeMode">
+              <input type="number" [min]="variable.min || 0" [max]="variable.max || 9999999999"
+                *ngIf="!variable.values || variable.values.length == 0" [ngModel]="newValue"
+                (ngModelChange)="write($event)" class="form-control ms-5">
+              <select class="form-select" *ngIf="variable.values && variable.values.length > 0" [ngModel]="newValue"
+                (ngModelChange)="write($event)">
+                <option *ngFor="let value of variable.values" [ngValue]="+value[0]">{{value[1]}}</option>
+              </select>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="d-flex justify-content-end">
-      <bi name="eye" (click)="showVariable()" *ngIf="variable.hide" class="mx-1"></bi>
-      <bi name="eye-slash" (click)="hideVariable()" *ngIf="!variable.hide" class="mx-1"></bi>
-      <bi name="info-circle" (click)="editVariable()" class="mx-1"></bi>
+      <div class="d-flex justify-content-end icons mt-2">
+        <bi name="eye" (click)="showVariable()" *ngIf="variable.hide" class="mx-1"></bi>
+        <bi name="eye-slash" (click)="hideVariable()" *ngIf="!variable.hide" class="mx-1"></bi>
+        <bi name="info-circle" (click)="editVariable()" class="mx-1"></bi>
+        <bi name="pen" class="mx-1" (click)="toggleWrite()" *ngIf="!variable.readonly"></bi>
+      </div>
     </div>
   </div>
-
-</ng-container>
-
+</div>

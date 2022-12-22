@@ -1,10 +1,10 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {StoreService} from "../../services/store.service";
-import {ModalService} from "../../services/modal.service";
-import {map, Observable, take} from "rxjs";
-import {DeviceData, Project, Variable} from "../../classes/interfaces";
-import {DeviceService} from "../../services/device.service";
-import {ExportService} from "../../services/export.service";
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { StoreService } from "../../services/store.service";
+import { ModalService } from "../../services/modal.service";
+import { map, Observable, take } from "rxjs";
+import { DeviceData, Project, Variable } from "../../classes/interfaces";
+import { DeviceService } from "../../services/device.service";
+import { ExportService } from "../../services/export.service";
 
 @Component({
   selector: 'app-header',
@@ -12,6 +12,7 @@ import {ExportService} from "../../services/export.service";
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
+
   @ViewChild("file") file: ElementRef | null;
   project$: Observable<Project>;
   isDeviceConnected$: Observable<boolean>;
@@ -104,6 +105,10 @@ export class HeaderComponent implements OnInit {
 
   disconnect() {
     this.Device.stopRead();
+  }
+
+  setExtentedView(value: boolean) {
+    this.Store.setExtendedView(value);
   }
 
   exportForNova() {

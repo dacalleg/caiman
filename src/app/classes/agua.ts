@@ -110,7 +110,9 @@ class AguaProtocol {
         private id_device: string,
         private id_product: string) {
 
-        this.token$ = this.getToken().pipe(shareReplay(1));
+        this.token$ = of(this.access_token).pipe(shareReplay(1));
+        //this.token$ = this.getToken().pipe(shareReplay(1));
+
     }
 
     private getToken() {

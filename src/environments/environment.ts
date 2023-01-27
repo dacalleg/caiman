@@ -7,7 +7,8 @@ export const environment = {
   agua_endpoint: "https://extraflame.agua-iot.com",
   agua_hostname: "extraflame.agua-iot.com",
   agua_id_brand: "1",
-  agua_customer_code: "195764"
+  agua_customer_code: "195764",
+  endpoint: "http://localhost"
 };
 
 /*

@@ -31,6 +31,7 @@ export interface Variable {
 export interface Project {
   variables: Variable[];
   view: ViewOption;
+  device?: DeviceProduct;
 }
 
 export interface ViewOption {
@@ -101,4 +102,81 @@ export interface OptimizationInput {
 export interface OptimizationOutput {
   variable: Variable | null;
   target: number;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  statusCode: number;
+  code: string;
+  message: string;
+  data: LoginData;
+}
+
+export interface LoginData {
+  token: string;
+  id: number;
+  email: string;
+  nicename: string;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+}
+
+export interface DeviceProduct {
+  id_device: string;
+  customer_code: string;
+  mac: string;
+  id_product: string;
+  cod_art: string;
+  serial: string;
+  name_product: string;
+  description: string;
+  product_serial: string;
+  name_devices_products: string;
+  description_devices_products: string;
+  creation_date: Date;
+  update_date?: any;
+  country: string;
+  state: string;
+  city: string;
+  attribute?: any;
+  email_master: string;
+  id_client_master: string;
+  info: ProductInfo;
+}
+
+export interface DeviceInfoResponse {
+  Success: boolean;
+  Text: string;
+  Value: boolean;
+  device_product: DeviceProduct[];
+}
+
+export interface ProductInfo {
+  id_product: string;
+  id: number;
+  name: string;
+  serami_file: number;
+  documents: [];
+  image: string | null;
+  serami_acl: SeramiACL[];
+  faq: SingleFaq[];
+  video: Video[];
+}
+
+export interface Video {
+  name: string;
+  description: string;
+  video: string;
+}
+
+export interface SeramiACL {
+  hidden_groups: string[];
+  hidden_variables: string[];
+  role: string;
+}
+
+export interface SingleFaq {
+  question: string;
+  response: string;
 }

@@ -105,4 +105,13 @@ export class DeviceService {
     else
       return throwError(() => new Error("Channel is null, call set channel before"))
   }
+
+  isOnline()
+  {
+    if (this.channel) {
+      return this.channel.ping();
+    }
+    else
+      return throwError(() => new Error("Channel is null, call set channel before"))
+  }
 }

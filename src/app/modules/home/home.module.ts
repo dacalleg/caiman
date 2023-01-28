@@ -20,6 +20,7 @@ import { FormsModule } from '@angular/forms';
 import {BootstrapIconsModule} from "ng-bootstrap-icons";
 import {Eye, EyeSlash, Search, InfoCircle, Pen} from 'ng-bootstrap-icons/icons';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { DeviceSelectComponent } from './components/device-select/device-select.component';
 
 const icons = {
   Eye,
@@ -46,6 +47,7 @@ const icons = {
     VariableEditComponent,
     ExportToModbusNavelPipe,
     OptimizationComponent,
+    DeviceSelectComponent,
   ],
   imports: [
     CommonModule,

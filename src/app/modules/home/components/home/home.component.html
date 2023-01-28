@@ -16,41 +16,57 @@
       </div>
       <div class="row">
         <div class="col">
-          <ul ngbNav #nav="ngbNav" class="nav-tabs">
-            <li ngbNavItem>
-              <a ngbNavLink>Device Info</a>
-              <ng-template ngbNavContent>
-                <div class="row">
-                  <div class="col">
-                    <img [src]="project.device?.info?.image">
-                  </div>
-                  <div class="col">
-                    <h1>{{project.device?.mac}}</h1>
-                    <div>{{project.device?.name_product}}</div>
-                  </div>
-                </div>
-              </ng-template>
-            </li>
-            <li ngbNavItem *ngFor="let group of groups$|async" (shown)="onGroupSelected(group)">
-              <a ngbNavLink>{{group}}</a>
-              <ng-template ngbNavContent>
-                <div class="row">
-                  <div class="col text-end my-2">
-                    <button class="btn btn-sm btn-primary mx-2" (click)="hideAll(group)">Hide All</button>
-                    <button class="btn btn-sm btn-primary" (click)="showAll(group)">Show All</button>
-                  </div>
-                </div>
-                <div class="row align-items-stretch">
-                  <ng-container *ngFor="let variable of variables$|async|varByGroup:group">
-                    <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2 my-2">
-                      <app-variable-tease [variable]="variable"></app-variable-tease>
+          <div class="d-flex">
+            <ul ngbNav #nav="ngbNav" class="nav-pills" orientation="vertical">
+              <li ngbNavItem>
+                <a ngbNavLink>Device Info</a>
+                <ng-template ngbNavContent>
+                  <div class="row">
+                    <div class="col">
+                      <img [src]="project.device?.info?.image">
                     </div>
-                  </ng-container>
-                </div>
-              </ng-template>
-            </li>
-          </ul>
-          <div [ngbNavOutlet]="nav"></div>
+                    <div class="col">
+                      <h1>{{project.device?.mac}}</h1>
+                      <div>{{project.device?.name_product}}</div>
+                      <div class="row">
+                        <div class="col">
+                          <div class="card">
+                            <div class="card-header">
+                              <h3>Connection</h3>
+                            </div>
+                            <div class="card-body">
+                              
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </ng-template>
+              </li>
+              <li ngbNavItem *ngFor="let group of groups$|async" (shown)="onGroupSelected(group)">
+                <a ngbNavLink>{{group}}</a>
+                <ng-template ngbNavContent>
+                  <div class="row">
+                    <div class="col text-end my-2">
+                      <button class="btn btn-sm btn-primary mx-2" (click)="hideAll(group)">Hide All</button>
+                      <button class="btn btn-sm btn-primary" (click)="showAll(group)">Show All</button>
+                    </div>
+                  </div>
+                  <div class="row align-items-stretch">
+                    <ng-container *ngFor="let variable of variables$|async|varByGroup:group">
+                      <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2 my-2">
+                        <app-variable-tease [variable]="variable"></app-variable-tease>
+                      </div>
+                    </ng-container>
+                  </div>
+                </ng-template>
+              </li>
+            </ul>
+            <div [ngbNavOutlet]="nav" class="flex-grow-1"></div>
+          </div>
+
         </div>
       </div>
     </ng-container>
@@ -59,8 +75,10 @@
       <div class="container">
         <div class="row">
           <div class="col p-3">
-            <div class="mb-5"><img src="assets/logo.svg" style="width: 350px"></div>
-            <div> You have not loaded any projects. <br>Import a .snet2 file using the "File" menu.</div>
+            <div class="text-center mb-3">Loading...</div>
+            <div class="progress-bar">
+              <div class="progress-bar-value"></div>
+            </div>
           </div>
         </div>
       </div>

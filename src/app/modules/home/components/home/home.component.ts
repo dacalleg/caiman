@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { BehaviorSubject, filter, from, map, mergeMap, Observable, shareReplay, switchMap, take, tap, zip } from "rxjs";
+import { BehaviorSubject, filter, from, map, mergeMap, Observable, of, shareReplay, switchMap, take, tap, throwError, zip } from "rxjs";
 import { Agua } from 'src/app/classes/agua';
-import { Project, Variable } from 'src/app/classes/interfaces';
+import { BleChannel } from 'src/app/classes/ble.channel';
+import { Channel, Project, Variable } from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DeviceService } from 'src/app/services/device.service';
@@ -32,22 +33,27 @@ export class HomeComponent implements OnInit {
     this.search$ = new BehaviorSubject<string>("");
     this.project$ = this.Store.getProject();
 
-    this.ActivatedRoute.params.pipe(
+    const loadDeviceData$ = this.ActivatedRoute.params.pipe(
       filter(params => params["mac"] != null),
-      map((params: any) => params["mac"] as string),
+      map((params) => params["mac"] as string),
       switchMap((mac) => this.Api.getDeviceInfoFromMac(mac).pipe(tap(device => this.Store.setDevice(device)))),
       switchMap((device) => this.Api.getAttachmentContent(device.info.serami_file).pipe(tap((content) => this.Store.loadFromSnet(content)))),
+      shareReplay(1)
+    );
+
+    const startWifiRead$ = loadDeviceData$.pipe(
       switchMap(() => zip(this.Auth.getToken(), this.Store.getProject())),
+      take(1),
       switchMap(arr => {
         const token = arr[0];
         const device = arr[1];
-        console.log(device);
         if (token) {
-          const channel = new Agua(this.http, device.device!.id_device, device.device!.id_product, token);
-          this.Device.setChannel(channel);
+          this.Device.setChannel(new Agua(this.http, device.device!.id_device, device.device!.id_product, token));
+          return this.Device.startRead();
         }
-        return this.Device.startRead();
-      })).subscribe();
+        return throwError(() => new Error("No token"));
+      })
+    );
 
     this.variables$ = this.search$.pipe(
       mergeMap(search => this.Auth.getRoles().pipe(
@@ -58,15 +64,19 @@ export class HomeComponent implements OnInit {
             return (item.name + item.address + "0x" + item.address.toString(16)).toLowerCase().includes(search.toLowerCase());
           })
         })
-      )))),
+        )))),
       shareReplay(1),
     )
+
     this.groups$ = this.Auth.getRoles().pipe(
       switchMap(roles => this.Store.getGroupsByRole(roles))
     )
+
+    loadDeviceData$.subscribe();
   }
 
   ngOnInit(): void {
+    
   }
 
   onSearchChange($event: any) {

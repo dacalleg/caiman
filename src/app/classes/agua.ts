@@ -1,4 +1,4 @@
-import { delay, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, takeUntil, throwError } from "rxjs";
+import { delay, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, takeUntil, tap, throwError } from "rxjs";
 import { Channel, Variable, VariableValue } from "./interfaces";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
@@ -41,7 +41,7 @@ export class Agua implements Channel {
     }
 
     ping(): Observable<void> {
-        throw new Error("Method not implemented.");
+        return this.protocol.isOnline();
     }
 
     close(): void {
@@ -222,6 +222,19 @@ class AguaProtocol {
                     }),
                     retry({ count: 5 })
                 ))
+        )
+    }
+
+    isOnline() {
+        const payload = {
+            "id_product": this.id_product,
+            "id_device": this.id_device
+        }
+        return this.token$.pipe(
+            switchMap(token => this.http.post<any>(environment.agua_endpoint + "/deviceStatusWifiStation", payload, { headers: this.getHeaders(token) }).pipe(
+                switchMap(response => this.getJobStatus(response.idRequest)),
+            )),
+            map(response => void 0)
         )
     }
 

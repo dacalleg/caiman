@@ -12,7 +12,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { JwtModule } from '@auth0/angular-jwt';
 import { environment } from 'src/environments/environment';
-import { IsAuthenticatedGuard } from './guards/isauthenticated.guard';
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -22,7 +21,7 @@ export function tokenGetter() {
   declarations: [
     AppComponent,
     FooterComponent,
-    DashboardComponent,    
+    DashboardComponent,
   ],
   imports: [
     BrowserModule,

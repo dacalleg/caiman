@@ -48,7 +48,7 @@ export class ApiService {
             return {
               id: item.id,
               name: item.title.rendered,
-              description: item.excerpt.rendered,
+              description: item.excerpt.rendered ? item.excerpt.rendered.replace(/(<([^>]+)>)/gi, "") : "",
               id_product: item.acf.key,
               serami_file: item.acf.serami_file,
               video: item.acf.video || [],

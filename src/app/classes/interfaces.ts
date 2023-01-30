@@ -157,11 +157,12 @@ export interface ProductInfo {
   id: number;
   name: string;
   serami_file: number;
-  documents: [];
+  documents: Document[];
   image: string | null;
   serami_acl: SeramiACL[];
   faq: SingleFaq[];
   video: Video[];
+  description: string;
 }
 
 export interface Video {
@@ -179,4 +180,10 @@ export interface SeramiACL {
 export interface SingleFaq {
   question: string;
   response: string;
+}
+
+export interface Document {
+  role: string;
+  name: string;
+  file: string;
 }

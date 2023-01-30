@@ -22,13 +22,14 @@
                 <a ngbNavLink>Device Info</a>
                 <ng-template ngbNavContent>
                   <div class="row">
-                    <div class="col">
+                    <div class="col text-center">
                       <img [src]="project.device?.info?.image">
                     </div>
                     <div class="col">
                       <h1>{{project.device?.mac}}</h1>
                       <div>{{project.device?.name_product}}</div>
-                      <div class="row">
+                      <p>{{project.device?.info?.description }}</p>
+                      <div class="row mb-3">
                         <div class="col">
                           <div class="card">
                             <div class="card-header">
@@ -38,6 +39,28 @@
                               
                             </div>
                           </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col">
+                          <h3>Documentazione Tecnica</h3>
+                          <ul>
+                            <li *ngFor="let doc of project.device?.info?.documents">
+                              <a [href]="doc.file" target="_blank">{{doc.name}}</a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col">
+                          <h3>Faq</h3>
+                          <ngb-accordion #acc="ngbAccordion" activeIds="ngb-panel-0">
+                            <ngb-panel [title]="faq.question" *ngFor="let faq of project.device?.info?.faq">
+                              <ng-template ngbPanelContent>
+                                {{faq.response}}
+                              </ng-template>
+                            </ngb-panel>
+                          </ngb-accordion>                          
                         </div>
                       </div>
                     </div>

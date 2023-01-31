@@ -30,3 +30,13 @@ app-variable-tease
     transform:  translateX(100%) scaleX(0.5);
   }
 }
+
+.sidebar
+{
+  border-right: 1px solid var(--gray-300);
+}
+
+.image
+{
+  border: 1px solid var(--gray-300);
+}

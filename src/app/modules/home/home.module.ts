@@ -21,6 +21,7 @@ import {BootstrapIconsModule} from "ng-bootstrap-icons";
 import {Eye, EyeSlash, Search, InfoCircle, Pen} from 'ng-bootstrap-icons/icons';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { DeviceSelectComponent } from './components/device-select/device-select.component';
+import { YouTubePlayerModule } from '@angular/youtube-player';
 
 const icons = {
   Eye,
@@ -54,6 +55,7 @@ const icons = {
     HomeRoutingModule,
     FormsModule,
     NgbModule,
+    YouTubePlayerModule,
     BootstrapIconsModule.pick(icons)
   ]
 })

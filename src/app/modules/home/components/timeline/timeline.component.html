@@ -1,0 +1,25 @@
+<div class="d-flex">
+    <div class="ticket position-relative">
+        <div class="line"></div>
+
+        <div *ngFor="let ticket of tickets;" [ngClass]="{'left': ticket.customer, 'right': !ticket.customer, 'collapsed': ticket.parent !== null && !expanded.includes(ticket.parent)}" class="message py-2 px-4 position-relative">
+            <div class="circle" *ngIf="!ticket.parent"></div>
+            <div class="text-end uppercase mb-2" *ngIf="!ticket.parent">
+                <span class="badge bg-success text-uppercase" >{{ticket.status}}</span>
+            </div>
+            <div class="date">{{ticket.created| date:'mediumDate'}}</div>
+            <h4 (click)="toggle(ticket.id)">{{ticket.title}}</h4>
+            <p>
+               {{ticket.description}}
+            </p>
+            <h3>Attachments</h3>
+            <ul class="list-unstyled">
+                <li class="nav-item"><a href="">Foto 1</a></li>
+                <li class="nav-item"><a href="">Foto 2</a></li>
+                <li class="nav-item"><a href="">Foto 3</a></li>
+
+            </ul>
+        </div>
+
+    </div>
+</div>

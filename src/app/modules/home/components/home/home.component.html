@@ -33,7 +33,7 @@
                       <ul class="nav pb-5">
                         <li class="nav-item me-2"><button class="btn btn-lg btn-primary">WiFi</button></li>
                         <li class="nav-item me-2"><button class="btn btn-lg btn-primary">Bluetooth</button></li>
-                        <li class="nav-item me-2"><button class="btn btn-lg btn-primary">Bridge</button></li>
+                        <li class="nav-item me-2"><button class="btn btn-lg btn-primary" disabled>Bridge</button></li>
                       </ul>
 
                       <div class="row my-5">
@@ -75,6 +75,12 @@
                       </div>
                     </div>
                   </div>
+                </ng-template>
+              </li>
+              <li ngbNavItem>
+                <a ngbNavLink>Timeline</a>
+                <ng-template ngbNavContent>
+                  <app-timeline></app-timeline>
                 </ng-template>
               </li>
               <li ngbNavItem *ngFor="let group of groups$|async" (shown)="onGroupSelected(group)">

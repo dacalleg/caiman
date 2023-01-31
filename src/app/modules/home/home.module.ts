@@ -22,6 +22,7 @@ import {Eye, EyeSlash, Search, InfoCircle, Pen} from 'ng-bootstrap-icons/icons';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { DeviceSelectComponent } from './components/device-select/device-select.component';
 import { YouTubePlayerModule } from '@angular/youtube-player';
+import { TimelineComponent } from './components/timeline/timeline.component';
 
 const icons = {
   Eye,
@@ -49,6 +50,7 @@ const icons = {
     ExportToModbusNavelPipe,
     OptimizationComponent,
     DeviceSelectComponent,
+    TimelineComponent,
   ],
   imports: [
     CommonModule,

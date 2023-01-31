@@ -187,3 +187,15 @@ export interface Document {
   name: string;
   file: string;
 }
+
+export interface Ticket
+{
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  created: Date;
+  parent: string|null;
+  customer: boolean;
+  device: string;
+}

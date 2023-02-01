@@ -38,6 +38,14 @@ export class DeviceService {
     this.channel = channel;
   }
 
+  connect()
+  {
+    if (this.channel) {
+      return this.channel.connect();
+    }
+    return throwError(() => new Error("Channel is null, call set channel before"))
+  }
+
   startRead() {
     if (this.channel) {
       return of(0).pipe(
@@ -90,6 +98,8 @@ export class DeviceService {
   disconnect() {
     this.connected$.next(false);
     this.stopRead();
+    if(this.channel)
+      this.channel.disconnect();
   }
 
   stopRead() {

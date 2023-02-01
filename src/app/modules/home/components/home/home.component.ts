@@ -28,8 +28,9 @@ export class HomeComponent implements OnInit {
   wifiConnectionAvailable$: Observable<boolean>;
   loadDeviceData$: Observable<DeviceProduct>;
   loadSnet$: Observable<string>;
-
   connected$: Observable<boolean>;
+
+  BLEChannel$: Observable<BleChannel>;
 
   constructor(
     private Store: StoreService,
@@ -65,6 +66,11 @@ export class HomeComponent implements OnInit {
       switchMap(() => combineLatest([this.Auth.getToken(), this.Store.getProject(), this.Api.getAguaEnv()])),
       switchMap(([token, project, env]) => of(new Agua(this.http, env.agua_endpoint, "" + env.agua_id_brand, project.device!.id_device, project.device!.id_product, token))),
       tap((agua) => this.Device.setChannel(agua)),
+    )
+
+    this.BLEChannel$ = this.loadDeviceData$.pipe(
+      map(() => new BleChannel()),
+      tap((channel) => this.Device.setChannel(channel))
     )
 
     this.wifiConnectionAvailable$ = this.aguaChannel$.pipe(
@@ -127,6 +133,15 @@ export class HomeComponent implements OnInit {
 
   unselectGroup() {
     this.Device.changeMonitoredVariables([]);
+  }
+
+  bleConnect()
+  {
+    this.BLEChannel$.pipe(
+      switchMap(() => this.Device.connect()),
+      switchMap(() => this.loadSnet$),
+      switchMap(() => this.Device.startRead()),
+    ).subscribe();
   }
 
   wifiConnect() {

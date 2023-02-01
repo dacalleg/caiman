@@ -82,7 +82,7 @@ export interface Channel {
   setVariableStream(variables: Variable[]): Observable<void>;
   getStream(): Observable<VariableValue[]>;
   ping(): Observable<boolean>;
-  close(): void;
+  disconnect(): Observable<void>;
 }
 
 

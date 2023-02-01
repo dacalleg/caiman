@@ -1,6 +1,7 @@
 import { catchError, delay, filter, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, tap, throwError } from "rxjs";
 import { Channel, Variable, VariableValue } from "./interfaces";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Utils } from "./utils";
 
 export class Agua implements Channel {
 
@@ -18,8 +19,12 @@ export class Agua implements Channel {
         return of(void 0);
     }
 
+    disconnect(): Observable<any> {
+        return of(void 0);
+    }
+
     write(variables: VariableValue[]): Observable<VariableValue[]> {
-        return this.protocol.writeVariable(variables);
+        return this.protocol.writeVariables(variables);
     }
 
     read(variables: Variable[]): Observable<VariableValue[]> {
@@ -59,38 +64,6 @@ interface RequestReadingReponse {
     Protocol: string;
     Values: number[];
     cmd: string;
-}
-
-class Utils {
-    static convertValuesToRead(variables: Variable[], values: number[]) {
-        let ret = [] as number[];
-        var re = new RegExp('#', 'g');
-        for (let i = 0; i < variables.length; i++) {
-            const variable = variables[i];
-            const value = values[i];
-            if (!variable.readExp) {
-                ret.push(value);
-            } else {
-                ret.push(eval(variable.readExp.replace(re, "" + value)));
-            }
-        }
-        return ret;
-    }
-
-    static convertValuesToWrite(variables: Variable[], values: number[]) {
-        let ret = [] as number[];
-        var re = new RegExp('#', 'g');
-        for (let i = 0; i < variables.length; i++) {
-            const variable = variables[i];
-            const value = values[i];
-            if (!variable.writeExp) {
-                ret.push(value);
-            } else {
-                ret.push(eval(variable.writeExp.replace(re, "" + value)));
-            }
-        }
-        return ret;
-    }
 }
 
 class AguaProtocol {
@@ -158,7 +131,7 @@ class AguaProtocol {
         )
     }
 
-    writeVariable(variables: VariableValue[]) {
+    writeVariables(variables: VariableValue[]) {
         const payload = {
             "id_product": this.id_product,
             "id_device": this.id_device,

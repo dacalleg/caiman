@@ -36,7 +36,7 @@ export function tokenGetter() {
       config: {
         tokenGetter: tokenGetter,
         allowedDomains: ["localhost"],
-        disallowedRoutes: [/\/wp-content\/uploads\/.*/],
+        disallowedRoutes: [/\/wp-content\/uploads\/.*/, "/wp-json/jwt-auth/v1/token"],
       },
     }),
   ],

@@ -135,12 +135,21 @@ export class HomeComponent implements OnInit {
     this.Device.changeMonitoredVariables([]);
   }
 
-  bleConnect()
-  {
+  bleConnect() {
     this.BLEChannel$.pipe(
       switchMap(() => this.Device.connect()),
+      switchMap(() => this.modal.openAlertModal({
+        title: "Connection",
+        message: "BLE connection in progress",
+        progress: true
+      })),
       switchMap(() => this.loadSnet$),
+      tap(() => this.modal.dismissAll()),
       switchMap(() => this.Device.startRead()),
+      catchError(err => this.modal.openAlertModal({
+        title: "Error",
+        message: err.message,
+      }))
     ).subscribe();
   }
 

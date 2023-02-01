@@ -1,0 +1,10 @@
+<ng-container *ngIf="config">
+    <div class="modal-header">
+        <h4 class="modal-title">{{config.title}}</h4>
+        <button type="button" *ngIf="!config.progress" class="btn-close" aria-label="Close" (click)="activeModal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <p>{{config.message}}</p>
+        <app-infinite-progress-bar *ngIf="config.progress"></app-infinite-progress-bar>
+    </div>
+</ng-container>

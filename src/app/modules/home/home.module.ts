@@ -23,6 +23,7 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { DeviceSelectComponent } from './components/device-select/device-select.component';
 import { YouTubePlayerModule } from '@angular/youtube-player';
 import { TimelineComponent } from './components/timeline/timeline.component';
+import { SharedModule } from '../shared/shared.module';
 
 const icons = {
   Eye,
@@ -54,6 +55,7 @@ const icons = {
   ],
   imports: [
     CommonModule,
+    SharedModule,
     HomeRoutingModule,
     FormsModule,
     NgbModule,

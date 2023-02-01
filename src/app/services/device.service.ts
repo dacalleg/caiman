@@ -42,8 +42,9 @@ export class DeviceService {
     if (this.channel) {
       return of(0).pipe(
         switchMap(() => this.channel!.connect()),
+        tap(() => this.connected$.next(true)),
         switchMap(() => this.monitoredVariables$),
-        filter((variables) => variables.length > 0),
+        //filter((variables) => variables.length > 0),
         switchMap((variables) => this.channel!.setVariableStream(variables)),
         switchMap(() => this.channel!.getStream()),
         tap(data => this.stream$.next(data)),
@@ -84,6 +85,11 @@ export class DeviceService {
   changeMonitoredVariables(variables: Variable[]) {
     this.monitoredVariables = variables;
     this.monitoredVariables$.next(this.monitoredVariables);
+  }
+
+  disconnect() {
+    this.connected$.next(false);
+    this.stopRead();
   }
 
   stopRead() {

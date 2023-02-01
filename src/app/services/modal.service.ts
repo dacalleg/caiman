@@ -1,6 +1,8 @@
-import {Injectable} from '@angular/core';
-import {Subject} from "rxjs";
-import {Variable} from "../classes/interfaces";
+import { Injectable } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { defer, from, of, Subject } from "rxjs";
+import { AlertModalConfig, Variable } from "../classes/interfaces";
+import { AlertComponent } from '../components/alert/alert.component';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +13,7 @@ export class ModalService {
   private variableEditModal$: Subject<Variable>;
   private optimizationModal$: Subject<void>;
 
-  constructor() {
+  constructor(private modalService: NgbModal) {
     this.optionModal$ = new Subject<void>();
     this.connectionSerialModal$ = new Subject<string>();
     this.optimizationModal$ = new Subject<void>();
@@ -48,5 +50,20 @@ export class ModalService {
 
   getVariableEditModal() {
     return this.variableEditModal$.asObservable();
+  }
+
+  openAlertModal(config: AlertModalConfig) {
+    return defer(() => {
+      this.modalService.dismissAll();
+      const modalRef = this.modalService.open(AlertComponent, {backdrop: config.progress ? 'static' : true, keyboard: false});
+      modalRef.componentInstance.config = config;
+      if(config.progress === true)
+        return of(void 0);
+      return from(modalRef.result)
+    })
+  }
+
+  dismissAll() {
+    this.modalService.dismissAll();
   }
 }

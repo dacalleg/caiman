@@ -81,7 +81,7 @@ export interface Channel {
   read(variables: Variable[]): Observable<VariableValue[]>;
   setVariableStream(variables: Variable[]): Observable<void>;
   getStream(): Observable<VariableValue[]>;
-  ping(): Observable<void>;
+  ping(): Observable<boolean>;
   close(): void;
 }
 
@@ -188,14 +188,27 @@ export interface Document {
   file: string;
 }
 
-export interface Ticket
-{
+export interface Ticket {
   id: string;
   title: string;
   description: string;
   status: string;
   created: Date;
-  parent: string|null;
+  parent: string | null;
   customer: boolean;
   device: string;
+}
+
+export interface AguaOptions {
+  agua_endpoint: string;
+  agua_hostname: string;
+  agua_id_brand: number;
+  agua_customer_code: number;
+}
+
+export interface AlertModalConfig
+{
+  title: string;
+  message: string;
+  progress?: boolean;
 }

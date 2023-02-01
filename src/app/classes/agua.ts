@@ -1,7 +1,6 @@
-import { delay, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, takeUntil, tap, throwError } from "rxjs";
+import { catchError, delay, filter, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, tap, throwError } from "rxjs";
 import { Channel, Variable, VariableValue } from "./interfaces";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../environments/environment';
 
 export class Agua implements Channel {
 
@@ -9,8 +8,8 @@ export class Agua implements Channel {
     private protocol: AguaProtocol;
     private bufferVariables: Variable[];
 
-    constructor(http: HttpClient, id_device: string, product_id: string, access_token: string) {
-        this.protocol = new AguaProtocol(http, access_token, id_device, product_id);
+    constructor(http: HttpClient, agua_enpoint: string, agua_id_brand: string, id_device: string, product_id: string, access_token: string) {
+        this.protocol = new AguaProtocol(http, access_token, agua_enpoint, agua_id_brand, id_device, product_id);
         this.close$ = new Subject();
         this.bufferVariables = [];
     }
@@ -34,13 +33,14 @@ export class Agua implements Channel {
 
     getStream(): Observable<VariableValue[]> {
         return of(void 0).pipe(
+            filter(() => this.bufferVariables.length > 0),
             switchMap(() => this.protocol.readBuffer(this.bufferVariables)),
             repeat({ delay: 1000 }),
             takeUntil(this.close$)
         )
     }
 
-    ping(): Observable<void> {
+    ping(): Observable<boolean> {
         return this.protocol.isOnline();
     }
 
@@ -95,11 +95,12 @@ class Utils {
 
 class AguaProtocol {
     private token$: Observable<string>;
+
     private getHeaders(token: string | null = null) {
         return new HttpHeaders()
             .set('content-type', 'application/json')
-            .set('customer_code', environment.agua_customer_code)
-            .set('id_brand', environment.agua_id_brand)
+            .set('customer_code', this.agua_endpoint)
+            .set('id_brand', this.agua_id_brand)
             .set('authorization', token || "")
             .set('local', 'false')
     }
@@ -107,12 +108,12 @@ class AguaProtocol {
     constructor(
         private http: HttpClient,
         private access_token: string,
+        private agua_endpoint: string,
+        private agua_id_brand: string,
         private id_device: string,
         private id_product: string) {
 
         this.token$ = of(this.access_token).pipe(shareReplay(1));
-        //this.token$ = this.getToken().pipe(shareReplay(1));
-
     }
 
     private getToken() {
@@ -122,7 +123,7 @@ class AguaProtocol {
             .set('local', 'true')
             .set('authorization', 'AguaManager');
 
-        return this.http.post<any>(environment.agua_endpoint + "/userLogin", {
+        return this.http.post<any>(this.agua_endpoint + "/userLogin", {
             email: username,
             password: password
         }, { headers: headers }).pipe(map(response => response.token as string));
@@ -140,7 +141,7 @@ class AguaProtocol {
             "Masks": variables.map(item => item.mask)
         }
         return this.token$.pipe(
-            switchMap(token => this.http.post<any>(environment.agua_endpoint + "/deviceRequestReading", payload, { headers: this.getHeaders(token) })
+            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceRequestReading", payload, { headers: this.getHeaders(token) })
                 .pipe(
                     switchMap(response => this.getJobStatus(response.idRequest)),
                     map(response => {
@@ -170,7 +171,7 @@ class AguaProtocol {
             "Values": Utils.convertValuesToWrite(variables.map(v => v.variable), variables.map(v => v.value))
         }
         return this.token$.pipe(
-            switchMap(token => this.http.post<any>(environment.agua_endpoint + "/deviceRequestWriting", payload, { headers: this.getHeaders(token) })
+            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceRequestWriting", payload, { headers: this.getHeaders(token) })
                 .pipe(
                     switchMap(response => this.getJobStatus(response.idRequest))
                 )),
@@ -191,7 +192,7 @@ class AguaProtocol {
             "Masks": variables.map(item => item.mask)
         }
         return this.token$.pipe(
-            switchMap(token => this.http.post<any>(environment.agua_endpoint + "/deviceSetConfigBuffer", payload, { headers: this.getHeaders(token) })
+            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceSetConfigBuffer", payload, { headers: this.getHeaders(token) })
                 .pipe(
                     switchMap(response => this.getJobStatus(response.idRequest)),
                     switchMap(() => of(void 0))
@@ -208,7 +209,7 @@ class AguaProtocol {
             "BufferId": bufferId
         }
         return this.token$.pipe(
-            switchMap(token => this.http.post<any>(environment.agua_endpoint + "/deviceGetBufferReading", payload, { headers: this.getHeaders(token) })
+            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceGetBufferReading", payload, { headers: this.getHeaders(token) })
                 .pipe(
                     switchMap(response => this.getJobStatus(response.idRequest)),
                     map(response => {
@@ -231,10 +232,11 @@ class AguaProtocol {
             "id_device": this.id_device
         }
         return this.token$.pipe(
-            switchMap(token => this.http.post<any>(environment.agua_endpoint + "/deviceStatusWifiStation", payload, { headers: this.getHeaders(token) }).pipe(
+            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceStatusWifiStation", payload, { headers: this.getHeaders(token) }).pipe(
                 switchMap(response => this.getJobStatus(response.idRequest)),
             )),
-            map(response => void 0)
+            switchMap(() => of(true)),
+            catchError(err => of(false)),
         )
     }
 
@@ -242,7 +244,7 @@ class AguaProtocol {
         return this.token$.pipe(
             switchMap(token => of(void 0).pipe(
                 delay(1000),
-                switchMap(() => this.http.get<any>(environment.agua_endpoint + "/deviceJobStatus/" + requestId, { headers: this.getHeaders(token) }).pipe(
+                switchMap(() => this.http.get<any>(this.agua_endpoint + "/deviceJobStatus/" + requestId, { headers: this.getHeaders(token) }).pipe(
                     switchMap(response => {
                         switch (response.jobAnswerStatus) {
                             case "waiting":

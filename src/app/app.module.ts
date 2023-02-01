@@ -11,7 +11,8 @@ import {FormsModule} from "@angular/forms";
 import { HttpClientModule } from '@angular/common/http';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { JwtModule } from '@auth0/angular-jwt';
-import { environment } from 'src/environments/environment';
+import { AlertComponent } from './components/alert/alert.component';
+import { SharedModule } from './modules/shared/shared.module';
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -22,17 +23,20 @@ export function tokenGetter() {
     AppComponent,
     FooterComponent,
     DashboardComponent,
+    AlertComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     NgbModule,
+    SharedModule,
     FormsModule,
     HttpClientModule,
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
-        allowedDomains: [environment.endpoint],
+        allowedDomains: ["localhost"],
+        disallowedRoutes: [/\/wp-content\/uploads\/.*/],
       },
     }),
   ],

@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { filter, from, map, of, switchMap, take, tap } from 'rxjs';
+import { combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { DeviceInfoResponse, ProductInfo, SeramiACL } from '../classes/interfaces';
+import { AguaOptions, DeviceInfoResponse, ProductInfo, SeramiACL } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -10,22 +10,34 @@ import { AuthService } from './auth.service';
 })
 export class ApiService {
 
-  constructor(private Http: HttpClient, private Auth: AuthService) { }
+  private options$: Observable<AguaOptions>;
+
+  constructor(private Http: HttpClient, private Auth: AuthService) { 
+    this.options$ = this.Http.get<AguaOptions>(environment.endpoint + "/wp-json/caiman/v1/options").pipe(shareReplay(1));
+  }
 
   private getAguaHeaders() {
-    return this.Auth.getToken().pipe(map((token) => {
-      return new HttpHeaders()
-        .set('content-type', 'application/json')
-        .set('customer_code', environment.agua_customer_code)
-        .set('id_brand', environment.agua_id_brand)
-        .set('authorization', token || "")
-        .set('local', 'false')
-    }))
+    return combineLatest([
+      this.Auth.getToken(),
+      this.options$,
+    ]).pipe(
+      take(1),
+      map(([token, env]) => {
+        return new HttpHeaders()
+          .set('content-type', 'application/json')
+          .set('customer_code', "" + env.agua_customer_code)
+          .set('id_brand', "" + env.agua_id_brand)
+          .set('authorization', token || "")
+          .set('local', 'false')
+      }))
   }
 
   getDeviceInfoFromMac(mac: string) {
-    return this.getAguaHeaders().pipe(
-      switchMap(headers => this.Http.post<DeviceInfoResponse>(environment.agua_endpoint + "/deviceInfoFromMac", { mac: mac }, { headers: headers })),
+    return combineLatest([
+      this.getAguaHeaders(),
+      this.options$,
+    ]).pipe(
+      switchMap(([headers, options]) => this.Http.post<DeviceInfoResponse>(options.agua_endpoint + "/deviceInfoFromMac", { mac: mac }, { headers: headers })),
       map(response => response.device_product[0]),
       switchMap(response => this.getProductInfo(response.id_product).pipe(map(info => {
         response.info = info;
@@ -92,5 +104,13 @@ export class ApiService {
     return this.getAttachmentUrl(id).pipe(
       switchMap(url => this.Http.get(url, { responseType: 'text' }))
     )
+  }
+
+  getUserInfo() {
+    return this.Http.get<any>(environment.endpoint + "/wp-json/caiman/v1/me");
+  }
+
+  getAguaEnv() {
+    return this.options$;
   }
 }

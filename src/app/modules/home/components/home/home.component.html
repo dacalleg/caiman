@@ -2,9 +2,8 @@
   <app-header></app-header>
 </div>
 <div class="main py-0 p-3">
-  <div class="container-fluid" *ngIf="(project$|async) as project">
+  <div class="container-fluid" *ngIf="(loadDeviceData$|async) as device">
 
-    <ng-container *ngIf="project.variables.length > 0">
       <!--<div class="row">
         <div class="col-md-6">
           <div class="input-group mb-3">
@@ -18,29 +17,31 @@
         <div class="col-md-3 sticky-top">
           <div class="d-flex" class="sidebar p-5">
             <ul ngbNav #nav="ngbNav" class="nav-pills" orientation="vertical">
-              <li ngbNavItem>
+              <li ngbNavItem (shown)="unselectGroup()">
                 <a ngbNavLink>Device Info</a>
                 <ng-template ngbNavContent>
                   <div class="row align-items-start">
                     <div class="col text-center order-1 order-md-2 sticky-top">
-                      <img [src]="project.device?.info?.image" class="image">
+                      <img [src]="device?.info?.image" class="image">
                     </div>
                     <div class="col order-2 order-md-1">
-                      <h1 class="fw-bold">{{project.device?.mac}}</h1>
-                      <div class="fw-bold">{{project.device?.name_product}}</div>
-                      <p class="my-5">{{project.device?.info?.description }}</p>
+                      <h1 class="fw-bold">{{device?.mac}}</h1>
+                      <div class="fw-bold">{{device?.name_product}}</div>
+                      <p class="my-5">{{device?.info?.description }}</p>
 
-                      <ul class="nav pb-5">
-                        <li class="nav-item me-2"><button class="btn btn-lg btn-primary">WiFi</button></li>
-                        <li class="nav-item me-2"><button class="btn btn-lg btn-primary">Bluetooth</button></li>
-                        <li class="nav-item me-2"><button class="btn btn-lg btn-primary" disabled>Bridge</button></li>
+                      <ul class="nav pb-5" >
+                        <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary" (click)="wifiConnect()">WiFi</button></li>
+                        <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary">Bluetooth</button></li>
+                        <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary" disabled>Bridge</button></li>
+
+                        <li class="nav-item me-2" *ngIf="(connected$|async)"><button class="btn btn-lg btn-primary" (click)="disconnect()">Disconnect</button></li>
                       </ul>
 
                       <div class="row my-5">
                         <div class="col">
                           <h3>Documentazione Tecnica</h3>
                           <ul>
-                            <li *ngFor="let doc of project.device?.info?.documents">
+                            <li *ngFor="let doc of device?.info?.documents">
                               <a [href]="doc.file" target="_blank">{{doc.name}}</a>
                             </li>
                           </ul>
@@ -50,7 +51,7 @@
                         <div class="col">
                           <h3>Faq</h3>
                           <ngb-accordion #acc="ngbAccordion">
-                            <ngb-panel [title]="faq.question" *ngFor="let faq of project.device?.info?.faq">
+                            <ngb-panel [title]="faq.question" *ngFor="let faq of device?.info?.faq">
                               <ng-template ngbPanelContent>
                                 {{faq.response}}
                               </ng-template>
@@ -62,7 +63,7 @@
                         <div class="col">
                           <h3>Video</h3>
                           <ngb-accordion #acc="ngbAccordion">
-                            <ngb-panel [title]="video.name" *ngFor="let video of project.device?.info?.video">
+                            <ngb-panel [title]="video.name" *ngFor="let video of device?.info?.video">
                               <ng-template ngbPanelContent>
                                 <div class="d-flex justify-content-center align-items-center flex-column">
                                   <youtube-player [videoId]="video.video"></youtube-player>
@@ -77,30 +78,33 @@
                   </div>
                 </ng-template>
               </li>
-              <li ngbNavItem>
+              <li ngbNavItem (shown)="unselectGroup()">
                 <a ngbNavLink>Timeline</a>
                 <ng-template ngbNavContent>
                   <app-timeline></app-timeline>
                 </ng-template>
               </li>
-              <li ngbNavItem *ngFor="let group of groups$|async" (shown)="onGroupSelected(group)">
-                <a ngbNavLink>{{group}}</a>
-                <ng-template ngbNavContent>
-                  <div class="row">
-                    <div class="col text-end my-2">
-                      <button class="btn btn-sm btn-primary mx-2" (click)="hideAll(group)">Hide All</button>
-                      <button class="btn btn-sm btn-primary" (click)="showAll(group)">Show All</button>
-                    </div>
-                  </div>
-                  <div class="row align-items-stretch">
-                    <ng-container *ngFor="let variable of variables$|async|varByGroup:group">
-                      <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2 my-2">
-                        <app-variable-tease [variable]="variable"></app-variable-tease>
+              <ng-container *ngIf="connected$|async">
+                <li ngbNavItem *ngFor="let group of groups$|async" (shown)="onGroupSelected(group)">
+                  <a ngbNavLink>{{group}}</a>
+                  <ng-template ngbNavContent>
+                    <div class="row">
+                      <div class="col text-end my-2">
+                        <button class="btn btn-sm btn-primary mx-2" (click)="hideAll(group)">Hide All</button>
+                        <button class="btn btn-sm btn-primary" (click)="showAll(group)">Show All</button>
                       </div>
-                    </ng-container>
-                  </div>
-                </ng-template>
-              </li>
+                    </div>
+                    <div class="row align-items-stretch">
+                      <ng-container *ngFor="let variable of variables$|async|varByGroup:group">
+                        <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-2 my-2">
+                          <app-variable-tease [variable]="variable"></app-variable-tease>
+                        </div>
+                      </ng-container>
+                    </div>
+                  </ng-template>
+                </li>
+              </ng-container>
+
             </ul>
           </div>
         </div>
@@ -108,16 +112,16 @@
           <div [ngbNavOutlet]="nav" class="flex-grow-1"></div>
         </div>
       </div>
-    </ng-container>
 
-    <div class="text-center h-100 d-flex" *ngIf="project.variables.length == 0">
+
+  </div>
+  <div class="container" *ngIf="!(loadDeviceData$|async)">
+    <div class="text-center h-100 d-flex">
       <div class="container">
         <div class="row">
           <div class="col p-3">
             <div class="text-center mb-3">Loading...</div>
-            <div class="progress-bar">
-              <div class="progress-bar-value"></div>
-            </div>
+            <app-infinite-progress-bar></app-infinite-progress-bar>
           </div>
         </div>
       </div>

@@ -87,7 +87,7 @@ export class BleChannel implements Channel {
   getStream(): Observable<VariableValue[]> {
     throw new Error("Method not implemented.");
   }
-  ping(): Observable<void> {
+  ping(): Observable<boolean> {
     throw new Error("Method not implemented.");
   }
 }

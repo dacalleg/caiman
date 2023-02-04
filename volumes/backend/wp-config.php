@@ -26,16 +26,19 @@ define( 'DB_NAME', 'caiman' );
 define( 'DB_USER', 'root' );
 
 /** Database password */
-define( 'DB_PASSWORD', 'password' );
+define( 'DB_PASSWORD', '01Ul8TrH&Mq8' );
 
 /** Database hostname */
-define( 'DB_HOST', 'db' );
+define( 'DB_HOST', 'caiman_wp_db' );
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8mb4' );
 
 /** The database collate type. Don't change this if in doubt. */
 define( 'DB_COLLATE', '' );
+
+define( 'WP_HOME', 'http://localhost/backend' );
+define( 'WP_SITEURL', 'http://localhost/backend' );
 
 /**#@+
  * Authentication unique keys and salts.
@@ -79,9 +82,9 @@ $table_prefix = 'wp_';
  *
  * @link https://wordpress.org/support/article/debugging-in-wordpress/
  */
-define( 'WP_DEBUG', false );
-define('JWT_AUTH_SECRET_KEY', 'tokenagua');
-define('JWT_AUTH_CORS_ENABLE', true);
+define('WP_DEBUG', false );
+define('JWT_AUTH_SECRET_KEY', 'tokenagua' );
+define('JWT_AUTH_CORS_ENABLE', true );
 
 /* Add any custom values between this line and the "stop editing" line. */
 

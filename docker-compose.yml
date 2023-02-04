@@ -1,0 +1,107 @@
+version: '3.1'
+services:
+
+  #caiman_mongo_rest:
+  #  restart: always
+  #  build: ./mongo-rest
+  #  image: caiman_mongo_rest:latest
+  #  container_name: caiman_mongo_rest
+  #  depends_on:
+  #    - caiman_mongo
+  #  volumes:
+  #    - ./mongo-rest/server.js:/usr/src/app/server.js
+  #    - ./lib/utils.js:/usr/src/app/utils.js
+  #    - ./lib/group_matcher.js:/usr/src/app/group_matcher.js
+  #    - ./volumes/uploads:/usr/src/app/uploads
+  #  command: ["node", "server.js"]
+  #  healthcheck:
+  #    interval: 5m
+  #  environment:
+  #    NODE_ENV: "production"
+
+  caiman_frontend:
+    restart: always
+    build: ./frontend
+    image: caiman_frontend:latest
+    container_name: caiman_frontend
+    healthcheck:
+      interval: 5m
+
+  caiman_backend:
+    restart: always
+    build: ./backend
+    image: caiman_backend:latest
+    container_name: caiman_backend
+    depends_on:
+      - caiman_wp_db
+    volumes:
+      - ./volumes/backend/wp-config.php:/var/www/public/wp-config.php
+    healthcheck:
+      interval: 5m
+
+  #caiman_mongo:
+  #  restart: always
+  #  image: caiman_mongo:latest
+  #  build: ./mongo
+  #  container_name: caiman_mongo
+  #  environment:
+  #    - MONGO_DATA_DIR=/data/db
+  #    - MONGO_LOG_DIR=/dev/null
+  #    - MONGODB_USER=root
+  #    - MONGODB_PASS=01Ul8TrH&Mq8
+  #  volumes:
+  #    - ./volumes/mongo:/data/db
+  #  command: mongod --logpath=/dev/null # --quiet
+
+  #certbot:
+  #  container_name: certbot
+  #  image: gordonchan/auto-letsencrypt
+  #  depends_on:
+  #   - caiman_reverse_proxy
+  #  volumes:
+  #   - ./volumes/letsencrypt/log:/var/log/letsencrypt
+  #   - /var/run/docker.sock:/var/run/docker.sock
+  #   - ./volumes/letsencrypt/data:/etc/letsencrypt
+  #   - ./volumes/letsencrypt/lib:/var/lib/letsencrypt
+  #   - ./volumes/letsencrypt/www:/tmp/letsencrypt/www
+  #   - ./volumes/letsencrypt/certs:/etc/nginx/certs
+  #  environment:
+  #   - EMAIL=iot@tecnoeka.com
+  #   - SERVER_CONTAINER=caiman_reverse_proxy
+  #   - WEBROOT_PATH=/tmp/letsencrypt/www
+  #   - CERTS_PATH=/etc/nginx/certs
+  #   - DOMAINS=nova-tem.micronovasrl.com
+  #   - CHECK_FREQ=7
+  #  restart: always
+
+  caiman_reverse_proxy:
+    restart: always
+    build: ./reverse_proxy
+    image: caiman_reverse_proxy:latest
+    container_name: caiman_reverse_proxy
+    volumes:
+      - ./volumes/uploads:/data/uploads
+    depends_on:
+      - caiman_backend
+      - caiman_frontend
+    ports:
+      - "80:80"
+      - "443:443"
+
+  caiman_wp_db:
+    image: mariadb
+    container_name: caiman_wp_db
+    environment:
+      MYSQL_ROOT_PASSWORD: 01Ul8TrH&Mq8
+    volumes:
+      - ./volumes/mariadb:/var/lib/mysql
+
+  caiman_phpmyadmin:
+      image: phpmyadmin/phpmyadmin
+      container_name: phpmyadmin
+      depends_on:
+        - caiman_wp_db
+      environment:
+          PMA_HOST: caiman_wp_db
+          MYSQL_ROOT_PASSWORD: 01Ul8TrH&Mq8
+          PMA_ABSOLUTE_URI: http://localhost/phpmyadmin/

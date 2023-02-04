@@ -9,7 +9,6 @@ export class AppComponent implements OnInit {
   title = 'serami';
   
   constructor() {
-
   }
 
   ngOnInit(): void {

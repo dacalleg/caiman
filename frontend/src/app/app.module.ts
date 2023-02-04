@@ -1,18 +1,20 @@
-import {NgModule} from '@angular/core';
-import {BrowserModule} from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 
-import {AppRoutingModule} from './app-routing.module';
-import {AppComponent} from './app.component';
-import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import {FooterComponent} from './components/footer/footer.component';
-import {ComponentStore} from "@ngrx/component-store";
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FooterComponent } from './components/footer/footer.component';
+import { ComponentStore } from "@ngrx/component-store";
 
-import {FormsModule} from "@angular/forms";
+import { FormsModule } from "@angular/forms";
 import { HttpClientModule } from '@angular/common/http';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { JwtModule } from '@auth0/angular-jwt';
 import { AlertComponent } from './components/alert/alert.component';
 import { SharedModule } from './modules/shared/shared.module';
+import { RxStompService } from './services/stomp.service';
+import { rxStompServiceFactory } from './stomp-service-factory';
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -40,7 +42,13 @@ export function tokenGetter() {
       },
     }),
   ],
-  providers: [ComponentStore],
+  providers: [
+    ComponentStore,
+    {
+      provide: RxStompService,
+      useFactory: rxStompServiceFactory,
+    },
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

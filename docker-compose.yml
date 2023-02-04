@@ -35,6 +35,7 @@ services:
     depends_on:
       - caiman_wp_db
     volumes:
+      - ./volumes/uploads:/var/www/public/wp-content/uploads
       - ./volumes/backend/wp-config.php:/var/www/public/wp-config.php
     healthcheck:
       interval: 5m
@@ -84,6 +85,7 @@ services:
     depends_on:
       - caiman_backend
       - caiman_frontend
+      - caiman_broker
     ports:
       - "80:80"
       - "443:443"
@@ -95,6 +97,18 @@ services:
       MYSQL_ROOT_PASSWORD: 01Ul8TrH&Mq8
     volumes:
       - ./volumes/mariadb:/var/lib/mysql
+
+  caiman_broker:
+    restart: always
+    image: caiman_broker:latest
+    build: ./rabbitmq
+    container_name: caiman_broker
+    volumes:
+      - ./volumes/rabbitmq:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+    healthcheck:
+      interval: 2m
 
   caiman_phpmyadmin:
       image: phpmyadmin/phpmyadmin

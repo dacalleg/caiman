@@ -1,0 +1,4 @@
+[
+    rabbitmq_web_stomp,
+    rabbitmq_management
+].

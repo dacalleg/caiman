@@ -3,3 +3,4 @@
 /.vscode
 /volumes/mariadb
 /volumes/uploads
+/volumes/rabbitmq

@@ -13,8 +13,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { JwtModule } from '@auth0/angular-jwt';
 import { AlertComponent } from './components/alert/alert.component';
 import { SharedModule } from './modules/shared/shared.module';
-import { RxStompService } from './services/stomp.service';
-import { rxStompServiceFactory } from './stomp-service-factory';
+import { AuthService } from './services/auth.service';
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -43,11 +42,8 @@ export function tokenGetter() {
     }),
   ],
   providers: [
+    AuthService,
     ComponentStore,
-    {
-      provide: RxStompService,
-      useFactory: rxStompServiceFactory,
-    },
   ],
   bootstrap: [AppComponent]
 })

@@ -5,12 +5,17 @@ export class Utils {
         let ret = [] as number[];
         var re = new RegExp('#', 'g');
         for (let i = 0; i < variables.length; i++) {
-            const variable = variables[i];
-            const value = values[i];
-            if (!variable.readExp) {
-                ret.push(value);
-            } else {
-                ret.push(eval(variable.readExp.replace(re, "" + value)));
+            try {
+                const variable = variables[i];
+                const value = values[i];
+                if (!variable.readExp) {
+                    ret.push(value);
+                } else {
+                    ret.push(eval(variable.readExp.replace(re, "" + value)));
+                }
+            }
+            catch (ex) {
+                ret.push(NaN);
             }
         }
         return ret;

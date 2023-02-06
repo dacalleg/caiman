@@ -1,7 +1,8 @@
 <div class="card h-100" *ngIf="variable"
   [ngClass]="{'eeprom': variable.memory === 'eeprom', 'ram': variable.memory === 'ram' }">
-  <div class="card-body h-100">
+  <div class="card-body h-100 px-2 py-1 pb-2">
     <div class="d-flex flex-column justify-content-between h-100">
+      <div [title]="variable.name" class="fw-bold name px-1">{{variable.name}}</div>
       <div [ngClass]="{'hide': variable.hide}">
         <div class="d-flex justify-content-between align-items-center mb-4"
           *ngIf="(project$|async)?.view?.extendedView">
@@ -24,7 +25,7 @@
           </div>
         </div>
         <div class="d-flex align-items-center justify-content-between">
-          <div class="me-2" style="max-width: 50%">
+          <!--<div class="me-2" style="max-width: 50%">
             <small class="type fst-italic" *ngIf="(project$|async)?.view?.extendedView">{{variable|type}}</small>
             <div class="d-block fw-bolder mb-0 name" [title]="variable.name">{{variable.name}}</div>
             <div class="data" *ngIf="(project$|async)?.view?.extendedView">
@@ -36,19 +37,29 @@
               <div>Max: {{variable.max}}</div>
               <div *ngIf="variable.pattern">Pattern: {{variable.pattern}}</div>
             </div>
-          </div>
-          <ng-container *ngIf="(value$|async|variableValueFormatter) as value">
-            <div class="value flex-grow-1 text-end" *ngIf="!writeMode"  [title]="value">{{value}}</div>
+          </div>-->
+          <ng-container *ngIf="(value$|async) as value; else notLoaded">
+            <ng-container *ngIf="value.value != 32768; else notLoaded">
+              <ng-container *ngIf="value|variableValueFormatter as calculatedValue; else notLoaded">
+                <div class="value flex-grow-1 text-end" *ngIf="!writeMode" [title]="calculatedValue">{{calculatedValue}}</div>
+              </ng-container>
+            </ng-container>
           </ng-container>
-          <svg *ngIf="!(value$|async)" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="background: none; display: block; shape-rendering: auto;" width="40px" height="40px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
-            <path d="M10 50A40 40 0 0 0 90 50A40 42 0 0 1 10 50" fill="#1d0e0b" stroke="none">
-              <animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
-            </path>
-          </svg> 
+          <ng-template #notLoaded>
+            <div class="flex-grow-1 text-end">
+              <svg  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="background: none; shape-rendering: auto;" width="40px" height="40px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <path d="M10 50A40 40 0 0 0 90 50A40 42 0 0 1 10 50" fill="#1d0e0b" stroke="none">
+                  <animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
+                </path>
+              </svg> 
+            </div>          
+          </ng-template>
+
+
           <div class="d-flex flex-grow-1 align-items-center justify-content-end" *ngIf="writeMode">
               <input type="number" [min]="variable.min || 0" [max]="variable.max || 9999999999"
                 *ngIf="!variable.values || variable.values.length == 0" [ngModel]="newValue"
-                (ngModelChange)="write($event)" class="form-control ms-5">
+                (ngModelChange)="write($event)" class="form-control my-1">
               <select class="form-select" *ngIf="variable.values && variable.values.length > 0" [ngModel]="newValue"
                 (ngModelChange)="write($event)">
                 <option *ngFor="let value of variable.values" [ngValue]="+value[0]">{{value[1]}}</option>
@@ -56,10 +67,13 @@
           </div>
         </div>
       </div>
-      <div class="d-flex justify-content-end icons mt-2">
-        <bi name="eye" (click)="showVariable()" *ngIf="variable.hide" class="mx-1"></bi>
-        <bi name="eye-slash" (click)="hideVariable()" *ngIf="!variable.hide" class="mx-1"></bi>
-        <bi name="info-circle" (click)="editVariable()" class="mx-1"></bi>
+      <div class="d-flex justify-content-between icons mt-2">
+        <div>{{variable.hash}}</div>
+        <!--
+          <bi name="eye" (click)="showVariable()" *ngIf="variable.hide" class="mx-1"></bi>
+          <bi name="eye-slash" (click)="hideVariable()" *ngIf="!variable.hide" class="mx-1"></bi>
+          <bi name="info-circle" (click)="editVariable()" class="mx-1"></bi>
+        -->
         <bi name="pen" class="mx-1" (click)="toggleWrite()" *ngIf="!variable.readonly"></bi>
       </div>
     </div>

@@ -27,6 +27,7 @@ add_filter(
         $payload["customer_code"] = "195764";
         $payload["data"]["user"] = $u;
         $payload["auth0"] = "true";
+        $payload["software"] = "caiman";
         $payload["id"] = "464D7C31-0BBD-462D-A7F8-C03913EED030";
         return $payload;
     },

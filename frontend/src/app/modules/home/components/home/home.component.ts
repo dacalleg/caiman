@@ -1,9 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { BehaviorSubject, catchError, combineLatest, concat, filter, from, ignoreElements, map, merge, mergeMap, Observable, of, shareReplay, switchMap, take, tap, throwError, zip } from "rxjs";
+import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
+import { BehaviorSubject, catchError, combineLatest, concat, filter, from, ignoreElements, map, merge, mergeMap, Observable, of, shareReplay, switchMap, take, tap, throwError, timeout, zip } from "rxjs";
 import { Agua } from 'src/app/classes/agua';
 import { BleChannel } from 'src/app/classes/ble.channel';
+import { BridgeChannel } from 'src/app/classes/bridge.channel';
 import { Channel, DeviceProduct, Project, Variable } from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -20,17 +22,20 @@ import { StoreService } from 'src/app/services/store.service';
 export class HomeComponent implements OnInit {
 
 
+  @ViewChild("nav") nav: NgbNav | null;
+
   project$: Observable<Project>;
   groups$: Observable<string[]>;
   variables$: Observable<Variable[]>;
   search$: BehaviorSubject<string>;
-  aguaChannel$: Observable<Agua>;
   wifiConnectionAvailable$: Observable<boolean>;
   loadDeviceData$: Observable<DeviceProduct>;
   loadSnet$: Observable<string>;
   connected$: Observable<boolean>;
 
+  aguaChannel$: Observable<Agua>;
   BLEChannel$: Observable<BleChannel>;
+  bridgeChannel$: Observable<BridgeChannel>;
 
   constructor(
     private Store: StoreService,
@@ -40,9 +45,10 @@ export class HomeComponent implements OnInit {
     private Auth: AuthService,
     private http: HttpClient,
     private modal: ModalService) {
+
+    this.nav = null;
     this.search$ = new BehaviorSubject<string>("");
     this.project$ = this.Store.getProject();
-
 
     this.connected$ = this.Device.isConnected();
 
@@ -70,6 +76,12 @@ export class HomeComponent implements OnInit {
 
     this.BLEChannel$ = this.loadDeviceData$.pipe(
       map(() => new BleChannel()),
+      tap((channel) => this.Device.setChannel(channel))
+    )
+
+    this.bridgeChannel$ = this.loadDeviceData$.pipe(
+      switchMap((data) => combineLatest([this.Auth.getToken(), this.Auth.getUserName(), of(data)])),
+      map(([token, username, data]) => new BridgeChannel(username, token, data.mac, "93664797")),
       tap((channel) => this.Device.setChannel(channel))
     )
 
@@ -135,6 +147,25 @@ export class HomeComponent implements OnInit {
     this.Device.changeMonitoredVariables([]);
   }
 
+  bridgeConnect() {
+    this.bridgeChannel$.pipe(
+      switchMap(() => this.modal.openAlertModal({
+        title: "Connection",
+        message: "Bridge connection in progress",
+        progress: true
+      })),
+      switchMap(() => this.Device.connect()),
+      switchMap(() => this.loadSnet$),
+      tap(() => this.modal.dismissAll()),
+      switchMap(() => this.Device.startRead()),
+      catchError(err => this.modal.openAlertModal({
+        title: "Error",
+        message: err.message,
+      }))
+    ).subscribe();
+  }
+
+
   bleConnect() {
     this.BLEChannel$.pipe(
       switchMap(() => this.Device.connect()),
@@ -146,10 +177,13 @@ export class HomeComponent implements OnInit {
       switchMap(() => this.loadSnet$),
       tap(() => this.modal.dismissAll()),
       switchMap(() => this.Device.startRead()),
-      catchError(err => this.modal.openAlertModal({
-        title: "Error",
-        message: err.message,
-      }))
+      catchError(err => {
+        this.disconnect();
+        return this.modal.openAlertModal({
+          title: "Error",
+          message: err.message,
+        })
+      })
     ).subscribe();
   }
 
@@ -167,18 +201,22 @@ export class HomeComponent implements OnInit {
           else
             return throwError(() => new Error("Wifi Connection not available"));
         }),
+        switchMap(() => this.Device.connect()),
         switchMap(() => this.loadSnet$),
         tap(() => this.modal.dismissAll()),
         switchMap(() => this.Device.startRead()),
-        catchError(err => this.modal.openAlertModal({
-          title: "Error",
-          message: err.message,
-        }))
+        catchError(err => {
+          return this.modal.openAlertModal({
+            title: "Error",
+            message: err.message,
+          });
+        })
       )
     ).subscribe();
   }
 
   disconnect() {
+    this.nav?.select("ngb-nav-0");
     this.Device.disconnect();
   }
 }

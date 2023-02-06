@@ -1,4 +1,3 @@
-import struct from "../classes/struct";
 import { Utils } from "./utils";
 import {
   BehaviorSubject,
@@ -8,19 +7,13 @@ import {
   concatMap,
   defer,
   delay,
-  distinctUntilChanged,
   filter,
-  finalize,
   from,
-  fromEvent,
-  last,
   map,
-  mergeMap,
   Observable,
   of,
   repeat,
   retry,
-  share,
   shareReplay,
   Subject,
   switchMap,
@@ -28,41 +21,52 @@ import {
   takeUntil,
   tap,
   throwError,
+  timeout,
+  TimeoutError,
   toArray
 } from "rxjs";
-import { BLESerialDevice, Channel, SerialConnectionSettings, Variable, VariableValue } from "./interfaces";
+import { Channel, Variable, VariableValue } from "./interfaces";
 
 export class BleChannel implements Channel {
   private connection$: Observable<{ device: any, server: any, service: any, characteristic: any }>;
   private stream$: Observable<VariableValue[]>;
   private charatteristics$: BehaviorSubject<any | null>;
+  private BLEDevice$: BehaviorSubject<any | null>;
   private bufferVariables$: BehaviorSubject<Variable[]>;
   private close$: Subject<void>;
   private sendCommand$: Subject<{ data: any, chunkSize: number, id: number }>;
   private responses$: Observable<{ id: number, payload: any }>;
+  private reconnect$: Observable<void>;
 
   constructor() {
     this.close$ = new Subject();
     this.charatteristics$ = new BehaviorSubject(null);
+    this.BLEDevice$ = new BehaviorSubject(null);
     this.sendCommand$ = new Subject();
 
-    this.connection$ = defer(() => {
-      //@ts-ignore
-      const promise = navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e'] })
-        .then(async (device: any) => {
+    this.reconnect$ = this.BLEDevice$.pipe(
+      take(1),
+      switchMap((device) => {
+        const bledata = async () => {
           const server = await device.gatt.connect() as any;
           const service = await server.getPrimaryService('6e400001-b5a3-f393-e0a9-e50e24dcca9e') as any;
           const characteristic = await service.getCharacteristic('6e400002-b5a3-f393-e0a9-e50e24dcca9e') as any;
           return { device: device, server: server, service: service, characteristic: characteristic };
-        });
-      return from(promise) as Observable<{ device: any, server: any, service: any, characteristic: any }>
-    }).pipe(
+        }
+        return from(bledata());
+      }),
       tap((data) => this.charatteristics$.next(data.characteristic)),
-      switchMap((arg) => this.sendIdentity("93664797").pipe(map(() => arg))),
-      shareReplay(1),
-    );
+      switchMap(() => this.sendIdentity("93664797").pipe(map(() => void 0))),
+      tap(() => this.responses$.subscribe()));
 
-    this.close$.pipe(switchMap(() => this.connection$)).subscribe((data) => data.device.gatt.disconnect());
+    //@ts-ignore
+    this.connection$ = from(navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e'] })).pipe(
+      tap((device) => this.BLEDevice$.next(device)),
+      switchMap(() => this.reconnect$.pipe(take(1))),
+      shareReplay(1),
+    )
+
+    this.close$.pipe(switchMap(() => this.BLEDevice$)).subscribe((device) => device.gatt.disconnect());
 
     this.bufferVariables$ = new BehaviorSubject<Variable[]>([]);
 
@@ -70,45 +74,34 @@ export class BleChannel implements Channel {
       switchMap((variables) => {
         if (variables.length === 0)
           return of([] as VariableValue[]);
-        return this.setBuffer(variables).pipe(
-          switchMap(() => this.readBuffer(variables).pipe(
-            repeat({ delay: 500 }),
-          )),
+        return of(void 0).pipe(
+          switchMap(() => this.setBuffer(variables).pipe(
+            switchMap(() => this.readBuffer(variables).pipe(
+              repeat({ delay: 500 }),
+            )),
+          ))
         )
       }),
-      retry(),
+      catchError((err) => {
+        return this.reconnect$.pipe(
+          switchMap(() => throwError(() => err))
+        )
+      }),
+      retry(5),
       takeUntil(this.close$),
       shareReplay(1)
     );
 
-    this.responses$ = combineLatest(
-      [this.charatteristics$.pipe(filter(item => item !== null)), this.sendCommand$]
-    ).pipe(
-      concatMap(([charatteristics, data]) => defer(() => from(charatteristics.writeValue(this.getHeader(data.data, data.chunkSize)))).pipe(
-        switchMap(() => from(JSON.stringify(data.data).split("")).pipe(
-          bufferCount(data.chunkSize),
-          map((arr: string[]) => arr.join("")),
-          map((str: string) => Uint8Array.from(Array.from(str).map(letter => letter.charCodeAt(0)))),
-          concatMap(buff => {
-            return defer(() => from(charatteristics.writeValue(buff))).pipe(map(() => data));
-          }),
-          toArray(),
-          switchMap(() => defer(() => from(charatteristics.readValue())).pipe(
-            map((resp: any) => new TextDecoder().decode(resp.buffer)),
-            switchMap((msg) => (msg !== "Navel\x00") ? of(msg) : throwError(() => new Error("End message"))),
-            repeat(),
-            catchError(() => of("")),
-            toArray(),
-            map((arr: string[]) => JSON.parse(arr.join(""))),
-            map(resp => { return { payload: resp.pl, id: data.id } }),
-          )),
-        )))
-      ),
+    this.responses$ = this.sendCommand$.pipe(
+      concatMap((data) => this.charatteristics$.pipe(
+        filter(item => item !== null),
+        take(1),
+        switchMap((charatteristics) => this.sendData(charatteristics, data)),
+      )),
       takeUntil(this.close$),
-      shareReplay(5),
-    )
+      shareReplay(1),
+    );
 
-    this.responses$.subscribe();
   }
 
   write(variables: VariableValue[]): Observable<VariableValue[]> {
@@ -133,6 +126,39 @@ export class BleChannel implements Channel {
       chunkSize & 0xFF,
       (chunkSize >> 8) & 0xFF,
     ));
+  }
+
+  private sendData(charatteristics: any, data: any) {
+    return defer(() => from(charatteristics.writeValue(this.getHeader(data.data, data.chunkSize)))).pipe(
+      switchMap(() => from(JSON.stringify(data.data).split("")).pipe(
+        bufferCount(data.chunkSize),
+        map((arr: string[]) => arr.join("")),
+        map((str: string) => Uint8Array.from(Array.from(str).map(letter => letter.charCodeAt(0)))),
+        concatMap(buff => {
+          return defer(() => from(charatteristics.writeValue(buff))).pipe(map(() => data));
+        }),
+        toArray(),
+        switchMap(() => defer(() => from(charatteristics.readValue())).pipe(
+          map((resp: any) => new TextDecoder().decode(resp.buffer)),
+          switchMap((msg) => (msg !== "Navel\x00") ? of(msg) : throwError(() => new Error("EndMessage"))),
+          repeat(),
+          catchError((err) => {
+            if (err.message !== 'EndMessage')
+              return throwError(() => err);
+            return of("")
+          }),
+          toArray(),
+          map((arr: string[]) => JSON.parse(arr.join(""))),
+          map(resp => { return { payload: resp.pl, id: data.id } }),
+          switchMap((resp) => {
+            if (resp === undefined)
+              return throwError(() => new Error("Undefined"));
+            if (resp.payload.NackErrCode !== undefined)
+              return throwError(() => new Error("Nack"));
+            return of(resp);
+          }),
+        )),
+      )))
   }
 
   private sendCommand(data: any, chunkSize = 200) {
@@ -162,7 +188,12 @@ export class BleChannel implements Channel {
   }
 
   private sendIdentity(security: string) {
-    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "Identity", Security: security, Id: "30C6F7C25168" }));
+    const payload = this.generateJsonEnvelope({ Cmd: "Identity", Security: security, Id: "30C6F7C25168" });
+    return this.charatteristics$.pipe(
+      take(1),
+      filter(item => item !== null),
+      switchMap((charatteristics) => this.sendData(charatteristics, { data: payload, chunkSize: 200, id: 0 })),
+    )
   }
 
   private sendStatusWifiStation() {
@@ -231,4 +262,9 @@ export class BleChannel implements Channel {
   ping(): Observable<boolean> {
     throw new Error("Method not implemented.");
   }
+
+  private onError() {
+    this.close$.next();
+  }
 }
+

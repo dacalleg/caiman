@@ -40,6 +40,17 @@ services:
     healthcheck:
       interval: 5m
 
+  caiman_rabbitmq_auth:
+    restart: always
+    build: ./rabbimtmq-auth
+    image: caiman_rabbitmq_auth:latest
+    container_name: caiman_rabbitmq_auth
+    command: ["node", "server.js"]
+    healthcheck:
+      interval: 5m
+    environment:
+      NODE_ENV: "production"
+
   #caiman_mongo:
   #  restart: always
   #  image: caiman_mongo:latest
@@ -107,6 +118,10 @@ services:
       - ./volumes/rabbitmq:/var/lib/rabbitmq
     environment:
       RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+    depends_on:
+      - caiman_rabbitmq_auth
+    ports:
+      - 15672:15672
     healthcheck:
       interval: 2m
 

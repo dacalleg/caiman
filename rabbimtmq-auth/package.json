@@ -1,0 +1,18 @@
+{
+  "name": "caiman_rabbitmq_auth",
+  "version": "1.0.0",
+  "description": "Node.js on Docker",
+  "author": "Daniele Callegaro <daniele.callegaro.90@gmail.com>",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongodb": "^3.6.9",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^8.5.1",
+    "crypto-js": "^4.0.0"
+  }
+}

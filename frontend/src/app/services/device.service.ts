@@ -41,7 +41,7 @@ export class DeviceService {
   connect()
   {
     if (this.channel) {
-      return this.channel.connect();
+      return this.channel.connect().pipe(tap(() => this.connected$.next(true)));
     }
     return throwError(() => new Error("Channel is null, call set channel before"))
   }
@@ -49,10 +49,7 @@ export class DeviceService {
   startRead() {
     if (this.channel) {
       return of(0).pipe(
-        switchMap(() => this.channel!.connect()),
-        tap(() => this.connected$.next(true)),
         switchMap(() => this.monitoredVariables$),
-        //filter((variables) => variables.length > 0),
         switchMap((variables) => this.channel!.setVariableStream(variables)),
         switchMap(() => this.channel!.getStream()),
         tap(data => this.stream$.next(data)),

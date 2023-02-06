@@ -33,6 +33,8 @@ export class Agua implements Channel {
 
     setVariableStream(variables: Variable[]): Observable<void> {
         this.bufferVariables = variables;
+        if(this.bufferVariables.length == 0)
+            return of(void 0);
         return this.protocol.setBuffer(this.bufferVariables);
     }
 

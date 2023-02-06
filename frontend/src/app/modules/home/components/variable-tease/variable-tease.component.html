@@ -2,9 +2,10 @@
   [ngClass]="{'eeprom': variable.memory === 'eeprom', 'ram': variable.memory === 'ram' }">
   <div class="card-body h-100 px-2 py-1 pb-2">
     <div class="d-flex flex-column justify-content-between h-100">
-      <div [title]="variable.name" class="fw-bold name px-1">{{variable.name}}</div>
+      <div [title]="variable|overrideVariableName|async" class="fw-bold name px-1">{{variable|overrideVariableName|async}}</div>
+      <p class="px-1"><small>{{variable|overrideVariableDescription|async}}</small></p>
       <div [ngClass]="{'hide': variable.hide}">
-        <div class="d-flex justify-content-between align-items-center mb-4"
+        <!--<div class="d-flex justify-content-between align-items-center mb-4"
           *ngIf="(project$|async)?.view?.extendedView">
           <div class="d-flex">
             <div *ngIf="variable.bit === 8" class="border bytetype byte">
@@ -23,7 +24,7 @@
           <div class="text-end">
             <strong>{{variable.address|address:variable.memory:viewOpt|numberFormat:viewOpt}}</strong>
           </div>
-        </div>
+        </div>-->
         <div class="d-flex align-items-center justify-content-between">
           <!--<div class="me-2" style="max-width: 50%">
             <small class="type fst-italic" *ngIf="(project$|async)?.view?.extendedView">{{variable|type}}</small>
@@ -54,8 +55,6 @@
               </svg> 
             </div>          
           </ng-template>
-
-
           <div class="d-flex flex-grow-1 align-items-center justify-content-end" *ngIf="writeMode">
               <input type="number" [min]="variable.min || 0" [max]="variable.max || 9999999999"
                 *ngIf="!variable.values || variable.values.length == 0" [ngModel]="newValue"

@@ -162,6 +162,19 @@ export interface ProductInfo {
   serami_acl: SeramiACL[];
   faq: SingleFaq[];
   video: Video[];
+  serami_var_override: VariableInfoOverride[];
+  serami_group_override: GroupNameOverride[];
+  description: string;
+}
+
+export interface GroupNameOverride {
+  name: string;
+  title: string;
+}
+
+export interface VariableInfoOverride {
+  id: string;
+  title: string;
   description: string;
 }
 

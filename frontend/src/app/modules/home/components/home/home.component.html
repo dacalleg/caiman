@@ -84,9 +84,52 @@
                   <app-timeline></app-timeline>
                 </ng-template>
               </li>
+              <li ngbNavItem (shown)="unselectGroup()" [id]="2">
+                <a ngbNavLink>Advanced</a>
+                <ng-template ngbNavContent>
+                  <div class="row align-items-start">
+                    <div class="col text-center order-1 order-md-2 sticky-top">
+                      <img [src]="device?.info?.image" class="image">
+                    </div>
+                    <div class="col order-2 order-md-1">
+                      <h1 class="fw-bold">{{device?.mac}}</h1>
+                      <div class="fw-bold">{{device?.name_product}}</div>
+
+                      <div class="row my-5">
+                        <div class="col">
+                          <h3>DATABASE</h3>
+                          <div class="input-group">
+                            <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon">
+                              <option selected>Choose...</option>
+                              <option value="1">One</option>
+                              <option value="2">Two</option>
+                              <option value="3">Three</option>
+                            </select>
+                            <button class="btn btn-outline-secondary" type="button">Load</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row my-5">
+                        <div class="col">
+                          <h3>FIRMWARE</h3>
+                          <div class="input-group">
+                            <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon">
+                              <option selected>Choose...</option>
+                              <option value="1">One</option>
+                              <option value="2">Two</option>
+                              <option value="3">Three</option>
+                            </select>
+                            <button class="btn btn-outline-secondary" type="button">Load</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </li>
               <ng-container *ngIf="connected$|async">
                 <li ngbNavItem *ngFor="let group of groups$|async" (shown)="onGroupSelected(group)">
-                  <a ngbNavLink>{{group}}</a>
+                  <a ngbNavLink>{{group|overrideGroupName|async}}</a>
                   <ng-template ngbNavContent>
                     <div class="row">
                       <div class="col my-2">

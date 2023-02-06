@@ -24,6 +24,9 @@ import { DeviceSelectComponent } from './components/device-select/device-select.
 import { YouTubePlayerModule } from '@angular/youtube-player';
 import { TimelineComponent } from './components/timeline/timeline.component';
 import { SharedModule } from '../shared/shared.module';
+import { OverrideVariableNamePipe } from './pipes/override-variable-name.pipe';
+import { OverrideGroupNamePipe } from './pipes/override-group-name.pipe';
+import { OverrideVariableDescriptionPipe } from './pipes/override-variable-description.pipe';
 
 const icons = {
   Eye,
@@ -52,6 +55,9 @@ const icons = {
     OptimizationComponent,
     DeviceSelectComponent,
     TimelineComponent,
+    OverrideVariableNamePipe,
+    OverrideGroupNamePipe,
+    OverrideVariableDescriptionPipe,
   ],
   imports: [
     CommonModule,

@@ -73,9 +73,9 @@ export class StoreService {
           const hidden_groups = state.device.info.serami_acl.find(acl => roles.includes(acl.role))?.hidden_groups;
           const hidden_variables = state.device.info.serami_acl.find(acl => roles.includes(acl.role))?.hidden_variables;
           if (!hidden_groups)
-            return [];
+            return state.variables;
           if (!hidden_variables)
-            return [];
+            return state.variables;
           return state.variables.filter(variable => !hidden_groups.includes(variable.group) && !hidden_variables.includes(variable.hash));
         }
         return [];

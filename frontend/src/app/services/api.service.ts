@@ -65,7 +65,9 @@ export class ApiService {
               serami_file: item.acf.serami_file,
               video: item.acf.video || [],
               documents: item.acf.documents || [],
-              serami_acl: serami_acl,
+              serami_var_override: item.acf.serami_var_override || [],
+              serami_group_override: item.acf.serami_group_override || [],
+              serami_acl: serami_acl || [],
               gateway_firmware_list: item.acf.gateway_firmware_list || [],
               image: item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
               faq: item.acf.faq || []

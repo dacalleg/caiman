@@ -87,7 +87,7 @@ define('JWT_AUTH_CORS_ENABLE', getenv("JWT_AUTH_CORS_ENABLE") === "true" ? true 
 $schema = getenv("HTTPS") === "true" ? "https" : "http";
 
 define( 'WP_HOME', $schema . '://' . getenv("HOST") . '/backend' );
-define( 'WP_SITEURL', $schema . '://' . getenv("HOST") . './backend' );
+define( 'WP_SITEURL', $schema . '://' . getenv("HOST") . '/backend' );
 
 /* Add any custom values between this line and the "stop editing" line. */
 

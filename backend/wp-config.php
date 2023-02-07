@@ -20,16 +20,16 @@
 
 // ** Database settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define( 'DB_NAME', 'caiman' );
+define( 'DB_NAME', getenv("DB_NAME") ); 
 
 /** Database username */
-define( 'DB_USER', 'root' );
+define( 'DB_USER', getenv("DB_USER") );
 
 /** Database password */
-define( 'DB_PASSWORD', '01Ul8TrH&Mq8' );
+define( 'DB_PASSWORD', getenv("DB_PASSWORD") );
 
 /** Database hostname */
-define( 'DB_HOST', 'caiman_wp_db' );
+define( 'DB_HOST', getenv("DB_HOST") );
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8mb4' );
@@ -80,11 +80,14 @@ $table_prefix = 'wp_';
  *
  * @link https://wordpress.org/support/article/debugging-in-wordpress/
  */
-define('WP_DEBUG', false );
-define('JWT_AUTH_SECRET_KEY', 'tokenagua' );
-define('JWT_AUTH_CORS_ENABLE', true );
-define( 'WP_HOME', 'http://localhost/backend' );
-define( 'WP_SITEURL', 'http://localhost/backend' );
+define('WP_DEBUG', getenv("WP_DEBUG") === "true" ? true : false);
+define('JWT_AUTH_SECRET_KEY', getenv("JWT_AUTH_SECRET_KEY") );
+define('JWT_AUTH_CORS_ENABLE', getenv("JWT_AUTH_CORS_ENABLE") === "true" ? true : false);
+
+$schema = getenv("HTTPS") === "true" ? "https" : "http";
+
+define( 'WP_HOME', $schema . '://' . getenv("HOST") . '/backend' );
+define( 'WP_SITEURL', $schema . '://' . getenv("HOST") . './backend' );
 
 /* Add any custom values between this line and the "stop editing" line. */
 

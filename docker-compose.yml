@@ -36,9 +36,19 @@ services:
       - caiman_wp_db
     volumes:
       - ./volumes/uploads:/var/www/public/wp-content/uploads
-      - ./volumes/backend/wp-config.php:/var/www/public/wp-config.php
     healthcheck:
       interval: 5m
+    environment:
+      DB_NAME: "caiman"
+      DB_USER: "root"
+      DB_PASSWORD: "01Ul8TrH&Mq8"
+      DB_HOST: "caiman_wp_db"
+      WP_DEBUG: "false"
+      JWT_AUTH_SECRET_KEY: "tokenagua"
+      JWT_AUTH_CORS_ENABLE: "true"
+      HTTPS: "false"
+      HOST: "localhost"
+
 
   caiman_rabbitmq_auth:
     restart: always

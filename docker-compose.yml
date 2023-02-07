@@ -103,6 +103,8 @@ services:
     container_name: caiman_reverse_proxy
     volumes:
       - ./volumes/uploads:/data/uploads
+      - ./volume/letsencrypt/certs:/etc/nginx/certs
+      - ./volume/letsencrypt/www:/data/acme
     depends_on:
       - caiman_backend
       - caiman_frontend

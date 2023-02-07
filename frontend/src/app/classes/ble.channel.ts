@@ -6,7 +6,6 @@ import {
   combineLatest,
   concatMap,
   defer,
-  delay,
   filter,
   from,
   map,
@@ -21,8 +20,6 @@ import {
   takeUntil,
   tap,
   throwError,
-  timeout,
-  TimeoutError,
   toArray
 } from "rxjs";
 import { Channel, Variable, VariableValue } from "./interfaces";
@@ -87,7 +84,7 @@ export class BleChannel implements Channel {
           switchMap(() => throwError(() => err))
         )
       }),
-      retry(5),
+      retry(),
       takeUntil(this.close$),
       shareReplay(1)
     );

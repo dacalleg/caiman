@@ -2,6 +2,8 @@ FROM nginx
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get install -y nodejs
 COPY . /usr/share/nginx/html
+RUN rm -rf /usr/share/nginx/html/node_modules
+RUN rm -rf /usr/share/nginx/html/.angular
 RUN cd /usr/share/nginx/html && npm install
 RUN cd /usr/share/nginx/html && npm run build
 COPY nginx.conf /etc/nginx/nginx.conf

@@ -1,175 +1,182 @@
-<div class="header">
-  <app-header></app-header>
-</div>
-<div class="main py-0 p-3">
-  <div class="container-fluid" *ngIf="(loadDeviceData$|async) as device">
+<div class="h-100 d-flex flex-column">
+  <div class="header">
+    <app-header></app-header>
+  </div>
+  <div class="container-fluid flex-grow-1" *ngIf="(loadDeviceData$|async) as device; else loader">
 
-      <!--<div class="row">
-        <div class="col-md-6">
-          <div class="input-group mb-3">
-            <input type="text" class="form-control" placeholder="Search variable by name or address..."
-              aria-describedby="button-addon2" (keydown)="onSearchChange($event)">
-            <button class="btn btn-primary" type="button" id="button-addon2">Search</button>
+    <!--<div class="row">
+          <div class="col-md-6">
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="Search variable by name or address..."
+                aria-describedby="button-addon2" (keydown)="onSearchChange($event)">
+              <button class="btn btn-primary" type="button" id="button-addon2">Search</button>
+            </div>
           </div>
-        </div>
-      </div>-->
-      <div class="row align-items-start">
-        <div class="col-md-3 sticky-top">
-          <div class="d-flex" class="sidebar p-5">
-            <ul ngbNav #nav="ngbNav" class="nav-pills" orientation="vertical">
-              <li ngbNavItem (shown)="unselectGroup()" [id]="0">
-                <a ngbNavLink>Device Info</a>
-                <ng-template ngbNavContent>
-                  <div class="row align-items-start">
-                    <div class="col text-center order-1 order-md-2 sticky-top">
-                      <img [src]="device?.info?.image" class="image">
-                    </div>
-                    <div class="col order-2 order-md-1">
-                      <h1 class="fw-bold">{{device?.mac}}</h1>
-                      <div class="fw-bold">{{device?.name_product}}</div>
-                      <p class="my-5">{{device?.info?.description }}</p>
-
-                      <ul class="nav pb-5" >
-                        <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary" (click)="wifiConnect()">WiFi</button></li>
-                        <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary" (click)="bleConnect()">Bluetooth</button></li>
-                        <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary" (click)="bridgeConnect()">Bridge</button></li>
-
-                        <li class="nav-item me-2" *ngIf="(connected$|async)"><button class="btn btn-lg btn-primary" (click)="disconnect()">Disconnect</button></li>
-                      </ul>
-
-                      <div class="row my-5">
-                        <div class="col">
-                          <h3>Documentazione Tecnica</h3>
-                          <ul>
-                            <li *ngFor="let doc of device?.info?.documents">
-                              <a [href]="doc.file" target="_blank">{{doc.name}}</a>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div class="row mb-5">
-                        <div class="col">
-                          <h3>Faq</h3>
-                          <ngb-accordion #acc="ngbAccordion">
-                            <ngb-panel [title]="faq.question" *ngFor="let faq of device?.info?.faq">
-                              <ng-template ngbPanelContent>
-                                {{faq.response}}
-                              </ng-template>
-                            </ngb-panel>
-                          </ngb-accordion>                          
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col">
-                          <h3>Video</h3>
-                          <ngb-accordion #acc="ngbAccordion">
-                            <ngb-panel [title]="video.name" *ngFor="let video of device?.info?.video">
-                              <ng-template ngbPanelContent>
-                                <div class="d-flex justify-content-center align-items-center flex-column">
-                                  <youtube-player [videoId]="video.video"></youtube-player>
-                                  <div>{{video.description}}</div>
-                                </div>
-                              </ng-template>
-                            </ngb-panel>
-                          </ngb-accordion>                          
-                        </div>
-                      </div>
-                    </div>
+        </div>-->
+    <div class="row align-items-start h-100">
+      <div class="col-md-3 h-100 sticky-top sidebar">
+        <div class="d-flex" class="p-5">
+          <ul ngbNav #nav="ngbNav" class="nav-pills" orientation="vertical">
+            <li ngbNavItem (shown)="unselectGroup()" [id]="0">
+              <a ngbNavLink>Device Info</a>
+              <ng-template ngbNavContent>
+                <div class="row align-items-start">
+                  <div class="col text-center order-1 order-md-2 sticky-top">
+                    <img [src]="device?.info?.image" class="image">
                   </div>
-                </ng-template>
-              </li>
-              <li ngbNavItem (shown)="unselectGroup()" [id]="1">
-                <a ngbNavLink>Timeline</a>
-                <ng-template ngbNavContent>
-                  <app-timeline></app-timeline>
-                </ng-template>
-              </li>
-              <li ngbNavItem (shown)="unselectGroup()" [id]="2">
-                <a ngbNavLink>Advanced</a>
-                <ng-template ngbNavContent>
-                  <div class="row align-items-start">
-                    <div class="col text-center order-1 order-md-2 sticky-top">
-                      <img [src]="device?.info?.image" class="image">
-                    </div>
-                    <div class="col order-2 order-md-1">
-                      <h1 class="fw-bold">{{device?.mac}}</h1>
-                      <div class="fw-bold">{{device?.name_product}}</div>
-
-                      <div class="row my-5">
-                        <div class="col">
-                          <h3>DATABASE</h3>
-                          <div class="input-group">
-                            <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon">
-                              <option selected>Choose...</option>
-                              <option value="1">One</option>
-                              <option value="2">Two</option>
-                              <option value="3">Three</option>
-                            </select>
-                            <button class="btn btn-outline-secondary" type="button">Load</button>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row my-5">
-                        <div class="col">
-                          <h3>FIRMWARE</h3>
-                          <div class="input-group">
-                            <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon">
-                              <option selected>Choose...</option>
-                              <option value="1">One</option>
-                              <option value="2">Two</option>
-                              <option value="3">Three</option>
-                            </select>
-                            <button class="btn btn-outline-secondary" type="button">Load</button>
-                          </div>
-                        </div>
+                  <div class="col order-2 order-md-1">
+                    <h1 class="fw-bold">{{device?.mac}}</h1>
+                    <div class="fw-bold">{{device?.name_product}}</div>
+                    <p class="my-5">{{device?.info?.description }}</p>
+  
+                    <ul class="nav pb-5">
+                      <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary"
+                          (click)="wifiConnect()">WiFi</button></li>
+                      <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary"
+                          (click)="bleConnect()">Bluetooth</button></li>
+                      <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary"
+                          (click)="bridgeConnect()">Bridge</button></li>
+  
+                      <li class="nav-item me-2" *ngIf="(connected$|async)"><button class="btn btn-lg btn-primary"
+                          (click)="disconnect()">Disconnect</button></li>
+                    </ul>
+  
+                    <div class="row my-5">
+                      <div class="col">
+                        <h3>Documentazione Tecnica</h3>
+                        <ul>
+                          <li *ngFor="let doc of device?.info?.documents">
+                            <a [href]="doc.file" target="_blank">{{doc.name}}</a>
+                          </li>
+                        </ul>
                       </div>
                     </div>
-                  </div>
-                </ng-template>
-              </li>
-              <ng-container *ngIf="connected$|async">
-                <li ngbNavItem *ngFor="let group of groups$|async" (shown)="onGroupSelected(group)">
-                  <a ngbNavLink>{{group|overrideGroupName|async}}</a>
-                  <ng-template ngbNavContent>
+                    <div class="row mb-5">
+                      <div class="col">
+                        <h3>Faq</h3>
+                        <ngb-accordion #acc="ngbAccordion">
+                          <ngb-panel [title]="faq.question" *ngFor="let faq of device?.info?.faq">
+                            <ng-template ngbPanelContent>
+                              {{faq.response}}
+                            </ng-template>
+                          </ngb-panel>
+                        </ngb-accordion>
+                      </div>
+                    </div>
                     <div class="row">
-                      <div class="col my-2">
-                        <h1 class="fw-bold">{{group}}</h1>
+                      <div class="col">
+                        <h3>Video</h3>
+                        <ngb-accordion #acc="ngbAccordion">
+                          <ngb-panel [title]="video.name" *ngFor="let video of device?.info?.video">
+                            <ng-template ngbPanelContent>
+                              <div class="d-flex justify-content-center align-items-center flex-column">
+                                <youtube-player [videoId]="video.video"></youtube-player>
+                                <div>{{video.description}}</div>
+                              </div>
+                            </ng-template>
+                          </ngb-panel>
+                        </ngb-accordion>
                       </div>
                     </div>
-                    <div class="row align-items-stretch">
-                      <ng-container *ngFor="let variable of variables$|async|varByGroup:group">
-                        <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-3 my-2">
-                          <app-variable-tease [variable]="variable"></app-variable-tease>
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+            <li ngbNavItem (shown)="unselectGroup()" [id]="1">
+              <a ngbNavLink>Timeline</a>
+              <ng-template ngbNavContent>
+                <app-timeline></app-timeline>
+              </ng-template>
+            </li>
+            <li ngbNavItem (shown)="unselectGroup()" [id]="2">
+              <a ngbNavLink>Advanced</a>
+              <ng-template ngbNavContent>
+                <div class="row align-items-start">
+                  <div class="col text-center order-1 order-md-2 sticky-top">
+                    <img [src]="device?.info?.image" class="image">
+                  </div>
+                  <div class="col order-2 order-md-1">
+                    <h1 class="fw-bold">{{device?.mac}}</h1>
+                    <div class="fw-bold">{{device?.name_product}}</div>
+  
+                    <div class="row my-5">
+                      <div class="col">
+                        <h3>DATABASE</h3>
+                        <div class="input-group">
+                          <select class="form-select" id="inputGroupSelect04"
+                            aria-label="Example select with button addon">
+                            <option selected>Choose...</option>
+                            <option value="1">One</option>
+                            <option value="2">Two</option>
+                            <option value="3">Three</option>
+                          </select>
+                          <button class="btn btn-outline-secondary" type="button">Load</button>
                         </div>
-                      </ng-container>
+                      </div>
                     </div>
-                  </ng-template>
-                </li>
-              </ng-container>
-
-            </ul>
-          </div>
-        </div>
-        <div class="col p-3 p-md-5">
-          <div [ngbNavOutlet]="nav" class="flex-grow-1"></div>
+                    <div class="row my-5">
+                      <div class="col">
+                        <h3>FIRMWARE</h3>
+                        <div class="input-group">
+                          <select class="form-select" id="inputGroupSelect04"
+                            aria-label="Example select with button addon">
+                            <option selected>Choose...</option>
+                            <option value="1">One</option>
+                            <option value="2">Two</option>
+                            <option value="3">Three</option>
+                          </select>
+                          <button class="btn btn-outline-secondary" type="button">Load</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+            <ng-container *ngIf="connected$|async">
+              <li ngbNavItem *ngFor="let group of groups$|async" (shown)="onGroupSelected(group)">
+                <a ngbNavLink>{{group|overrideGroupName|async}}</a>
+                <ng-template ngbNavContent>
+                  <div class="row">
+                    <div class="col my-2">
+                      <h1 class="fw-bold">{{group}}</h1>
+                    </div>
+                  </div>
+                  <div class="row align-items-stretch">
+                    <ng-container *ngFor="let variable of variables$|async|varByGroup:group">
+                      <div class="col-md-6 col-lg-4 col-xl-3 col-xxl-3 my-2">
+                        <app-variable-tease [variable]="variable"></app-variable-tease>
+                      </div>
+                    </ng-container>
+                  </div>
+                </ng-template>
+              </li>
+            </ng-container>
+  
+          </ul>
         </div>
       </div>
-
-
+      <div class="col p-3 p-md-5">
+        <div [ngbNavOutlet]="nav" class="flex-grow-1"></div>
+      </div>
+    </div>
   </div>
-  <div class="container" *ngIf="!(loadDeviceData$|async)">
-    <div class="text-center h-100 d-flex">
-      <div class="container">
-        <div class="row">
-          <div class="col p-3">
-            <div class="text-center mb-3">Loading...</div>
-            <app-infinite-progress-bar></app-infinite-progress-bar>
+  <ng-template #loader>
+    <div class="d-flex h-100 w-100 justify-content-center align-items-center">
+      <div class="text-center w-50 d-flex">
+        <div class="container">
+          <div class="row">
+            <div class="col p-3">
+              <div class="text-center mb-3">Loading...</div>
+              <app-infinite-progress-bar></app-infinite-progress-bar>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </ng-template>
 </div>
+
 
 <app-option-modal></app-option-modal>
 <app-serial-modal></app-serial-modal>

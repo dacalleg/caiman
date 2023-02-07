@@ -7,8 +7,7 @@ $black: #202020;
 $white: #FFFFFF;
 $primary: #496356;
 
-:root
-{
+:root {
     --black: #{$black};
     --gray: #{$gray};
     --white: #{$white};
@@ -18,48 +17,50 @@ $primary: #496356;
 
 @import "bootstrap/scss/bootstrap";
 
-.btn, .form-control, .accordion-item
-{
+.btn,
+.form-control,
+.accordion-item {
     border-radius: 0;
 }
 
 
-body
-{
+body {
     font-family: 'Rubik', sans-serif;
     color: $gray;
 }
 
-h1,h2,h3,h4,h5,h6
-{
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: $black;
 }
 
-h3
-{
+h3 {
     text-transform: uppercase;
     font-size: .8em;
     letter-spacing: .25ch;
 }
 
-.nav-pills .nav-link.active
-{
-    background-color:transparent;
+.nav-pills .nav-link.active {
+    background-color: transparent;
     color: $black;
     font-weight: bold;
     letter-spacing: .2ch;
 }
 
-.nav-item
-{
+.nav-item {
     //border-bottom: 1px solid mix($white, $gray, 70% );
 }
 
 .nav-link {
-    color: mix($white, $gray, 70% );
+    color: mix($white, $gray, 70%);
     text-transform: uppercase;
     font-size: .9em;
     letter-spacing: .1ch;
+
     &:hover {
         color: $black;
     }
@@ -68,4 +69,10 @@ h3
 .accordion-item {
     background-color: transparent;
     border: none;
+}
+
+app-home {
+    width: 100%;
+    display: block;
+    min-height: 100%;
 }

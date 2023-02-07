@@ -16,6 +16,9 @@
 add_filter(
     'jwt_auth_payload',
     function ( $payload, $user ) {
+        $agua_customer_code = get_field("agua_customer_code", "option");
+        $agua_id_brand = get_field("agua_id_brand", "option");
+
         $u = array();
         $u['id'] = $user->ID;
         $u['name'] = $user->display_name;
@@ -23,8 +26,8 @@ add_filter(
         $u['roles'] = $user->roles;
         $payload["email"] = $user->user_email;
         $payload["id_app"] = $user->user_email;
-        $payload["id_brand"] = "AguaManager";
-        $payload["customer_code"] = "195764";
+        $payload["id_brand"] = $agua_id_brand;
+        $payload["customer_code"] = $agua_customer_code;
         $payload["data"]["user"] = $u;
         $payload["auth0"] = "true";
         $payload["software"] = "caiman";

@@ -46,8 +46,6 @@ services:
       WP_DEBUG: "false"
       JWT_AUTH_SECRET_KEY: "tokenagua"
       JWT_AUTH_CORS_ENABLE: "true"
-      HTTPS: "false"
-      HOST: "caiman.micronovasrl.com"
 
 
   caiman_rabbitmq_auth:

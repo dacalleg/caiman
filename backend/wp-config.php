@@ -84,13 +84,15 @@ define('WP_DEBUG', getenv("WP_DEBUG") === "true" ? true : false);
 define('JWT_AUTH_SECRET_KEY', getenv("JWT_AUTH_SECRET_KEY") );
 define('JWT_AUTH_CORS_ENABLE', getenv("JWT_AUTH_CORS_ENABLE") === "true" ? true : false);
 
-$schema = getenv("HTTPS") === "true" ? "https" : "http";
-
-define( 'WP_HOME', $schema . '://' . getenv("HOST") . '/backend' );
-define( 'WP_SITEURL', $schema . '://' . getenv("HOST") . '/backend' );
+define( 'WP_HOME', $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_X_FORWARDED_HOST'] . '/backend' );
+define( 'WP_SITEURL', $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_X_FORWARDED_HOST'] . '/backend' );
 
 /* Add any custom values between this line and the "stop editing" line. */
 
+if($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'){
+    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['SERVER_PORT'] = 443;
+}
 
 
 /* That's all, stop editing! Happy publishing. */

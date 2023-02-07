@@ -75,26 +75,26 @@ services:
   #    - ./volumes/mongo:/data/db
   #  command: mongod --logpath=/dev/null # --quiet
 
-  #certbot:
-  #  container_name: certbot
-  #  image: gordonchan/auto-letsencrypt
-  #  depends_on:
-  #   - caiman_reverse_proxy
-  #  volumes:
-  #   - ./volumes/letsencrypt/log:/var/log/letsencrypt
-  #   - /var/run/docker.sock:/var/run/docker.sock
-  #   - ./volumes/letsencrypt/data:/etc/letsencrypt
-  #   - ./volumes/letsencrypt/lib:/var/lib/letsencrypt
-  #   - ./volumes/letsencrypt/www:/tmp/letsencrypt/www
-  #   - ./volumes/letsencrypt/certs:/etc/nginx/certs
-  #  environment:
-  #   - EMAIL=iot@tecnoeka.com
-  #   - SERVER_CONTAINER=caiman_reverse_proxy
-  #   - WEBROOT_PATH=/tmp/letsencrypt/www
-  #   - CERTS_PATH=/etc/nginx/certs
-  #   - DOMAINS=nova-tem.micronovasrl.com
-  #   - CHECK_FREQ=7
-  #  restart: always
+  certbot:
+    container_name: certbot
+    image: gordonchan/auto-letsencrypt
+    depends_on:
+     - caiman_reverse_proxy
+    volumes:
+     - ./volumes/letsencrypt/log:/var/log/letsencrypt
+     - /var/run/docker.sock:/var/run/docker.sock
+     - ./volumes/letsencrypt/data:/etc/letsencrypt
+     - ./volumes/letsencrypt/lib:/var/lib/letsencrypt
+     - ./volumes/letsencrypt/www:/tmp/letsencrypt/www
+     - ./volumes/letsencrypt/certs:/etc/nginx/certs
+    environment:
+     - EMAIL=info@micronovasrl.com
+     - SERVER_CONTAINER=caiman_reverse_proxy
+     - WEBROOT_PATH=/tmp/letsencrypt/www
+     - CERTS_PATH=/etc/nginx/certs
+     - DOMAINS=caiman.micronovasrl.com
+     - CHECK_FREQ=7
+    restart: always
 
   caiman_reverse_proxy:
     restart: always

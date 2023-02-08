@@ -162,6 +162,7 @@ export interface ProductInfo {
   serami_acl: SeramiACL[];
   faq: SingleFaq[];
   video: Video[];
+  gateway_firmware_list: GatewayFirmware[];
   serami_var_override: VariableInfoOverride[];
   serami_group_override: GroupNameOverride[];
   description: string;
@@ -224,4 +225,18 @@ export interface AlertModalConfig
   title: string;
   message: string;
   progress?: boolean;
+}
+
+export interface GatewayFirmware
+{
+  version: string;
+  file: number;
+}
+
+export interface Board
+{
+  id: string;
+  serami_file: string;
+  serami_acl: SeramiACL[];
+  gateway_firmware_list: GatewayFirmware[];
 }

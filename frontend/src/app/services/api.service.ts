@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, DeviceInfoResponse, ProductInfo, SeramiACL } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, ProductInfo, SeramiACL } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -12,7 +12,7 @@ export class ApiService {
 
   private options$: Observable<AguaOptions>;
 
-  constructor(private Http: HttpClient, private Auth: AuthService) { 
+  constructor(private Http: HttpClient, private Auth: AuthService) {
     this.options$ = this.Http.get<AguaOptions>(environment.endpoint + "/wp-json/caiman/v1/options").pipe(shareReplay(1));
   }
 
@@ -46,36 +46,46 @@ export class ApiService {
     );
   }
 
-  getProductInfo(id_product: string) {
-    return this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model").pipe(
-      switchMap(response => {
-        return from(
-          response.map(item => {
-            let serami_acl = [] as SeramiACL[];
-            if (item.acf.serami_acl) {
-              serami_acl = item.acf.serami_acl.map((item: any) => {
-                return { ...item, hidden_variables: item.hidden_variables ? item.hidden_variables.split("\r\n") : [], hidden_groups: item.hidden_groups ? item.hidden_groups.split("\r\n") : [] }
-              })
-            }
-            return {
-              id: item.id,
-              name: item.title.rendered,
-              description: item.excerpt.rendered ? item.excerpt.rendered.replace(/(<([^>]+)>)/gi, "") : "",
-              id_product: item.acf.key,
-              serami_file: item.acf.serami_file,
-              video: item.acf.video || [],
-              documents: item.acf.documents || [],
-              serami_var_override: item.acf.serami_var_override || [],
-              serami_group_override: item.acf.serami_group_override || [],
-              serami_acl: serami_acl || [],
-              gateway_firmware_list: item.acf.gateway_firmware_list || [],
-              image: item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
-              faq: item.acf.faq || []
-            } as ProductInfo
+  private getBoard(id: string) {
+    return this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/board/" + id).pipe(
+      map(item => {
+        let serami_acl = [] as SeramiACL[];
+        if (item.acf.serami_acl) {
+          serami_acl = item.acf.serami_acl.map((item: any) => {
+            return { ...item, hidden_variables: item.hidden_variables ? item.hidden_variables.split("\r\n") : [], hidden_groups: item.hidden_groups ? item.hidden_groups.split("\r\n") : [] }
           })
-        )
+        }
+        return {
+          id: item.id,
+          serami_file: item.acf.serami_file,
+          serami_acl: serami_acl,
+          gateway_firmware_list: item.acf.gateway_firmware_list || [],
+        }
+      })
+    )
+  }
+
+  getProductInfo(id_product: string) {
+    return this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model?key=" + id_product).pipe(
+      switchMap(arr => from(arr)),
+      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board)])),
+      map(([item, board]) => {
+        return {
+          id: item.id,
+          name: item.title.rendered,
+          description: item.excerpt.rendered ? item.excerpt.rendered.replace(/(<([^>]+)>)/gi, "") : "",
+          id_product: item.acf.key,
+          serami_file: board.serami_file,
+          serami_acl: board.serami_acl,
+          gateway_firmware_list: board.gateway_firmware_list,
+          video: item.acf.video || [],
+          documents: item.acf.documents || [],
+          serami_var_override: item.acf.serami_var_override || [],
+          serami_group_override: item.acf.serami_group_override || [],
+          image: item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
+          faq: item.acf.faq || []
+        } as ProductInfo
       }),
-      filter(item => item.id_product == id_product),
       take(1),
       switchMap(item => {
         if (item.image) {
@@ -96,7 +106,7 @@ export class ApiService {
     )
   }
 
-  getAttachmentUrl(id: number) {
+  getAttachmentUrl(id: number|string) {
     return this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/media/" + id).pipe(
       map(response => response.source_url)
     )

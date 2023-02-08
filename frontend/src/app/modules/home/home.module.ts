@@ -27,6 +27,8 @@ import { SharedModule } from '../shared/shared.module';
 import { OverrideVariableNamePipe } from './pipes/override-variable-name.pipe';
 import { OverrideGroupNamePipe } from './pipes/override-group-name.pipe';
 import { OverrideVariableDescriptionPipe } from './pipes/override-variable-description.pipe';
+import { AttachmentUrlPipe } from './pipes/attachment-url.pipe';
+import { RoleInCurrentUserPipe } from './pipes/role-in-current-user.pipe';
 
 const icons = {
   Eye,
@@ -58,6 +60,8 @@ const icons = {
     OverrideVariableNamePipe,
     OverrideGroupNamePipe,
     OverrideVariableDescriptionPipe,
+    AttachmentUrlPipe,
+    RoleInCurrentUserPipe,
   ],
   imports: [
     CommonModule,

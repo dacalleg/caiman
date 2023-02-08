@@ -14,6 +14,7 @@ import { JwtModule } from '@auth0/angular-jwt';
 import { AlertComponent } from './components/alert/alert.component';
 import { SharedModule } from './modules/shared/shared.module';
 import { AuthService } from './services/auth.service';
+import { environment } from 'src/environments/environment';
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -36,7 +37,7 @@ export function tokenGetter() {
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
-        allowedDomains: ["localhost"],
+        allowedDomains: [environment.host, window.location.host],
         disallowedRoutes: [/backend\/wp-content\/uploads\/.*/, "/backend/wp-json/jwt-auth/v1/token"],
       },
     }),

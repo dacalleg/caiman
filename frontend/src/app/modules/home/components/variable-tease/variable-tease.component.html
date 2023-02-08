@@ -67,7 +67,9 @@
         </div>
       </div>
       <div class="d-flex justify-content-between icons mt-2">
-        <div>{{variable.hash}}</div>
+        <div>
+          <span *ngIf="'administrator'|roleInCurrentUser|async">{{variable.hash}}</span>
+        </div>
         <!--
           <bi name="eye" (click)="showVariable()" *ngIf="variable.hide" class="mx-1"></bi>
           <bi name="eye-slash" (click)="hideVariable()" *ngIf="!variable.hide" class="mx-1"></bi>

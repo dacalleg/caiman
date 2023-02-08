@@ -6,10 +6,7 @@ import { HomeComponent } from './components/home/home.component';
 import { TimelineComponent } from './components/timeline/timeline.component';
 
 const routes: Routes = [
-    { path: '', component: HomeComponent, canActivate: [IsAuthenticatedGuard] },
-    { path: 'timeline', component: TimelineComponent, canActivate: [IsAuthenticatedGuard] },
-
-    { path: 'device-select', component: DeviceSelectComponent, canActivate: [IsAuthenticatedGuard] },
+    { path: '', component: DeviceSelectComponent, canActivate: [IsAuthenticatedGuard] },
     { path: ':mac', component: HomeComponent, canActivate: [IsAuthenticatedGuard] },
 ];
 

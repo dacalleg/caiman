@@ -14,7 +14,7 @@
           </div>
         </div>-->
     <div class="row align-items-start h-100">
-      <div class="col-md-3 h-100 sticky-top sidebar">
+      <div class="col-md-3 sticky-top ">
         <div class="d-flex" class="p-5">
           <ul ngbNav #nav="ngbNav" class="nav-pills" orientation="vertical">
             <li ngbNavItem (shown)="unselectGroup()" [id]="0">
@@ -46,7 +46,7 @@
                         <h3>Documentazione Tecnica</h3>
                         <ul>
                           <li *ngFor="let doc of device?.info?.documents">
-                            <a [href]="doc.file" target="_blank">{{doc.name}}</a>
+                            <a [href]="doc.file|attachmentUrl|async" target="_blank">{{doc.name}}</a>
                           </li>
                         </ul>
                       </div>
@@ -156,7 +156,7 @@
           </ul>
         </div>
       </div>
-      <div class="col p-3 p-md-5">
+      <div class="col p-3 p-md-5 content" >
         <div [ngbNavOutlet]="nav" class="flex-grow-1"></div>
       </div>
     </div>

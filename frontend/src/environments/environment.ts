@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  host: "localhost",
-  endpoint: "http://localhost/backend"
+  host: "caiman.micronovasrl.com",
+  endpoint: "https://caiman.micronovasrl.com/backend"
 };
 
 /*

@@ -112,3 +112,12 @@ function caiman_get_options(WP_REST_Request $request)
 
     return new WP_REST_Response($ret, 200);
 }
+
+add_filter( 'rest_model_query', function( $args, $request ){
+    if ( $key = $request->get_param( 'key' ) ) {
+        $args['meta_key'] = 'key';
+        $args['meta_value'] = $key;
+    }
+    return $args;
+}, 10, 2 );
+    

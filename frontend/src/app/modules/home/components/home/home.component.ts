@@ -2,11 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject, catchError, combineLatest, concat, filter, from, ignoreElements, map, merge, mergeMap, Observable, of, shareReplay, switchMap, take, tap, throwError, timeout, zip } from "rxjs";
+import { BehaviorSubject, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, merge, mergeMap, Observable, of, retry, shareReplay, switchMap, take, tap, throwError, timeout, toArray, zip } from "rxjs";
 import { Agua } from 'src/app/classes/agua';
 import { BleChannel } from 'src/app/classes/ble.channel';
 import { BridgeChannel } from 'src/app/classes/bridge.channel';
-import { Channel, DeviceProduct, Project, Variable } from 'src/app/classes/interfaces';
+import { Channel, Database, DeviceProduct, Project, Variable, VariableValue } from 'src/app/classes/interfaces';
+import { Utils } from 'src/app/classes/utils';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DeviceService } from 'src/app/services/device.service';
@@ -37,6 +38,8 @@ export class HomeComponent implements OnInit {
   BLEChannel$: Observable<BleChannel>;
   bridgeChannel$: Observable<BridgeChannel>;
 
+  databaseSelected: Database | null;
+
   constructor(
     private Store: StoreService,
     private Device: DeviceService,
@@ -49,6 +52,8 @@ export class HomeComponent implements OnInit {
     this.nav = null;
     this.search$ = new BehaviorSubject<string>("");
     this.project$ = this.Store.getProject();
+
+    this.databaseSelected = null;
 
     this.connected$ = this.Device.isConnected();
 
@@ -218,5 +223,47 @@ export class HomeComponent implements OnInit {
   disconnect() {
     this.nav?.select("ngb-nav-0");
     this.Device.disconnect();
+  }
+
+  loadDatabase() {
+    if (this.databaseSelected) {
+      let i = 0;
+      let count = this.databaseSelected.values.length;
+      combineLatest([
+        of(this.databaseSelected),
+        this.modal.openAlertModal({
+          title: "Writing Database " + this.databaseSelected.name,
+          progress: true,
+          progressValue: 0,
+        }),
+      ]).pipe(
+        switchMap(([database, modal]) => from(database.values)),
+        concatMap((dbvalue) => combineLatest([of(dbvalue), this.Store.getVariableByHash(dbvalue.id)]).pipe(
+          map(([dbvalue, variable]) => {
+            if (variable == null)
+              throw new Error("Variable not found");
+            return { variable: variable, value: Utils.convertValuesToWrite([variable], [+dbvalue.value])[0] } as VariableValue
+          }),
+          tap((value) => this.modal.upodateAlertModalConfig({ title: "Writing Database " + this.databaseSelected!.name, progress: true, progressValue: (i / count) * 100, message: "Writing " + value.variable.name })),
+          switchMap((value) => this.Device.write([value])),
+          tap(() => i++),
+          timeout(5000),
+          retry(5)
+        )),
+        toArray(),
+        tap(() => this.modal.dismissAll()),
+        switchMap(() => this.modal.openAlertModal({
+          title: "Database written",
+          message: "Database written successfully",
+        }))
+      ).subscribe({
+        error: (err) => {
+          this.modal.dismissAll()
+        },
+        complete: () => {
+
+        }
+      });
+    }
   }
 }

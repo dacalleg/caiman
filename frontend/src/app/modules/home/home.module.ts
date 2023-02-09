@@ -18,7 +18,7 @@ import { VarByGroupPipe } from './pipes/var-by-group.pipe';
 import { HomeRoutingModule } from './home-routing.modules';
 import { FormsModule } from '@angular/forms';
 import {BootstrapIconsModule} from "ng-bootstrap-icons";
-import {Eye, EyeSlash, Search, InfoCircle, Pen} from 'ng-bootstrap-icons/icons';
+import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle} from 'ng-bootstrap-icons/icons';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { DeviceSelectComponent } from './components/device-select/device-select.component';
 import { YouTubePlayerModule } from '@angular/youtube-player';
@@ -29,13 +29,16 @@ import { OverrideGroupNamePipe } from './pipes/override-group-name.pipe';
 import { OverrideVariableDescriptionPipe } from './pipes/override-variable-description.pipe';
 import { AttachmentUrlPipe } from './pipes/attachment-url.pipe';
 import { RoleInCurrentUserPipe } from './pipes/role-in-current-user.pipe';
+import { DeviceInfoComponent } from './components/device-info/device-info.component';
+import { WithRolePipe } from './pipes/with-role.pipe';
 
 const icons = {
   Eye,
   EyeSlash,
   Search,
   InfoCircle,
-  Pen
+  Pen,
+  PersonCircle
 };
 
 @NgModule({
@@ -62,6 +65,8 @@ const icons = {
     OverrideVariableDescriptionPipe,
     AttachmentUrlPipe,
     RoleInCurrentUserPipe,
+    DeviceInfoComponent,
+    WithRolePipe,
   ],
   imports: [
     CommonModule,

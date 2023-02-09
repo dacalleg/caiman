@@ -8,18 +8,18 @@
       <ul class="navbar-nav ms-auto">
         <li class="nav-item" ngbDropdown>
           <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown1" role="button">
-            File
+            <bi name="person-circle" class="mx-1"></bi>
           </a>
-          <div ngbDropdownMenu aria-labelledby="navbarDropdown1" class="dropdown-menu">
-            <a ngbDropdownItem (click)="importSnet2()">Open .snet2</a>
+          <div ngbDropdownMenu aria-labelledby="navbarDropdown1" class="dropdown-menu dropdown-menu-end foreground">
+            <div class="dropdown-header text-end">
+              <div>{{username$|async}}</div>
+              <small class="role">{{roles$|async}}</small>
+            </div>
             <hr class="dropdown-divider">
-            <a ngbDropdownItem (click)="settings()">Settings</a>
-            <a ngbDropdownItem (click)="optimization()">Optimization</a>
-            <hr class="dropdown-divider">
-            <a ngbDropdownItem (click)="close()">Close</a>
+            <a class="text-end" ngbDropdownItem (click)="logout()">Logout</a>
           </div>
         </li>
-        <li class="nav-item" ngbDropdown *ngIf="(project$|async)">
+        <!--<li class="nav-item" ngbDropdown *ngIf="(project$|async)">
           <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown2" role="button">
             View
           </a>
@@ -60,7 +60,7 @@
             <a ngbDropdownItem (click)="exportForNavelMicropython()">Export for Navel(Micropython)</a>
             <a ngbDropdownItem (click)="exportForNova()">Export for Nova</a>
           </div>
-        </li>
+        </li>-->
       </ul>
     </div>
   </div>

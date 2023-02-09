@@ -1,11 +1,12 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { StoreService } from "../../../../services/store.service";
 import { ModalService } from "../../../../services/modal.service";
-import { map, Observable, take } from "rxjs";
+import { map, Observable, take, tap } from "rxjs";
 import { DeviceData, Project, Variable } from "../../../../classes/interfaces";
 import { DeviceService } from "../../../../services/device.service";
 import { ExportService } from "../../../../services/export.service";
-
+import { AuthService } from 'src/app/services/auth.service';
+import { Router } from '@angular/router'
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -13,14 +14,26 @@ import { ExportService } from "../../../../services/export.service";
 })
 export class HeaderComponent implements OnInit {
 
+
   @ViewChild("file") file: ElementRef | null;
   project$: Observable<Project>;
   isDeviceConnected$: Observable<boolean>;
+  username$: Observable<any>;
+  roles$: Observable<string>;
 
-  constructor(private Store: StoreService, private modalService: ModalService, private exporter: ExportService, private Device: DeviceService) {
+  constructor(
+    private Store: StoreService, 
+    private modalService: ModalService, 
+    private exporter: ExportService, 
+    private Device: DeviceService, 
+    private AuthService: AuthService,
+    private Router: Router
+    ) {
     this.file = null;
     this.project$ = this.Store.getProject();
     this.isDeviceConnected$ = this.Device.isConnected();
+    this.username$ = this.AuthService.getUserName();
+    this.roles$ = this.AuthService.getRoles().pipe(map(roles => roles.join(", ")));
   }
 
   ngOnInit(): void {
@@ -118,5 +131,11 @@ export class HeaderComponent implements OnInit {
     })).subscribe(result => {
       this.download("export.json", JSON.stringify(result));
     })
+  }
+
+  logout() {
+    this.AuthService.logout().pipe(
+      tap(() => this.Router.navigate(['/auth/login']))
+    ).subscribe();
   }
 }

@@ -102,7 +102,14 @@ export class BleChannel implements Channel {
   }
 
   write(variables: VariableValue[]): Observable<VariableValue[]> {
-    return this.writeVariables(variables);
+    return this.writeVariables(variables).pipe(
+      catchError((err) => {
+        return this.reconnect$.pipe(
+          switchMap(() => throwError(() => err))
+        )
+      }),
+      retry(),
+    )
   }
 
   read(variables: Variable[]): Observable<VariableValue[]> {

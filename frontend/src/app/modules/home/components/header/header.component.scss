@@ -1,6 +1,20 @@
-.navbar
-{
-    border-top:8px solid var(--primary);
-    border-bottom:1px solid var(--gray-300);
+.navbar {
+    border-top: 8px solid var(--primary);
+    border-bottom: 1px solid var(--gray-300);
 
+}
+
+bi {
+    display: inline-block;
+    width: 1.3rem;
+}
+
+.foreground
+{
+    z-index: 10000;
+}
+
+.role
+{
+    text-transform: uppercase;
 }

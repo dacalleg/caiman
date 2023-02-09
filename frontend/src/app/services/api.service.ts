@@ -60,7 +60,8 @@ export class ApiService {
           serami_file: item.acf.serami_file,
           serami_acl: serami_acl,
           gateway_firmware_list: item.acf.gateway_firmware_list || [],
-        }
+          database: item.acf.database || []
+        } as Board
       })
     )
   }
@@ -82,6 +83,7 @@ export class ApiService {
           documents: item.acf.documents || [],
           serami_var_override: item.acf.serami_var_override || [],
           serami_group_override: item.acf.serami_group_override || [],
+          database: board.database || [],
           image: item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
           faq: item.acf.faq || []
         } as ProductInfo

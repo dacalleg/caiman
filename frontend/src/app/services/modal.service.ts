@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { defer, from, of, Subject } from "rxjs";
+import { BehaviorSubject, defer, from, Observable, of, shareReplay, Subject } from "rxjs";
 import { AlertModalConfig, Variable } from "../classes/interfaces";
 import { AlertComponent } from '../components/alert/alert.component';
 
@@ -8,16 +8,24 @@ import { AlertComponent } from '../components/alert/alert.component';
   providedIn: 'root'
 })
 export class ModalService {
+
   private optionModal$: Subject<void>;
   private connectionSerialModal$: Subject<string>;
   private variableEditModal$: Subject<Variable>;
   private optimizationModal$: Subject<void>;
+
+  private alertModalConfigSubject$: BehaviorSubject<AlertModalConfig | null>; 
 
   constructor(private modalService: NgbModal) {
     this.optionModal$ = new Subject<void>();
     this.connectionSerialModal$ = new Subject<string>();
     this.optimizationModal$ = new Subject<void>();
     this.variableEditModal$ = new Subject<Variable>();
+    this.alertModalConfigSubject$ = new BehaviorSubject<AlertModalConfig | null>(null);
+  }
+
+  getAlertModalConfig() {
+    return this.alertModalConfigSubject$.asObservable();
   }
 
   openOptionModal() {
@@ -56,11 +64,15 @@ export class ModalService {
     return defer(() => {
       this.modalService.dismissAll();
       const modalRef = this.modalService.open(AlertComponent, {backdrop: config.progress ? 'static' : true, keyboard: false});
-      modalRef.componentInstance.config = config;
+      this.alertModalConfigSubject$.next(config);
       if(config.progress === true)
         return of(void 0);
       return from(modalRef.result)
     })
+  }
+
+  upodateAlertModalConfig(config: AlertModalConfig) {
+    this.alertModalConfigSubject$.next(config);
   }
 
   dismissAll() {

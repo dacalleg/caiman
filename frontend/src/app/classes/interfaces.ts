@@ -152,6 +152,16 @@ export interface DeviceInfoResponse {
   device_product: DeviceProduct[];
 }
 
+export interface Board
+{
+  id: string;
+  serami_file: number;
+  serami_acl: SeramiACL[];
+  gateway_firmware_list: GatewayFirmware[];
+  database: Database[];
+}
+
+
 export interface ProductInfo {
   id_product: string;
   id: number;
@@ -165,6 +175,7 @@ export interface ProductInfo {
   gateway_firmware_list: GatewayFirmware[];
   serami_var_override: VariableInfoOverride[];
   serami_group_override: GroupNameOverride[];
+  database: Database[];
   description: string;
 }
 
@@ -185,10 +196,9 @@ export interface Video {
   video: string;
 }
 
-export interface SeramiACL {
+export interface SeramiACL extends WithRole {
   hidden_groups: string[];
   hidden_variables: string[];
-  role: string;
 }
 
 export interface SingleFaq {
@@ -196,8 +206,7 @@ export interface SingleFaq {
   response: string;
 }
 
-export interface Document {
-  role: string;
+export interface Document extends WithRole {
   name: string;
   file: string;
 }
@@ -223,8 +232,9 @@ export interface AguaOptions {
 export interface AlertModalConfig
 {
   title: string;
-  message: string;
+  message?: string;
   progress?: boolean;
+  progressValue?: number;
 }
 
 export interface GatewayFirmware
@@ -233,10 +243,20 @@ export interface GatewayFirmware
   file: number;
 }
 
-export interface Board
+
+export interface Database extends WithRole
+{
+  name: string;
+  values: DatabaseValue[]
+}
+
+export interface WithRole
+{
+  role: string;
+}
+
+export interface DatabaseValue
 {
   id: string;
-  serami_file: string;
-  serami_acl: SeramiACL[];
-  gateway_firmware_list: GatewayFirmware[];
+  value: string;
 }

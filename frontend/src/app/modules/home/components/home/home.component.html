@@ -14,72 +14,27 @@
           </div>
         </div>-->
     <div class="row align-items-start h-100">
-      <div class="col-md-3 sticky-top ">
-        <div class="d-flex" class="p-5">
+      <div class="col-md-3 sticky-top">
+        <div class="px-5 pt-5">
+          <div class="row align-items-start">
+            <div class="col">
+              <ul class="nav nav-pills">
+                <li class="nav-item back"><a class="nav-link" routerLink="/dashboard/home/">Torna indietro</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      
+        <div class="d-flex" class="p-5 pt-2">
           <ul ngbNav #nav="ngbNav" class="nav-pills" orientation="vertical">
             <li ngbNavItem (shown)="unselectGroup()" [id]="0">
               <a ngbNavLink>Device Info</a>
               <ng-template ngbNavContent>
-                <div class="row align-items-start">
-                  <div class="col text-center order-1 order-md-2 sticky-top">
-                    <img [src]="device?.info?.image" class="image">
-                  </div>
-                  <div class="col order-2 order-md-1">
-                    <h1 class="fw-bold">{{device?.mac}}</h1>
-                    <div class="fw-bold">{{device?.name_product}}</div>
-                    <p class="my-5">{{device?.info?.description }}</p>
-  
-                    <ul class="nav pb-5">
-                      <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary"
-                          (click)="wifiConnect()">WiFi</button></li>
-                      <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary"
-                          (click)="bleConnect()">Bluetooth</button></li>
-                      <li class="nav-item me-2" *ngIf="!(connected$|async)"><button class="btn btn-lg btn-primary"
-                          (click)="bridgeConnect()">Bridge</button></li>
-  
-                      <li class="nav-item me-2" *ngIf="(connected$|async)"><button class="btn btn-lg btn-primary"
-                          (click)="disconnect()">Disconnect</button></li>
-                    </ul>
-  
-                    <div class="row my-5">
-                      <div class="col">
-                        <h3>Documentazione Tecnica</h3>
-                        <ul>
-                          <li *ngFor="let doc of device?.info?.documents">
-                            <a [href]="doc.file|attachmentUrl|async" target="_blank">{{doc.name}}</a>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                    <div class="row mb-5">
-                      <div class="col">
-                        <h3>Faq</h3>
-                        <ngb-accordion #acc="ngbAccordion">
-                          <ngb-panel [title]="faq.question" *ngFor="let faq of device?.info?.faq">
-                            <ng-template ngbPanelContent>
-                              {{faq.response}}
-                            </ng-template>
-                          </ngb-panel>
-                        </ngb-accordion>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col">
-                        <h3>Video</h3>
-                        <ngb-accordion #acc="ngbAccordion">
-                          <ngb-panel [title]="video.name" *ngFor="let video of device?.info?.video">
-                            <ng-template ngbPanelContent>
-                              <div class="d-flex justify-content-center align-items-center flex-column">
-                                <youtube-player [videoId]="video.video"></youtube-player>
-                                <div>{{video.description}}</div>
-                              </div>
-                            </ng-template>
-                          </ngb-panel>
-                        </ngb-accordion>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <app-device-info [device]="device" [connected]="connected$|async"
+                  (onDisconnect)="disconnect()"
+                  (onBLEConnect)="bleConnect()"
+                  (onBridgeConnect)="bridgeConnect()"
+                  (onWifiConnect)="wifiConnect()"></app-device-info>
               </ng-template>
             </li>
             <li ngbNavItem (shown)="unselectGroup()" [id]="1">
@@ -98,19 +53,17 @@
                   <div class="col order-2 order-md-1">
                     <h1 class="fw-bold">{{device?.mac}}</h1>
                     <div class="fw-bold">{{device?.name_product}}</div>
-  
+
                     <div class="row my-5">
                       <div class="col">
                         <h3>DATABASE</h3>
                         <div class="input-group">
                           <select class="form-select" id="inputGroupSelect04"
-                            aria-label="Example select with button addon">
-                            <option selected>Choose...</option>
-                            <option value="1">One</option>
-                            <option value="2">Two</option>
-                            <option value="3">Three</option>
+                            aria-label="Example select with button addon" [(ngModel)]="databaseSelected">
+                            <option selected disabled [value]="null">Choose...</option>
+                            <option *ngFor="let db of device.info.database|withRole|async" [ngValue]="db">{{db.name}}</option>
                           </select>
-                          <button class="btn btn-outline-secondary" type="button">Load</button>
+                          <button class="btn btn-outline-secondary" type="button" (click)="loadDatabase()">Load</button>
                         </div>
                       </div>
                     </div>
@@ -152,11 +105,10 @@
                 </ng-template>
               </li>
             </ng-container>
-  
           </ul>
         </div>
       </div>
-      <div class="col p-3 p-md-5 content" >
+      <div class="col p-3 p-md-5 content">
         <div [ngbNavOutlet]="nav" class="flex-grow-1"></div>
       </div>
     </div>

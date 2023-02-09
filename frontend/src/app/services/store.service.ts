@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ComponentStore } from "@ngrx/component-store";
 import { DeviceProduct, Project, Variable, ViewOption } from "../classes/interfaces";
 import { SeramiParserService } from "./serami-parser.service";
-import { first, from, map, switchMap } from "rxjs";
+import { first, from, map, switchMap, take } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -63,6 +63,13 @@ export class StoreService {
   getVariables() {
     return this.componentStore.state$.pipe(
       map(item => item.variables)
+    );
+  }
+
+  getVariableByHash(hash: string) {
+    return this.getVariables().pipe(
+      map(item => item.find(v => v.hash === hash)),
+      take(1)
     );
   }
 

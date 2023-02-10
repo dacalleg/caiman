@@ -56,7 +56,9 @@ add_filter(
 
 function set_other_mime_types( $mime_types ) {
   $mime_types['snet2'] = 'text/plain';
-  $mime_types['bin'] = 'application/octet-stream';
+  $mime_types['bin'] = 'application/x-dosexec';
+  
+
   return $mime_types;
 }
 add_filter( 'upload_mimes', 'set_other_mime_types', 1, 1 );

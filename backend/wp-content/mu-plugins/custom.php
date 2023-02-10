@@ -16,9 +16,6 @@
 add_filter(
     'jwt_auth_payload',
     function ( $payload, $user ) {
-        $agua_customer_code = get_field("agua_customer_code", "option");
-        $agua_id_brand = get_field("agua_id_brand", "option");
-
         $u = array();
         $u['id'] = $user->ID;
         $u['name'] = $user->display_name;
@@ -26,12 +23,12 @@ add_filter(
         $u['roles'] = $user->roles;
         $payload["email"] = $user->user_email;
         $payload["id_app"] = $user->user_email;
-        $payload["id_brand"] = $agua_id_brand;
-        $payload["customer_code"] = $agua_customer_code;
+        $payload["id_brand"] = $_ENV["AGUA_ID_BRAND"];
+        $payload["customer_code"] = $_ENV["AGUA_CUSTOMER_CODE"];
         $payload["data"]["user"] = $u;
         $payload["auth0"] = "true";
-        $payload["software"] = "caiman";
-        $payload["id"] = "464D7C31-0BBD-462D-A7F8-C03913EED030";
+        $payload["software"] = $_ENV["JWT_SOFTWARE_FIELD"];
+        $payload["id"] = $_ENV["JWT_ID_FIELD"];
         return $payload;
     },
     10,
@@ -105,10 +102,11 @@ function caiman_get_user(WP_REST_Request $request)
 function caiman_get_options(WP_REST_Request $request)
 {
     $ret = new \stdClass();
-    $ret->agua_endpoint = get_field('agua_endpoint', 'option');
-    $ret->agua_hostname = get_field('agua_hostname', 'option');
-    $ret->agua_id_brand = intval(get_field('agua_id_brand', 'option'));
-    $ret->agua_customer_code = intval(get_field('agua_customer_code', 'option'));
+
+    $ret->agua_endpoint = $_ENV["AGUA_ENDPOINT"];
+    $ret->agua_hostname = $_ENV["AGUA_HOSTNAME"];
+    $ret->agua_id_brand = intval($_ENV["AGUA_ID_BRAND"]);
+    $ret->agua_customer_code = intval($_ENV["AGUA_CUSTOMER_CODE"]);
 
     return new WP_REST_Response($ret, 200);
 }

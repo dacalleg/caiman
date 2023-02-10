@@ -46,7 +46,12 @@ services:
       WP_DEBUG: "false"
       JWT_AUTH_SECRET_KEY: "tokenagua"
       JWT_AUTH_CORS_ENABLE: "true"
-
+      AGUA_ID_BRAND: "1"
+      AGUA_CUSTOMER_CODE: "195764"
+      AGUA_HOSTNAME: "extraflame.agua-iot.com"
+      AGUA_ENDPOINT: "https://extraflame.agua-iot.com"
+      JWT_SOFTWARE_FIELD: "caiman"
+      JWT_ID_FIELD: "464D7C31-0BBD-462D-A7F8-C03913EED030"
 
   caiman_rabbitmq_auth:
     restart: always

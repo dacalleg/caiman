@@ -49,7 +49,7 @@ services:
       AGUA_ID_BRAND: "1"
       AGUA_CUSTOMER_CODE: "999996"
       AGUA_HOSTNAME: "aguaxxx.agua-iot.com"
-      AGUA_ENDPOINT: "https://aguaxxx.agua-iot.com/"
+      AGUA_ENDPOINT: "https://aguaxxx.agua-iot.com"
       JWT_SOFTWARE_FIELD: "caiman"
       JWT_ID_FIELD: "464D7C31-0BBD-462D-A7F8-C03913EED030"
 

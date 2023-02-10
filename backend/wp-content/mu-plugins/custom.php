@@ -35,6 +35,14 @@ add_filter(
     2
 );
 
+function edit_capabilities()
+{
+    $administrator = get_role('administrator');
+    $administrator->add_cap("unfiltered_upload");
+}
+add_action('init', 'edit_capabilities');
+
+
 add_filter(
     'jwt_auth_expire',
     function ( $expire, $issued_at ) {
@@ -45,13 +53,14 @@ add_filter(
     2
 );
 
-add_filter( 'upload_mimes', 'set_other_mime_types', 1, 1 );
 
 function set_other_mime_types( $mime_types ) {
   $mime_types['snet2'] = 'text/plain';
   $mime_types['bin'] = 'application/octet-stream';
   return $mime_types;
 }
+add_filter( 'upload_mimes', 'set_other_mime_types', 1, 1 );
+
 
 function register_caiman_rest_api()
 {

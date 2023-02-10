@@ -45,13 +45,6 @@ add_filter(
     2
 );
 
-function add_default_options_page() {
-    if( function_exists('acf_add_options_page') ) {
-        acf_add_options_page();
-    }
-}
-add_action( 'plugins_loaded', 'add_default_options_page' );
-
 add_filter( 'upload_mimes', 'set_other_mime_types', 1, 1 );
 
 function set_other_mime_types( $mime_types ) {

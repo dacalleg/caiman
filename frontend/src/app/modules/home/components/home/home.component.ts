@@ -80,13 +80,13 @@ export class HomeComponent implements OnInit {
     )
 
     this.BLEChannel$ = this.loadDeviceData$.pipe(
-      map(() => new BleChannel()),
+      map((data) => new BleChannel(data.mac, "79890979")),
       tap((channel) => this.Device.setChannel(channel))
     )
 
     this.bridgeChannel$ = this.loadDeviceData$.pipe(
       switchMap((data) => combineLatest([this.Auth.getToken(), this.Auth.getUserName(), of(data)])),
-      map(([token, username, data]) => new BridgeChannel(username, token, data.mac, "93664797")),
+      map(([token, username, data]) => new BridgeChannel(username, token, data.mac, "79890979")),
       tap((channel) => this.Device.setChannel(channel))
     )
 

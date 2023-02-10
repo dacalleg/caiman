@@ -37,8 +37,8 @@ export function tokenGetter() {
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
-        allowedDomains: [environment.host, window.location.host],
-        disallowedRoutes: [/backend\/wp-content\/uploads\/.*/, "/backend/wp-json/jwt-auth/v1/token"],
+        allowedDomains: [environment.host],
+        disallowedRoutes: [/backend\/wp-content\/uploads\/.*/, /backend\/wp-json\/jwt-auth\/v1\/token/],
       },
     }),
   ],

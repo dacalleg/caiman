@@ -35,7 +35,7 @@ export class BleChannel implements Channel {
   private responses$: Observable<{ id: number, payload: any }>;
   private reconnect$: Observable<void>;
 
-  constructor() {
+  constructor(mac: string, security:string) {
     this.close$ = new Subject();
     this.charatteristics$ = new BehaviorSubject(null);
     this.BLEDevice$ = new BehaviorSubject(null);
@@ -53,7 +53,7 @@ export class BleChannel implements Channel {
         return from(bledata());
       }),
       tap((data) => this.charatteristics$.next(data.characteristic)),
-      switchMap(() => this.sendIdentity("93664797").pipe(map(() => void 0))),
+      switchMap(() => this.sendIdentity(mac, security).pipe(map(() => void 0))),
       tap(() => this.responses$.subscribe()));
 
     //@ts-ignore
@@ -191,8 +191,8 @@ export class BleChannel implements Channel {
     }
   }
 
-  private sendIdentity(security: string) {
-    const payload = this.generateJsonEnvelope({ Cmd: "Identity", Security: security, Id: "30C6F7C25168" });
+  private sendIdentity(mac: string, security: string) {
+    const payload = this.generateJsonEnvelope({ Cmd: "Identity", Security: security, Id: mac });
     return this.charatteristics$.pipe(
       take(1),
       filter(item => item !== null),

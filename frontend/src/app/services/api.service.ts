@@ -115,6 +115,13 @@ export class ApiService {
     )
   }
 
+  getAttachmentUrlWithoutSSL(id: number|string) {
+    return this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/media/" + id).pipe(
+      map(response => response.source_url),
+      map(response => response.replace("https://" + environment.endpoint + "/wp-content/uploads", "http://" + environment.host + "/files"))
+    )
+  }
+
   getAttachmentContent(id: number, responseType: 'text' | 'blob' = 'text') {
     return this.getAttachmentUrl(id).pipe(
       switchMap(url => this.Http.get(url, { responseType: 'text' }))

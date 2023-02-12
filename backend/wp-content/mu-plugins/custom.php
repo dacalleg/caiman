@@ -123,3 +123,10 @@ add_filter( 'rest_model_query', function( $args, $request ){
     return $args;
 }, 10, 2 );
     
+add_filter( 'rest_translation_query', function( $args, $request ){
+    if ( $key = $request->get_param( 'lang' ) ) {
+        $args['meta_key'] = 'code';
+        $args['meta_value'] = $key;
+    }
+    return $args;
+}, 10, 2 );

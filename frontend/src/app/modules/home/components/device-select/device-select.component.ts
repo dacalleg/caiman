@@ -10,7 +10,7 @@ export class DeviceSelectComponent implements OnInit {
   macAddress: string;
 
   constructor(private Router: Router) {
-    this.macAddress = "30C6F7C25168";
+    this.macAddress = "7C87CEED9014";
   }
 
   ngOnInit(): void {

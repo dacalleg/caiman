@@ -237,7 +237,7 @@ export interface AlertModalConfig
   progressValue?: number;
 }
 
-export interface GatewayFirmware
+export interface GatewayFirmware extends WithRole
 {
   version: string;
   file: number;

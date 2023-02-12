@@ -18,7 +18,7 @@ export class WithRolePipe implements PipeTransform {
     }
     return this.authService.getRoles().pipe(
       map(roles => {
-        return value.filter(item => item.role === "all" || roles.includes(item.role))
+        return value.filter(item => item.role === "all" || roles.includes("administrator") || roles.includes(item.role))
       })
     )
   }

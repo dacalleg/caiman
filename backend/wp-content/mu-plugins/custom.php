@@ -124,9 +124,9 @@ add_filter( 'rest_model_query', function( $args, $request ){
 }, 10, 2 );
     
 add_filter( 'rest_translation_query', function( $args, $request ){
-    if ( $key = $request->get_param( 'lang' ) ) {
+    if ( $language = $request->get_param( 'language' ) ) {
         $args['meta_key'] = 'code';
-        $args['meta_value'] = $key;
+        $args['meta_value'] = $language;
     }
     return $args;
 }, 10, 2 );

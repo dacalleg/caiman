@@ -14,7 +14,7 @@
           </div>
         </div>-->
     <div class="row align-items-start h-100">
-      <div class="col-md-3 sticky-top">
+      <div class="col-md-3 sticky-md-top">
         <div class="px-5 pt-5">
           <div class="row align-items-start">
             <div class="col">
@@ -24,7 +24,6 @@
             </div>
           </div>
         </div>
-      
         <div class="d-flex" class="p-5 pt-2">
           <ul ngbNav #nav="ngbNav" class="nav-pills" orientation="vertical">
             <li ngbNavItem (shown)="unselectGroup()" [id]="0">
@@ -47,15 +46,15 @@
               <a ngbNavLink>Advanced</a>
               <ng-template ngbNavContent>
                 <div class="row align-items-start">
-                  <div class="col text-center order-1 order-md-2 sticky-top">
-                    <img [src]="device?.info?.image" class="image">
+                  <div class="col-md text-center order-1 order-md-2 sticky-md-top">
+                    <img [src]="device?.info?.image" class="w-100 image">
                   </div>
                   <div class="col order-2 order-md-1">
                     <h1 class="fw-bold">{{device?.mac}}</h1>
                     <div class="fw-bold">{{device?.name_product}}</div>
 
                     <div class="row my-5">
-                      <div class="col">
+                      <div class="col-md">
                         <h3>DATABASE</h3>
                         <div class="input-group">
                           <select class="form-select" id="inputGroupSelect04"

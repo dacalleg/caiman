@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -6,9 +7,10 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'serami';
-  
-  constructor() {
+
+  constructor(translate: TranslateService) {
+    translate.setDefaultLang('it');
+    translate.use('it');
   }
 
   ngOnInit(): void {
@@ -16,6 +18,8 @@ export class AppComponent implements OnInit {
     tag.src = 'https://www.youtube.com/iframe_api';
     document.body.appendChild(tag);
   }
+
+
 
 
 }

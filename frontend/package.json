@@ -23,6 +23,8 @@
     "@auth0/angular-jwt": "^5.1.2",
     "@ng-bootstrap/ng-bootstrap": "^14.0.1",
     "@ngrx/component-store": "^15.2.1",
+    "@ngx-translate/core": "^14.0.0",
+    "@ngx-translate/http-loader": "^7.0.0",
     "@popperjs/core": "^2.11.6",
     "@stomp/rx-stomp": "^1.2.0",
     "@xmldom/xmldom": "^0.8.2",

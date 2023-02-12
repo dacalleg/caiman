@@ -67,7 +67,8 @@ export class ApiService {
   }
 
   getProductInfo(id_product: string) {
-    return this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model?key=" + id_product).pipe(
+    //@todo change id_product!!!!!
+    return this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model?key=" + "96A1042C-EC5A-474C-B554-D8CCA7B6D602").pipe(
       switchMap(arr => from(arr)),
       switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board)])),
       map(([item, board]) => {

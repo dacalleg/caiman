@@ -2,8 +2,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, ProductInfo, SeramiACL } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, ProductInfo, SeramiACL, Translation } from '../classes/interfaces';
 import { AuthService } from './auth.service';
+import { TranslationProviderService } from './translation-provider.service';
+import { TranslationService } from './translation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +14,11 @@ export class ApiService {
 
   private options$: Observable<AguaOptions>;
 
-  constructor(private Http: HttpClient, private Auth: AuthService) {
+  constructor(
+    private Http: HttpClient,
+    private Auth: AuthService,
+    private TranslationProvider: TranslationProviderService,
+    private Translation: TranslationService) {
     this.options$ = this.Http.get<AguaOptions>(environment.endpoint + "/wp-json/caiman/v1/options").pipe(shareReplay(1));
   }
 
@@ -66,9 +72,10 @@ export class ApiService {
     )
   }
 
-  getProductInfo(id_product: string) {
+  getProductInfo(product: string) {
     //@todo change id_product!!!!!
-    return this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model?key=" + "96A1042C-EC5A-474C-B554-D8CCA7B6D602").pipe(
+    return combineLatest([of("96A1042C-EC5A-474C-B554-D8CCA7B6D602"), this.Translation.getCurrentLanguage()]).pipe(
+      switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => from(arr)),
       switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board)])),
       map(([item, board]) => {
@@ -89,7 +96,6 @@ export class ApiService {
           faq: item.acf.faq || []
         } as ProductInfo
       }),
-      take(1),
       switchMap(item => {
         if (item.image) {
           return this.getMedia(item.image).pipe(map(image => {
@@ -109,13 +115,13 @@ export class ApiService {
     )
   }
 
-  getAttachmentUrl(id: number|string) {
+  getAttachmentUrl(id: number | string) {
     return this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/media/" + id).pipe(
       map(response => response.source_url)
     )
   }
 
-  getAttachmentUrlWithoutSSL(id: number|string) {
+  getAttachmentUrlWithoutSSL(id: number | string) {
     return this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/media/" + id).pipe(
       map(response => response.source_url),
       map(response => response.replace("https://" + environment.endpoint + "/wp-content/uploads", "http://" + environment.host + "/files"))
@@ -134,5 +140,9 @@ export class ApiService {
 
   getAguaEnv() {
     return this.options$;
+  }
+
+  getTranslations() {
+    return this.TranslationProvider.getAvailableTranslations();
   }
 }

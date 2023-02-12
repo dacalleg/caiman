@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslationService } from './services/translation.service';
 
 @Component({
   selector: 'app-root',
@@ -8,9 +8,8 @@ import { TranslateService } from '@ngx-translate/core';
 })
 export class AppComponent implements OnInit {
 
-  constructor(translate: TranslateService) {
-    translate.setDefaultLang('it');
-    translate.use('it');
+  constructor(private translation: TranslationService) {
+    
   }
 
   ngOnInit(): void {

@@ -17,6 +17,8 @@ import { SharedModule } from './modules/shared/shared.module';
 import { AuthService } from './services/auth.service';
 import { environment } from 'src/environments/environment';
 import { TranslationLoader } from './modules/shared/translations/translation.loader';
+import { ApiService } from './services/api.service';
+import { TranslationProviderService } from './services/translation-provider.service';
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -40,7 +42,7 @@ export function tokenGetter() {
       loader: {
         provide: TranslateLoader,
         useClass: TranslationLoader,
-        deps: [HttpClient]
+        deps: [TranslationProviderService]
       }
     }),
     JwtModule.forRoot({
@@ -54,6 +56,8 @@ export function tokenGetter() {
   providers: [
     AuthService,
     ComponentStore,
+    ApiService,
+    TranslationProviderService
   ],
   bootstrap: [AppComponent]
 })

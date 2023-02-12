@@ -260,3 +260,10 @@ export interface DatabaseValue
   id: string;
   value: string;
 }
+
+export interface Translation {
+  id: number,
+  lang: string,
+  name: string,
+  values: { [key: string]: string };
+}

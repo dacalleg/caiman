@@ -1,0 +1,3 @@
+<select class="form-select" aria-label="Default select example" [ngModel]="currentLanguage$|async" (ngModelChange)="onLanguageChange($event)">
+    <option *ngFor="let translation of translations$|async" [ngValue]="translation">{{translation}}</option>
+  </select>

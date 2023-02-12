@@ -132,6 +132,6 @@ add_filter( 'rest_translation_query', function( $args, $request ){
 }, 10, 2 );
 
 add_filter( 'jwt_auth_iss', function( $args ){
-    return $_ENV["JWT_IIS_FIELD"];
+    return $_ENV["JWT_ISS_FIELD"];
 }, 10, 1 );
 

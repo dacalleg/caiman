@@ -52,6 +52,7 @@ services:
       AGUA_ENDPOINT: "https://aguaxxx.agua-iot.com"
       JWT_SOFTWARE_FIELD: "caiman"
       JWT_ID_FIELD: "464D7C31-0BBD-462D-A7F8-C03913EED030"
+      JWT_ISS_FIELD: "caiman.micronovasrl.com"
 
   caiman_rabbitmq_auth:
     restart: always

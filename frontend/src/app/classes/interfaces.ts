@@ -83,6 +83,9 @@ export interface Channel {
   getStream(): Observable<VariableValue[]>;
   ping(): Observable<boolean>;
   disconnect(): Observable<void>;
+  setWifi(ssid: string, password: string): Observable<void>;
+  getWifiStatus(): Observable<WifiStatus>;
+  disconnectWifi(): Observable<void>;
 }
 
 
@@ -266,4 +269,19 @@ export interface Translation {
   lang: string,
   name: string,
   values: { [key: string]: string };
+}
+
+export interface WifiStatus
+{
+  wifi_connected: boolean;
+  cloud_connected: boolean;
+  wifi_stations: WifiStation[];
+}
+
+export interface WifiStation
+{
+  ssid: string;
+  channel: number;
+  rssi: number;
+  bssid: string;
 }

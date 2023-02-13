@@ -1,0 +1,31 @@
+<div class="wifi d-flex justify-content-between align-items-center p-3 mb-2" *ngIf="station">
+    <div class="d-flex align-items-center">
+        <div class="me-3 text-center">
+            <div>
+                <bi name="wifi"></bi>
+            </div>
+            <small>{{station.rssi}}</small>
+        </div>
+        <div>
+            <div>{{station.ssid}}</div>
+            <small>{{station.bssid}}</small>
+        </div>
+    </div>
+    <ng-container *ngIf="showPasswordInput">
+        <div class="flex-grow-1 px-3">
+            <input type="password" class="form-control" id="wifipassword" [(ngModel)]="password" placeholder="Inserisci la password">
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary" type="button" (click)="connect()">CONNETTI</button>
+        </div>
+    </ng-container>
+    <ng-container *ngIf="!showPasswordInput">
+        <div *ngIf="!connected; else disconnectTemplate">
+            <button class="btn btn-outline-secondary" type="button" (click)="showPassword()">CONNETTI</button>
+        </div>
+        <ng-template #disconnectTemplate>
+            <button class="btn btn-outline-secondary" type="button" (click)="disconnect()">DISCONNETTI</button>
+        </ng-template>
+    </ng-container>
+
+</div>

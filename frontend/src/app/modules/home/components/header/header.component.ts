@@ -116,10 +116,6 @@ export class HeaderComponent implements OnInit {
     this.modalService.openConnectionSerialModal("BLE");
   }
 
-  disconnect() {
-    this.Device.stopRead();
-  }
-
   setExtentedView(value: boolean) {
     this.Store.setExtendedView(value);
   }

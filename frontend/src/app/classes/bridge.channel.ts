@@ -21,7 +21,7 @@ import {
   throwError,
   timeout,
 } from "rxjs";
-import { Channel, Variable, VariableValue } from "./interfaces";
+import { Channel, Variable, VariableValue, WifiStatus } from "./interfaces";
 import { environment } from "src/environments/environment";
 import { RxStomp, RxStompConfig } from "@stomp/rx-stomp";
 import { IMessage } from '@stomp/stompjs';
@@ -44,7 +44,7 @@ export class BridgeChannel implements Channel {
     this.stomp$ = this.stompSubject$.pipe(filter((stomp) => stomp !== null), map((stomp) => stomp!), take(1));
     this.sendCommand$ = new Subject();
     this.device = device;
-    
+
     const stomp = new RxStomp();
     this.connection$ = defer(() => {
       stomp.configure(this.getConfiguration(user, token));
@@ -92,7 +92,7 @@ export class BridgeChannel implements Channel {
     this.responses$ = combineLatest(
       [this.stomp$, this.sendCommand$]
     ).pipe(
-      concatMap(([stomp, data]) => of(stomp.publish({destination: "/topic/command." + this.device, body: JSON.stringify(data)})).pipe(
+      concatMap(([stomp, data]) => of(stomp.publish({ destination: "/topic/command." + this.device, body: JSON.stringify(data) })).pipe(
         switchMap(() => this.responseTopic$)).pipe(
           take(1),
           map(resp => JSON.parse(resp.body)),
@@ -103,6 +103,17 @@ export class BridgeChannel implements Channel {
     );
 
     this.responses$.subscribe();
+  }
+  disconnectWifi(): Observable<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  getWifiStatus(): Observable<WifiStatus> {
+    throw new Error("Method not implemented.");
+  }
+
+  setWifi(ssid: string, password: string): Observable<void> {
+    throw new Error("Method not implemented.");
   }
 
   write(variables: VariableValue[]): Observable<VariableValue[]> {

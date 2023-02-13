@@ -2,14 +2,13 @@ import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   filter,
+  map,
   Observable,
-  of,
-  repeat,
   Subject,
   switchMap,
+  take,
   takeUntil,
   tap,
-  throwError,
 } from "rxjs";
 import { Channel, Variable, VariableValue } from "../classes/interfaces";
 
@@ -20,44 +19,50 @@ export class DeviceService {
   private monitoredVariables: Variable[];
   private monitoredVariables$: BehaviorSubject<Variable[]>;
 
-  private stop$: Subject<void>;
   private connected$: BehaviorSubject<boolean>;
-  private channel: Channel | null;
   private stream$: Subject<VariableValue[]>;
+  private channel$: BehaviorSubject<Channel | null>;
 
   constructor() {
     this.monitoredVariables = [];
-    this.stop$ = new Subject();
     this.connected$ = new BehaviorSubject<boolean>(false);
-    this.channel = null
     this.monitoredVariables$ = new BehaviorSubject<Variable[]>([]);
     this.stream$ = new Subject();
+    this.channel$ = new BehaviorSubject<Channel | null>(null);
+  }
+
+  private getChannel(): Observable<Channel> {
+    return this.connected$.pipe(
+      filter(connected => connected),
+      switchMap(() => this.channel$.asObservable()),
+      filter(channel => channel !== null),
+      map(channel => channel!),
+      take(1)
+    )
   }
 
   setChannel(channel: Channel) {
-    this.channel = channel;
+    this.channel$.next(channel);
   }
 
-  connect()
-  {
-    if (this.channel) {
-      return this.channel.connect().pipe(tap(() => this.connected$.next(true)));
-    }
-    return throwError(() => new Error("Channel is null, call set channel before"))
+  connect() {
+    return this.channel$.pipe(
+      filter(channel => channel !== null),
+      map(channel => channel!),
+      switchMap(channel => channel.connect().pipe(tap(() => this.connected$.next(true)))),
+      take(1),
+    )
   }
 
   startRead() {
-    if (this.channel) {
-      return of(0).pipe(
-        switchMap(() => this.monitoredVariables$),
-        switchMap((variables) => this.channel!.setVariableStream(variables)),
-        switchMap(() => this.channel!.getStream()),
+    return this.getChannel().pipe(
+      switchMap(channel => this.monitoredVariables$.pipe(
+        switchMap((variables) => channel.setVariableStream(variables)),
+        switchMap(() => channel.getStream()),
         tap(data => this.stream$.next(data)),
-        takeUntil(this.stop$)
-      )
-    }
-    else
-      return throwError(() => new Error("Channel is null, call set channel before"))
+      )),
+      takeUntil(this.connected$.pipe(filter(connected => connected === false))),
+    )
   }
 
   getStream() {
@@ -93,38 +98,55 @@ export class DeviceService {
   }
 
   disconnect() {
-    this.connected$.next(false);
-    this.stopRead();
-    if(this.channel)
-      this.channel.disconnect();
-  }
-
-  stopRead() {
-    this.stop$.next();
+    return this.getChannel().pipe(
+      tap(() => this.connected$.next(false)),
+      switchMap(channel => channel.disconnect()),
+      take(1)
+    );
   }
 
   write(variables: VariableValue[]): Observable<VariableValue[]> {
-    if (this.channel) {
-      return this.channel.write(variables);
-    }
-    else
-      return throwError(() => new Error("Channel is null, call set channel before"))
+    return this.getChannel().pipe(
+      switchMap(channel => channel.write(variables)),
+      take(1)
+    );
   }
 
   read(variables: Variable[]) {
-    if (this.channel) {
-      return this.channel.read(variables);
-    }
-    else
-      return throwError(() => new Error("Channel is null, call set channel before"))
+    return this.getChannel().pipe(
+      switchMap(channel => channel.read(variables)),
+      take(1)
+    );
   }
 
-  isOnline()
-  {
-    if (this.channel) {
-      return this.channel.ping();
-    }
-    else
-      return throwError(() => new Error("Channel is null, call set channel before"))
+  isOnline() {
+    return this.channel$.pipe(
+      filter(channel => channel !== null),
+      map(channel => channel!),
+      switchMap(channel => channel.ping()),
+      take(1)
+    )
+  }
+
+  setWifi(ssid: string, password: string) {
+    return this.getChannel().pipe(
+      switchMap(channel => channel.setWifi(ssid, password)),
+      take(1)
+    );
+  }
+
+
+  disconnectWifi() {
+    return this.getChannel().pipe(
+      switchMap(channel => channel.disconnectWifi()),
+      take(1)
+    );
+  }
+
+  getWifiStatus() {
+    return this.getChannel().pipe(
+      switchMap(channel => channel.getWifiStatus()),
+      take(1)
+    );
   }
 }

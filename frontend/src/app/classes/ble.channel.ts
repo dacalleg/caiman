@@ -22,7 +22,7 @@ import {
   throwError,
   toArray
 } from "rxjs";
-import { Channel, Variable, VariableValue } from "./interfaces";
+import { Channel, Variable, VariableValue, WifiStation, WifiStatus } from "./interfaces";
 
 export class BleChannel implements Channel {
   private connection$: Observable<{ device: any, server: any, service: any, characteristic: any }>;
@@ -35,7 +35,7 @@ export class BleChannel implements Channel {
   private responses$: Observable<{ id: number, payload: any }>;
   private reconnect$: Observable<void>;
 
-  constructor(mac: string, security:string) {
+  constructor(mac: string, security: string) {
     this.close$ = new Subject();
     this.charatteristics$ = new BehaviorSubject(null);
     this.BLEDevice$ = new BehaviorSubject(null);
@@ -200,8 +200,41 @@ export class BleChannel implements Channel {
     )
   }
 
-  private sendStatusWifiStation() {
-    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "StatusWifiStation" }));
+  getWifiStatus() {
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "StatusWifiStation" })).pipe(
+      map((resp: any) => {
+        return{
+          wifi_connected: resp.ConnSta === "Connected",
+          cloud_connected: resp.ConnServer === "Connected",
+          wifi_stations:resp.Aps.map((item: any) => {
+            return {
+              ssid: item.ssid,
+              channel: item.channel,
+              rssi: item.rssi,
+              bssid: item.bssid
+            } as WifiStation
+          })
+        } as WifiStatus
+      }),
+    );
+  }
+
+  setWifi(ssid: string, password: string) {
+    const payload = {
+      'Activation': 'Connect',
+      'Id': 1,
+      'ssid': ssid,
+      'password': password,
+    };
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "SetWifiStation", ...payload }));
+  }
+
+  disconnectWifi()
+  {
+    const payload = {
+      'Activation': 'Disconnect',
+    };
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "SetWifiStation", ...payload }));
   }
 
   private writeVariables(variables: VariableValue[]) {

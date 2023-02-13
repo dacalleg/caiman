@@ -1,5 +1,5 @@
 import { catchError, delay, filter, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, tap, throwError } from "rxjs";
-import { Channel, Variable, VariableValue } from "./interfaces";
+import { Channel, Variable, VariableValue, WifiStatus } from "./interfaces";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Utils } from "./utils";
 
@@ -13,6 +13,18 @@ export class Agua implements Channel {
         this.protocol = new AguaProtocol(http, access_token, agua_enpoint, agua_id_brand, id_device, product_id);
         this.close$ = new Subject();
         this.bufferVariables = [];
+    }
+
+    disconnectWifi(): Observable<void> {
+        throw new Error("Method not implemented.");
+    }
+    
+    getWifiStatus(): Observable<WifiStatus> {
+        throw new Error("Method not implemented.");
+    }
+    
+    setWifi(ssid: string, password: string): Observable<void> {
+        throw new Error("Method not implemented.");
     }
 
     connect(): Observable<any> {

@@ -18,7 +18,7 @@ import { VarByGroupPipe } from './pipes/var-by-group.pipe';
 import { HomeRoutingModule } from './home-routing.modules';
 import { FormsModule } from '@angular/forms';
 import {BootstrapIconsModule} from "ng-bootstrap-icons";
-import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle} from 'ng-bootstrap-icons/icons';
+import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi} from 'ng-bootstrap-icons/icons';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { DeviceSelectComponent } from './components/device-select/device-select.component';
 import { YouTubePlayerModule } from '@angular/youtube-player';
@@ -31,6 +31,7 @@ import { AttachmentUrlPipe } from './pipes/attachment-url.pipe';
 import { RoleInCurrentUserPipe } from './pipes/role-in-current-user.pipe';
 import { DeviceInfoComponent } from './components/device-info/device-info.component';
 import { WithRolePipe } from './pipes/with-role.pipe';
+import { WifiTeaseComponent } from './components/wifi-tease/wifi-tease.component';
 
 const icons = {
   Eye,
@@ -38,7 +39,8 @@ const icons = {
   Search,
   InfoCircle,
   Pen,
-  PersonCircle
+  PersonCircle,
+  Wifi
 };
 
 @NgModule({
@@ -67,6 +69,7 @@ const icons = {
     RoleInCurrentUserPipe,
     DeviceInfoComponent,
     WithRolePipe,
+    WifiTeaseComponent,
   ],
   imports: [
     CommonModule,

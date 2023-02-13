@@ -79,6 +79,20 @@
                         </div>
                       </div>
                     </div>
+                    <div class="row">
+                      <div class="col">
+                        <h3 class="mb-3">NETWORK</h3>
+                        <ng-container  *ngIf="(wifiStatus$|async) as status">
+                          <div class="text-end" *ngIf="!status.wifi_connected">
+                            <button class="btn btn-outline-secondary me-2" type="button" (click)="disconnectWifi()">CANCELLA IMPOSTAZIONI WIFI</button>
+                            <button class="btn btn-outline-secondary" type="button" (click)="scanWifi()">AGGIORNA</button>
+                          </div>
+                          <div class="pt-3">
+                            <app-wifi-tease  *ngFor="let station of status.wifi_stations" [connected]="status.wifi_connected" [station]="station" (onDisconnect)="disconnectWifi()" (onConnect)="connectWifi($event)"></app-wifi-tease>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </ng-template>

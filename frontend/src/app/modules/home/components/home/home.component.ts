@@ -2,11 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, merge, mergeMap, Observable, of, retry, shareReplay, switchMap, take, tap, throwError, timeout, toArray, zip } from "rxjs";
+import { BehaviorSubject, catchError, combineLatest, concat, concatMap, defer, delay, filter, from, ignoreElements, map, merge, mergeMap, Observable, of, repeat, retry, shareReplay, switchMap, take, takeUntil, tap, throwError, timeout, toArray, zip } from "rxjs";
 import { Agua } from 'src/app/classes/agua';
 import { BleChannel } from 'src/app/classes/ble.channel';
 import { BridgeChannel } from 'src/app/classes/bridge.channel';
-import { Channel, Database, DeviceProduct, Project, Variable, VariableValue } from 'src/app/classes/interfaces';
+import { Channel, Database, DeviceProduct, Project, Variable, VariableValue, WifiStation, WifiStatus } from 'src/app/classes/interfaces';
 import { Utils } from 'src/app/classes/utils';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -21,6 +21,7 @@ import { StoreService } from 'src/app/services/store.service';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+
 
 
   @ViewChild("nav") nav: NgbNav | null;
@@ -39,6 +40,9 @@ export class HomeComponent implements OnInit {
   bridgeChannel$: Observable<BridgeChannel>;
 
   databaseSelected: Database | null;
+  wifiStatus$: Observable<WifiStatus>;
+
+  wifiRefreshSubject$: BehaviorSubject<void>;
 
   constructor(
     private Store: StoreService,
@@ -76,7 +80,7 @@ export class HomeComponent implements OnInit {
     this.aguaChannel$ = this.loadDeviceData$.pipe(
       switchMap(() => combineLatest([this.Auth.getToken(), this.Store.getProject(), this.Api.getAguaEnv()])),
       switchMap(([token, project, env]) => of(new Agua(this.http, env.agua_endpoint, "" + env.agua_id_brand, project.device!.id_device, project.device!.id_product, token))),
-      tap((agua) => this.Device.setChannel(agua)),
+      tap((agua) => this.Device.setChannel(agua))
     )
 
     this.BLEChannel$ = this.loadDeviceData$.pipe(
@@ -111,10 +115,13 @@ export class HomeComponent implements OnInit {
     this.groups$ = this.Auth.getRoles().pipe(
       switchMap(roles => this.Store.getGroupsByRole(roles))
     )
+    
+    this.wifiRefreshSubject$ = new BehaviorSubject<void>(void 0);
+    this.wifiStatus$ = this.wifiRefreshSubject$.pipe(
+      switchMap(() => this.Device.getWifiStatus())
+    );
 
     this.loadDeviceData$.subscribe();
-
-    this.Api.getAguaEnv().subscribe(env => console.log(env));
   }
 
   ngOnInit(): void {
@@ -162,6 +169,7 @@ export class HomeComponent implements OnInit {
       switchMap(() => this.Device.connect()),
       switchMap(() => this.loadSnet$),
       tap(() => this.modal.dismissAll()),
+      take(1),
       switchMap(() => this.Device.startRead()),
       catchError(err => this.modal.openAlertModal({
         title: "Error",
@@ -181,6 +189,7 @@ export class HomeComponent implements OnInit {
       })),
       switchMap(() => this.loadSnet$),
       tap(() => this.modal.dismissAll()),
+      take(1),
       switchMap(() => this.Device.startRead()),
       catchError(err => {
         this.disconnect();
@@ -209,6 +218,7 @@ export class HomeComponent implements OnInit {
         switchMap(() => this.Device.connect()),
         switchMap(() => this.loadSnet$),
         tap(() => this.modal.dismissAll()),
+        take(1),
         switchMap(() => this.Device.startRead()),
         catchError(err => {
           return this.modal.openAlertModal({
@@ -222,7 +232,7 @@ export class HomeComponent implements OnInit {
 
   disconnect() {
     this.nav?.select("ngb-nav-0");
-    this.Device.disconnect();
+    this.Device.disconnect().subscribe();
   }
 
   loadDatabase() {
@@ -265,5 +275,58 @@ export class HomeComponent implements OnInit {
         }
       });
     }
+  }
+
+  scanWifi()
+  {
+    this.wifiRefreshSubject$.next();
+  }
+
+  disconnectWifi() {
+    this.modal.openAlertModal({
+      title: "Disconnecting",
+      message: "Disconnection in progress",
+      progress: true,
+    }).pipe(
+      switchMap(() => this.Device.disconnectWifi().pipe(
+        switchMap(() => of(void 0).pipe(
+          delay(1000),
+          tap(() => this.wifiRefreshSubject$.next()),
+          repeat()
+        )),
+        ignoreElements(),
+        timeout(15000),
+        takeUntil(this.wifiStatus$.pipe(filter(status => !status.wifi_connected))),
+      ))
+    ).subscribe({
+      error: (err) => {
+        this.modal.upodateAlertModalConfig({ title: "Disconnecting", progress: false, message: "Timeout" })
+      },
+      complete: () => this.modal.dismissAll()
+    });
+  }
+
+  connectWifi($event: { station: WifiStation, password: string }) {
+    this.modal.openAlertModal({
+      title: "Connecting",
+      message: "Connection to " + $event.station.ssid + " in progress",
+      progress: true,
+    }).pipe(
+      switchMap(() => this.Device.setWifi($event.station.ssid, $event.password).pipe(
+        switchMap(() => of(void 0).pipe(
+          delay(1000),
+          tap(() => this.wifiRefreshSubject$.next()),
+          repeat()
+        )),
+        ignoreElements(),
+        timeout(15000),
+        takeUntil(this.wifiStatus$.pipe(filter(status => status.wifi_connected))),
+      ))
+    ).subscribe({
+      error: (err) => {
+        this.modal.upodateAlertModalConfig({ title: "Connecting", progress: false, message: "Timeout. Could not connect to the network, check password." })
+      },
+      complete: () => this.modal.dismissAll()
+    });
   }
 }

@@ -96,7 +96,7 @@ function get_language_code()
 
 function get_translation_value($key, $lang, $placeholders=array())
 {
-    $default = array("base_url" => get_site_url());
+    $default = array("base_url" => get_site_url(), "domain_url" => str_replace("/backend", "", get_site_url()));
     $placeholders = array_merge($default, $placeholders);
 
     $posts = get_posts(array(

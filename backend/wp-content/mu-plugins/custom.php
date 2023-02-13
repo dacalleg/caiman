@@ -128,8 +128,8 @@ function get_translation_value($key, $lang, $placeholders=array())
     {
         if($translation["key"] == $key){
             $message = $translation["value"];
-            break;
         }
+        $placeholders[$translation["key"]] = $translation["value"];
     }
 
     if($message == null)

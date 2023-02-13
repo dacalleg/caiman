@@ -76,7 +76,7 @@ add_filter( 'retrieve_password_title', function($title, $user_login, $user_data)
 }, 10, 3 );
 
 add_filter( 'retrieve_password_message', function($message, $key, $user_login, $user_data){   
-    return get_translation_value("reset.email.body", get_language_code(), array("key" => $key, "user" => $user_login));
+    return nl2br(get_translation_value("reset.email.body", get_language_code(), array("key" => $key, "user" => $user_login)));
 }, 10, 4 );
 
 function get_language_code()
@@ -119,7 +119,7 @@ function get_translation_value($key, $lang, $placeholders=array())
     }
 
     if($message == null)
-        return null;
+        return "Translation not found";
 
     foreach($placeholders as $key => $value)
         $message = str_replace("{{".$key."}}", $value, $message);

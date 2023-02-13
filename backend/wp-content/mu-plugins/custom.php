@@ -81,7 +81,8 @@ add_filter( 'retrieve_password_message', function($message, $key, $user_login, $
 
 function get_language_code()
 {
-    $lang = $_COOKIE["language"];
+    $headers = getallheaders();
+    $lang = $headers["Language"];
     
     if(!isset($lang))
         $lang = "en";
@@ -93,12 +94,20 @@ function get_translation_value($key, $lang, $placeholders=array())
     $default = array("base_url" => get_site_url());
     $placeholders = array_merge($default, $placeholders);
 
-    $post = get_post(array(
+    $posts = get_posts(array(
         "post_type" => "translation",
         "meta_key" => "code",
         "meta_value" => $lang,
     ));
-    $translations = get_field("translations", $post->ID);
+
+    if(count($posts) == 0)
+        $posts = get_posts(array(
+            "post_type" => "translation",
+            "meta_key" => "code",
+            "meta_value" => "en",
+        ));
+
+    $translations = get_field("translations", $posts[0]->ID);
     $message = null;
 
     foreach($translations as $translation)
@@ -120,14 +129,17 @@ function get_translation_value($key, $lang, $placeholders=array())
 
 function register_caiman_rest_api()
 {
-    /*remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+    remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
     add_filter( 'rest_pre_serve_request', function( $value ) {
-      header( 'Access-Control-Allow-Origin: *' );
-      header( 'Access-Control-Allow-Methods: GET' );
-      header( 'Access-Control-Allow-Credentials: true' );
-      header( 'Access-Control-Expose-Headers: Link', false );
-      return $value;
-    } );*/
+        $http_origin = $_SERVER['HTTP_ORIGIN'];
+        if ($http_origin == "http://localhost:4200" || $http_origin == get_site_url())
+            header("Access-Control-Allow-Origin: $http_origin");
+        header( 'Access-Control-Allow-Headers: *' );
+        header( 'Access-Control-Allow-Methods: GET, POST, OPTIONS' );
+        header( 'Access-Control-Allow-Credentials: true' );
+        header( 'Access-Control-Expose-Headers: Link', false );
+        return $value;
+    });
     register_rest_route(
         'caiman/v1',
         '/me',

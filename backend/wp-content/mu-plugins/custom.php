@@ -71,6 +71,7 @@ add_filter( 'upload_mimes', 'set_other_mime_types', 1, 1 );
 add_filter( 'jwt_auth_whitelist', function ( $endpoints ) {
     $your_endpoints = array(
         '/wp-json/caiman/v1/forgot-password',
+        '/wp-json/caiman/v1/reset-password',
     );
 
     return array_unique( array_merge( $endpoints, $your_endpoints ) );
@@ -172,6 +173,15 @@ function register_caiman_rest_api()
             'permission_callback' => '__return_true'
         )
     );
+    register_rest_route(
+        'caiman/v1',
+        '/reset-password',
+        array(
+            'methods' => 'POST',
+            'callback' => 'caiman_reset_password',
+            'permission_callback' => '__return_true'
+        )
+    );
 }
 
 function caiman_forgot_password(WP_REST_Request $request)
@@ -182,6 +192,19 @@ function caiman_forgot_password(WP_REST_Request $request)
         return new WP_REST_Response(200);
     else
         return new WP_REST_Response(404);
+}
+
+function caiman_reset_password(WP_REST_Request $request)
+{
+    $body = $request->get_json_params();
+    $user = $body["user"];
+    $key = $body["key"];
+    $password = $body["password"];
+    $validation = check_password_reset_key($key, $user);
+    if(is_wp_error($validation))
+        return new WP_REST_Response(array('message' => $validation->get_error_message()), 404);
+    reset_password($user, $password);
+    return new WP_REST_Response(200);
 }
 
 

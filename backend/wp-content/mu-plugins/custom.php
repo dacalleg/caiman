@@ -13,6 +13,11 @@
  * @package caiman
  */
 
+function html_wp_email_content_type() {
+    return 'text/html';
+}
+add_filter( 'wp_mail_content_type', 'html_wp_email_content_type' );
+
 add_filter(
     'jwt_auth_payload',
     function ( $payload, $user ) {

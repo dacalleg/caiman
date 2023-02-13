@@ -92,7 +92,25 @@ function register_caiman_rest_api()
             'permission_callback' => '__return_true'
         )
     );
+    register_rest_route(
+        'caiman/v1',
+        '/forgot-password',
+        array(
+            'methods' => 'POST',
+            'callback' => 'caiman_forgot_password',
+            'permission_callback' => '__return_true'
+        )
+    );
+}
 
+function caiman_forgot_password(WP_REST_Request $request)
+{
+    $body = $request->get_json_params();
+    $result = retrieve_password($body["user"]);
+    if($result)
+        return new WP_REST_Response(200);
+    else
+        return new WP_REST_Response(404);
 }
 
 

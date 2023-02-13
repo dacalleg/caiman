@@ -197,12 +197,12 @@ function caiman_forgot_password(WP_REST_Request $request)
 function caiman_reset_password(WP_REST_Request $request)
 {
     $body = $request->get_json_params();
-    $user = $body["user"];
+    $login = $body["user"];
     $key = $body["key"];
     $password = $body["password"];
-    $validation = check_password_reset_key($key, $user);
-    if(is_wp_error($validation))
-        return new WP_REST_Response(array('message' => $validation->get_error_message()), 404);
+    $user = check_password_reset_key($key, $login);
+    if(is_wp_error($user))
+        return new WP_REST_Response(array('message' => $user->get_error_message()), 404);
     reset_password($user, $password);
     return new WP_REST_Response(200);
 }

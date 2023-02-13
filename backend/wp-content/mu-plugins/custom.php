@@ -69,8 +69,54 @@ add_filter( 'jwt_auth_whitelist', function ( $endpoints ) {
     );
 
     return array_unique( array_merge( $endpoints, $your_endpoints ) );
-} );
+});
 
+add_filter( 'retrieve_password_title', function($title, $user_login, $user_data){
+    return get_translation_value("reset.email.title", get_language_code());
+}, 10, 3 );
+
+add_filter( 'retrieve_password_message', function($message, $key, $user_login, $user_data){   
+    return get_translation_value("reset.email.body", get_language_code(), array("key" => $key, "user" => $user_login));
+}, 10, 4 );
+
+function get_language_code()
+{
+    $lang = $_COOKIE["language"];
+    
+    if(!isset($lang))
+        $lang = "en";
+    return $lang;
+}
+
+function get_translation_value($key, $lang, $placeholders=array())
+{
+    $default = array("base_url" => get_site_url());
+    $placeholders = array_merge($default, $placeholders);
+
+    $post = get_post(array(
+        "post_type" => "translation",
+        "meta_key" => "code",
+        "meta_value" => $lang,
+    ));
+    $translations = get_field("translations", $post->ID);
+    $message = null;
+
+    foreach($translations as $translation)
+    {
+        if($translation["key"] == $key){
+            $message = $translation["value"];
+            break;
+        }
+    }
+
+    if($message == null)
+        return null;
+
+    foreach($placeholders as $key => $value)
+        $message = str_replace("{{".$key."}}", $value, $message);
+
+    return $message;
+}
 
 function register_caiman_rest_api()
 {

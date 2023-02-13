@@ -73,8 +73,7 @@ export class ApiService {
   }
 
   getProductInfo(product: string) {
-    //@todo change id_product!!!!!
-    return combineLatest([of("96A1042C-EC5A-474C-B554-D8CCA7B6D602"), this.Translation.getCurrentLanguage()]).pipe(
+    return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
       switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => from(arr)),
       switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board)])),

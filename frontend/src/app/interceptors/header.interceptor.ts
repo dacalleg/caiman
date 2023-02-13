@@ -5,8 +5,7 @@ import {
     HttpRequest,
     HttpHeaders
 } from '@angular/common/http';
-import { map, Observable, of, switchMap, take } from 'rxjs';
-import { TranslationService } from '../services/translation.service';
+import { Observable, of, switchMap } from 'rxjs';
 
 export class HeaderInterceptor implements HttpInterceptor {
 
@@ -20,7 +19,6 @@ export class HeaderInterceptor implements HttpInterceptor {
 
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        console.log(new Date());
         return this.getHeaders().pipe(
             switchMap(headers => {
                 let reqHeaders = req.headers;
@@ -33,7 +31,5 @@ export class HeaderInterceptor implements HttpInterceptor {
                 return next.handle(req.clone({ headers: reqHeaders }));
             })
         );
-
-        return next.handle(req);
     }
 }

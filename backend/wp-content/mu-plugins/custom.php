@@ -63,6 +63,14 @@ function set_other_mime_types( $mime_types ) {
 }
 add_filter( 'upload_mimes', 'set_other_mime_types', 1, 1 );
 
+add_filter( 'jwt_auth_whitelist', function ( $endpoints ) {
+    $your_endpoints = array(
+        '/wp-json/caiman/v1/forgot-password',
+    );
+
+    return array_unique( array_merge( $endpoints, $your_endpoints ) );
+} );
+
 
 function register_caiman_rest_api()
 {

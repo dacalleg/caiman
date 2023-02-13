@@ -1,0 +1,24 @@
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Reset password</h3>
+                    <ng-container *ngIf="!finish; else complete">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="email" [(ngModel)]="email" />
+                        </div>
+                        <div *ngIf="error" class="mb-2">{{error}}</div>
+                        <button type="submit" class="btn btn-primary" (click)="reset()">Submit</button>
+                        <a routerLink="/auth/login" class="btn btn-link">Torna al login</a>
+                    </ng-container>
+                    <ng-template #complete>
+                        <div>Un'email è stata inviata a {{email}} con il link per il reset della password.</div>
+                        <a routerLink="/auth/login">Torna al login</a>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

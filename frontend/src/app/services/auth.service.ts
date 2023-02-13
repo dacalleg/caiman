@@ -31,6 +31,14 @@ export class AuthService {
     )
   }
 
+  requestResetPassword(username: string) {
+    return this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/forgot-password', { user: username });
+  }
+
+  resetPassword(username: string, key: string, password: string) {
+    return this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/reset-password', { user: username, key: key, password: password });
+  }
+
   tokenValidityChanges(): Observable<boolean> {
     return this.tokenValidityChanges$;
   }

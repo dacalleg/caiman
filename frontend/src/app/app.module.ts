@@ -9,7 +9,7 @@ import { ComponentStore } from "@ngrx/component-store";
 import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
 
 import { FormsModule } from "@angular/forms";
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClientModule, HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { JwtModule } from '@auth0/angular-jwt';
 import { AlertComponent } from './components/alert/alert.component';
@@ -19,6 +19,9 @@ import { environment } from 'src/environments/environment';
 import { TranslationLoader } from './modules/shared/translations/translation.loader';
 import { ApiService } from './services/api.service';
 import { TranslationProviderService } from './services/translation-provider.service';
+import { CookieService } from 'ngx-cookie-service';
+import { HeaderInterceptor } from './interceptors/header.interceptor';
+import { TranslationService } from './services/translation.service';
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -49,15 +52,22 @@ export function tokenGetter() {
       config: {
         tokenGetter: tokenGetter,
         allowedDomains: [environment.host],
-        disallowedRoutes: [/backend\/wp-content\/uploads\/.*/, /backend\/wp-json\/jwt-auth\/v1\/token/, /backend\/wp-json\/wp\/v2\/translation/],
+        disallowedRoutes: [/backend\/wp-content\/uploads\/.*/, /backend\/wp-json\/jwt-auth\/v1\/token/, /backend\/wp-json\/wp\/v2\/translation/, /backend\/wp-json\/caiman\/v1\/forgot-password/],
       },
     }),
+    
   ],
   providers: [
     AuthService,
     ComponentStore,
     ApiService,
-    TranslationProviderService
+    TranslationProviderService,
+    TranslationService,
+    { 
+      provide: HTTP_INTERCEPTORS, 
+      useClass: HeaderInterceptor,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

@@ -31,6 +31,7 @@
     "bootstrap": "^5.1.3",
     "fmin": "^0.0.2",
     "ng-bootstrap-icons": "^13.1.2-canary.1",
+    "ngx-cookie-service": "^15.0.0",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "xpath": "^0.0.32",

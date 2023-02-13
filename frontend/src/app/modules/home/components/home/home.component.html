@@ -84,7 +84,7 @@
               </ng-template>
             </li>
             <ng-container *ngIf="connected$|async">
-              <li ngbNavItem *ngFor="let group of groups$|async" (shown)="onGroupSelected(group)">
+              <li ngbNavItem *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [id]="i + 3">
                 <a ngbNavLink>{{group|overrideGroupName|async}}</a>
                 <ng-template ngbNavContent>
                   <div class="row">

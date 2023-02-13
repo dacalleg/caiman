@@ -89,7 +89,7 @@ add_filter( 'wp_password_change_notification_email', function( $wp_password_chan
     $message = get_translation_value("passwordchange.email.body", get_language_code());
     $title = get_translation_value("passwordchange.email.title", get_language_code());
     $wp_password_change_notification_email["subject"] = $title;
-    $wp_password_change_notification_email["message"] = $message;
+    $wp_password_change_notification_email["message"] = nl2br($message);
     return $wp_password_change_notification_email;
 }, 10, 3 );
 

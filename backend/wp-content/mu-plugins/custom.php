@@ -85,6 +85,14 @@ add_filter( 'retrieve_password_message', function($message, $key, $user_login, $
     return nl2br(get_translation_value("reset.email.body", get_language_code(), array("key" => $key, "user" => $user_login)));
 }, 10, 4 );
 
+add_filter( 'wp_password_change_notification_email', function( $wp_password_change_notification_email, $user, $blogname ){   
+    $message = get_translation_value("passwordchange.email.body", get_language_code());
+    $title = get_translation_value("passwordchange.email.title", get_language_code());
+    $wp_password_change_notification_email["subject"] = $title;
+    $wp_password_change_notification_email["message"] = $message;
+    return $wp_password_change_notification_email;
+}, 10, 3 );
+
 function get_language_code()
 {
     $headers = getallheaders();

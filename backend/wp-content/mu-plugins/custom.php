@@ -18,6 +18,39 @@ function html_wp_email_content_type() {
 }
 add_filter( 'wp_mail_content_type', 'html_wp_email_content_type' );
 
+
+
+add_filter( 'manage_users_columns', function ( $column ) {
+    $column['status'] = 'Status';
+    return $column;
+});
+
+add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id ) {
+    switch ($column_name) {
+        case 'status' :
+            $user = get_user_by('id', $user_id);
+            $roles = $user->roles;
+            if(in_array("administrator", $roles))
+                return "-";
+            $access = get_field("user_access", "user_" . $user->ID);
+            if($access == "locked")
+                return "Locked";
+            if($access == "noexpire")
+                return "Granted";
+            if($access == "expire")
+            {
+                $expiration = get_field("expiration", "user_" . $user->ID);
+                $now = new DateTime();
+                $exp = DateTime::createFromFormat('d/m/Y', $expiration);
+                if($exp < $now)
+                    return "Expired";
+                return "Expire on " . $expiration;
+            }
+            return "*";            
+    }
+    return $val;
+}, 10, 3 );
+
 add_filter( 'authenticate', function($user, $username, $password ){
     if( $user === null || is_wp_error($user))
         return $user;

@@ -301,7 +301,7 @@ function caiman_register(WP_REST_Request $request)
     $password = $body["password"];
     $name = $body["name"];
     $surname = $body["surname"];
-
+    $displayed_name = $surname. " " . $name;
     $wp_user_id = wp_create_user($email, $password, $email);
 
     if(is_wp_error($wp_user_id))
@@ -311,7 +311,7 @@ function caiman_register(WP_REST_Request $request)
 
     $reg_code = md5($email . time());
     $wp_user = new WP_User($wp_user_id);
-    wp_update_user( array ('ID' => $wp_user_id, 'display_name' => $surname. " " . $name));    
+    wp_update_user( array ('ID' => $wp_user_id, 'display_name' => $displayed_name));    
     $wp_user->set_role( "pending" );
 
     update_field("user_access", $_ENV["DEFAULT_USER_ACCESS"], "user_" . $wp_user_id);
@@ -323,7 +323,7 @@ function caiman_register(WP_REST_Request $request)
     }
 
     $title = get_translation_value("registration.email.title", get_language_code());
-    $body = get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code, "email" => $email));
+    $body = get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code, "email" => $email, 'displayed_name' => $displayed_name));
 
     wp_mail( array($body["email"]), $title, $body );
 

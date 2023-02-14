@@ -34,8 +34,12 @@ function caiman_confirm_user(WP_REST_Request $request)
     foreach($administrators as $admin)
     {
         $admin_email = $admin->user_email;
-        $title = get_translation_value("registration.admin.email.title");
-        $message = nl2br(get_translation_value("registration.admin.email.body", array("user_email" => $email)));
+        $admin_language = get_field("language", "user_" . $admin->ID);
+        if($admin_language === null || $admin_language === "")
+            $admin_language = $_ENV['DEFAULT_LANGUAGE'];
+        
+        $title = get_translation_value("registration.admin.email.title", array(), $admin_language);
+        $message = nl2br(get_translation_value("registration.admin.email.body", array("user_email" => $email), $admin_language));
         wp_mail($admin_email, $title, $message, $headers);
     }
 

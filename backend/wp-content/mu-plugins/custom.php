@@ -21,7 +21,7 @@ add_filter( 'wp_mail_content_type', 'html_wp_email_content_type' );
 
 
 add_filter( 'manage_users_columns', function ( $column ) {
-    $column['status'] = 'Status';
+    $column['status'] = 'Login';
     return $column;
 });
 
@@ -63,19 +63,19 @@ add_filter( 'authenticate', function($user, $username, $password ){
     switch($access)
     {
         case "locked":
-            return new WP_Error( 'authentication_failed', __( '<strong>ERROR</strong>: Your account is locked.' ));
+            return new WP_Error( 'account_locked', __( '<strong>ERROR</strong>: Your account is locked.' ));
         case "expire":
             $expiration = get_field("expiration", "user_" . $user->ID);
             $now = new DateTime();
             $exp = DateTime::createFromFormat('d/m/Y', $expiration);
             if($exp < $now)
-                return new WP_Error( 'authentication_failed', __( '<strong>ERROR</strong>: Your account has expired.' ));
+                return new WP_Error( 'account_expired', __( '<strong>ERROR</strong>: Your account has expired.' ));
             return $user;
         case "noexpire":
             return $user;
     }
     return null;
-}, 10,3);
+}, 30, 3);
 
 add_filter(
     'jwt_auth_payload',

@@ -35,7 +35,7 @@ add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id
 
             $user_reg_code = get_field("reg_code", "user_" . $user->ID);
 
-            if($user_reg_code !== null || $user_reg_code !== "")
+            if($user_reg_code !== null && $user_reg_code !== "")
                 return "Pending";
 
             $access = get_field("user_access", "user_" . $user->ID);
@@ -67,7 +67,7 @@ add_filter( 'authenticate', function($user, $username, $password ){
 
     $user_reg_code = get_field("reg_code", "user_" . $user->ID);
 
-    if($user_reg_code !== null || $user_reg_code !== "")
+    if($user_reg_code !== null && $user_reg_code !== "")
         return new WP_Error( 'account_pending', __( '<strong>ERROR</strong>: Your account is pending.' ));
 
     $access = get_field("user_access", "user_" . $user->ID);

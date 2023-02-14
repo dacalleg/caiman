@@ -203,7 +203,7 @@ function get_language_code()
     $lang = $headers["Language"];
     
     if(!isset($lang))
-        $lang = $_ENV("DEFAULT_LANGUAGE_CODE");
+        $lang = $_ENV["DEFAULT_LANGUAGE_CODE"];
     return $lang;
 }
 

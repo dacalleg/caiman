@@ -57,6 +57,38 @@ add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id
     return $val;
 }, 10, 3 );
 
+add_action('acf/save_post', function ($post_id) {
+    // Check the new value of user access field.
+    if( isset($_POST['acf']['field_63eb3dca6b357']) ) {
+        $wp_user = new WP_User($post_id);
+        if($wp_user == null && is_wp_error($wp_user))
+            return;
+        $roles = $wp_user->roles;
+        if(in_array("administrator", $roles))
+            return;
+
+        $access = $_POST['acf']['field_63eb3dca6b357'];
+
+        $title = get_translation_value("user.access.email.title");
+
+        if($access == "locked")
+            $message = nl2br(get_translation_value("user.access.locked.email.body", array("display_name" => $wp_user->display_name)));
+        if($access == "noexpire")
+            $message = nl2br(get_translation_value("user.access.noexpire.email.body", array("display_name" => $wp_user->display_name)));
+        if($access == "expire")
+        {
+            $expiration = null;
+            if(array_key_exists('field_63eb3e3a6b358', $_POST['acf']))
+                $expiration = $_POST['acf']['field_63eb3e3a6b358'];     
+            $message = nl2br(get_translation_value("user.access.expire.email.body", array("display_name" => $wp_user->display_name, "expiration" => $expiration)));
+        }
+
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+        wp_mail($wp_user->user_email, $title, $message, $headers);
+    }
+}, 5, 1);
+
+
 add_filter( 'authenticate', function($user, $username, $password ){
     if( $user === null || is_wp_error($user))
         return $user;
@@ -325,7 +357,7 @@ function caiman_register_user(WP_REST_Request $request)
     $password = $body["password"];
     $name = $body["name"];
     $surname = $body["surname"];
-    $displayed_name = $surname. " " . $name;
+    $display_name = $surname. " " . $name;
     $wp_user_id = wp_create_user($email, $password, $email);
 
     if(is_wp_error($wp_user_id))
@@ -337,7 +369,7 @@ function caiman_register_user(WP_REST_Request $request)
     $wp_user = new WP_User($wp_user_id);
     wp_update_user( array (
         'ID' => $wp_user_id, 
-        'display_name' => $displayed_name,
+        'display_name' => $display_name,
         'first_name' => $name,
         'last_name' => $surname,
     ));
@@ -353,7 +385,7 @@ function caiman_register_user(WP_REST_Request $request)
     }
 
     $title = get_translation_value("registration.email.title");
-    $message = nl2br(get_translation_value("registration.email.body", array("reg_code" => $reg_code, "email" => $email, 'displayed_name' => $displayed_name)));
+    $message = nl2br(get_translation_value("registration.email.body", array("reg_code" => $reg_code, "email" => $email, 'display_name' => $display_name)));
     $headers = array('Content-Type: text/html; charset=UTF-8');
     
     wp_mail( $email, $title, $message, $headers );

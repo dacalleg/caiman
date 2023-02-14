@@ -276,11 +276,11 @@ function caiman_register(WP_REST_Request $request)
 
     $wp_user = new WP_User($wp_user_id);
     $wp_user->set_role( $_ENV["DEFAULT_ROLE"] );
-    update_field("user_access", $_ENV["DEFAULT_USER_ACCESS"] );
+    update_field("user_access", $_ENV["DEFAULT_USER_ACCESS"], "user_" . $wp_user_id);
 
     foreach ($body as $key => $value) {
         if($key != "email" && $key != "password")
-            update_field($key, $value, "user_".$wp_user_id);
+            update_field($key, $value, "user_" . $wp_user_id);
     }
 
     if(is_wp_error($wp_user))

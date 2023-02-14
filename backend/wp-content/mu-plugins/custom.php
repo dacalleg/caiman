@@ -13,12 +13,12 @@
  * @package caiman
  */
 
+require_once __DIR__ . '/authentication.php';
+
 function html_wp_email_content_type() {
     return 'text/html';
 }
 add_filter( 'wp_mail_content_type', 'html_wp_email_content_type' );
-
-
 
 add_filter( 'manage_users_columns', function ( $column ) {
     $column['status'] = 'Login';
@@ -130,27 +130,7 @@ add_filter( 'authenticate', function($user, $username, $password ){
     return null;
 }, 30, 3);
 
-add_filter(
-    'jwt_auth_payload',
-    function ( $payload, $user ) {
-        $u = array();
-        $u['id'] = $user->ID;
-        $u['name'] = $user->display_name;
-        $u['email'] = $user->user_email;
-        $u['roles'] = $user->roles;
-        $payload["email"] = $user->user_email;
-        $payload["id_app"] = $user->user_email;
-        $payload["id_brand"] = $_ENV["AGUA_ID_BRAND"];
-        $payload["customer_code"] = $_ENV["AGUA_CUSTOMER_CODE"];
-        $payload["data"]["user"] = $u;
-        $payload["auth0"] = "true";
-        $payload["software"] = $_ENV["JWT_SOFTWARE_FIELD"];
-        $payload["id"] = $_ENV["JWT_ID_FIELD"];
-        return $payload;
-    },
-    10,
-    2
-);
+
 
 function edit_capabilities()
 {
@@ -158,17 +138,6 @@ function edit_capabilities()
     $administrator->add_cap("unfiltered_upload");
 }
 add_action('init', 'edit_capabilities');
-
-
-add_filter(
-    'jwt_auth_expire',
-    function ( $expire, $issued_at ) {
-        // Modify the "expire" here.
-        return time() + 86400;
-    },
-    10,
-    2
-);
 
 
 function set_other_mime_types( $mime_types ) {
@@ -179,17 +148,6 @@ function set_other_mime_types( $mime_types ) {
   return $mime_types;
 }
 add_filter( 'upload_mimes', 'set_other_mime_types', 1, 1 );
-
-add_filter( 'jwt_auth_whitelist', function ( $endpoints ) {
-    $your_endpoints = array(
-        '/wp-json/caiman/v1/forgot-password',
-        '/wp-json/caiman/v1/reset-password',
-        '/wp-json/caiman/v1/register',
-        '/wp-json/caiman/v1/confirm',
-    );
-
-    return array_unique( array_merge( $endpoints, $your_endpoints ) );
-});
 
 add_filter( 'retrieve_password_title', function($title, $user_login, $user_data){
     return get_translation_value("reset.email.title");
@@ -490,8 +448,3 @@ add_filter( 'rest_translation_query', function( $args, $request ){
     }
     return $args;
 }, 10, 2 );
-
-add_filter( 'jwt_auth_iss', function( $args ){
-    return $_ENV["JWT_ISS_FIELD"];
-}, 10, 1 );
-

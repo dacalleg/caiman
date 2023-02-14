@@ -2,6 +2,14 @@
 
 require_once __DIR__ . '/utils.php';
 
+function get_user_language_code($user)
+{
+    $language = get_field("language", "user_" . $user->ID);
+    if($language === null || $language === "")
+        $language = $_ENV['DEFAULT_LANGUAGE_CODE'];
+    return $language;
+}
+
 function caiman_update_user_language(WP_REST_Request $request)
 {
     $user = wp_get_current_user();
@@ -34,12 +42,10 @@ function caiman_confirm_user(WP_REST_Request $request)
     foreach($administrators as $admin)
     {
         $admin_email = $admin->user_email;
-        $admin_language = get_field("language", "user_" . $admin->ID);
-        if($admin_language === null || $admin_language === "")
-            $admin_language = $_ENV['DEFAULT_LANGUAGE'];
+        $language = get_user_language_code($admin);
         
-        $title = get_translation_value("registration.admin.email.title", array(), $admin_language);
-        $message = nl2br(get_translation_value("registration.admin.email.body", array("user_email" => $email), $admin_language));
+        $title = get_translation_value("registration.admin.email.title", array(), $language);
+        $message = nl2br(get_translation_value("registration.admin.email.body", array("user_email" => $email), $language));
         wp_mail($admin_email, $title, $message, $headers);
     }
 
@@ -157,9 +163,8 @@ add_action('acf/save_post', function ($post_id) {
             return;
 
         $access = $_POST['acf']['field_63eb3dca6b357'];
-        $user_language = get_field("language", "user_" . $id);
-        if($user_language === null || $user_language === "")
-            $user_language = $_ENV['DEFAULT_LANGUAGE'];
+
+        $user_language = get_user_language_code($wp_user);
 
         $title = get_translation_value("user.access.email.title", array(), $user_language);
 

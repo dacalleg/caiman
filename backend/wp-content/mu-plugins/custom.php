@@ -35,7 +35,7 @@ add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id
 
             $user_reg_code = get_field("reg_code", "user_" . $user->ID);
 
-            if($user_reg_code == null)
+            if($user_reg_code !== null)
                 return "Pending";
 
             $access = get_field("user_access", "user_" . $user->ID);

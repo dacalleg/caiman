@@ -136,16 +136,21 @@ function caiman_get_user(WP_REST_Request $request)
 }
 
 add_filter( 'retrieve_password_title', function($title, $user_login, $user_data){
-    return get_translation_value("reset.email.title");
+    $user = get_user_by('login', $user_login);
+    $language = get_user_language_code($user);
+    return get_translation_value("reset.email.title", array(), $language);
 }, 10, 3 );
 
 add_filter( 'retrieve_password_message', function($message, $key, $user_login, $user_data){   
-    return nl2br(get_translation_value("reset.email.body", array("key" => $key, "user" => $user_login)));
+    $user = get_user_by('login', $user_login);
+    $language = get_user_language_code($user);
+    return nl2br(get_translation_value("reset.email.body", array("key" => $key, "user" => $user_login), $language));
 }, 10, 4 );
 
 add_filter( 'wp_password_change_notification_email', function( $wp_password_change_notification_email, $user, $blogname ){   
-    $message = get_translation_value("passwordchange.email.body");
-    $title = get_translation_value("passwordchange.email.title");
+    $language = get_user_language_code($user);
+    $message = get_translation_value("passwordchange.email.body", array(), $language);
+    $title = get_translation_value("passwordchange.email.title", array(), $language);
     $wp_password_change_notification_email["subject"] = $title;
     $wp_password_change_notification_email["message"] = nl2br($message);
     return $wp_password_change_notification_email;

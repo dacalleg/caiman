@@ -58,6 +58,8 @@ add_filter( 'authenticate', function($user, $username, $password ){
     $roles = $user->roles;
     if(in_array("administrator", $roles))
         return $user;
+    if(in_array("pending", $roles))
+        return new WP_Error( 'account_pending', __( '<strong>ERROR</strong>: Your account is pending.' ));
 
     $access = get_field("user_access", "user_" . $user->ID);
     switch($access)
@@ -259,7 +261,37 @@ function register_caiman_rest_api()
             'permission_callback' => '__return_true'
         )
     );
+    register_rest_route(
+        'caiman/v1',
+        '/confirm',
+        array(
+            'methods' => 'POST',
+            'callback' => 'caiman_confirm',
+            'permission_callback' => '__return_true'
+        )
+    );
 }
+
+function caiman_confirm(WP_REST_Request $request)
+{
+    $body = $request->get_json_params();
+    $email = $body["email"];
+    $reg_code = $body["reg_code"];
+
+    $user = get_user_by("email", $email);
+    if($user == false)
+        return new WP_REST_Response(array('error_code' => "user_not_found"), 404);
+
+    $user_reg_code = get_field("reg_code", "user_" . $user->ID);
+    if($user_reg_code != $reg_code)
+        return new WP_REST_Response(array('error_code' => "invalid_reg_code"), 404);
+
+    $user->set_role( $_ENV["DEFAULT_ROLE"] );
+    update_field("reg_code", "", "user_" . $user->ID);
+
+    return new WP_REST_Response(200);
+}
+
 
 function caiman_register(WP_REST_Request $request)
 {
@@ -274,19 +306,24 @@ function caiman_register(WP_REST_Request $request)
         return new WP_REST_Response(array('error_code' => $wp_user_id->get_error_code()), 404);
     }
 
+    $reg_code = md5($email . time());
     $wp_user = new WP_User($wp_user_id);
-    $wp_user->set_role( $_ENV["DEFAULT_ROLE"] );
+    $wp_user->set_role( "pending" );
+
     update_field("user_access", $_ENV["DEFAULT_USER_ACCESS"], "user_" . $wp_user_id);
+    update_field("reg_code", $reg_code, "user_" . $wp_user_id);
 
     foreach ($body as $key => $value) {
         if($key != "email" && $key != "password")
             update_field($key, $value, "user_" . $wp_user_id);
     }
 
-    if(is_wp_error($wp_user))
-        return new WP_REST_Response(array('error_code' => $wp_user->get_error_code()), 404);
-    else
-        return new WP_REST_Response(200);
+    $title = get_translation_value("registration.email.title", get_language_code());
+    $body = get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code));
+
+    wp_mail( $body["email"], $title, $body );
+
+    return new WP_REST_Response(200);
 }
 
 function caiman_forgot_password(WP_REST_Request $request)

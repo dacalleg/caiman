@@ -55,7 +55,8 @@ services:
       JWT_ISS_FIELD: "caiman.micronovasrl.com"
       DEFAULT_ROLE: "service"
       DEFAULT_USER_ACCESS: "locked"
-
+      DEFAULT_LANGUAGE_CODE: "it"
+      DEFAULT_ADMIN_CODE: "it"
 
   caiman_rabbitmq_auth:
     restart: always

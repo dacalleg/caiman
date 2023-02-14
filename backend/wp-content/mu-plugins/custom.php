@@ -134,6 +134,7 @@ add_filter( 'jwt_auth_whitelist', function ( $endpoints ) {
         '/wp-json/caiman/v1/forgot-password',
         '/wp-json/caiman/v1/reset-password',
         '/wp-json/caiman/v1/register',
+        '/wp-json/caiman/v1/confirm',
     );
 
     return array_unique( array_merge( $endpoints, $your_endpoints ) );
@@ -298,6 +299,8 @@ function caiman_register(WP_REST_Request $request)
     $body = $request->get_json_params();
     $email = $body["email"];
     $password = $body["password"];
+    $name = $body["name"];
+    $surname = $body["surname"];
 
     $wp_user_id = wp_create_user($email, $password, $email);
 
@@ -308,20 +311,21 @@ function caiman_register(WP_REST_Request $request)
 
     $reg_code = md5($email . time());
     $wp_user = new WP_User($wp_user_id);
+    wp_update_user( array ('ID' => $wp_user_id, 'display_name' => $surname. " " . $name));    
     $wp_user->set_role( "pending" );
 
     update_field("user_access", $_ENV["DEFAULT_USER_ACCESS"], "user_" . $wp_user_id);
     update_field("reg_code", $reg_code, "user_" . $wp_user_id);
 
     foreach ($body as $key => $value) {
-        if($key != "email" && $key != "password")
+        if($key != "email" && $key != "password" && $key != "name" && $key != "surname")
             update_field($key, $value, "user_" . $wp_user_id);
     }
 
     $title = get_translation_value("registration.email.title", get_language_code());
     $body = get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code, "email" => $email));
 
-    wp_mail( $body["email"], $title, $body );
+    wp_mail( array($body["email"]), $title, $body );
 
     return new WP_REST_Response(200);
 }

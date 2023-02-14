@@ -1,3 +1,3 @@
 <?php
 
-require WPMU_PLUGIN_DIR.'/micronova/init.php';
+require WPMU_PLUGIN_DIR.'/caiman/init.php';

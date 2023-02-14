@@ -321,7 +321,24 @@ function register_caiman_rest_api()
             'permission_callback' => '__return_true'
         )
     );
+    register_rest_route(
+        'caiman/v1',
+        '/update-language',
+        array(
+            'methods' => 'POST',
+            'callback' => 'caiman_update_user_language',
+            'permission_callback' => '__return_true'
+        )
+    );
 }
+
+function caiman_update_user_language(WP_REST_Request $request)
+{
+    $user = wp_get_current_user();
+    update_field("language", get_language_code(), "user_" . $user->ID);
+    return new WP_REST_Response(200);
+}
+
 
 function caiman_confirm_user(WP_REST_Request $request)
 {
@@ -385,6 +402,7 @@ function caiman_register_user(WP_REST_Request $request)
 
     update_field("user_access", $_ENV["DEFAULT_USER_ACCESS"], "user_" . $wp_user_id);
     update_field("reg_code", $reg_code, "user_" . $wp_user_id);
+    update_field("language", get_language_code(), "user_" . $wp_user_id);
 
     foreach ($body as $key => $value) {
         if($key != "email" && $key != "password" && $key != "name" && $key != "surname")
@@ -428,7 +446,18 @@ add_action( 'rest_api_init', 'register_caiman_rest_api' );
 
 function caiman_get_user(WP_REST_Request $request)
 {
-    return new WP_REST_Response(wp_get_current_user(), 200);
+    $user = wp_get_current_user();
+    if($user->ID == 0)
+        return new WP_REST_Response(array('error_code' => "user_not_found"), 404);
+    $ret = new \stdClass();
+    $ret->id = $user->ID;
+    $ret->email = $user->user_email;
+    $ret->name = $user->first_name;
+    $ret->surname = $user->last_name;
+    $ret->display_name = $user->display_name;
+    $ret->role = $user->roles[0];
+    $ret->fields = get_fields("user_" . $user->ID);
+    return new WP_REST_Response($ret, 200);
 }
 
 function caiman_get_options(WP_REST_Request $request)

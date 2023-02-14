@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, ProductInfo, SeramiACL, Translation, UserData } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, ProductInfo, SeramiACL, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
@@ -78,6 +78,39 @@ export class ApiService {
       switchMap(arr => from(arr)),
       switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board)])),
       map(([item, board]) => {
+        let serami_var_override = item.acf.serami_var_override as any[] || [];
+        let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
+        let serami_var_formula_override = item.acf.serami_var_formula_override as any[] || [];
+
+        let identifiers = [].concat(
+          ...serami_var_override.map(item => item.id),
+          ...serami_var_opt_override.map(item => item.id),
+          ...serami_var_formula_override.map(item => item.id)
+        ).filter((item, pos, arr) => {
+          return arr.indexOf(item) == pos;
+        });
+
+        const var_override = identifiers.map(id => {
+          const info = serami_var_override.find(item => item.id === id);
+          const options = serami_var_opt_override.find(item => item.id === id)?.options.split("\n").reduce((acc: { [key: string]: string }, item: string) => {
+            const [key, value] = item.split(":");
+            acc[value.trim()] = key.trim();
+            return acc;
+          }, {} as { [key: string]: string });
+          const formula = serami_var_formula_override.find(item => item.id === id);
+
+          return {
+            id: id,
+            title: info ? info.title : undefined,
+            description: info ? info.description : undefined,
+            options: options ? options : undefined,
+            read_exp: formula ? formula.read_exp : undefined,
+            write_exp: formula ? formula.write_exp : undefined,
+          } as VariableInfoOverride
+        })
+
+        console.log(var_override);
+
         return {
           id: item.id,
           name: item.title.rendered,
@@ -88,7 +121,7 @@ export class ApiService {
           gateway_firmware_list: board.gateway_firmware_list,
           video: item.acf.video || [],
           documents: item.acf.documents || [],
-          serami_var_override: item.acf.serami_var_override || [],
+          serami_var_override: var_override || [],
           serami_group_override: item.acf.serami_group_override || [],
           database: board.database || [],
           image: item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,

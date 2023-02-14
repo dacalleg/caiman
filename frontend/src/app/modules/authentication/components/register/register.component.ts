@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { combineLatest, of, switchMap, throwError } from 'rxjs';
+import { combineLatest, of, switchMap, tap, throwError } from 'rxjs';
 import { User } from 'src/app/classes/interfaces';
 import { AuthService } from 'src/app/services/auth.service';
 
@@ -14,6 +14,7 @@ export class RegisterComponent {
   user: User;
   repeatPassword: string = "";
   finish: boolean = false;
+  validation: boolean = false;
 
   constructor(private AuthService: AuthService) {
     this.user = {
@@ -26,6 +27,7 @@ export class RegisterComponent {
   }
 
   signUp() {
+    this.validation = true;
     combineLatest([of(this.user), of(this.repeatPassword)]).pipe(
       switchMap(([user, reapeatPassword]) => {
         const validation = this.checkPassword(user.password!, reapeatPassword);
@@ -33,8 +35,9 @@ export class RegisterComponent {
           return this.AuthService.register(user);
         this.error = validation;
         return throwError(() => new Error("Invalid password"));
-      }
-      )).subscribe({
+      }),
+      tap(() => this.validation = false),
+      ).subscribe({
         error: (error) => {
           this.error = error.error.error_code;
         },

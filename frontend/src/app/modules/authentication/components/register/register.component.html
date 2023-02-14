@@ -4,7 +4,7 @@
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title">Registration</h3>
-                    <ng-container *ngIf="!finish;else end;">
+                    <ng-container *ngIf="!finish && !validation">
                         <div class="row">
                             <div class="col-md">
                                 <div class="mb-3">
@@ -52,10 +52,14 @@
                             </div>
                         </div>
                     </ng-container>
-                    <ng-template #end>
+                    <ng-container *ngIf="!finish && validation">
+                        <div class="mb-2">Validazione in corso</div>
+                        <a routerLink="/auth/login" class="btn btn-link">Torna al login</a>
+                    </ng-container>
+                    <ng-container *ngIf="finish">
                         <div class="mb-2">Ti abbiamo inviato una mail per completare la registrazione</div>
                         <a routerLink="/auth/login" class="btn btn-link">Torna al login</a>
-                    </ng-template>
+                    </ng-container>
                 </div>
             </div>
         </div>

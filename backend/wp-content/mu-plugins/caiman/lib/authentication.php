@@ -14,7 +14,6 @@ add_filter(
         $payload["customer_code"] = $_ENV["AGUA_CUSTOMER_CODE"];
         $payload["data"]["user"] = $u;
         $payload["auth0"] = "true";
-        $payload["software"] = $_ENV["JWT_SOFTWARE_FIELD"];
         $payload["id"] = $_ENV["JWT_ID_FIELD"];
         return $payload;
 }, 10, 2);

@@ -6,12 +6,12 @@
                     <h3 class="card-title">Registration</h3>
                     <ng-container *ngIf="!finish; else end">
                         <div class="mb-2" *ngIf="error === null">Validazione in corso</div>
-                        <div class="mb-2" *ngIf="error === 'invalid_reg_code' || error ==='user_not_found'">Il link di registrazione non è valido</div> 
-                        <a routerLink="/auth/login" class="btn btn-link">Torna al login</a>                       
+                        <div class="mb-4" *ngIf="error === 'invalid_reg_code' || error ==='user_not_found'">Il link di registrazione non è valido</div> 
+                        <a routerLink="/auth/login" class="btn btn-primary">Torna al login</a>                       
                     </ng-container>
                     <ng-template #end>
-                        <div class="mb-2">Il tuo account è stato validato, attendi che un amministratore attivi il tuo account per effettuare il login</div>
-                        <a routerLink="/auth/login" class="btn btn-link">Torna al login</a>
+                        <div class="mb-4">Il tuo account è stato validato, attendi che un amministratore attivi il tuo account per effettuare il login</div>
+                        <a routerLink="/auth/login" class="btn btn-primary">Torna al login</a>
                     </ng-template>
                 </div>
             </div>

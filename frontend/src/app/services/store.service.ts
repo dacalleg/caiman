@@ -129,6 +129,23 @@ export class StoreService {
   loadFromSnet(xml: string) {
     this.seramiParser.parse(xml).pipe(first()).subscribe(data => {
       this.componentStore.setState((project) => {
+        let overrides = project.device?.info.serami_var_override;
+        if (overrides) {
+          data = data.map(variable => {
+            const override_variable = overrides!.find(ov => ov.id === variable.hash);
+            if (override_variable) {
+              if (override_variable?.title)
+                variable.name = override_variable.title;
+              if (override_variable?.description)
+                variable.description = override_variable.description;
+              if (override_variable?.options)
+                variable.values = Object.keys(override_variable.options).map(key => {
+                  return [override_variable.options![key], key]
+                })
+            }
+            return variable;
+          });
+        }
         return { ...project, variables: data, view: { addressFormat: 16, modbus: false, modbusEEpromOffset: 4096, extendedView: false } } as Project;
       })
     });

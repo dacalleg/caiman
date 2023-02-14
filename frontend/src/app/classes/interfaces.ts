@@ -26,6 +26,7 @@ export interface Variable {
   hide?: boolean,
   signed: boolean,
   formatstring: string
+  description?: string
 }
 
 export interface Project {
@@ -145,6 +146,7 @@ export interface DeviceProduct {
   attribute?: any;
   email_master: string;
   id_client_master: string;
+  security_code: string;
   info: ProductInfo;
 }
 
@@ -155,8 +157,7 @@ export interface DeviceInfoResponse {
   device_product: DeviceProduct[];
 }
 
-export interface Board
-{
+export interface Board {
   id: string;
   serami_file: number;
   serami_acl: SeramiACL[];
@@ -189,8 +190,11 @@ export interface GroupNameOverride {
 
 export interface VariableInfoOverride {
   id: string;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
+  options?: { [key: string]: string }
+  read_exp?: string;
+  write_exp?: string;
 }
 
 export interface Video {
@@ -232,34 +236,29 @@ export interface AguaOptions {
   agua_customer_code: number;
 }
 
-export interface AlertModalConfig
-{
+export interface AlertModalConfig {
   title: string;
   message?: string;
   progress?: boolean;
   progressValue?: number;
 }
 
-export interface GatewayFirmware extends WithRole
-{
+export interface GatewayFirmware extends WithRole {
   version: string;
   file: number;
 }
 
 
-export interface Database extends WithRole
-{
+export interface Database extends WithRole {
   name: string;
   values: DatabaseValue[]
 }
 
-export interface WithRole
-{
+export interface WithRole {
   role: string;
 }
 
-export interface DatabaseValue
-{
+export interface DatabaseValue {
   id: string;
   value: string;
 }
@@ -271,23 +270,20 @@ export interface Translation {
   values: { [key: string]: string };
 }
 
-export interface WifiStatus
-{
+export interface WifiStatus {
   wifi_connected: boolean;
   cloud_connected: boolean;
   wifi_stations: WifiStation[];
 }
 
-export interface WifiStation
-{
+export interface WifiStation {
   ssid: string;
   channel: number;
   rssi: number;
   bssid: string;
 }
 
-export interface User
-{
+export interface User {
   name: string;
   surname: string;
   email: string;
@@ -295,16 +291,14 @@ export interface User
   company: string;
 }
 
-export interface UserField
-{
+export interface UserField {
   language: string;
   company: string;
 }
 
-export interface UserData
-{
+export interface UserData {
   id: number;
-  email:string;
+  email: string;
   name: string;
   surname: string;
   display_name: string;

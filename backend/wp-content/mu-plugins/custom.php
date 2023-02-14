@@ -35,7 +35,7 @@ add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id
 
             $user_reg_code = get_field("reg_code", "user_" . $user->ID);
 
-            if($user_reg_code !== null)
+            if($user_reg_code !== null || $user_reg_code !== "")
                 return "Pending";
 
             $access = get_field("user_access", "user_" . $user->ID);
@@ -67,7 +67,7 @@ add_filter( 'authenticate', function($user, $username, $password ){
 
     $user_reg_code = get_field("reg_code", "user_" . $user->ID);
 
-    if($user_reg_code !== null)
+    if($user_reg_code !== null || $user_reg_code !== "")
         return new WP_Error( 'account_pending', __( '<strong>ERROR</strong>: Your account is pending.' ));
 
     $access = get_field("user_access", "user_" . $user->ID);
@@ -298,7 +298,7 @@ function caiman_confirm_user(WP_REST_Request $request)
     if($user_reg_code != $reg_code)
         return new WP_REST_Response(array('error_code' => "invalid_reg_code"), 404);
 
-    delete_field("reg_code", "user_" . $user->ID);
+    update_field("reg_code", "", "user_" . $user->ID);
 
     $administrators = get_users(array(
         'role__in' => array('administrator'),
@@ -310,7 +310,7 @@ function caiman_confirm_user(WP_REST_Request $request)
     {
         $admin_email = $admin->user_email;
         $title = get_translation_value("registration.admin.email.title");
-        $message = get_translation_value("registration.admin.email.body", array("user_email" => $email));
+        $message = nl2br(get_translation_value("registration.admin.email.body", array("user_email" => $email)));
         wp_mail($admin_email, $title, $message, $headers);
     }
 

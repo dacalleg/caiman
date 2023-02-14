@@ -268,6 +268,12 @@ function caiman_register(WP_REST_Request $request)
     $password = $body["password"];
 
     $wp_user_id = wp_create_user($email, $password, $email);
+
+    if(is_wp_error($wp_user_id))
+    {
+        return new WP_REST_Response(array('error_code' => $wp_user_id->get_error_code()), 404);
+    }
+
     $wp_user = new WP_User($wp_user_id);
     $wp_user->set_role( $_ENV["DEFAULT_ROLE"] );
     update_field("user_access", $_ENV["DEFAULT_USER_ACCESS"] );

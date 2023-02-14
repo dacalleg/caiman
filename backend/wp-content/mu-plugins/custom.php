@@ -18,6 +18,32 @@ function html_wp_email_content_type() {
 }
 add_filter( 'wp_mail_content_type', 'html_wp_email_content_type' );
 
+add_filter( 'authenticate', function($user, $username, $password ){
+    if( $user === null || is_wp_error($user))
+        return $user;
+
+    $roles = $user->roles;
+    if(in_array("administrator", $roles))
+        return $user;
+
+    $access = get_field("user_access", "user_" . $user->ID);
+    switch($access)
+    {
+        case "locked":
+            return new WP_Error( 'authentication_failed', __( '<strong>ERROR</strong>: Your account is locked.' ));
+        case "expire":
+            $expiration = get_field("expiration", "user_" . $user->ID);
+            $now = new DateTime();
+            $exp = DateTime::createFromFormat('d/m/Y', $expiration);
+            if($exp < $now)
+                return new WP_Error( 'authentication_failed', __( '<strong>ERROR</strong>: Your account has expired.' ));
+            return $user;
+        case "noexpire":
+            return $user;
+    }
+    return null;
+}, 10,3);
+
 add_filter(
     'jwt_auth_payload',
     function ( $payload, $user ) {

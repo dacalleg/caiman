@@ -80,7 +80,13 @@ add_action('acf/save_post', function ($post_id) {
         {
             $expiration = null;
             if(array_key_exists('field_63eb3e3a6b358', $_POST['acf']))
-                $expiration = $_POST['acf']['field_63eb3e3a6b358'];     
+                $expiration = $_POST['acf']['field_63eb3e3a6b358'];
+
+            $re = '/(\w{4})(\w{2})(\w{2})/m';
+            $subst = "$3/$2/$1";
+            
+            $expiration = preg_replace($re, $subst, $expiration);
+            
             $message = nl2br(get_translation_value("user.access.expire.email.body", array("display_name" => $wp_user->display_name, "expiration" => $expiration)));
         }
 

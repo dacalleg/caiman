@@ -32,6 +32,12 @@ add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id
             $roles = $user->roles;
             if(in_array("administrator", $roles))
                 return "-";
+
+            $user_reg_code = get_field("reg_code", "user_" . $user->ID);
+
+            if($user_reg_code == null)
+                return "Pending";
+
             $access = get_field("user_access", "user_" . $user->ID);
             if($access == "locked")
                 return "Locked";
@@ -58,7 +64,10 @@ add_filter( 'authenticate', function($user, $username, $password ){
     $roles = $user->roles;
     if(in_array("administrator", $roles))
         return $user;
-    if(in_array("pending", $roles))
+
+    $user_reg_code = get_field("reg_code", "user_" . $user->ID);
+
+    if($user_reg_code !== null)
         return new WP_Error( 'account_pending', __( '<strong>ERROR</strong>: Your account is pending.' ));
 
     $access = get_field("user_access", "user_" . $user->ID);
@@ -287,8 +296,7 @@ function caiman_confirm(WP_REST_Request $request)
     if($user_reg_code != $reg_code)
         return new WP_REST_Response(array('error_code' => "invalid_reg_code"), 404);
 
-    $user->set_role( $_ENV["DEFAULT_ROLE"] );
-    update_field("reg_code", "", "user_" . $user->ID);
+    delete_field("reg_code", "user_" . $user->ID);
 
     return new WP_REST_Response(200);
 }
@@ -311,8 +319,14 @@ function caiman_register(WP_REST_Request $request)
 
     $reg_code = md5($email . time());
     $wp_user = new WP_User($wp_user_id);
-    wp_update_user( array ('ID' => $wp_user_id, 'display_name' => $displayed_name));    
-    $wp_user->set_role( "pending" );
+    wp_update_user( array (
+        'ID' => $wp_user_id, 
+        'display_name' => $displayed_name,
+        'first_name' => $name,
+        'last_name' => $surname,
+    ));
+
+    $wp_user->set_role( $_ENV["DEFAULT_ROLE"] );
 
     update_field("user_access", $_ENV["DEFAULT_USER_ACCESS"], "user_" . $wp_user_id);
     update_field("reg_code", $reg_code, "user_" . $wp_user_id);
@@ -323,9 +337,10 @@ function caiman_register(WP_REST_Request $request)
     }
 
     $title = get_translation_value("registration.email.title", get_language_code());
-    $body = get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code, "email" => $email, 'displayed_name' => $displayed_name));
-
-    wp_mail( array($body["email"]), $title, $body );
+    $body = nl2br(get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code, "email" => $email, 'displayed_name' => $displayed_name)));
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+    
+    wp_mail( array($body["email"]), $title, $body, $headers );
 
     return new WP_REST_Response(200);
 }

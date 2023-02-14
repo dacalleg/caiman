@@ -150,16 +150,16 @@ add_filter( 'jwt_auth_whitelist', function ( $endpoints ) {
 });
 
 add_filter( 'retrieve_password_title', function($title, $user_login, $user_data){
-    return get_translation_value("reset.email.title", get_language_code());
+    return get_translation_value("reset.email.title");
 }, 10, 3 );
 
 add_filter( 'retrieve_password_message', function($message, $key, $user_login, $user_data){   
-    return nl2br(get_translation_value("reset.email.body", get_language_code(), array("key" => $key, "user" => $user_login)));
+    return nl2br(get_translation_value("reset.email.body", array("key" => $key, "user" => $user_login)));
 }, 10, 4 );
 
 add_filter( 'wp_password_change_notification_email', function( $wp_password_change_notification_email, $user, $blogname ){   
-    $message = get_translation_value("passwordchange.email.body", get_language_code());
-    $title = get_translation_value("passwordchange.email.title", get_language_code());
+    $message = get_translation_value("passwordchange.email.body");
+    $title = get_translation_value("passwordchange.email.title");
     $wp_password_change_notification_email["subject"] = $title;
     $wp_password_change_notification_email["message"] = nl2br($message);
     return $wp_password_change_notification_email;
@@ -171,12 +171,14 @@ function get_language_code()
     $lang = $headers["Language"];
     
     if(!isset($lang))
-        $lang = "en";
+        $lang = $_ENV("DEFAULT_LANGUAGE_CODE");
     return $lang;
 }
 
-function get_translation_value($key, $lang, $placeholders=array())
+function get_translation_value($key, $placeholders=array(), $lang=null)
 {
+    if($lang == null)
+        $lang = get_language_code();
     $default = array("base_url" => get_site_url(), "domain_url" => str_replace("/backend", "", get_site_url()));
     $placeholders = array_merge($default, $placeholders);
 
@@ -267,7 +269,7 @@ function register_caiman_rest_api()
         '/register',
         array(
             'methods' => 'POST',
-            'callback' => 'caiman_register',
+            'callback' => 'caiman_register_user',
             'permission_callback' => '__return_true'
         )
     );
@@ -276,13 +278,13 @@ function register_caiman_rest_api()
         '/confirm',
         array(
             'methods' => 'POST',
-            'callback' => 'caiman_confirm',
+            'callback' => 'caiman_confirm_user',
             'permission_callback' => '__return_true'
         )
     );
 }
 
-function caiman_confirm(WP_REST_Request $request)
+function caiman_confirm_user(WP_REST_Request $request)
 {
     $body = $request->get_json_params();
     $email = $body["email"];
@@ -298,11 +300,25 @@ function caiman_confirm(WP_REST_Request $request)
 
     delete_field("reg_code", "user_" . $user->ID);
 
+    $administrators = get_users(array(
+        'role__in' => array('administrator'),
+    ));
+
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+
+    foreach($administrators as $admin)
+    {
+        $admin_email = $admin->user_email;
+        $title = get_translation_value("registration.admin.email.title");
+        $message = get_translation_value("registration.admin.email.body", array("user_email" => $email));
+        wp_mail($admin_email, $title, $message, $headers);
+    }
+
     return new WP_REST_Response(200);
 }
 
 
-function caiman_register(WP_REST_Request $request)
+function caiman_register_user(WP_REST_Request $request)
 {
     $body = $request->get_json_params();
     $email = $body["email"];
@@ -336,8 +352,8 @@ function caiman_register(WP_REST_Request $request)
             update_field($key, $value, "user_" . $wp_user_id);
     }
 
-    $title = get_translation_value("registration.email.title", get_language_code());
-    $message = nl2br(get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code, "email" => $email, 'displayed_name' => $displayed_name)));
+    $title = get_translation_value("registration.email.title");
+    $message = nl2br(get_translation_value("registration.email.body", array("reg_code" => $reg_code, "email" => $email, 'displayed_name' => $displayed_name)));
     $headers = array('Content-Type: text/html; charset=UTF-8');
     
     wp_mail( $email, $title, $message, $headers );

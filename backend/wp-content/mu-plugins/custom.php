@@ -337,10 +337,10 @@ function caiman_register(WP_REST_Request $request)
     }
 
     $title = get_translation_value("registration.email.title", get_language_code());
-    $body = nl2br(get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code, "email" => $email, 'displayed_name' => $displayed_name)));
+    $message = nl2br(get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code, "email" => $email, 'displayed_name' => $displayed_name)));
     $headers = array('Content-Type: text/html; charset=UTF-8');
     
-    wp_mail( array($body["email"]), $title, $body, $headers );
+    wp_mail( $email, $title, $message, $headers );
 
     return new WP_REST_Response(200);
 }

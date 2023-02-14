@@ -76,9 +76,9 @@ add_action('acf/save_post', function ($post_id) {
         $title = get_translation_value("user.access.email.title", array(), $user_language);
 
         if($access == "locked")
-            $message = nl2br(get_translation_value("user.access.locked.email.body", array("display_name" => $wp_user->display_name)), $user_language);
+            $message = nl2br(get_translation_value("user.access.locked.email.body", array("display_name" => $wp_user->display_name), $user_language));
         if($access == "noexpire")
-            $message = nl2br(get_translation_value("user.access.noexpire.email.body", array("display_name" => $wp_user->display_name)), $user_language);
+            $message = nl2br(get_translation_value("user.access.noexpire.email.body", array("display_name" => $wp_user->display_name), $user_language));
         if($access == "expire")
         {
             $expiration = null;
@@ -90,7 +90,7 @@ add_action('acf/save_post', function ($post_id) {
             
             $expiration = preg_replace($re, $subst, $expiration);
             
-            $message = nl2br(get_translation_value("user.access.expire.email.body", array("display_name" => $wp_user->display_name, "expiration" => $expiration)), $user_language);
+            $message = nl2br(get_translation_value("user.access.expire.email.body", array("display_name" => $wp_user->display_name, "expiration" => $expiration), $user_language));
         }
 
         $headers = array('Content-Type: text/html; charset=UTF-8');

@@ -319,7 +319,7 @@ function caiman_register(WP_REST_Request $request)
     }
 
     $title = get_translation_value("registration.email.title", get_language_code());
-    $body = get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code));
+    $body = get_translation_value("registration.email.body", get_language_code(), array("reg_code" => $reg_code, "email" => $email));
 
     wp_mail( $body["email"], $title, $body );
 

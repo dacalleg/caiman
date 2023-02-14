@@ -60,8 +60,9 @@ add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id
 add_action('acf/save_post', function ($post_id) {
     // Check the new value of user access field.
     if( isset($_POST['acf']['field_63eb3dca6b357']) ) {
-        $wp_user = new WP_User($post_id);
-        if($wp_user == null && is_wp_error($wp_user))
+        $id = str_replace("user_", "", $post_id);
+        $wp_user = new WP_User($id);
+        if($wp_user->ID == 0 && is_wp_error($wp_user))
             return;
         $roles = $wp_user->roles;
         if(in_array("administrator", $roles))

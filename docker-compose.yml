@@ -53,6 +53,9 @@ services:
       JWT_SOFTWARE_FIELD: "caiman"
       JWT_ID_FIELD: "464D7C31-0BBD-462D-A7F8-C03913EED030"
       JWT_ISS_FIELD: "caiman.micronovasrl.com"
+      DEFAULT_ROLE: "service"
+      DEFAULT_USER_ACCESS: "locked"
+
 
   caiman_rabbitmq_auth:
     restart: always

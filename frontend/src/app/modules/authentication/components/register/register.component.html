@@ -1,0 +1,63 @@
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Registration</h3>
+                    <ng-container *ngIf="!finish;else end;">
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="name" [(ngModel)]="user.name" />
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="mb-3">
+                                    <label for="surname" class="form-label">Surname</label>
+                                    <input type="text" class="form-control" id="surname" [(ngModel)]="user.surname" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email address</label>
+                                    <input type="email" class="form-control" id="email" [(ngModel)]="user.email" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password"
+                                        [(ngModel)]="user.password" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="repeatpassword" class="form-label">Ripeti Password</label>
+                                    <input type="password" class="form-control" id="repeatpassword"
+                                        [(ngModel)]="repeatPassword" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="company" class="form-label">Azienda</label>
+                                    <input type="text" class="form-control" id="company" [(ngModel)]="user.company" />
+                                </div>
+                                <ng-container *ngIf="error">
+                                    <div *ngIf="error === 'existing_user_email'">Esiste già un account registrato per
+                                        questa
+                                        e-mail</div>
+                                    <div *ngIf="error === 'password_short'">La password ha una dimensione inferiore a 8
+                                        caratteri.</div>
+                                    <div *ngIf="error === 'password_not_match'">Le password non coincidono.</div>
+                                </ng-container>
+                                <button type="submit" class="btn btn-primary" (click)="signUp()">Submit</button>
+                                <a routerLink="/auth/login" class="btn btn-link">Torna al login</a>
+                            </div>
+                        </div>
+                    </ng-container>
+                    <ng-template #end>
+                        <div class="mb-2">Ti abbiamo inviato una mail per completare la registrazione</div>
+                        <a routerLink="/auth/login" class="btn btn-link">Torna al login</a>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

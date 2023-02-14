@@ -285,3 +285,28 @@ export interface WifiStation
   rssi: number;
   bssid: string;
 }
+
+export interface User
+{
+  name: string;
+  surname: string;
+  email: string;
+  password?: string;
+  company: string;
+}
+
+export interface UserField
+{
+  language: string;
+  company: string;
+}
+
+export interface UserData
+{
+  id: number;
+  email:string;
+  name: string;
+  surname: string;
+  display_name: string;
+  fields: UserField;
+}

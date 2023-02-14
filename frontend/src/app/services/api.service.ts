@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, ProductInfo, SeramiACL, Translation } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, ProductInfo, SeramiACL, Translation, UserData } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
@@ -131,10 +131,6 @@ export class ApiService {
     return this.getAttachmentUrl(id).pipe(
       switchMap(url => this.Http.get(url, { responseType: 'text' }))
     )
-  }
-
-  getUserInfo() {
-    return this.Http.get<any>(environment.endpoint + "/wp-json/caiman/v1/me");
   }
 
   getAguaEnv() {

@@ -17,9 +17,14 @@
                         <input type="checkbox" class="form-check-input" id="rememberMe" [(ngModel)]="rememberMe" />
                         <label class="form-check" for="rememberMe">Remember me</label>
                     </div>
-                    <div *ngIf="error">{{error}}</div>
+                    <ng-container *ngIf="error">
+                        <div *ngIf="error === 'account_expired'">Il tuo account è scaduto, contatta l'assistenza per l'abilitazione.</div>
+                        <div *ngIf="error === 'account_locked'">Il tuo account è stato bloccato, contatta l'assistenza per l'abilitazione.</div>
+                        <div *ngIf="error === 'invalid_email' || error === 'incorrect_password'">Le credenziali inserite sono errate.</div>
+                    </ng-container>
                     <button type="submit" class="btn btn-primary" (click)="login()">Submit</button>
                     <a routerLink="/auth/forgot" class="btn btn-link">Password dimenticata?</a>
+                    <a routerLink="/auth/register" class="btn btn-link">Non hai un account?</a>
 
                 </div>
             </div>

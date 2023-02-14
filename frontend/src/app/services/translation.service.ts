@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, take } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,7 @@ export class TranslationService {
       localStorage.setItem("language", "it");
       this.translation.use('it');
     }
+
     this.languageSubject$ = new BehaviorSubject<string>(this.translation.currentLang);
   }
 

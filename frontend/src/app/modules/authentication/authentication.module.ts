@@ -6,13 +6,17 @@ import { AuthenticationRoutingModule } from './authentication-routing.modules';
 import { TranslateModule } from '@ngx-translate/core';
 import { ResetComponent } from './components/reset/reset.component';
 import { RecoverComponent } from './components/recover/recover.component';
+import { RegisterComponent } from './components/register/register.component';
+import { ConfirmComponent } from './components/confirm/confirm.component';
 
 
 @NgModule({
   declarations: [
     LoginComponent,
     ResetComponent,
-    RecoverComponent
+    RecoverComponent,
+    RegisterComponent,
+    ConfirmComponent
   ],
   imports: [
     CommonModule,

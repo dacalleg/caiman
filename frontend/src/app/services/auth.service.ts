@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { BehaviorSubject, defer, distinctUntilChanged, filter, interval, map, Observable, of, shareReplay, Subject, switchMap, take, tap } from 'rxjs';
+import { BehaviorSubject, defer, distinctUntilChanged, filter, interval, map, Observable, of, shareReplay, skip, Subject, switchMap, take, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { LoginResponse } from '../classes/interfaces';
+import { LoginResponse, User, UserData } from '../classes/interfaces';
+import { TranslationService } from './translation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,9 @@ export class AuthService {
 
   private tokenChanges$: BehaviorSubject<string | null>;
   private tokenValidityChanges$: Observable<boolean>;
-  constructor(private Http: HttpClient, private jwtHelper: JwtHelperService) {
+  private userData$: Observable<UserData>;
+
+  constructor(private Http: HttpClient, private jwtHelper: JwtHelperService, private Translation: TranslationService) {
     this.tokenChanges$ = new BehaviorSubject<string | null>(localStorage.getItem('access_token'));
     this.tokenValidityChanges$ = interval(5000).pipe(
       switchMap(() => this.tokenChanges$.pipe(take(1))),
@@ -20,6 +23,21 @@ export class AuthService {
       distinctUntilChanged(),
       shareReplay(1)
     );
+
+    this.userData$ = this.tokenChanges$.pipe(
+      filter(token => token !== null),
+      switchMap(() => this.Http.get<UserData>(environment.endpoint + "/wp-json/caiman/v1/me")),
+      shareReplay(1)
+    );
+
+    this.Translation.getCurrentLanguage().pipe(
+      skip(2),
+      switchMap(() => this.updateUserLanguage()),
+    ).subscribe();
+
+    this.getUserData().pipe(take(1)).subscribe((userData) => {
+      this.Translation.changeLanguage(userData.fields.language);
+    });
   }
 
   login(username: string, password: string) {
@@ -37,6 +55,21 @@ export class AuthService {
 
   resetPassword(username: string, key: string, password: string) {
     return this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/reset-password', { user: username, key: key, password: password });
+  }
+
+  register(user: User) {
+    return this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/register', user);
+  }
+
+  confirmEmail(email: string, code: string) {
+    return this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/confirm', { email: email, reg_code: code });
+  }
+
+
+  updateUserLanguage() {
+    return this.getToken().pipe(
+      switchMap(() => this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/update-language', null))
+    )
   }
 
   tokenValidityChanges(): Observable<boolean> {
@@ -73,5 +106,9 @@ export class AuthService {
       this.tokenChanges$.next(null);
       return of(void 0);
     })
+  }
+
+  getUserData(): Observable<UserData> {
+    return this.userData$;
   }
 }

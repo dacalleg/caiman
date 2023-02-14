@@ -69,11 +69,11 @@ add_action('acf/save_post', function ($post_id) {
             return;
 
         $access = $_POST['acf']['field_63eb3dca6b357'];
-        $user_language = get_field("language", $post_id);
+        $user_language = get_field("language", "user_" . $id);
         if($user_language === null || $user_language === "")
             $user_language = $_ENV['DEFAULT_LANGUAGE'];
 
-        $title = get_translation_value("user.access.email.title");
+        $title = get_translation_value("user.access.email.title", array(), $user_language);
 
         if($access == "locked")
             $message = nl2br(get_translation_value("user.access.locked.email.body", array("display_name" => $wp_user->display_name)), $user_language);
@@ -90,7 +90,7 @@ add_action('acf/save_post', function ($post_id) {
             
             $expiration = preg_replace($re, $subst, $expiration);
             
-            $message = nl2br(get_translation_value("user.access.expire.email.body", array("display_name" => $wp_user->display_name, "expiration" => $expiration)));
+            $message = nl2br(get_translation_value("user.access.expire.email.body", array("display_name" => $wp_user->display_name, "expiration" => $expiration)), $user_language);
         }
 
         $headers = array('Content-Type: text/html; charset=UTF-8');

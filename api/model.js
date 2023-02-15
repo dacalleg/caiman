@@ -40,7 +40,14 @@ module.exports = (sequelize, DataTypes) => {
         customer: {
             type: DataTypes.BOOLEAN,
         }
-    }, { hierarchy: true })
+    }, {
+        indexes: [
+            {
+                unique: false,
+                fields: ['device']
+            }
+        ]
+    })
 
     Ticket.parent = Ticket.belongsTo(Ticket, { foreignKey: 'parent_id', as: 'parent' });
     Ticket.assets = Ticket.hasMany(Asset, { foreignKey: 'ticket_id', as: 'assets' });

@@ -16,6 +16,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
 const { Ticket, Asset } = require('./model')(sequelize, DataTypes);
 const express = require('express');
 var cors = require('cors')
+const fs = require('fs');
 
 const UserRequired = (req, res, next) => {
     if (req.headers.authorization) {
@@ -39,12 +40,12 @@ function loadTicketHierarchy(ticket) {
         try {
             const children = await Ticket.findAll({
                 raw: true,
-                nest : true,
+                nest: true,
                 where: {
                     parent_id: ticket.id
                 },
                 include: [
-                    {model: Asset, as: 'assets'}
+                    { model: Asset, as: 'assets' }
                 ]
             });
             ticket.children = [];
@@ -76,54 +77,49 @@ async function init() {
         });
 
         app.post('/ticket/add', UserRequired, async (req, res) => {
-            try
-            {
-                if(req.body.parent !== undefined) {
+            try {
+                if (req.body.parent !== undefined) {
                     req.body.ticket["status"] = "open";
                 }
+                
+                let obj = { ...req.body.ticket, email: req.email };
+                const ticket = await Ticket.create(obj, { include: { association: Ticket.assets } });
 
-                const ticket = await Ticket.create(req.body.ticket, { include: { association: Ticket.assets }});
-
-                if(req.body.parent !== undefined) {
+                if (req.body.parent !== undefined) {
                     await ticket.setParent(req.body.parent);
                 }
                 res.status(200).send({ status: "OK" });
-            }catch(ex)
-            {
+            } catch (ex) {
                 res.status(500).send({ message: ex.message });
             }
         });
 
         app.post('/ticket/close', UserRequired, async (req, res) => {
-            try
-            {
+            try {
                 await Ticket.update({ status: 'closed' }, { where: { id: req.body.id } });
                 res.status(200).send({ status: "OK" });
-            }catch(ex)
-            {
+            } catch (ex) {
                 res.status(500).send({ message: ex.message });
             }
         });
 
         app.post('/ticket/get', UserRequired, async (req, res) => {
-            try
-            {   
+            try {
                 const tickets = await Ticket.findAll(
                     {
                         raw: true,
-                        nest : true,
+                        nest: true,
                         where: {
                             device: req.body.device,
-                            parent_id : null
+                            parent_id: null
                         },
                         include: [
-                            {model: Asset, as: 'assets'}
+                            { model: Asset, as: 'assets' }
                         ]
                     }
                 );
                 res.status(200).send(await Promise.all(tickets.map(async (ticket) => loadTicketHierarchy(ticket))));
-            }catch(ex)
-            {
+            } catch (ex) {
                 res.status(500).send({ message: ex.message });
             }
         });
@@ -135,11 +131,11 @@ async function init() {
             fs.writeFile(
                 filepath,
                 buff,
-                {flag: "a"},
+                { flag: "a" },
                 function () {
                 }
             );
-            res.send({"status": "OK"});
+            res.send({ "status": "OK" });
         });
 
         app.listen(PORT, (error) => {

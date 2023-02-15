@@ -1,23 +1,25 @@
 version: '3.1'
 services:
 
-  #caiman_mongo_rest:
-  #  restart: always
-  #  build: ./mongo-rest
-  #  image: caiman_mongo_rest:latest
-  #  container_name: caiman_mongo_rest
-  #  depends_on:
-  #    - caiman_mongo
-  #  volumes:
-  #    - ./mongo-rest/server.js:/usr/src/app/server.js
-  #    - ./lib/utils.js:/usr/src/app/utils.js
-  #    - ./lib/group_matcher.js:/usr/src/app/group_matcher.js
-  #    - ./volumes/uploads:/usr/src/app/uploads
-  #  command: ["node", "server.js"]
-  #  healthcheck:
-  #    interval: 5m
-  #  environment:
-  #    NODE_ENV: "production"
+  caiman_api:
+    restart: always
+    build: ./api
+    image: caiman_api:latest
+    container_name: caiman_api
+    depends_on:
+      - caiman_db
+    volumes:
+      - ./volumes/uploads/api:/usr/src/app/uploads
+    command: ["node", "index.js"]
+    healthcheck:
+      interval: 5m
+    environment:
+      NODE_ENV: "production"
+      DB_NAME: "api"
+      DB_USER: "root"
+      DB_PASSWORD: "01Ul8TrH&Mq8"
+      DB_HOST: "caiman_db"
+      JWT_AUTH_SECRET_KEY: "tokenagua"
 
   caiman_frontend:
     restart: always
@@ -33,7 +35,7 @@ services:
     image: caiman_backend:latest
     container_name: caiman_backend
     depends_on:
-      - caiman_wp_db
+      - caiman_db
     volumes:
       - ./volumes/uploads:/var/www/public/wp-content/uploads
     healthcheck:
@@ -42,7 +44,7 @@ services:
       DB_NAME: "caiman"
       DB_USER: "root"
       DB_PASSWORD: "01Ul8TrH&Mq8"
-      DB_HOST: "caiman_wp_db"
+      DB_HOST: "caiman_db"
       WP_DEBUG: "false"
       JWT_AUTH_SECRET_KEY: "tokenagua"
       JWT_AUTH_CORS_ENABLE: "true"
@@ -68,20 +70,6 @@ services:
       interval: 5m
     environment:
       NODE_ENV: "production"
-
-  #caiman_mongo:
-  #  restart: always
-  #  image: caiman_mongo:latest
-  #  build: ./mongo
-  #  container_name: caiman_mongo
-  #  environment:
-  #    - MONGO_DATA_DIR=/data/db
-  #    - MONGO_LOG_DIR=/dev/null
-  #    - MONGODB_USER=root
-  #    - MONGODB_PASS=01Ul8TrH&Mq8
-  #  volumes:
-  #    - ./volumes/mongo:/data/db
-  #  command: mongod --logpath=/dev/null # --quiet
 
   certbot:
     container_name: certbot
@@ -121,9 +109,9 @@ services:
       - "80:80"
       - "443:443"
 
-  caiman_wp_db:
+  caiman_db:
     image: mariadb
-    container_name: caiman_wp_db
+    container_name: caiman_db
     environment:
       MYSQL_ROOT_PASSWORD: 01Ul8TrH&Mq8
     volumes:
@@ -149,8 +137,8 @@ services:
       image: phpmyadmin/phpmyadmin
       container_name: phpmyadmin
       depends_on:
-        - caiman_wp_db
+        - caiman_db
       environment:
-          PMA_HOST: caiman_wp_db
+          PMA_HOST: caiman_db
           MYSQL_ROOT_PASSWORD: 01Ul8TrH&Mq8
-          PMA_ABSOLUTE_URI: http://localhost/phpmyadmin/
+          PMA_ABSOLUTE_URI: https://caiman.micronovasrl.com/phpmyadmin/

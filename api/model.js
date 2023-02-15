@@ -1,0 +1,38 @@
+
+module.exports = (sequelize, DataTypes) => {
+    const Asset = sequelize.define('assets', {
+        path: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+    }, {})
+    const Ticket = sequelize.define('tickets', {
+        email: {
+            type: DataTypes.STRING(100),
+            allowNull: false
+        },
+        title: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        device: {
+            type: DataTypes.STRING(20),
+            allowNull: false
+        },
+        status: {
+            type: DataTypes.STRING(10),
+            allowNull: true
+        },
+        text: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        customer: {
+            type: DataTypes.BOOLEAN,
+        }
+    } , {hierarchy: true})
+
+    Ticket.parent = Ticket.belongsTo(Ticket, { foreignKey: 'parent_id', as: 'parent' });
+    Ticket.assets = Ticket.hasMany(Asset, { foreignKey: 'ticket_id', as: 'assets' });
+    return { Ticket, Asset }
+};

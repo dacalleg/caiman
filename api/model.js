@@ -1,12 +1,22 @@
 
 module.exports = (sequelize, DataTypes) => {
     const Asset = sequelize.define('assets', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
         path: {
             type: DataTypes.STRING,
             allowNull: false
         },
     }, {})
     const Ticket = sequelize.define('tickets', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
         email: {
             type: DataTypes.STRING(100),
             allowNull: false
@@ -30,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
         customer: {
             type: DataTypes.BOOLEAN,
         }
-    } , {hierarchy: true})
+    }, { hierarchy: true })
 
     Ticket.parent = Ticket.belongsTo(Ticket, { foreignKey: 'parent_id', as: 'parent' });
     Ticket.assets = Ticket.hasMany(Asset, { foreignKey: 'ticket_id', as: 'assets' });

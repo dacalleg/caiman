@@ -81,8 +81,8 @@ async function init() {
                 if (req.body.parent !== undefined) {
                     req.body.ticket["status"] = "open";
                 }
-                
-                let obj = { ...req.body.ticket, email: req.email };
+
+                let obj = { ...req.body.ticket, email: req.user.email };
                 const ticket = await Ticket.create(obj, { include: { association: Ticket.assets } });
 
                 if (req.body.parent !== undefined) {

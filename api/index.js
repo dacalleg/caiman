@@ -15,7 +15,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
 });
 const { Ticket, Asset } = require('./model')(sequelize, DataTypes);
 const express = require('express');
-
+var cors = require('cors')
 
 const UserRequired = (req, res, next) => {
     if (req.headers.authorization) {
@@ -68,6 +68,7 @@ async function init() {
         await Ticket.sync({ alter: true });
         await Asset.sync({ alter: true });
 
+        app.use(cors());
         app.use(bodyParser.json({ limit: '10mb' }));
 
         app.get('/healthcheck', (req, res) => {

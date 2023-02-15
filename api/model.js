@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         title: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
         device: {
             type: DataTypes.STRING(20),

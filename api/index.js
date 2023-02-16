@@ -39,8 +39,6 @@ function loadTicketHierarchy(ticket) {
     return new Promise(async (resolve, reject) => {
         try {
             const children = await Ticket.findAll({
-                raw: true,
-                nest: true,
                 where: {
                     parent_id: ticket.id
                 },
@@ -50,7 +48,7 @@ function loadTicketHierarchy(ticket) {
             });
             ticket.children = [];
             for (let child of children) {
-                ticket.children.push(await loadTicketHierarchy(child));
+                ticket.children.push(await loadTicketHierarchy(child.toJSON()));
             }
             resolve(ticket);
         } catch (ex) {
@@ -107,8 +105,6 @@ async function init() {
             try {
                 const tickets = await Ticket.findAll(
                     {
-                        raw: true,
-                        nest: true,
                         where: {
                             device: req.body.device,
                             parent_id: null
@@ -118,7 +114,7 @@ async function init() {
                         ]
                     }
                 );
-                res.status(200).send(await Promise.all(tickets.map(async (ticket) => loadTicketHierarchy(ticket))));
+                res.status(200).send(await Promise.all(tickets.map(async (ticket) => loadTicketHierarchy(ticket.toJSON()))));
             } catch (ex) {
                 res.status(500).send({ message: ex.message });
             }

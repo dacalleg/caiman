@@ -81,7 +81,7 @@ async function init() {
                 }
 
                 let obj = { ...req.body.ticket, email: req.user.email };
-                const ticket = await Ticket.create(obj, { include: { association: Ticket.assets } });
+                const ticket = await Ticket.create(obj, { include: { association: Asset } });
 
                 if (req.body.parent !== undefined) {
                     await ticket.setParent(req.body.parent);

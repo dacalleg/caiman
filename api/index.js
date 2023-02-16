@@ -45,7 +45,7 @@ function loadTicketHierarchy(ticket) {
                     parent_id: ticket.id
                 },
                 include: [
-                    { model: Asset, as: 'ticket' }
+                    Asset
                 ]
             });
             ticket.children = [];
@@ -114,7 +114,7 @@ async function init() {
                             parent_id: null
                         },
                         include: [
-                            { model: Asset, as: 'ticket' }
+                            Asset
                         ]
                     }
                 );

@@ -27,7 +27,7 @@ const UserRequired = (req, res, next) => {
         jwt.verify(token, JWT_KEY, function (err, decoded) {
             if (err)
                 return res.sendStatus(403);
-            req.user = decoded.data;
+            req.user = decoded;
             next();
         });
     } else {
@@ -45,7 +45,7 @@ function loadTicketHierarchy(ticket) {
                     parent_id: ticket.id
                 },
                 include: [
-                    { model: Asset, as: 'assets' }
+                    { model: Asset, as: 'ticket' }
                 ]
             });
             ticket.children = [];
@@ -114,7 +114,7 @@ async function init() {
                             parent_id: null
                         },
                         include: [
-                            { model: Asset, as: 'assets' }
+                            { model: Asset, as: 'ticket' }
                         ]
                     }
                 );

@@ -50,6 +50,6 @@ module.exports = (sequelize, DataTypes) => {
     })
 
     Ticket.parent = Ticket.belongsTo(Ticket, { foreignKey: 'parent_id', as: 'parent' });
-    Ticket.assets = Ticket.hasMany(Asset, { foreignKey: 'ticket_id', as: 'assets' });
+    Asset.ticket = Asset.belongsTo(Ticket, { foreignKey: 'ticket_id', as: 'ticket' });
     return { Ticket, Asset }
 };

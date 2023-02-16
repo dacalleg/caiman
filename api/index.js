@@ -81,13 +81,14 @@ async function init() {
                 }
 
                 let obj = { ...req.body.ticket, email: req.user.email };
-                const ticket = await Ticket.create(obj, { include: { association: Asset } });
+                const ticket = await Ticket.create(obj, { include: [ Asset ] });
 
                 if (req.body.parent !== undefined) {
                     await ticket.setParent(req.body.parent);
                 }
                 res.status(200).send({ status: "OK" });
             } catch (ex) {
+
                 res.status(500).send({ message: ex.message });
             }
         });

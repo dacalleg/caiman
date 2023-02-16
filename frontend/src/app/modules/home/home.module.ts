@@ -22,7 +22,6 @@ import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi} from 'ng-boo
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { DeviceSelectComponent } from './components/device-select/device-select.component';
 import { YouTubePlayerModule } from '@angular/youtube-player';
-import { TimelineComponent } from './components/timeline/timeline.component';
 import { SharedModule } from '../shared/shared.module';
 import { OverrideGroupNamePipe } from './pipes/override-group-name.pipe';
 import { AttachmentUrlPipe } from './pipes/attachment-url.pipe';
@@ -30,6 +29,7 @@ import { RoleInCurrentUserPipe } from './pipes/role-in-current-user.pipe';
 import { DeviceInfoComponent } from './components/device-info/device-info.component';
 import { WithRolePipe } from './pipes/with-role.pipe';
 import { WifiTeaseComponent } from './components/wifi-tease/wifi-tease.component';
+import { TicketsComponent } from './components/tickets/tickets.component';
 
 const icons = {
   Eye,
@@ -59,13 +59,13 @@ const icons = {
     ExportToModbusNavelPipe,
     OptimizationComponent,
     DeviceSelectComponent,
-    TimelineComponent,
     OverrideGroupNamePipe,
     AttachmentUrlPipe,
     RoleInCurrentUserPipe,
     DeviceInfoComponent,
     WithRolePipe,
     WifiTeaseComponent,
+    TicketsComponent,
   ],
   imports: [
     CommonModule,

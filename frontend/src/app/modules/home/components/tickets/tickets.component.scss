@@ -1,0 +1,42 @@
+.main-ticket
+{
+    border-top:2px solid transparent;
+    border-bottom: 1px solid #EEE;
+    .description
+    {
+        font-size: 14px;
+        line-height: 1.2;
+    }
+
+    &.open
+    {
+        border-left:2px solid #009218;
+    }
+
+    &.selected
+    {
+        background-color: #EEE;
+    }
+
+    &:hover{
+        background-color: #EEE;
+    }
+}
+
+
+.response-container
+{
+
+    .response
+    {
+        border-bottom: 1px solid #EEE;
+        &:nth-child(even)
+        {
+            background-color: #EEE;
+        }
+        &:nth-child(odd)
+        {
+            background-color: #FFF;
+        }
+    }
+}

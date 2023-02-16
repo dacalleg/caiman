@@ -218,17 +218,6 @@ export interface Document extends WithRole {
   file: string;
 }
 
-export interface Ticket {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  created: Date;
-  parent: string | null;
-  customer: boolean;
-  device: string;
-}
-
 export interface AguaOptions {
   agua_endpoint: string;
   agua_hostname: string;
@@ -303,4 +292,22 @@ export interface UserData {
   surname: string;
   display_name: string;
   fields: UserField;
+}
+
+export interface Ticket
+{
+  id: string;
+  text: string | null;
+  title: string | null;
+  device: string;
+  email: string;
+  status: string;
+  customer: number;
+  children: Ticket[];
+  assets: TicketAsset[];
+  createdAt: Date;
+}
+
+export interface TicketAsset {
+  path: string;
 }

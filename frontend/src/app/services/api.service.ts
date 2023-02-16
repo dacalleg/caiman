@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap } from 'rxjs';
+import { bufferCount, combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, ProductInfo, SeramiACL, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, ProductInfo, SeramiACL, Ticket, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
@@ -172,5 +172,57 @@ export class ApiService {
 
   getTranslations() {
     return this.TranslationProvider.getAvailableTranslations();
+  }
+
+  getTickets(device: string) {
+    return this.Http.post<Ticket[]>(environment.endpoint + "/api/ticket/get", { device: device }).pipe(map(resp => {
+      return resp.map(item => {
+        item.createdAt = new Date(item.createdAt);
+        return item;
+      })
+    }))
+  }
+
+  addTicket(ticket: Partial<Ticket>, parent: Ticket) {
+    return this.Http.post<Ticket>(environment.endpoint + "/api/ticket/add", { ticket: ticket, parent: parent.id });
+  }
+
+  closeTicket(ticket: Ticket) {
+    return this.Http.post<Ticket>(environment.endpoint + "/api/ticket/close", { id: ticket.id });
+  }
+
+  chunkUpload(file: File, chunkSize: number = 1024 * 1024) {
+    const splitted = file.name.split(".", 2);
+    const ext = splitted[1];
+    const filename = this.makeid(10);
+    return from(file.arrayBuffer()).pipe(
+      bufferCount(chunkSize),
+      map(buffer => new Blob(buffer, { type: file.type })),
+      switchMap(blob => from(this.blobToBase64(blob))),
+      switchMap(base64 => this.Http.post(environment.endpoint + "/api/chunkupload", { name: filename, ext: ext, chunk:base64  })),
+      map(() => filename + "." + ext)
+    );
+  }
+
+  private makeid(length = 8) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
+  private blobToBase64(blob: Blob) {
+    return new Promise<string>(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        const base64 = dataUrl.split('base64,')[1];
+        resolve(base64);
+      };
+      reader.readAsDataURL(blob);
+    });
   }
 }

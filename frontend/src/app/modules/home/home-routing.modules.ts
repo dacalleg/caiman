@@ -3,7 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { IsAuthenticatedGuard } from 'src/app/guards/isauthenticated.guard';
 import { DeviceSelectComponent } from './components/device-select/device-select.component';
 import { HomeComponent } from './components/home/home.component';
-import { TimelineComponent } from './components/timeline/timeline.component';
 
 const routes: Routes = [
     { path: '', component: DeviceSelectComponent, canActivate: [IsAuthenticatedGuard] },

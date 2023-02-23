@@ -27,8 +27,8 @@ function caiman_get_unsecure_file( WP_REST_Request $request ) {
     $url = wp_get_attachment_url($params["attachment"]);
     $parts = parse_url($url);
     $path = "/files" . str_replace("/backend/wp-content/uploads", "", $parts["path"]);
-    $unsecure_path = "http://" . $parts["host"] . $path;
-    return new WP_REST_Response(array("md5" => $md5, "path" => $unsecure_path), 200);
+    $unsecure_url = "http://" . $parts["host"] . $path;
+    return new WP_REST_Response(array("md5" => $md5, "url" => $unsecure_url), 200);
 }
 
 function caiman_get_gateway( WP_REST_Request $request ) {

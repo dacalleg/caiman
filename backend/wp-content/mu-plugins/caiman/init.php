@@ -17,6 +17,7 @@ require_once __DIR__ . '/lib/authentication.php';
 require_once __DIR__ . '/lib/user.php';
 require_once __DIR__ . '/lib/admin.php';
 require_once __DIR__ . '/lib/generic.php';
+require_once __DIR__ . '/lib/api.php';
 
 add_action( 'rest_api_init', function(){
     remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );

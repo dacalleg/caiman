@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { bufferCount, combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, ProductInfo, SeramiACL, Ticket, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, Gateway, ProductInfo, SeramiACL, Ticket, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
@@ -45,7 +45,7 @@ export class ApiService {
     ]).pipe(
       switchMap(([headers, options]) => this.Http.post<DeviceInfoResponse>(options.agua_endpoint + "/deviceInfoFromMac", { mac: mac }, { headers: headers })),
       map(response => response.device_product[0]),
-      switchMap(response => this.getProductInfo(response.id_product).pipe(map(info => {
+      switchMap(response => this.getProductInfo(response.id_product, response.boards_status.Type).pipe(map(info => {
         response.info = info;
         return response;
       })))
@@ -65,19 +65,34 @@ export class ApiService {
           id: item.id,
           serami_file: item.acf.serami_file,
           serami_acl: serami_acl,
-          gateway_firmware_list: item.acf.gateway_firmware_list || [],
+          firmware_list: item.acf.firmware || [],
           database: item.acf.database || []
         } as Board
       })
     )
   }
 
-  getProductInfo(product: string) {
+  private getGateway(type: string, board: string) {
+    return this.Http.get<number[]>(environment.endpoint + "/wp-json/caiman/v1/gateway/" + board + "/" + type).pipe(
+      switchMap(ids => this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/gateway/" + ids[0])),
+      map(item => {
+        return {
+          id: item.id,
+          board: item.acf.board,
+          type: item.acf.type,
+          firmware_list: item.acf.firmware || [],
+        } as Gateway
+      })
+    )
+  }
+
+
+  getProductInfo(product: string, gateway: string) {
     return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
       switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => from(arr)),
-      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board)])),
-      map(([item, board]) => {
+      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), this.getGateway(gateway, item.acf.board)])),
+      map(([item, board, gateway]) => {
         let serami_var_override = item.acf.serami_var_override as any[] || [];
         let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
         let serami_var_formula_override = item.acf.serami_var_formula_override as any[] || [];
@@ -109,8 +124,6 @@ export class ApiService {
           } as VariableInfoOverride
         })
 
-        console.log(var_override);
-
         return {
           id: item.id,
           name: item.title.rendered,
@@ -118,7 +131,8 @@ export class ApiService {
           id_product: item.acf.key,
           serami_file: board.serami_file,
           serami_acl: board.serami_acl,
-          gateway_firmware_list: board.gateway_firmware_list,
+          gateway_firmware_list: gateway.firmware_list,
+          board_firmware_list: board.firmware_list,
           video: item.acf.video || [],
           documents: item.acf.documents || [],
           serami_var_override: var_override || [],
@@ -154,10 +168,7 @@ export class ApiService {
   }
 
   getAttachmentUrlWithoutSSL(id: number | string) {
-    return this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/media/" + id).pipe(
-      map(response => response.source_url),
-      map(response => response.replace("https://" + environment.endpoint + "/wp-content/uploads", "http://" + environment.host + "/files"))
-    )
+    return this.Http.get<{url:string, md5:string}>(environment.endpoint + "/wp-json/caiman/v1/unsecure_file/" + id)
   }
 
   getAttachmentContent(id: number, responseType: 'text' | 'blob' = 'text') {

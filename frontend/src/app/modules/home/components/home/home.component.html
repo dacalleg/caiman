@@ -68,12 +68,26 @@
                     </div>
                     <div class="row my-5">
                       <div class="col">
-                        <h3>FIRMWARE</h3>
+                        <h3>FIRMWARE GATEWAY</h3>
                         <div class="input-group">
                           <select class="form-select" id="inputGroupSelect04"
                             aria-label="Example select with button addon">
                             <option selected disabled [value]="null">Choose...</option>
-                            <option *ngFor="let firmware of device.info.gateway_firmware_list|withRole|async" [ngValue]="firmware.file">{{firmware.version}}</option>
+                            <option *ngFor="let firmware of device.info.gateway_firmware_list|withRole|async" [ngValue]="firmware.file">{{firmware.revision}}</option>
+                          </select>
+                          <button class="btn btn-outline-secondary" type="button">Load</button>
+                        </div>
+                        <span>Current Revision: {{device.boards_status.Revision}}</span>
+                      </div>
+                    </div>
+                    <div class="row my-5">
+                      <div class="col">
+                        <h3>FIRMWARE BOARD</h3>
+                        <div class="input-group">
+                          <select class="form-select" id="inputGroupSelect04"
+                            aria-label="Example select with button addon">
+                            <option selected disabled [value]="null">Choose...</option>
+                            <option *ngFor="let firmware of device.info.board_firmware_list|withRole|async" [ngValue]="firmware.file">{{firmware.revision}}</option>
                           </select>
                           <button class="btn btn-outline-secondary" type="button">Load</button>
                         </div>

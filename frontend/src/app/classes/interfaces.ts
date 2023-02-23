@@ -126,10 +126,19 @@ export interface LoginData {
   displayName: string;
 }
 
+export interface BoardsStatus {
+  Type: string;
+  Revision: string;
+  Id: string;
+  Restart_cnt: number;
+}
+
+
 export interface DeviceProduct {
   id_device: string;
   customer_code: string;
   mac: string;
+  boards_status: BoardsStatus;
   id_product: string;
   cod_art: string;
   serial: string;
@@ -161,8 +170,14 @@ export interface Board {
   id: string;
   serami_file: number;
   serami_acl: SeramiACL[];
-  gateway_firmware_list: GatewayFirmware[];
+  firmware_list: Firmware[];
   database: Database[];
+}
+
+export interface Gateway{
+  type: string;
+  board: number;
+  firmware_list: Firmware[];
 }
 
 
@@ -176,9 +191,10 @@ export interface ProductInfo {
   serami_acl: SeramiACL[];
   faq: SingleFaq[];
   video: Video[];
-  gateway_firmware_list: GatewayFirmware[];
   serami_var_override: VariableInfoOverride[];
   serami_group_override: GroupNameOverride[];
+  gateway_firmware_list: Firmware[];
+  board_firmware_list: Firmware[];
   database: Database[];
   description: string;
 }
@@ -232,7 +248,7 @@ export interface AlertModalConfig {
   progressValue?: number;
 }
 
-export interface GatewayFirmware extends WithRole {
+export interface Firmware extends WithRole {
   version: string;
   file: number;
 }

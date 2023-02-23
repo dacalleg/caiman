@@ -112,6 +112,40 @@ export class BleChannel implements Channel {
     )
   }
 
+  loadGatewayFirmware(url: string): Observable<VariableValue[]> {
+    const urlData = new URL(url);
+    const path = urlData.pathname.split("/").slice(0, -1).join("/");
+    const filename = urlData.pathname.split("/").slice(-1).join("/");
+    const payload = {
+      RemoteHost: urlData.host,
+      RemotePath: path,
+      LocalPath: "",
+      Flags: ["OVER_WRITE", "AUTO_UPG"],
+      Type: "OTA",
+      FileNames: filename,
+      MD5: ""
+    }
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload }));
+  }
+
+  loadPowerBoardFirmware(url: string, md5: string): Observable<VariableValue[]> {
+    const urlData = new URL(url);
+    const protocol = urlData.protocol.replace(":", "");
+    const path = urlData.pathname.split("/").slice(0, -1).join("/");
+    const filename = urlData.pathname.split("/").slice(-1).join("/");
+    const payload = {
+      RemoteHost: urlData.origin,
+      RemotePath: path,
+      Protocol: protocol,
+      LocalPath: "fw",
+      Flags: ["OVER_WRITE", "CREATE_DIR", "AUTO_UPG"],
+      Type: "FW",
+      FileNames: filename,
+      MD5: md5.toUpperCase()
+    }
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload }));
+  }
+
   read(variables: Variable[]): Observable<VariableValue[]> {
     throw new Error("Method not implemented.");
   }
@@ -203,10 +237,10 @@ export class BleChannel implements Channel {
   getWifiStatus() {
     return this.sendCommand(this.generateJsonEnvelope({ Cmd: "StatusWifiStation" })).pipe(
       map((resp: any) => {
-        return{
+        return {
           wifi_connected: resp.ConnSta === "Connected",
           cloud_connected: resp.ConnServer === "Connected",
-          wifi_stations:resp.Aps.map((item: any) => {
+          wifi_stations: resp.Aps.map((item: any) => {
             return {
               ssid: item.ssid,
               channel: item.channel,
@@ -229,8 +263,7 @@ export class BleChannel implements Channel {
     return this.sendCommand(this.generateJsonEnvelope({ Cmd: "SetWifiStation", ...payload }));
   }
 
-  disconnectWifi()
-  {
+  disconnectWifi() {
     const payload = {
       'Activation': 'Disconnect',
     };

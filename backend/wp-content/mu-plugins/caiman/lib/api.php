@@ -23,7 +23,7 @@ add_action( 'rest_api_init', function(){
 
 function caiman_get_unsecure_file( WP_REST_Request $request ) {
     $params = $request->get_params();
-    $md5 = get_attached_file($params["attachment"]);
+    $md5 = md5_file(get_attached_file($params["attachment"]));
     $url = wp_get_attachment_url($params["attachment"]);
     $parts = parse_url($url);
     $path = "/files" . str_replace("/backend/wp-content/uploads", "", $parts["path"]);

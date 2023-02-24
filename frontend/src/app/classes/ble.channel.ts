@@ -6,6 +6,7 @@ import {
   combineLatest,
   concatMap,
   defer,
+  delay,
   filter,
   from,
   map,
@@ -18,11 +19,13 @@ import {
   switchMap,
   take,
   takeUntil,
+  takeWhile,
   tap,
   throwError,
+  timeout,
   toArray
 } from "rxjs";
-import { Channel, Variable, VariableValue, WifiStation, WifiStatus } from "./interfaces";
+import { Channel, FirmwareDownloadStatus, Variable, VariableValue, WifiStation, WifiStatus } from "./interfaces";
 
 export class BleChannel implements Channel {
   private connection$: Observable<{ device: any, server: any, service: any, characteristic: any }>;
@@ -112,7 +115,12 @@ export class BleChannel implements Channel {
     )
   }
 
-  loadGatewayFirmware(url: string): Observable<VariableValue[]> {
+  private getDownloadStatus()
+  {
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "StatusDwnUpg" }));
+  }
+
+  loadGatewayFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
     const urlData = new URL(url);
     const path = urlData.pathname.split("/").slice(0, -1).join("/");
     const filename = urlData.pathname.split("/").slice(-1).join("/");
@@ -123,27 +131,43 @@ export class BleChannel implements Channel {
       Flags: ["OVER_WRITE", "AUTO_UPG"],
       Type: "OTA",
       FileNames: filename,
-      MD5: ""
+      MD5: md5.toUpperCase()
     }
-    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload }));
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload })).pipe(
+      switchMap(() => this.getDownloadStatus().pipe(
+        map(response => {
+          return {operation: response.StatusCode, progress: response.Progress} as FirmwareDownloadStatus
+        }),
+        repeat({delay: 1000}),
+        takeWhile(response => response.operation < 2)
+      ))
+    )
   }
 
-  loadPowerBoardFirmware(url: string, md5: string): Observable<VariableValue[]> {
+  loadPowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
     const urlData = new URL(url);
     const protocol = urlData.protocol.replace(":", "");
     const path = urlData.pathname.split("/").slice(0, -1).join("/");
     const filename = urlData.pathname.split("/").slice(-1).join("/");
     const payload = {
-      RemoteHost: urlData.origin,
+      RemoteHost: urlData.host,
       RemotePath: path,
-      Protocol: protocol,
+      Protocol: protocol.toUpperCase(),
       LocalPath: "fw",
       Flags: ["OVER_WRITE", "CREATE_DIR", "AUTO_UPG"],
       Type: "FW",
       FileNames: filename,
       MD5: md5.toUpperCase()
     }
-    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload }));
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload })).pipe(
+      switchMap(() => this.getDownloadStatus().pipe(
+        map(response => {
+          return {operation: response.StatusCode, progress: response.Progress} as FirmwareDownloadStatus
+        }),
+        repeat({delay: 1000}),
+        takeWhile(response => response.operation < 4)
+      ))
+    )
   }
 
   read(variables: Variable[]): Observable<VariableValue[]> {
@@ -195,12 +219,14 @@ export class BleChannel implements Channel {
               return throwError(() => new Error("Nack"));
             return of(resp);
           }),
+          tap(res => console.log(res)),
         )),
       )))
   }
 
   private sendCommand(data: any, chunkSize = 200) {
     return defer(() => {
+      console.log(data);
       const id = Math.floor(Math.random() * 10000000);
       this.sendCommand$.next({ data: data, chunkSize: chunkSize, id: id })
       return combineLatest([of(id), this.responses$]);

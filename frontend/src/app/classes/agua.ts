@@ -1,5 +1,5 @@
 import { catchError, delay, filter, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, tap, throwError } from "rxjs";
-import { Channel, Variable, VariableValue, WifiStatus } from "./interfaces";
+import { Channel, FirmwareDownloadStatus, Variable, VariableValue, WifiStatus } from "./interfaces";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Utils } from "./utils";
 
@@ -18,11 +18,11 @@ export class Agua implements Channel {
     disconnectWifi(): Observable<void> {
         throw new Error("Method not implemented.");
     }
-    
+
     getWifiStatus(): Observable<WifiStatus> {
         throw new Error("Method not implemented.");
     }
-    
+
     setWifi(ssid: string, password: string): Observable<void> {
         throw new Error("Method not implemented.");
     }
@@ -45,7 +45,7 @@ export class Agua implements Channel {
 
     setVariableStream(variables: Variable[]): Observable<void> {
         this.bufferVariables = variables;
-        if(this.bufferVariables.length == 0)
+        if (this.bufferVariables.length == 0)
             return of(void 0);
         return this.protocol.setBuffer(this.bufferVariables);
     }
@@ -67,6 +67,12 @@ export class Agua implements Channel {
         this.close$.next();
     }
 
+    loadGatewayFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
+        throw new Error("Method not implemented.");
+    }
+    loadPowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
+        throw new Error("Method not implemented.");
+    }
 }
 
 interface RequestReadingReponse {

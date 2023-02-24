@@ -21,7 +21,7 @@ import {
   throwError,
   timeout,
 } from "rxjs";
-import { Channel, Variable, VariableValue, WifiStatus } from "./interfaces";
+import { Channel, FirmwareDownloadStatus, Variable, VariableValue, WifiStatus } from "./interfaces";
 import { environment } from "src/environments/environment";
 import { RxStomp, RxStompConfig } from "@stomp/rx-stomp";
 import { IMessage } from '@stomp/stompjs';
@@ -103,6 +103,13 @@ export class BridgeChannel implements Channel {
     );
 
     this.responses$.subscribe();
+  }
+  
+  loadGatewayFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
+    throw new Error("Method not implemented.");
+  }
+  loadPowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
+    throw new Error("Method not implemented.");
   }
   disconnectWifi(): Observable<void> {
     throw new Error("Method not implemented.");

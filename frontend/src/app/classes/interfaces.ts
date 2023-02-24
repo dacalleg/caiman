@@ -87,6 +87,8 @@ export interface Channel {
   setWifi(ssid: string, password: string): Observable<void>;
   getWifiStatus(): Observable<WifiStatus>;
   disconnectWifi(): Observable<void>;
+  loadGatewayFirmware(url:string, md5:string): Observable<FirmwareDownloadStatus>;
+  loadPowerBoardFirmware(url:string, md5:string): Observable<FirmwareDownloadStatus>;
 }
 
 
@@ -326,4 +328,10 @@ export interface Ticket
 
 export interface TicketAsset {
   path: string;
+}
+
+export interface FirmwareDownloadStatus
+{
+  operation: number;
+  progress: number;
 }

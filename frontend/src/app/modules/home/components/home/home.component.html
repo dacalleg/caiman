@@ -71,11 +71,11 @@
                         <h3>FIRMWARE GATEWAY</h3>
                         <div class="input-group">
                           <select class="form-select" id="inputGroupSelect04"
-                            aria-label="Example select with button addon">
+                            aria-label="Example select with button addon" [(ngModel)]="selectedFirmwareGateway">
                             <option selected disabled [value]="null">Choose...</option>
-                            <option *ngFor="let firmware of device.info.gateway_firmware_list|withRole|async" [ngValue]="firmware.file">{{firmware.revision}}</option>
+                            <option *ngFor="let firmware of device.info.gateway_firmware_list|withRole|async" [ngValue]="firmware">{{firmware.revision}}</option>
                           </select>
-                          <button class="btn btn-outline-secondary" type="button">Load</button>
+                          <button class="btn btn-outline-secondary" type="button" (click)="upgradeFirmwareGateway()" [disabled]="selectedFirmwareGateway === null">Load</button>
                         </div>
                         <span>Current Revision: {{device.boards_status.Revision}}</span>
                       </div>
@@ -85,11 +85,11 @@
                         <h3>FIRMWARE BOARD</h3>
                         <div class="input-group">
                           <select class="form-select" id="inputGroupSelect04"
-                            aria-label="Example select with button addon">
+                            aria-label="Example select with button addon" [(ngModel)]="selectedFirmwareBoard">
                             <option selected disabled [value]="null">Choose...</option>
-                            <option *ngFor="let firmware of device.info.board_firmware_list|withRole|async" [ngValue]="firmware.file">{{firmware.revision}}</option>
+                            <option *ngFor="let firmware of device.info.board_firmware_list|withRole|async" [ngValue]="firmware">{{firmware.revision}}</option>
                           </select>
-                          <button class="btn btn-outline-secondary" type="button">Load</button>
+                          <button class="btn btn-outline-secondary" type="button" (click)="upgradeFirmwareBoard()" [disabled]="selectedFirmwareBoard === null">Load</button>
                         </div>
                       </div>
                     </div>

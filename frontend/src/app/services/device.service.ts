@@ -9,8 +9,9 @@ import {
   take,
   takeUntil,
   tap,
+  throwError,
 } from "rxjs";
-import { Channel, Variable, VariableValue } from "../classes/interfaces";
+import { Channel, FirmwareDownloadStatus, Variable, VariableValue } from "../classes/interfaces";
 
 @Injectable({
   providedIn: 'root'
@@ -147,6 +148,32 @@ export class DeviceService {
     return this.getChannel().pipe(
       switchMap(channel => channel.getWifiStatus()),
       take(1)
+    );
+  }
+
+  upgradeGatewayFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
+    return this.getChannel().pipe(
+      switchMap(channel => channel.getWifiStatus().pipe(
+        switchMap((status) => {
+          if (status.wifi_connected) {
+            return channel.loadGatewayFirmware(url, md5);
+          }
+          return throwError(() => new Error("Wifi not connected"));
+        })
+      ))
+    );
+  }
+
+  upgradePowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
+    return this.getChannel().pipe(
+      switchMap(channel => channel.getWifiStatus().pipe(
+        switchMap((status) => {
+          if (status.wifi_connected) {
+            return channel.loadPowerBoardFirmware(url, md5);
+          }
+          return throwError(() => new Error("Wifi not connected"));
+        })
+      ))
     );
   }
 }

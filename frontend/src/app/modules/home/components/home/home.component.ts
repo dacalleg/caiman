@@ -6,7 +6,7 @@ import { BehaviorSubject, catchError, combineLatest, concat, concatMap, defer, d
 import { Agua } from 'src/app/classes/agua';
 import { BleChannel } from 'src/app/classes/ble.channel';
 import { BridgeChannel } from 'src/app/classes/bridge.channel';
-import { Channel, Database, DeviceProduct, Project, Variable, VariableValue, WifiStation, WifiStatus } from 'src/app/classes/interfaces';
+import { Channel, Database, DeviceProduct, Firmware, Project, Variable, VariableValue, WifiStation, WifiStatus } from 'src/app/classes/interfaces';
 import { Utils } from 'src/app/classes/utils';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -21,8 +21,6 @@ import { StoreService } from 'src/app/services/store.service';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-
-
 
   @ViewChild("nav") nav: NgbNav | null;
 
@@ -44,6 +42,9 @@ export class HomeComponent implements OnInit {
 
   wifiRefreshSubject$: BehaviorSubject<void>;
 
+  selectedFirmwareGateway: Firmware|null;
+  selectedFirmwareBoard: Firmware|null;
+
   constructor(
     private Store: StoreService,
     private Device: DeviceService,
@@ -54,6 +55,8 @@ export class HomeComponent implements OnInit {
     private modal: ModalService) {
 
     this.nav = null;
+    this.selectedFirmwareBoard = null;
+    this.selectedFirmwareGateway = null;
     this.search$ = new BehaviorSubject<string>("");
     this.project$ = this.Store.getProject();
 
@@ -84,7 +87,7 @@ export class HomeComponent implements OnInit {
     )
 
     this.BLEChannel$ = this.loadDeviceData$.pipe(
-      map((data) => new BleChannel(data.mac, data.security_code )),
+      map((data) => new BleChannel(data.mac, data.security_code)),
       tap((channel) => this.Device.setChannel(channel))
     )
 
@@ -115,7 +118,7 @@ export class HomeComponent implements OnInit {
     this.groups$ = this.Auth.getRoles().pipe(
       switchMap(roles => this.Store.getGroupsByRole(roles))
     )
-    
+
     this.wifiRefreshSubject$ = new BehaviorSubject<void>(void 0);
     this.wifiStatus$ = this.wifiRefreshSubject$.pipe(
       switchMap(() => this.Device.getWifiStatus())
@@ -277,8 +280,7 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  scanWifi()
-  {
+  scanWifi() {
     this.wifiRefreshSubject$.next();
   }
 
@@ -327,6 +329,57 @@ export class HomeComponent implements OnInit {
         this.modal.upodateAlertModalConfig({ title: "Connecting", progress: false, message: "Timeout. Could not connect to the network, check password." })
       },
       complete: () => this.modal.dismissAll()
+    });
+  }
+
+  upgradeFirmwareGateway() {
+    of(this.selectedFirmwareGateway).pipe(
+      map(firmware => firmware!),
+      switchMap(firmware => this.Api.getAttachmentUrlWithoutSSL(firmware.file)),
+      switchMap(firmware => this.modal.openAlertModal({
+        title: "Upgrading",
+        message: "Upgrading Firmware",
+        progress: true,
+        progressValue: 0
+      }).pipe(
+        switchMap(() => this.Device.upgradeGatewayFirmware(firmware.url, firmware.md5).pipe(
+          tap((progress) => this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: true, progressValue: progress.progress, message: "Upgrading Firmware" })),
+        ))
+      )),
+    ).subscribe({
+      error: (err) => {
+        this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: false, message: err.message })
+      },
+      complete: () => {
+        this.disconnect();
+        this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: false, message: "Firmware download successfully, wait for the device to reboot before connecting again." })
+      }
+    });
+  }
+
+  upgradeFirmwareBoard() {
+    of(this.selectedFirmwareBoard).pipe(
+      map(firmware => firmware!),
+      switchMap(firmware => this.Api.getAttachmentUrlWithoutSSL(firmware.file)),
+      tap(firmware => console.log(firmware)),
+      switchMap(firmware => this.modal.openAlertModal({
+        title: "Upgrading",
+        message: "Upgrading Board Firmware",
+        progress: true,
+        progressValue: 0
+      }).pipe(
+        switchMap(() => this.Device.upgradePowerBoardFirmware(firmware.url, firmware.md5).pipe(
+          tap((progress) => this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: true, progressValue: progress.progress, message: "Upgrading Firmware" })),
+        ))
+      )),
+    ).subscribe({
+      error: (err) => {
+        this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: false, message: err.message })
+      },
+      complete: () => {
+        this.disconnect();
+        this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: false, message: "Firmware download successfully, wait for the device to reboot before connecting again." })
+      }
     });
   }
 }

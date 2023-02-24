@@ -12,7 +12,7 @@ add_action('init', function() {
 add_filter( 'upload_mimes', function($mime_types) {
     $mime_types['snet2'] = 'text/plain';
     $mime_types['bin'] = 'application/x-dosexec';
-    $mime_types['enc'] = 'application/x-dosexec';
+    $mime_types['enc'] = 'text/plain';
 
     return $mime_types;
 }, 1, 1 );

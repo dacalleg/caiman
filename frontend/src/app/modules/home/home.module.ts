@@ -30,6 +30,7 @@ import { DeviceInfoComponent } from './components/device-info/device-info.compon
 import { WithRolePipe } from './pipes/with-role.pipe';
 import { WifiTeaseComponent } from './components/wifi-tease/wifi-tease.component';
 import { TicketsComponent } from './components/tickets/tickets.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 const icons = {
   Eye,
@@ -74,7 +75,8 @@ const icons = {
     FormsModule,
     NgbModule,
     YouTubePlayerModule,
-    BootstrapIconsModule.pick(icons)
+    BootstrapIconsModule.pick(icons),
+    TranslateModule.forChild()
   ]
 })
 export class HomeModule { }

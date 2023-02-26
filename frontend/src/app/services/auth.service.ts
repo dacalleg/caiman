@@ -25,7 +25,7 @@ export class AuthService {
     );
 
     this.userData$ = this.tokenChanges$.pipe(
-      filter(token => token !== null),
+      filter(token => token !== null && !this.jwtHelper.isTokenExpired(token)),
       switchMap(() => this.Http.get<UserData>(environment.endpoint + "/wp-json/caiman/v1/me")),
       shareReplay(1)
     );

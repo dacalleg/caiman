@@ -27,7 +27,7 @@
         <div class="d-flex" class="p-5 pt-2">
           <ul ngbNav #nav="ngbNav" class="nav-pills" orientation="vertical">
             <li ngbNavItem (shown)="unselectGroup()" [id]="0">
-              <a ngbNavLink>Device Info</a>
+              <a ngbNavLink>{{'home.deviceinfo'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-device-info [device]="device" [connected]="connected$|async"
                   (onDisconnect)="disconnect()"
@@ -37,13 +37,13 @@
               </ng-template>
             </li>
             <li ngbNavItem (shown)="unselectGroup()" [id]="1">
-              <a ngbNavLink>Timeline</a>
+              <a ngbNavLink>{{'home.timeline'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-tickets></app-tickets>
               </ng-template>
             </li>
             <li ngbNavItem (shown)="unselectGroup()" [id]="2">
-              <a ngbNavLink>Advanced</a>
+              <a ngbNavLink>{{'home.advanced'|translate}}</a>
               <ng-template ngbNavContent>
                 <div class="row align-items-start">
                   <div class="col-md text-center order-1 order-md-2 sticky-md-top">
@@ -55,51 +55,51 @@
 
                     <div class="row my-5">
                       <div class="col-md">
-                        <h3>DATABASE</h3>
+                        <h3>{{'home.database'|translate}}</h3>
                         <div class="input-group">
                           <select class="form-select" id="inputGroupSelect04"
                             aria-label="Example select with button addon" [(ngModel)]="databaseSelected">
-                            <option selected disabled [value]="null">Choose...</option>
+                            <option selected disabled [value]="null">{{'choose'|translate}}</option>
                             <option *ngFor="let db of device.info.database|withRole|async" [ngValue]="db">{{db.name}}</option>
                           </select>
-                          <button class="btn btn-outline-secondary" type="button" (click)="loadDatabase()">Load</button>
+                          <button class="btn btn-outline-secondary" type="button" (click)="loadDatabase()">{{'load'|translate}}</button>
                         </div>
                       </div>
                     </div>
                     <div class="row my-5">
                       <div class="col">
-                        <h3>FIRMWARE GATEWAY</h3>
+                        <h3>{{'home.firmwaregateway'|translate}}</h3>
                         <div class="input-group">
                           <select class="form-select" id="inputGroupSelect04"
                             aria-label="Example select with button addon" [(ngModel)]="selectedFirmwareGateway">
-                            <option selected disabled [value]="null">Choose...</option>
+                            <option selected disabled [value]="null">{{'choose'|translate}}</option>
                             <option *ngFor="let firmware of device.info.gateway_firmware_list|withRole|async" [ngValue]="firmware">{{firmware.revision}}</option>
                           </select>
-                          <button class="btn btn-outline-secondary" type="button" (click)="upgradeFirmwareGateway()" [disabled]="selectedFirmwareGateway === null">Load</button>
+                          <button class="btn btn-outline-secondary" type="button" (click)="upgradeFirmwareGateway()" [disabled]="selectedFirmwareGateway === null">{{'load'|translate}}</button>
                         </div>
-                        <span>Current Revision: {{device.boards_status.Revision}}</span>
+                        <span>{{'home.currentfirmware'|translate}}: {{device.boards_status.Revision}}</span>
                       </div>
                     </div>
                     <div class="row my-5">
                       <div class="col">
-                        <h3>FIRMWARE BOARD</h3>
+                        <h3>{{'home.firmwareboard'|translate}}</h3>
                         <div class="input-group">
                           <select class="form-select" id="inputGroupSelect04"
                             aria-label="Example select with button addon" [(ngModel)]="selectedFirmwareBoard">
-                            <option selected disabled [value]="null">Choose...</option>
+                            <option selected disabled [value]="null">{{'choose'|translate}}</option>
                             <option *ngFor="let firmware of device.info.board_firmware_list|withRole|async" [ngValue]="firmware">{{firmware.revision}}</option>
                           </select>
-                          <button class="btn btn-outline-secondary" type="button" (click)="upgradeFirmwareBoard()" [disabled]="selectedFirmwareBoard === null">Load</button>
+                          <button class="btn btn-outline-secondary" type="button" (click)="upgradeFirmwareBoard()" [disabled]="selectedFirmwareBoard === null">{{'load'|translate}}</button>
                         </div>
                       </div>
                     </div>
                     <div class="row">
                       <div class="col">
-                        <h3 class="mb-3">NETWORK</h3>
+                        <h3 class="mb-3">{{'home.network'|translate}}</h3>
                         <ng-container  *ngIf="(wifiStatus$|async) as status">
                           <div class="text-end" *ngIf="!status.wifi_connected">
-                            <button class="btn btn-outline-secondary me-2" type="button" (click)="disconnectWifi()">CANCELLA IMPOSTAZIONI WIFI</button>
-                            <button class="btn btn-outline-secondary" type="button" (click)="scanWifi()">AGGIORNA</button>
+                            <button class="btn btn-outline-secondary me-2" type="button" (click)="disconnectWifi()">{{'wifi.deletesettings'|translate}}</button>
+                            <button class="btn btn-outline-secondary" type="button" (click)="scanWifi()">{{'update'|translate}}</button>
                           </div>
                           <div class="pt-3">
                             <app-wifi-tease  *ngFor="let station of status.wifi_stations" [connected]="status.wifi_connected" [station]="station" (onDisconnect)="disconnectWifi()" (onConnect)="connectWifi($event)"></app-wifi-tease>
@@ -144,7 +144,7 @@
         <div class="container">
           <div class="row">
             <div class="col p-3">
-              <div class="text-center mb-3">Loading...</div>
+              <div class="text-center mb-3">{{'loading'|translate}}</div>
               <app-infinite-progress-bar></app-infinite-progress-bar>
             </div>
           </div>

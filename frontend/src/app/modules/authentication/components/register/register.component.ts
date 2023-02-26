@@ -36,25 +36,22 @@ export class RegisterComponent {
         this.error = validation;
         return throwError(() => new Error("Invalid password"));
       }),
-      tap(() => this.validation = false),
-      ).subscribe({
-        error: (error) => {
-          this.error = error.error.error_code;
-        },
-        complete: () => {
-          this.finish = true;
-        }
-      })
+    ).subscribe({
+      error: (error) => {
+        this.validation = false;
+      },
+      complete: () => {
+        this.validation = false;
+        this.finish = true;
+      }
+    })
   }
 
-  checkPassword(password:string, reapeatPassword:string)
-  {
-    if(password.length < 8)
-    {
+  checkPassword(password: string, reapeatPassword: string) {
+    if (password.length < 8) {
       return "password_short";
     }
-    if(password !== reapeatPassword)
-    {
+    if (password !== reapeatPassword) {
       return "password_not_match";
     }
     return "ok";

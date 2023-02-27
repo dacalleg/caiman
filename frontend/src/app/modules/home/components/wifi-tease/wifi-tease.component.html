@@ -13,18 +13,18 @@
     </div>
     <ng-container *ngIf="showPasswordInput">
         <div class="flex-grow-1 px-3">
-            <input type="password" class="form-control" id="wifipassword" [(ngModel)]="password" placeholder="Inserisci la password">
+            <input type="password" class="form-control" id="wifipassword" [(ngModel)]="password" [placeholder]="'wifi.password.placeholder' | translate">
         </div>
         <div>
-            <button class="btn btn-outline-secondary" type="button" (click)="connect()">CONNETTI</button>
+            <button class="btn btn-outline-secondary" type="button" (click)="connect()">{{ 'wifi.connect' | translate }}</button>
         </div>
     </ng-container>
     <ng-container *ngIf="!showPasswordInput">
         <div *ngIf="!connected; else disconnectTemplate">
-            <button class="btn btn-outline-secondary" type="button" (click)="showPassword()">CONNETTI</button>
+            <button class="btn btn-outline-secondary" type="button" (click)="showPassword()">{{ 'wifi.insertpassword' | translate }}</button>
         </div>
         <ng-template #disconnectTemplate>
-            <button class="btn btn-outline-secondary" type="button" (click)="disconnect()">DISCONNETTI</button>
+            <button class="btn btn-outline-secondary" type="button" (click)="disconnect()">{{ 'wifi.disconnect' | translate }}</button>
         </ng-template>
     </ng-container>
 

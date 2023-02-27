@@ -248,6 +248,7 @@ export interface AlertModalConfig {
   message?: string;
   progress?: boolean;
   progressValue?: number;
+  replaceParams? : { [key: string]: string };
 }
 
 export interface Firmware extends WithRole {

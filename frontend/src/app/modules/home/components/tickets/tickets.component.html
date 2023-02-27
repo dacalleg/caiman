@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3">
-            <h1>Tickets</h1>
+            <h1>{{ 'tickets.tickets' | translate }}</h1>
             <div *ngFor="let ticket of tickets$|async" class="main-ticket p-3 d-flex" [ngClass]="ticket.status"
                 (click)="selectTicket(ticket)">
                 <div class="flex-grow-1">
@@ -21,23 +21,23 @@
                         <div>{{response.createdAt|date:'dd/MM/yy'}}</div>
                         <div>{{response.text}}</div>
                         <div *ngFor="let asset of response.assets; let i=index">
-                            <a [href]="'https://caiman.micronovasrl.com/backend/wp-content/uploads/api/' + asset.path">Allegato {{i}}</a>
+                            <a [href]="'https://caiman.micronovasrl.com/backend/wp-content/uploads/api/' + asset.path">{{ 'ticket.attachment' | translate }} {{i}}</a>
                         </div>
                         <div class="mt-3" *ngIf="visibleForm !== response.id">
-                            <button class="btn btn-outline-primary" type="button" (click)="showForm(response.id)">Scrivi</button>
+                            <button class="btn btn-outline-primary" type="button" (click)="showForm(response.id)">{{ 'tickets.write' | translate }}</button>
                         </div>
 
                         <div class="text-end mt-3">{{response.email}}</div>
                         <div *ngIf="visibleForm === response.id">
                             <div class="mb-3">
-                                <label [for]="'message-' + i" class="form-label">Messaggio</label>
+                                <label [for]="'message-' + i" class="form-label">{{ 'tickets.message' | translate }}</label>
                                 <textarea class="form-control" [id]="'message-' + i" [(ngModel)]="newTicket.text"></textarea>
                             </div>
                             <input #file type="file" (change)="onFileSelected($event)" class="d-none">
-                            <div class="btn btn-outline-primary" (click)="addAsset()">Aggiungi allegato</div>
-                            <button class="btn btn-outline-primary ms-2" type="button"(click)="sendMessaage(response)" >Rispondi</button>
+                            <div class="btn btn-outline-primary" (click)="addAsset()">{{ 'tickets.add_attachment' | translate }}</div>
+                            <button class="btn btn-outline-primary ms-2" type="button"(click)="sendMessaage(response)" >{{ 'tickets.send' | translate }}</button>
                             <div class="my-3" *ngIf="attachments.length > 0">
-                                <h3>Allegati</h3>
+                                <h3>{{ 'tickets.attachments' | translate }}</h3>
                                 <div *ngFor="let file of attachments">
                                     {{file.name}}
                                 </div>

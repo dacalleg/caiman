@@ -8,21 +8,22 @@
       <p class="my-5">{{device?.info?.description }}</p>
 
       <ul class="nav pb-5">
+
         <li class="nav-item me-2" *ngIf="!connected"><button class="btn btn-lg btn-primary"
-            (click)="wifiConnect()">WiFi</button></li>
+            (click)="wifiConnect()">{{ 'home.deviceinfo.wifi' | translate }}</button></li>
         <li class="nav-item me-2" *ngIf="!connected"><button class="btn btn-lg btn-primary"
-            (click)="bleConnect()">Bluetooth</button></li>
+            (click)="bleConnect()">{{ 'home.deviceinfo.ble' | translate }}</button></li>
         <li class="nav-item me-2" *ngIf="!connected"><button class="btn btn-lg btn-primary"
-            (click)="bridgeConnect()">Bridge</button></li>
+            (click)="bridgeConnect()">{{ 'home.deviceinfo.bridge' | translate }}</button></li>
 
         <li class="nav-item me-2" *ngIf="connected"><button class="btn btn-lg btn-primary"
-            (click)="disconnect()">Disconnect</button></li>
+            (click)="disconnect()">{{ 'home.deviceinfo.disconnect' | translate }}</button></li>
       </ul>
 
       <ng-container *ngIf="(device?.info?.documents|withRole|async) as documents">
         <div class="row my-5" *ngIf="documents.length > 0">
             <div class="col">
-              <h3>Documentazione Tecnica</h3>
+              <h3>{{ 'home.deviceinfo.documents' | translate }}</h3>
               <ul>
                 <li *ngFor="let doc of documents">
                   <a [href]="doc.file|attachmentUrl|async" target="_blank">{{doc.name}}</a>
@@ -34,7 +35,7 @@
 
       <div class="row mb-5">
         <div class="col">
-          <h3>Faq</h3>
+          <h3>{{ 'home.deviceinfo.faq' | translate }}</h3>
           <ngb-accordion #acc="ngbAccordion">
             <ngb-panel [title]="faq.question" *ngFor="let faq of device?.info?.faq">
               <ng-template ngbPanelContent>
@@ -46,7 +47,7 @@
       </div>
       <div class="row">
         <div class="col">
-          <h3>Video</h3>
+          <h3>{{ 'home.deviceinfo.video' | translate }}</h3>
           <ngb-accordion #acc="ngbAccordion">
             <ngb-panel [title]="video.name" *ngFor="let video of device?.info?.video">
               <ng-template ngbPanelContent>

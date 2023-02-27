@@ -11,7 +11,7 @@ import { AuthService } from 'src/app/services/auth.service';
 export class RecoverComponent {
   password: string;
   reapeatPassword: string;
-  errorCode: number;
+  errorCode: string|null;
   finish: boolean = false;
   key: string|null;
   username: string|null;
@@ -19,7 +19,7 @@ export class RecoverComponent {
   constructor(private ActivatedRoute: ActivatedRoute, private AuthService: AuthService) {
     this.password = "";
     this.reapeatPassword = "";
-    this.errorCode = -1;
+    this.errorCode = null;
     this.key = null;
     this.username = null;
   }
@@ -36,7 +36,7 @@ export class RecoverComponent {
       }
     )).subscribe({
       error: (error) => {
-        this.errorCode = 3;
+        this.errorCode = "link_invalid";
       },
       complete: () => {
         this.finish = true;
@@ -48,11 +48,11 @@ export class RecoverComponent {
   {
     if(password.length < 8)
     {
-      return 1;
+      return "password_short";
     }
     if(password !== reapeatPassword)
     {
-      return 2;
+      return "password_not_match";
     }
     return 0;
   }

@@ -1,19 +1,25 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject, catchError, combineLatest, concat, concatMap, defer, delay, filter, from, ignoreElements, map, merge, mergeMap, Observable, of, repeat, retry, shareReplay, switchMap, take, takeUntil, tap, throwError, timeout, toArray, zip } from "rxjs";
+import { BehaviorSubject, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, mergeMap, Observable, of, repeat, retry, shareReplay, switchMap, take, takeUntil, tap, throwError, timeout, toArray } from "rxjs";
 import { Agua } from 'src/app/classes/agua';
 import { BleChannel } from 'src/app/classes/ble.channel';
 import { BridgeChannel } from 'src/app/classes/bridge.channel';
-import { Channel, Database, DeviceProduct, Firmware, Project, Variable, VariableValue, WifiStation, WifiStatus } from 'src/app/classes/interfaces';
+import { Database, DeviceProduct, Firmware, Project, Variable, VariableValue, WifiStation, WifiStatus } from 'src/app/classes/interfaces';
 import { Utils } from 'src/app/classes/utils';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DeviceService } from 'src/app/services/device.service';
 import { ModalService } from 'src/app/services/modal.service';
-import { SeramiParserService } from 'src/app/services/serami-parser.service';
 import { StoreService } from 'src/app/services/store.service';
+
+/*
+modal.upgrading: "Upgrading"
+modal.upgrading_board_message: "Upgrading Board Firmware"
+modal.upgrading_gateway_message: "Upgrading Gateway Firmware"
+modal.upgrading_board_success: "Firmware download successfully, wait for the device to reboot before connecting again."
+*/
 
 @Component({
   selector: 'app-home',
@@ -42,8 +48,8 @@ export class HomeComponent implements OnInit {
 
   wifiRefreshSubject$: BehaviorSubject<void>;
 
-  selectedFirmwareGateway: Firmware|null;
-  selectedFirmwareBoard: Firmware|null;
+  selectedFirmwareGateway: Firmware | null;
+  selectedFirmwareBoard: Firmware | null;
 
   constructor(
     private Store: StoreService,
@@ -165,8 +171,8 @@ export class HomeComponent implements OnInit {
   bridgeConnect() {
     this.bridgeChannel$.pipe(
       switchMap(() => this.modal.openAlertModal({
-        title: "Connection",
-        message: "Bridge connection in progress",
+        title: "modal.title.connection",
+        message: "modal.bridge.connection",
         progress: true
       })),
       switchMap(() => this.Device.connect()),
@@ -175,7 +181,7 @@ export class HomeComponent implements OnInit {
       take(1),
       switchMap(() => this.Device.startRead()),
       catchError(err => this.modal.openAlertModal({
-        title: "Error",
+        title: "error",
         message: err.message,
       }))
     ).subscribe();
@@ -186,8 +192,8 @@ export class HomeComponent implements OnInit {
     this.BLEChannel$.pipe(
       switchMap(() => this.Device.connect()),
       switchMap(() => this.modal.openAlertModal({
-        title: "Connection",
-        message: "BLE connection in progress",
+        title: "modal.title.connection",
+        message: "modal.ble.connection",
         progress: true
       })),
       switchMap(() => this.loadSnet$),
@@ -207,7 +213,7 @@ export class HomeComponent implements OnInit {
   wifiConnect() {
     concat(
       this.modal.openAlertModal({
-        title: "Connection",
+        title: "modal.title.connection",
         message: "Wifi connection in progress",
         progress: true
       }).pipe(ignoreElements()),
@@ -216,7 +222,7 @@ export class HomeComponent implements OnInit {
           if (available)
             return of(available)
           else
-            return throwError(() => new Error("Wifi Connection not available"));
+            return throwError(() => new Error("modal.wifi.connectionerror"));
         }),
         switchMap(() => this.Device.connect()),
         switchMap(() => this.loadSnet$),
@@ -225,7 +231,7 @@ export class HomeComponent implements OnInit {
         switchMap(() => this.Device.startRead()),
         catchError(err => {
           return this.modal.openAlertModal({
-            title: "Error",
+            title: "error",
             message: err.message,
           });
         })
@@ -245,19 +251,25 @@ export class HomeComponent implements OnInit {
       combineLatest([
         of(this.databaseSelected),
         this.modal.openAlertModal({
-          title: "Writing Database " + this.databaseSelected.name,
+          title: "modal.writedb.title",
           progress: true,
           progressValue: 0,
+          replaceParams: { dbname: this.databaseSelected.name }
         }),
       ]).pipe(
         switchMap(([database, modal]) => from(database.values)),
         concatMap((dbvalue) => combineLatest([of(dbvalue), this.Store.getVariableByHash(dbvalue.id)]).pipe(
           map(([dbvalue, variable]) => {
             if (variable == null)
-              throw new Error("Variable not found");
+              throw new Error("modal.writedb.error.varnotfound");
             return { variable: variable, value: Utils.convertValuesToWrite([variable], [+dbvalue.value])[0] } as VariableValue
           }),
-          tap((value) => this.modal.upodateAlertModalConfig({ title: "Writing Database " + this.databaseSelected!.name, progress: true, progressValue: (i / count) * 100, message: "Writing " + value.variable.name })),
+          tap((value) => this.modal.upodateAlertModalConfig({
+            title: "modal.writedb.title",
+            progress: true, progressValue: (i / count) * 100,
+            message: "modal.writedb.message",
+            replaceParams: { dbname: this.databaseSelected!.name, varname: value.variable.name }
+          })),
           switchMap((value) => this.Device.write([value])),
           tap(() => i++),
           timeout(5000),
@@ -266,12 +278,18 @@ export class HomeComponent implements OnInit {
         toArray(),
         tap(() => this.modal.dismissAll()),
         switchMap(() => this.modal.openAlertModal({
-          title: "Database written",
-          message: "Database written successfully",
+          title: "modal.writedb.title",
+          message: "modal.writedb.success",
+          replaceParams: { dbname: this.databaseSelected!.name}
         }))
       ).subscribe({
         error: (err) => {
-          this.modal.dismissAll()
+          this.modal.upodateAlertModalConfig({
+            title: "modal.writedb.title",
+            progress: false,
+            message: err.message,
+            replaceParams: { dbname: this.databaseSelected!.name}
+          })
         },
         complete: () => {
 
@@ -286,8 +304,8 @@ export class HomeComponent implements OnInit {
 
   disconnectWifi() {
     this.modal.openAlertModal({
-      title: "Disconnecting",
-      message: "Disconnection in progress",
+      title: "modal.disconnecting",
+      message: "modal.disconnecting.message",
       progress: true,
     }).pipe(
       switchMap(() => this.Device.disconnectWifi().pipe(
@@ -302,7 +320,7 @@ export class HomeComponent implements OnInit {
       ))
     ).subscribe({
       error: (err) => {
-        this.modal.upodateAlertModalConfig({ title: "Disconnecting", progress: false, message: "Timeout" })
+        this.modal.upodateAlertModalConfig({ title: "modal.disconnecting", progress: false, message: "timeout" })
       },
       complete: () => this.modal.dismissAll()
     });
@@ -310,9 +328,10 @@ export class HomeComponent implements OnInit {
 
   connectWifi($event: { station: WifiStation, password: string }) {
     this.modal.openAlertModal({
-      title: "Connecting",
-      message: "Connection to " + $event.station.ssid + " in progress",
+      title: "modal.wifistation.connection",
+      message: "modal.wifistation.message",
       progress: true,
+      replaceParams: { ssid: $event.station.ssid }
     }).pipe(
       switchMap(() => this.Device.setWifi($event.station.ssid, $event.password).pipe(
         switchMap(() => of(void 0).pipe(
@@ -326,7 +345,10 @@ export class HomeComponent implements OnInit {
       ))
     ).subscribe({
       error: (err) => {
-        this.modal.upodateAlertModalConfig({ title: "Connecting", progress: false, message: "Timeout. Could not connect to the network, check password." })
+        this.modal.upodateAlertModalConfig(
+          { title: "modal.wifistation.connection", 
+          progress: false,
+           message: "modal.wifistation.timeout" })
       },
       complete: () => this.modal.dismissAll()
     });
@@ -337,22 +359,33 @@ export class HomeComponent implements OnInit {
       map(firmware => firmware!),
       switchMap(firmware => this.Api.getAttachmentUrlWithoutSSL(firmware.file)),
       switchMap(firmware => this.modal.openAlertModal({
-        title: "Upgrading",
-        message: "Upgrading Firmware",
+        title: "modal.upgrading",
+        message: "modal.upgrading.gateway",
         progress: true,
         progressValue: 0
       }).pipe(
         switchMap(() => this.Device.upgradeGatewayFirmware(firmware.url, firmware.md5).pipe(
-          tap((progress) => this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: true, progressValue: progress.progress, message: "Upgrading Firmware" })),
+          tap((progress) => this.modal.upodateAlertModalConfig({ 
+            title: "modal.upgrading",
+             progress: true, 
+             progressValue: progress.progress,
+             message: "modal.upgrading.gateway"
+           })),
         ))
       )),
     ).subscribe({
       error: (err) => {
-        this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: false, message: err.message })
+        this.modal.upodateAlertModalConfig({ 
+          title: "modal.upgrading",
+           progress: false,
+            message: err.message })
       },
       complete: () => {
         this.disconnect();
-        this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: false, message: "Firmware download successfully, wait for the device to reboot before connecting again." })
+        this.modal.upodateAlertModalConfig({ 
+          title: "modal.upgrading", 
+          progress: false,
+          message: "modal.upgrading.gateway.success" })
       }
     });
   }
@@ -363,22 +396,33 @@ export class HomeComponent implements OnInit {
       switchMap(firmware => this.Api.getAttachmentUrlWithoutSSL(firmware.file)),
       tap(firmware => console.log(firmware)),
       switchMap(firmware => this.modal.openAlertModal({
-        title: "Upgrading",
-        message: "Upgrading Board Firmware",
+        title: "modal.upgrading",
+        message: "modal.upgrading.board",
         progress: true,
         progressValue: 0
       }).pipe(
         switchMap(() => this.Device.upgradePowerBoardFirmware(firmware.url, firmware.md5).pipe(
-          tap((progress) => this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: true, progressValue: progress.progress, message: "Upgrading Firmware" })),
+          tap((progress) => this.modal.upodateAlertModalConfig({ 
+            title: "modal.upgrading", 
+            progress: true, 
+            progressValue: progress.progress, 
+            message: "modal.upgrading.board" })),
         ))
       )),
     ).subscribe({
       error: (err) => {
-        this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: false, message: err.message })
+        this.modal.upodateAlertModalConfig({ 
+          title: "modal.upgrading", 
+          progress: false, 
+          message: err.message 
+        })
       },
       complete: () => {
         this.disconnect();
-        this.modal.upodateAlertModalConfig({ title: "Upgrading", progress: false, message: "Firmware download successfully, wait for the device to reboot before connecting again." })
+        this.modal.upodateAlertModalConfig({
+           title: "modal.upgrading", 
+           progress: false,
+           message: "modal.upgrading.board.success" })
       }
     });
   }

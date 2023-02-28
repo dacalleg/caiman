@@ -14,12 +14,6 @@ import { DeviceService } from 'src/app/services/device.service';
 import { ModalService } from 'src/app/services/modal.service';
 import { StoreService } from 'src/app/services/store.service';
 
-/*
-modal.upgrading: "Upgrading"
-modal.upgrading_board_message: "Upgrading Board Firmware"
-modal.upgrading_gateway_message: "Upgrading Gateway Firmware"
-modal.upgrading_board_success: "Firmware download successfully, wait for the device to reboot before connecting again."
-*/
 
 @Component({
   selector: 'app-home',
@@ -27,6 +21,7 @@ modal.upgrading_board_success: "Firmware download successfully, wait for the dev
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+
 
   @ViewChild("nav") nav: NgbNav | null;
 
@@ -51,6 +46,8 @@ export class HomeComponent implements OnInit {
   selectedFirmwareGateway: Firmware | null;
   selectedFirmwareBoard: Firmware | null;
 
+  mobileMenuOpen: boolean;
+
   constructor(
     private Store: StoreService,
     private Device: DeviceService,
@@ -61,6 +58,7 @@ export class HomeComponent implements OnInit {
     private modal: ModalService) {
 
     this.nav = null;
+    this.mobileMenuOpen = false;
     this.selectedFirmwareBoard = null;
     this.selectedFirmwareGateway = null;
     this.search$ = new BehaviorSubject<string>("");
@@ -280,7 +278,7 @@ export class HomeComponent implements OnInit {
         switchMap(() => this.modal.openAlertModal({
           title: "modal.writedb.title",
           message: "modal.writedb.success",
-          replaceParams: { dbname: this.databaseSelected!.name}
+          replaceParams: { dbname: this.databaseSelected!.name }
         }))
       ).subscribe({
         error: (err) => {
@@ -288,7 +286,7 @@ export class HomeComponent implements OnInit {
             title: "modal.writedb.title",
             progress: false,
             message: err.message,
-            replaceParams: { dbname: this.databaseSelected!.name}
+            replaceParams: { dbname: this.databaseSelected!.name }
           })
         },
         complete: () => {
@@ -346,9 +344,11 @@ export class HomeComponent implements OnInit {
     ).subscribe({
       error: (err) => {
         this.modal.upodateAlertModalConfig(
-          { title: "modal.wifistation.connection", 
-          progress: false,
-           message: "modal.wifistation.timeout" })
+          {
+            title: "modal.wifistation.connection",
+            progress: false,
+            message: "modal.wifistation.timeout"
+          })
       },
       complete: () => this.modal.dismissAll()
     });
@@ -365,27 +365,29 @@ export class HomeComponent implements OnInit {
         progressValue: 0
       }).pipe(
         switchMap(() => this.Device.upgradeGatewayFirmware(firmware.url, firmware.md5).pipe(
-          tap((progress) => this.modal.upodateAlertModalConfig({ 
+          tap((progress) => this.modal.upodateAlertModalConfig({
             title: "modal.upgrading",
-             progress: true, 
-             progressValue: progress.progress,
-             message: "modal.upgrading.gateway"
-           })),
+            progress: true,
+            progressValue: progress.progress,
+            message: "modal.upgrading.gateway"
+          })),
         ))
       )),
     ).subscribe({
       error: (err) => {
-        this.modal.upodateAlertModalConfig({ 
+        this.modal.upodateAlertModalConfig({
           title: "modal.upgrading",
-           progress: false,
-            message: err.message })
+          progress: false,
+          message: err.message
+        })
       },
       complete: () => {
         this.disconnect();
-        this.modal.upodateAlertModalConfig({ 
-          title: "modal.upgrading", 
+        this.modal.upodateAlertModalConfig({
+          title: "modal.upgrading",
           progress: false,
-          message: "modal.upgrading.gateway.success" })
+          message: "modal.upgrading.gateway.success"
+        })
       }
     });
   }
@@ -402,28 +404,43 @@ export class HomeComponent implements OnInit {
         progressValue: 0
       }).pipe(
         switchMap(() => this.Device.upgradePowerBoardFirmware(firmware.url, firmware.md5).pipe(
-          tap((progress) => this.modal.upodateAlertModalConfig({ 
-            title: "modal.upgrading", 
-            progress: true, 
-            progressValue: progress.progress, 
-            message: "modal.upgrading.board" })),
+          tap((progress) => this.modal.upodateAlertModalConfig({
+            title: "modal.upgrading",
+            progress: true,
+            progressValue: progress.progress,
+            message: "modal.upgrading.board"
+          })),
         ))
       )),
     ).subscribe({
       error: (err) => {
-        this.modal.upodateAlertModalConfig({ 
-          title: "modal.upgrading", 
-          progress: false, 
-          message: err.message 
+        this.modal.upodateAlertModalConfig({
+          title: "modal.upgrading",
+          progress: false,
+          message: err.message
         })
       },
       complete: () => {
         this.disconnect();
         this.modal.upodateAlertModalConfig({
-           title: "modal.upgrading", 
-           progress: false,
-           message: "modal.upgrading.board.success" })
+          title: "modal.upgrading",
+          progress: false,
+          message: "modal.upgrading.board.success"
+        })
       }
     });
+  }
+
+  openMobileMenu() {
+    this.mobileMenuOpen = true;
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
+  }
+
+  selectTab($event: any) {
+    const option = $event.value as number;
+    this.nav?.select("ngb-nav-" + option);
   }
 }

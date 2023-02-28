@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { StoreService } from "../../../../services/store.service";
 import { ModalService } from "../../../../services/modal.service";
 import { map, Observable, take, tap } from "rxjs";
@@ -16,19 +16,20 @@ export class HeaderComponent implements OnInit {
 
 
   @ViewChild("file") file: ElementRef | null;
+  @Output() onBurgerClicked = new EventEmitter<void>();
   project$: Observable<Project>;
   isDeviceConnected$: Observable<boolean>;
   username$: Observable<any>;
   roles$: Observable<string>;
 
   constructor(
-    private Store: StoreService, 
-    private modalService: ModalService, 
-    private exporter: ExportService, 
-    private Device: DeviceService, 
+    private Store: StoreService,
+    private modalService: ModalService,
+    private exporter: ExportService,
+    private Device: DeviceService,
     private AuthService: AuthService,
     private Router: Router
-    ) {
+  ) {
     this.file = null;
     this.project$ = this.Store.getProject();
     this.isDeviceConnected$ = this.Device.isConnected();
@@ -133,5 +134,9 @@ export class HeaderComponent implements OnInit {
     this.AuthService.logout().pipe(
       tap(() => this.Router.navigate(['/auth/login']))
     ).subscribe();
+  }
+
+  burgerMenuClicked() {
+    this.onBurgerClicked.emit();
   }
 }

@@ -1,21 +1,25 @@
 <div class="h-100 d-flex flex-column">
   <div class="header">
-    <app-header></app-header>
+    <app-header (onBurgerClicked)="openMobileMenu()"></app-header>
   </div>
   <div class="container-fluid flex-grow-1" *ngIf="(loadDeviceData$|async) as device; else loader">
-
-    <!--<div class="row">
-          <div class="col-md-6">
-            <div class="input-group mb-3">
-              <input type="text" class="form-control" placeholder="Search variable by name or address..."
-                aria-describedby="button-addon2" (keydown)="onSearchChange($event)">
-              <button class="btn btn-primary" type="button" id="button-addon2">Search</button>
-            </div>
-          </div>
-        </div>-->
+    <div class="row align-items-start d-flex d-md-none py-3 sticky-top bg-white">
+      <div class="col">
+          <select class="form-select form-select-sm" (change)="selectTab($event.target)">
+            <option value="0">{{'home.deviceinfo'|translate}}</option>
+            <option value="1">{{'home.timeline'|translate}}</option>
+            <option value="2">{{'home.advanced'|translate}}</option>
+            <ng-container *ngIf="connected$|async">
+              <option *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [value]="i+3">
+                {{group|overrideGroupName|async}}
+              </option>
+            </ng-container>
+          </select>
+      </div>
+    </div>
     <div class="row align-items-start h-100">
       <div class="col-md-3 sticky-md-top">
-        <div class="px-5 pt-5">
+        <div class="px-5 pt-5 d-none d-md-inline">
           <div class="row align-items-start">
             <div class="col">
               <ul class="nav nav-pills">
@@ -24,7 +28,7 @@
             </div>
           </div>
         </div>
-        <div class="d-flex" class="p-5 pt-2">
+        <div class="d-flex" class="p-5 pt-2 d-none d-md-inline">
           <ul ngbNav #nav="ngbNav" class="nav-pills" orientation="vertical">
             <li ngbNavItem (shown)="unselectGroup()" [id]="0">
               <a ngbNavLink>{{'home.deviceinfo'|translate}}</a>
@@ -46,7 +50,7 @@
               <a ngbNavLink>{{'home.advanced'|translate}}</a>
               <ng-template ngbNavContent>
                 <div class="row align-items-start">
-                  <div class="col-md text-center order-1 order-md-2 sticky-md-top">
+                  <div class="col-md text-center order-1 order-md-2 sticky-md-top d-none d-md-block">
                     <img [src]="device?.info?.image" class="w-100 image">
                   </div>
                   <div class="col order-2 order-md-1">
@@ -112,7 +116,7 @@
               </ng-template>
             </li>
             <ng-container *ngIf="connected$|async">
-              <li ngbNavItem *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [id]="i + 3">
+              <li ngbNavItem *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [id]="i + 3" [domId]="'ngb-nav-' + i">
                 <a ngbNavLink>{{group|overrideGroupName|async}}</a>
                 <ng-template ngbNavContent>
                   <div class="row">
@@ -154,8 +158,14 @@
   </ng-template>
 </div>
 
-
-<app-option-modal></app-option-modal>
-<app-serial-modal></app-serial-modal>
-<app-variable-edit></app-variable-edit>
-<app-optimization></app-optimization>
+<div class="menu-mobile d-flex flex-column align-items-start position-fixed vh-100 w-100 top-0 left-0" [ngClass]="{'d-none': !mobileMenuOpen}">
+  <div class="text-end w-100 p-3">
+    <button class="btn btn-link btn-close" (click)="closeMobileMenu()">
+    </button>
+  </div>
+  <div class="d-flex w-100 align-items-center justify-content-center flex-grow-1">
+    <ul class="list-unstyled">
+      <li><a routerLink="/dashboard/home/">{{"back"|translate}}</a></li>
+    </ul>
+  </div>
+</div>

@@ -1,15 +1,22 @@
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-center">
-      <img src="assets/logo.svg" style="height: 37px;">
-      <h2 class="m-0 fw-bold ms-2">CAIMAN</h2>
+    <div class="d-flex align-items-center justify-content-between w-100">
+      <div class="d-flex align-items-center justify-content-center">
+        <img src="assets/logo.svg" style="height: 37px;">
+        <h2 class="m-0 fw-bold ms-2">CAIMAN</h2>
+      </div>
+      <div class="menu d-block d-md-none">
+        <button class="btn btn-link" (click)="burgerMenuClicked()">
+          <bi name="list"></bi>
+        </button>
+      </div>
     </div>
-    <div class="navbar-collapse" id="navbarContent">
+    <div class="navbar-collapse d-none d-md-block" id="navbarContent">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
+        <li class="nav-item d-flex align-items-center ms-md-3">
           <app-language-switcher></app-language-switcher>
         </li>
-        <li class="nav-item" ngbDropdown>
+        <li class="nav-item ms-md-3" ngbDropdown>
           <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown1" role="button">
             <bi name="person-circle" class="mx-1"></bi>
           </a>
@@ -22,50 +29,9 @@
             <a class="text-end" ngbDropdownItem (click)="logout()">Logout</a>
           </div>
         </li>
-        <!--<li class="nav-item" ngbDropdown *ngIf="(project$|async)">
-          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown2" role="button">
-            View
-          </a>
-          <div ngbDropdownMenu aria-labelledby="navbarDropdown2" class="dropdown-menu">
-            <a ngbDropdownItem (click)="hexAddress()" [disabled]="(project$|async)?.view?.addressFormat === 16">Numbers in Hex</a>
-            <a ngbDropdownItem (click)="decAddress()"  [disabled]="(project$|async)?.view?.addressFormat === 10">Numbers in Dec</a>
-            <hr class="dropdown-divider">
-            <a ngbDropdownItem (click)="modbusAddress(true)" [disabled]="(project$|async)?.view?.modbus === true">Modbus Address</a>
-            <a ngbDropdownItem (click)="modbusAddress(false)" [disabled]="(project$|async)?.view?.modbus === false">Serami Address</a>
-            <hr class="dropdown-divider">
-            <a ngbDropdownItem (click)="setExtentedView(true)" [disabled]="(project$|async)?.view?.extendedView === true">Extended View</a>
-            <a ngbDropdownItem (click)="setExtentedView(false)" [disabled]="(project$|async)?.view?.extendedView === false">Simplified View</a>
-          </div>
-        </li>
-        <li class="nav-item d-none" ngbDropdown *ngIf="(project$|async)">
-          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown3" role="button">
-            BLE
-          </a>
-          <div ngbDropdownMenu aria-labelledby="navbarDropdown3" class="dropdown-menu">
-            <a ngbDropdownItem (click)="connectBLE()">Connect</a>
-            <a ngbDropdownItem (click)="disconnect()" *ngIf="(isDeviceConnected$|async)">Disconnect</a>
-          </div>
-        </li>
-        <li class="nav-item d-none" ngbDropdown *ngIf="(project$|async)">
-          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown3" role="button">
-            SERIAL
-          </a>
-          <div ngbDropdownMenu aria-labelledby="navbarDropdown3" class="dropdown-menu">
-            <a ngbDropdownItem (click)="connectSerial()" *ngIf="!(isDeviceConnected$|async)">Connect</a>
-            <a ngbDropdownItem (click)="disconnect()" *ngIf="(isDeviceConnected$|async)">Disconnect</a>
-          </div>
-        </li>
-        <li class="nav-item" ngbDropdown *ngIf="(project$|async)">
-          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown4" role="button">
-            Export
-          </a>
-          <div ngbDropdownMenu aria-labelledby="navbarDropdown4" class="dropdown-menu">
-            <a ngbDropdownItem (click)="exportForNavelMicropython()">Export for Navel(Micropython)</a>
-            <a ngbDropdownItem (click)="exportForNova()">Export for Nova</a>
-          </div>
-        </li>-->
       </ul>
     </div>
   </div>
 </nav>
+
 <input #file type="file" (change)="onFileChange($event)" class="d-none">

@@ -18,7 +18,7 @@ import { VarByGroupPipe } from './pipes/var-by-group.pipe';
 import { HomeRoutingModule } from './home-routing.modules';
 import { FormsModule } from '@angular/forms';
 import {BootstrapIconsModule} from "ng-bootstrap-icons";
-import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi} from 'ng-bootstrap-icons/icons';
+import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List} from 'ng-bootstrap-icons/icons';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { DeviceSelectComponent } from './components/device-select/device-select.component';
 import { YouTubePlayerModule } from '@angular/youtube-player';
@@ -39,7 +39,8 @@ const icons = {
   InfoCircle,
   Pen,
   PersonCircle,
-  Wifi
+  Wifi,
+  List
 };
 
 @NgModule({

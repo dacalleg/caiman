@@ -1,8 +1,9 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import * as xpath from "xpath";
-import {DOMParser} from "@xmldom/xmldom"
-import {Page, Variable} from "../classes/interfaces";
-import {from, Observable} from "rxjs";
+import { DOMParser } from "@xmldom/xmldom"
+import { Page, Variable } from "../classes/interfaces";
+import { from, Observable } from "rxjs";
+import { Utils } from '../classes/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class SeramiParserService {
   constructor() {
   }
 
-  parse(xml: string): Observable<Variable[]>{
+  parse(xml: string): Observable<Variable[]> {
     const document = new DOMParser().parseFromString(xml, 'text/xml');
     let nodes = xpath.select("//parameter", document);
     return from(Promise.all(nodes.map(async node => {
@@ -25,7 +26,7 @@ export class SeramiParserService {
     })).then(items => items.filter(item => item !== null) as Variable[]).then(items => {
       let ret = [] as Variable[];
       items.forEach(variable => {
-        if ( variable.type === "RwmsParameterBase" && variable.bits != null) {
+        if (variable.type === "RwmsParameterBase" && variable.bits != null) {
           let index = 0;
           ret = ret.concat(...variable.bits.map(bit => {
 
@@ -47,6 +48,8 @@ export class SeramiParserService {
               binaryMask: this.hex2bin(mask.toString(16)),
               hexMask: mask.toString(16),
               bits: null,
+              readExp: null,
+              writeExp: null,
               readExpPy: ["1 if (x & " + mask + ") > 0 else 0"],
               writeExpPy: ["crv | (1 << " + index + ") if x > 0 else crv & ~(1 << " + index + ")"]
             } as Variable;
@@ -86,13 +89,11 @@ export class SeramiParserService {
       if (expval.includes("IIF")) {
         expval = expval.substring(4, expval.length - 1);
         const pieces = expval.split(",")
-        if(pieces[0].includes("65535/2") || pieces[0].includes("255/2"))
-        {
+        if (pieces[0].includes("65535/2") || pieces[0].includes("255/2")) {
           expval = pieces[1];
           signed = true;
         }
-        else
-        {
+        else {
           expval = pieces[1] + " if " + pieces[0] + " else " + pieces[2];
         }
       }
@@ -104,6 +105,27 @@ export class SeramiParserService {
       redexp.push(expval);
     if (mask !== (Math.pow(2, bit) - 1))
       redexp.push("x & " + mask);
+    const realmin = parseInt(this.nodeChildValue("set_min", node));
+    const realmax = parseInt(this.nodeChildValue("set_max", node));
+    const exprval = this.nodeChildValue("expreval", node);
+
+    let min = realmin;
+    let max = realmax;
+    if (exprval && exprval !== "#") {
+      var re = new RegExp('#', 'g');
+      const fnmin = (x: number) => {
+        let e = exprval.replace(re, "" + x) + " - " + realmin;
+        return eval(e);
+      }
+      const fnmax = (x: number) => {
+        let e = exprval.replace(re, "" + x) + " - " + realmax;
+        return eval(e);
+      }
+      min = Math.round(Utils.newtonRaphson(fnmin, 0, 0.1));
+      max = Math.round(Utils.newtonRaphson(fnmax, 0, 0.1));
+    }
+
+
     return {
       type: type,
       group: this.nodeChildValue("parent", node) as string,
@@ -111,8 +133,8 @@ export class SeramiParserService {
       hash: ((memory ? "M_" : "E_") + address + mask + bit) as string,
       sanitizedName: sanitizedName,
       address: address,
-      min: parseInt(this.nodeChildValue("set_min", node)),
-      max: parseInt(this.nodeChildValue("set_max", node)),
+      min: min,
+      max: max,
       readonly: this.toBoolean(this.nodeChildValue("readonly", node)),
       memory: memory ? "eeprom" : "ram",
       mask: mask,
@@ -156,7 +178,7 @@ export class SeramiParserService {
     };
   }
 
-  getPattern(type: string, bit: number, reverse: boolean, signed:boolean = false): string {
+  getPattern(type: string, bit: number, reverse: boolean, signed: boolean = false): string {
     let byte = bit / 8;
     if (type === "RwmsParameterBase") {
       if (byte === 1)
@@ -174,35 +196,32 @@ export class SeramiParserService {
     return "ERROR";
   }
 
-  getPages(variables: Variable[], maxLength: number = Number.MAX_VALUE)
-  {
+  getPages(variables: Variable[], maxLength: number = Number.MAX_VALUE) {
     let eepromPages = this.pages(variables.filter(item => item.memory === "eeprom"), maxLength).map(item => {
-      return {start: item[0], end: item[1], eeprom: true } as Page;
+      return { start: item[0], end: item[1], eeprom: true } as Page;
     });
     let ramPages = this.pages(variables.filter(item => item.memory === "ram"), maxLength).map(item => {
-      return {start: item[0], end: item[1], eeprom: false } as Page;
+      return { start: item[0], end: item[1], eeprom: false } as Page;
     });
     return eepromPages.concat(ramPages);
   }
 
-  private pages(variables: Variable[], maxLength: number = Number.MAX_VALUE): number[][]
-  {
-    if(variables.length === 0)
+  private pages(variables: Variable[], maxLength: number = Number.MAX_VALUE): number[][] {
+    if (variables.length === 0)
       return [];
     let ret = [] as number[][];
-    let start = null as number|null;
-    let last = null as number|null;
-    variables.sort((a,b) => {
+    let start = null as number | null;
+    let last = null as number | null;
+    variables.sort((a, b) => {
       return a.address - b.address;
     }).forEach(item => {
-      if(start === null)
+      if (start === null)
         start = item.address - (item.address % 2);
-      if((item.address + (item.bit/8) - start) > (maxLength))
-      {
+      if ((item.address + (item.bit / 8) - start) > (maxLength)) {
         ret.push([start as number, last as number]);
         start = item.address - (item.address % 2);
       }
-      last = item.address + (item.bit/8);
+      last = item.address + (item.bit / 8);
       last = (last as number + (last as number % 2)) as number
     });
     last = (last as number + (last as number % 2)) as number
@@ -223,9 +242,9 @@ export class SeramiParserService {
       .replace(/(\w+)_$/gm, '$1');
   }
 
-  getChildrens(nodeName: string, node: any): (string|null)[]|null {
+  getChildrens(nodeName: string, node: any): (string | null)[] | null {
     const visualmode = parseInt(this.nodeChildValue("visualmode", node));
-    if(visualmode !== 8)
+    if (visualmode !== 8)
       return null;
     let ret = [];
     const mask = this.hex2bin(this.nodeChildValue("mask", node)).split("").reverse();

@@ -63,7 +63,7 @@ export class ModalService {
   openAlertModal(config: AlertModalConfig) {
     return defer(() => {
       this.modalService.dismissAll();
-      const modalRef = this.modalService.open(AlertComponent, {backdrop: config.progress ? 'static' : true, keyboard: false});
+      const modalRef = this.modalService.open(AlertComponent, {centered: true, backdrop: config.progress ? 'static' : true, keyboard: false});
       this.alertModalConfigSubject$.next(config);
       if(config.progress === true)
         return of(void 0);

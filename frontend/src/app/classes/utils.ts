@@ -27,12 +27,39 @@ export class Utils {
         for (let i = 0; i < variables.length; i++) {
             const variable = variables[i];
             const value = values[i];
+
+
             if (!variable.writeExp) {
-                ret.push(value);
+                if (variable.readExp) {
+                    //Calculate reverse formula
+                    const fn = (x: number) => {
+                        let e = variable.readExp!.replace(re, "" + x) + " - " + value;
+                        return eval(e);
+                    }
+                    const result = Utils.newtonRaphson(fn, 0, 0.1);
+                    ret.push(Math.round(result));
+                }
+                else {
+                    ret.push(value);
+
+                }
             } else {
                 ret.push(eval(variable.writeExp.replace(re, "" + value)));
             }
         }
         return ret;
+    }
+
+    static newtonRaphson(f: (x: number) => number, x0: number, h: number = 0.0001) {
+        let x1 = x0 - f(x0) / Utils.derivative(f, x0, h);
+        while (Math.abs(x1 - x0) > h) {
+            x0 = x1;
+            x1 = x0 - f(x0) / Utils.derivative(f, x0, h);
+        }
+        return x1;
+    }
+
+    static derivative(f: (x: number) => number, x: number, h: number = 0.0001) {
+        return (f(x + h) - f(x - h)) / (2 * h);
     }
 }

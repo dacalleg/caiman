@@ -32,7 +32,7 @@ export class TicketsComponent {
     this.visibleForm = null;
     this.newTicket = this.createEmptyTicket();
     this.reloadTicket$ = new Subject<void>();
-    this.reloadTicket$.subscribe(() => console.log("emitted"));
+    this.reloadTicket$.subscribe();
 
 
     this.tickets$ = merge(
@@ -85,9 +85,7 @@ export class TicketsComponent {
       switchMap(() => this.Api.addTicket(this.newTicket, parent)),
       tap(() => this.reloadTicket$.next())
     ).subscribe({
-      complete: () => {
-        console.log("Ticket created");
-      }
+      complete: () => {}
     });
   }
 

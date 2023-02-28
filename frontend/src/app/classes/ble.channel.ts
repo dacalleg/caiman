@@ -219,14 +219,12 @@ export class BleChannel implements Channel {
               return throwError(() => new Error("Nack"));
             return of(resp);
           }),
-          tap(res => console.log(res)),
         )),
       )))
   }
 
   private sendCommand(data: any, chunkSize = 200) {
     return defer(() => {
-      console.log(data);
       const id = Math.floor(Math.random() * 10000000);
       this.sendCommand$.next({ data: data, chunkSize: chunkSize, id: id })
       return combineLatest([of(id), this.responses$]);

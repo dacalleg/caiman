@@ -212,7 +212,7 @@ export class HomeComponent implements OnInit {
     concat(
       this.modal.openAlertModal({
         title: "modal.title.connection",
-        message: "Wifi connection in progress",
+        message: "modal.wifi.connection",
         progress: true
       }).pipe(ignoreElements()),
       this.wifiConnectionAvailable$.pipe(
@@ -396,7 +396,6 @@ export class HomeComponent implements OnInit {
     of(this.selectedFirmwareBoard).pipe(
       map(firmware => firmware!),
       switchMap(firmware => this.Api.getAttachmentUrlWithoutSSL(firmware.file)),
-      tap(firmware => console.log(firmware)),
       switchMap(firmware => this.modal.openAlertModal({
         title: "modal.upgrading",
         message: "modal.upgrading.board",

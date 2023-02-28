@@ -1,5 +1,5 @@
-import { catchError, delay, filter, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, tap, throwError } from "rxjs";
-import { Channel, FirmwareDownloadStatus, Variable, VariableValue, WifiStatus } from "./interfaces";
+import { catchError, delay, filter, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, takeWhile, tap, throwError } from "rxjs";
+import { Channel, FirmwareDownloadStatus, Variable, VariableValue, WifiStation, WifiStatus } from "./interfaces";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Utils } from "./utils";
 
@@ -20,7 +20,7 @@ export class Agua implements Channel {
     }
 
     getWifiStatus(): Observable<WifiStatus> {
-        throw new Error("Method not implemented.");
+        return this.protocol.getWifiStatus();
     }
 
     setWifi(ssid: string, password: string): Observable<void> {
@@ -68,7 +68,7 @@ export class Agua implements Channel {
     }
 
     loadGatewayFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
-        throw new Error("Method not implemented.");
+        return this.protocol.loadGatewayFirmware(url, md5);
     }
     loadPowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
         throw new Error("Method not implemented.");
@@ -230,6 +230,75 @@ class AguaProtocol {
             )),
             switchMap(() => of(true)),
             catchError(err => of(false)),
+        )
+    }
+
+    getWifiStatus() {
+        const payload = {
+            "id_product": this.id_product,
+            "id_device": this.id_device
+        }
+
+        return this.token$.pipe(
+            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceStatusWifiStation", payload, { headers: this.getHeaders(token) }).pipe(
+                switchMap(response => this.getJobStatus(response.idRequest)),
+            )),
+            map((resp: any) => {
+                return {
+                    wifi_connected: resp.ConnSta === "Connected",
+                    cloud_connected: resp.ConnServer === "Connected",
+                    wifi_stations: resp.Aps.map((item: any) => {
+                        return {
+                            ssid: item.ssid,
+                            channel: item.channel,
+                            rssi: item.rssi,
+                            bssid: item.bssid
+                        } as WifiStation
+                    })
+                } as WifiStatus
+            })
+        )
+    }
+
+    loadGatewayFirmware(url: string, md5: string) {
+        const urlData = new URL(url);
+        const path = urlData.pathname.split("/").slice(0, -1).join("/");
+        const filename = urlData.pathname.split("/").slice(-1).join("/");
+        const payload = {
+            id_product: this.id_product,
+            id_device: this.id_device,
+            RemoteHost: urlData.host,
+            RemotePath: path,
+            LocalPath: "",
+            Protocol: "HTTP",
+            Flags: ["OVER_WRITE", "AUTO_UPG"],
+            Type: "OTA",
+            FileNames: filename,
+            MD5: md5.toUpperCase()
+        }
+        return this.token$.pipe(
+            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceDownloadFiles", payload, { headers: this.getHeaders(token) }).pipe(
+                switchMap(response => this.getJobStatus(response.idRequest)),
+            )),
+            switchMap(() => this.getDownloadStatus().pipe(
+                map(response => {
+                    return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus
+                }),
+                repeat({ delay: 1000 }),
+                takeWhile(response => response.operation < 2)
+            )),
+        )
+    }
+
+    private getDownloadStatus() {
+        const payload = {
+            id_product: this.id_product,
+            id_device: this.id_device,
+        }
+        return this.token$.pipe(
+            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceStatusDwnUpg", payload, { headers: this.getHeaders(token) }).pipe(
+                switchMap(response => this.getJobStatus(response.idRequest)),
+            ))
         )
     }
 

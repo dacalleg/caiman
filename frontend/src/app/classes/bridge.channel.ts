@@ -235,7 +235,7 @@ export class BridgeChannel implements Channel {
 
   private getConfiguration(username: string, token: string) {
     return {
-      brokerURL: 'ws://' + environment.host + '/ws',
+      brokerURL: 'wss://' + environment.host + '/ws',
 
       connectHeaders: {
         login: username,

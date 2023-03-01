@@ -71,7 +71,7 @@ export class Agua implements Channel {
         return this.protocol.loadGatewayFirmware(url, md5);
     }
     loadPowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
-        throw new Error("Method not implemented.");
+        return this.protocol.loadPowerBoardFirmware(url, md5);
     }
 }
 
@@ -260,6 +260,37 @@ class AguaProtocol {
         )
     }
 
+    loadPowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
+        const urlData = new URL(url);
+        const protocol = urlData.protocol.replace(":", "");
+        const path = urlData.pathname.split("/").slice(0, -1).join("/");
+        const filename = urlData.pathname.split("/").slice(-1).join("/");
+        const payload = {
+            id_product: this.id_product,
+            id_device: this.id_device,
+            RemoteHost: urlData.host,
+            RemotePath: path,
+            Protocol: protocol.toUpperCase(),
+            LocalPath: "fw",
+            Flags: ["OVER_WRITE", "CREATE_DIR", "AUTO_UPG"],
+            Type: "FW",
+            FileNames: filename,
+            MD5: md5.toUpperCase()
+        }
+        return this.token$.pipe(
+            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceDownloadFiles", payload, { headers: this.getHeaders(token) }).pipe(
+                switchMap(response => this.getJobStatus(response.idRequest)),
+            )),
+            switchMap(() => this.getDownloadStatus().pipe(
+                map(response => {
+                    return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus
+                }),
+                repeat({ delay: 1000 }),
+                takeWhile(response => response.operation < 4)
+            )),
+        )
+    }
+
     loadGatewayFirmware(url: string, md5: string) {
         const urlData = new URL(url);
         const path = urlData.pathname.split("/").slice(0, -1).join("/");
@@ -317,7 +348,7 @@ class AguaProtocol {
                         return of(response.jobAnswerData);
                     }
                     ),
-                    retry({ count: 5, delay: 1000 }))
+                    retry({ count: 10, delay: 1000 }))
                 ))
             )
         )

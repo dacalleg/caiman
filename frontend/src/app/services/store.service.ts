@@ -138,6 +138,8 @@ export class StoreService {
                 variable.name = override_variable.title;
               if (override_variable?.description)
                 variable.description = override_variable.description;
+              if (override_variable?.writable !== undefined)
+                variable.readonly = !override_variable.writable;
               if (override_variable?.options)
                 variable.values = Object.keys(override_variable.options).map(key => {
                   return [override_variable.options![key], key]

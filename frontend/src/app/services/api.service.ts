@@ -58,7 +58,12 @@ export class ApiService {
         let serami_acl = [] as SeramiACL[];
         if (item.acf.serami_acl) {
           serami_acl = item.acf.serami_acl.map((item: any) => {
-            return { ...item, hidden_variables: item.hidden_variables ? item.hidden_variables.split("\r\n") : [], hidden_groups: item.hidden_groups ? item.hidden_groups.split("\r\n") : [] }
+            return { ...item, 
+              hidden_variables: item.hidden_variables ? item.hidden_variables.split("\r\n") : [], 
+              hidden_groups: item.hidden_groups ? item.hidden_groups.split("\r\n") : [],
+              only_read_variables: item.only_read_variables ? item.only_read_variables.split("\r\n") : [],
+              writable_variables: item.writable_variables ? item.writable_variables.split("\r\n") : [] 
+            }
           })
         }
         return {
@@ -66,7 +71,8 @@ export class ApiService {
           serami_file: item.acf.serami_file,
           serami_acl: serami_acl,
           firmware_list: item.acf.firmware || [],
-          database: item.acf.database || []
+          database: item.acf.database || [],
+          serami_var_formula_override: item.acf.serami_var_formula_override || [],
         } as Board
       })
     )
@@ -91,11 +97,14 @@ export class ApiService {
     return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
       switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => from(arr)),
-      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), this.getGateway(gateway, item.acf.board)])),
-      map(([item, board, gateway]) => {
+      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), this.getGateway(gateway, item.acf.board), this.Auth.getRoles()])),
+      take(1),
+      map(([item, board, gateway, roles]) => {
         let serami_var_override = item.acf.serami_var_override as any[] || [];
         let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
-        let serami_var_formula_override = item.acf.serami_var_formula_override as any[] || [];
+        let serami_var_formula_override = board.serami_var_formula_override as any[] || [];
+        let writable_variables = board.serami_acl.find(item => roles.includes(item.role) || item.role === 'all')?.writable_variables || [];
+        let only_read_variables = board.serami_acl.find(item => roles.includes(item.role) || item.role === 'all')?.only_read_variables || [];
 
         let identifiers = [].concat(
           ...serami_var_override.map(item => item.id),
@@ -114,6 +123,14 @@ export class ApiService {
           }, {} as { [key: string]: string });
           const formula = serami_var_formula_override.find(item => item.id === id);
 
+          let is_writable = writable_variables.includes(id);
+          let is_only_readable = only_read_variables.includes(id);
+          let writable = undefined as boolean | undefined;
+          if(is_writable)
+            writable = true;
+          if(is_only_readable)
+            writable = false;         
+
           return {
             id: id,
             title: info ? info.title : undefined,
@@ -121,6 +138,7 @@ export class ApiService {
             options: options ? options : undefined,
             read_exp: formula ? formula.read_exp : undefined,
             write_exp: formula ? formula.write_exp : undefined,
+            writable: writable
           } as VariableInfoOverride
         })
 
@@ -168,7 +186,7 @@ export class ApiService {
   }
 
   getAttachmentUrlWithoutSSL(id: number | string) {
-    return this.Http.get<{url:string, md5:string}>(environment.endpoint + "/wp-json/caiman/v1/unsecure_file/" + id)
+    return this.Http.get<{ url: string, md5: string }>(environment.endpoint + "/wp-json/caiman/v1/unsecure_file/" + id)
   }
 
   getAttachmentContent(id: number, responseType: 'text' | 'blob' = 'text') {
@@ -210,7 +228,7 @@ export class ApiService {
       bufferCount(chunkSize),
       map(buffer => new Blob(buffer, { type: file.type })),
       switchMap(blob => from(this.blobToBase64(blob))),
-      switchMap(base64 => this.Http.post(environment.endpoint + "/api/chunkupload", { name: filename, ext: ext, chunk:base64  })),
+      switchMap(base64 => this.Http.post(environment.endpoint + "/api/chunkupload", { name: filename, ext: ext, chunk: base64 })),
       map(() => filename + "." + ext)
     );
   }

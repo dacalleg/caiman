@@ -79,7 +79,7 @@
             <bi name="eye-slash" (click)="hideVariable()" *ngIf="!variable.hide" class="mx-1"></bi>
             <bi name="info-circle" (click)="editVariable()" class="mx-1"></bi>
           -->
-        <bi name="pen" class="mx-1" (click)="toggleWrite()" *ngIf="!variable.readonly"></bi>
+        <button class="btn btn-sm btn-link mt-2" (click)="toggleWrite()"><bi name="pen" class="mx-1"  *ngIf="!variable.readonly"></bi></button>
       </div>
     </div>
   </div>

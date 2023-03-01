@@ -174,6 +174,7 @@ export interface Board {
   serami_acl: SeramiACL[];
   firmware_list: Firmware[];
   database: Database[];
+  serami_var_formula_override: any[];
 }
 
 export interface Gateway{
@@ -213,6 +214,7 @@ export interface VariableInfoOverride {
   options?: { [key: string]: string }
   read_exp?: string;
   write_exp?: string;
+  writable?: boolean;
 }
 
 export interface Video {
@@ -224,6 +226,8 @@ export interface Video {
 export interface SeramiACL extends WithRole {
   hidden_groups: string[];
   hidden_variables: string[];
+  only_read_variables: string[];
+  writable_variables: string[];
 }
 
 export interface SingleFaq {

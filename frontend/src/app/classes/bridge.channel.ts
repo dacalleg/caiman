@@ -21,7 +21,7 @@ import {
   throwError,
   timeout,
 } from "rxjs";
-import { Channel, FirmwareDownloadStatus, Variable, VariableValue, WifiStatus } from "./interfaces";
+import { Channel, FirmwareDownloadStatus, Variable, VariableValue, WifiStation, WifiStatus } from "./interfaces";
 import { environment } from "src/environments/environment";
 import { RxStomp, RxStompConfig } from "@stomp/rx-stomp";
 import { IMessage } from '@stomp/stompjs';
@@ -52,7 +52,7 @@ export class BridgeChannel implements Channel {
       return of(stomp);
     }).pipe(
       tap((stomp) => this.stompSubject$.next(stomp)),
-      switchMap((arg) => this.sendIdentity(secutiry).pipe(map(() => arg))),
+      switchMap((arg) => this.sendBridgePing().pipe(map(() => arg))),
       timeout(5000),
       catchError((err) => {
         this.close$.next();
@@ -108,15 +108,37 @@ export class BridgeChannel implements Channel {
   loadGatewayFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
     throw new Error("Method not implemented.");
   }
+
   loadPowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
     throw new Error("Method not implemented.");
   }
+
   disconnectWifi(): Observable<void> {
     throw new Error("Method not implemented.");
   }
 
-  getWifiStatus(): Observable<WifiStatus> {
-    throw new Error("Method not implemented.");
+  private sendBridgePing()
+  {
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "ConnectionPing" }));
+  }
+
+  getWifiStatus() {
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "StatusWifiStation" })).pipe(
+      map((resp: any) => {
+        return {
+          wifi_connected: resp.ConnSta === "Connected",
+          cloud_connected: resp.ConnServer === "Connected",
+          wifi_stations: resp.Aps.map((item: any) => {
+            return {
+              ssid: item.ssid,
+              channel: item.channel,
+              rssi: item.rssi,
+              bssid: item.bssid
+            } as WifiStation
+          })
+        } as WifiStatus
+      }),
+    );
   }
 
   setWifi(ssid: string, password: string): Observable<void> {

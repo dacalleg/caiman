@@ -10,19 +10,21 @@ export class VariableValueFormatterPipe implements PipeTransform {
     if (value === null)
       return null;
 
+    let calculated = value.value;
+
     if (value.variable.values) {
       for (let i = 0; i < value.variable.values.length; i++) {
         const item = value.variable.values[i]
-        if (parseInt(item[0]) == value.value)
+        if (parseInt(item[0]) == calculated)
           return item[1];
       }
     }
 
     if (value.variable.formatstring) {
-      return value.variable.formatstring.replace("{0}", "" + value.value);
+      return value.variable.formatstring.replace("{0}", "" + calculated);
     }
 
-    return value.value;
+    return calculated;
   }
 
 }

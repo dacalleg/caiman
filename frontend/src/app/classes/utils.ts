@@ -7,7 +7,13 @@ export class Utils {
         for (let i = 0; i < variables.length; i++) {
             try {
                 const variable = variables[i];
-                const value = values[i];
+                const value = values[i] & variable.mask!;
+
+                if (variable.type === "RwmsParameterBaseBit") {
+                    ret.push(value > 0 ? 1 : 0);
+                    continue;
+                }
+
                 if (!variable.readExp) {
                     ret.push(value);
                 } else {
@@ -28,6 +34,10 @@ export class Utils {
             const variable = variables[i];
             const value = values[i];
 
+            if (variable.type === "RwmsParameterBaseBit") {
+                ret.push(value > 0 ? variable.mask! : 0);
+                continue;
+            }
 
             if (!variable.writeExp) {
                 if (variable.readExp) {

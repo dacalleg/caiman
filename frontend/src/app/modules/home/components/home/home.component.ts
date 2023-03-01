@@ -420,7 +420,6 @@ export class HomeComponent implements OnInit {
         })
       },
       complete: () => {
-        this.disconnect();
         this.modal.upodateAlertModalConfig({
           title: "modal.upgrading",
           progress: false,

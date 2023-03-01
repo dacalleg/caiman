@@ -30,7 +30,7 @@
         </div>
         <div class="d-flex" class="p-5 pt-2 d-none d-md-inline">
           <ul ngbNav #nav="ngbNav" class="nav-pills" orientation="vertical">
-            <li ngbNavItem (shown)="unselectGroup()" [id]="0">
+            <li ngbNavItem (shown)="unselectGroup()" [id]="0" [domId]="'ngb-nav-' + 0">
               <a ngbNavLink>{{'home.deviceinfo'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-device-info [device]="device" [connected]="connected$|async"
@@ -40,13 +40,13 @@
                   (onWifiConnect)="wifiConnect()"></app-device-info>
               </ng-template>
             </li>
-            <li ngbNavItem (shown)="unselectGroup()" [id]="1">
+            <li ngbNavItem (shown)="unselectGroup()" [id]="1" [domId]="'ngb-nav-' + 1">
               <a ngbNavLink>{{'home.timeline'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-tickets></app-tickets>
               </ng-template>
             </li>
-            <li ngbNavItem (shown)="unselectGroup()" [id]="2">
+            <li ngbNavItem (shown)="unselectGroup()" [id]="2" [domId]="'ngb-nav-' + 2">
               <a ngbNavLink>{{'home.advanced'|translate}}</a>
               <ng-template ngbNavContent>
                 <div class="row align-items-start">

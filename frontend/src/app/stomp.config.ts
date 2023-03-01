@@ -2,7 +2,7 @@ import { RxStompConfig } from '@stomp/rx-stomp';
 import { environment } from '../environments/environment';
 
 export const myRxStompConfig: RxStompConfig = {
-    brokerURL: 'ws://' + environment.host + '/ws',
+    brokerURL: 'wss://' + environment.host + '/ws',
 
     connectHeaders: {
         login: 'rabbitmq',

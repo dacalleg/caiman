@@ -60,7 +60,7 @@ export class BleChannel implements Channel {
       tap(() => this.responses$.subscribe()));
 
     //@ts-ignore
-    this.connection$ = from(navigator.bluetooth.requestDevice({filters: [{namePrefix: "T009_" + mac.substring(mac.length - 6)}]})).pipe(
+    this.connection$ = from(navigator.bluetooth.requestDevice({ acceptAllDevices: true, services: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e'] })).pipe(
       tap((device) => this.BLEDevice$.next(device)),
       switchMap(() => this.reconnect$.pipe(take(1))),
       shareReplay(1),

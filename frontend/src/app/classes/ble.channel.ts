@@ -60,7 +60,7 @@ export class BleChannel implements Channel {
       tap(() => this.responses$.subscribe()));
 
     //@ts-ignore
-    this.connection$ = from(navigator.bluetooth.requestDevice({ acceptAllDevices: true, services: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e'] })).pipe(
+    this.connection$ = from(navigator.bluetooth.requestDevice({ acceptAllDevices: true })).pipe(
       tap((device) => this.BLEDevice$.next(device)),
       switchMap(() => this.reconnect$.pipe(take(1))),
       shareReplay(1),
@@ -115,8 +115,7 @@ export class BleChannel implements Channel {
     )
   }
 
-  private getDownloadStatus()
-  {
+  private getDownloadStatus() {
     return this.sendCommand(this.generateJsonEnvelope({ Cmd: "StatusDwnUpg" }));
   }
 
@@ -136,9 +135,9 @@ export class BleChannel implements Channel {
     return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload })).pipe(
       switchMap(() => this.getDownloadStatus().pipe(
         map(response => {
-          return {operation: response.StatusCode, progress: response.Progress} as FirmwareDownloadStatus
+          return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus
         }),
-        repeat({delay: 1000}),
+        repeat({ delay: 1000 }),
         takeWhile(response => response.operation < 2)
       ))
     )
@@ -162,9 +161,9 @@ export class BleChannel implements Channel {
     return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload })).pipe(
       switchMap(() => this.getDownloadStatus().pipe(
         map(response => {
-          return {operation: response.StatusCode, progress: response.Progress} as FirmwareDownloadStatus
+          return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus
         }),
-        repeat({delay: 1000}),
+        repeat({ delay: 1000 }),
         takeWhile(response => response.operation < 4)
       ))
     )

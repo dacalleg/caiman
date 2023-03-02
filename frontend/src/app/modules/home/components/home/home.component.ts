@@ -74,8 +74,13 @@ export class HomeComponent implements OnInit {
       shareReplay(1)
     );
 
-    this.loadDeviceData$ = macAddress$.pipe(
-      switchMap((mac) => this.Api.getDeviceInfoFromMac(mac).pipe(tap(device => this.Store.setDevice(device)))),
+    const productKey$ = this.ActivatedRoute.params.pipe(
+      map((params) => params["productKey"] as string | null),
+      shareReplay(1)
+    );
+
+    this.loadDeviceData$ = combineLatest([macAddress$, productKey$]).pipe(
+      switchMap(([mac, productKey]) => this.Api.getDeviceInfoFromMac(mac, productKey).pipe(tap(device => this.Store.setDevice(device)))),
       shareReplay(1)
     );
 
@@ -156,10 +161,16 @@ export class HomeComponent implements OnInit {
   }
 
   onGroupSelected(group: string) {
-    this.variables$.pipe(
-      map(variables => variables.filter(v => v.group == group && !v.hide)),
-      take(1)
-    ).subscribe(variables => this.Device.changeMonitoredVariables(variables))
+    combineLatest([
+      this.Store.getVariablesWithVariableKey(),
+      this.variables$.pipe(map(variables => variables.filter(v => v.group == group && !v.hide)))
+    ]).pipe(
+      take(1),
+      map(([variableswithKey, variables]) => {
+        let ret = [] as Variable[];
+        ret = ret.concat(...variableswithKey, ...variables);
+        return ret.filter((a, index, arr) => arr.findIndex(b => (b.hash === a.hash)) === index)
+      })).subscribe(variables => this.Device.changeMonitoredVariables(variables))
   }
 
   unselectGroup() {

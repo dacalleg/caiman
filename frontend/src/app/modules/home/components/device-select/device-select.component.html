@@ -19,22 +19,29 @@
             <div class="col">
                 <div class="card">
                     <div class="card-body">
-                        <div class="card-title">
-                            <h2>Online Mode</h2>
-                        </div>
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="MAC Address" aria-label="MAC Address"
-                                aria-describedby="button-addon2" [(ngModel)]="macAddress">
-                            <button class="btn btn-outline-primary " type="button" id="button-addon2"
-                                (click)="connectUsingMAC()">Connect</button>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="MAC Address"
+                                        aria-label="MAC Address" aria-describedby="button-addon2"
+                                        [(ngModel)]="macAddress">
+                                    <button class="btn btn-outline-primary " type="button" id="button-addon2"
+                                        (click)="connectUsingMAC()">Connect</button>
+                                </div>
+                            </div>
                         </div>
                         <div class="text-center my-3">
                             <span>OR</span>
                         </div>
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Serial Number"
-                                aria-label="Serial Number" aria-describedby="button-addon2">
-                            <button class="btn btn-outline-primary " type="button" id="button-addon2">Connect</button>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" placeholder="Serial Number"
+                                        aria-label="Serial Number" aria-describedby="button-addon2">
+                                    <button class="btn btn-outline-primary " type="button"
+                                        id="button-addon2">Connect</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -44,26 +51,26 @@
             <div class="col">
                 <div class="card">
                     <div class="card-body">
-                        <div class="card-title">
-                            <h2>Offline Mode</h2>
-                        </div>
-                        <div class="d-flex align-items-end mb-3">
-                            <div class="flex-grow-1">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="macaddress" class="form-label">Mac Address</label>
+                                <input type="text" class="form-control" placeholder="MAC Address"
+                                    aria-label="MAC Address" aria-describedby="button-addon2" [(ngModel)]="macAddress"
+                                    id="macaddress">
+                            </div>
+                            <div class="col">
                                 <label for="productlist" class="form-label">Select a product</label>
-                                <select id="productlist" class="form-select">
-                                    <option selected>Select a product</option>
-                                    <option value="1">One</option>
-                                    <option value="2">Two</option>
-                                    <option value="3">Three</option>
+                                <select id="productlist" class="form-select" [(ngModel)]="selectedProduct">
+                                    <option selected [ngValue]="null">Select a product</option>
+                                    <option *ngFor="let product of products$|async" [ngValue]="product.key"
+                                        [innerHtml]="product.name"></option>
                                 </select>
                             </div>
-                            <button class="btn btn-link">Refresh product list</button>
                         </div>
                         <div class="text-end">
-                            <button class="btn btn-primary">Connect</button>
+                            <button class="btn btn-primary" (click)="connectUsingProduct()">Connect</button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

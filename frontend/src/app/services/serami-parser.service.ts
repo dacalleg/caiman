@@ -28,6 +28,8 @@ export class SeramiParserService {
       items.forEach(variable => {
         if (variable.type === "RwmsParameterBase" && variable.bits != null) {
           let index = 0;
+          if(variable.varKey)
+            ret.push(variable)
           ret = ret.concat(...variable.bits.map(bit => {
 
             if (bit === null) {
@@ -38,10 +40,11 @@ export class SeramiParserService {
             const sanitizedName = variable.sanitizedName + "_" + bit
             const value = {
               ...variable,
+              varKey: undefined,
               type: "RwmsParameterBaseBit",
               name: variable.name + "_" + bit,
               mask: mask,
-              hash: (variable.memory ? "E_" : "R_") + variable.address + mask,
+              hash: [(variable.memory ? "E" : "R"), "" + variable.address, "" + mask].join("_"),
               sanitizedName: sanitizedName,
               min: 0,
               max: 1,
@@ -79,6 +82,7 @@ export class SeramiParserService {
     const sanitizedName = this.sanitizeString(this.nodeChildValue("label", node)) as string;
     let address = parseInt(this.nodeChildValue("startaddress", node), 16) as number;
     const mask = parseInt(this.nodeChildValue("mask", node), 16);
+    const varName = this.nodeChildValue("var_name", node) as string;
     let expval = this.nodeChildValue("expreval", node)
     let signed = false;
     if (expval && typeof expval === "string") {
@@ -121,16 +125,27 @@ export class SeramiParserService {
         let e = exprval.replace(re, "" + x) + " - " + realmax;
         return eval(e);
       }
-      min = Math.round(Utils.newtonRaphson(fnmin, 0, 0.1));
-      max = Math.round(Utils.newtonRaphson(fnmax, 0, 0.1));
+      try {
+        min = Math.round(Utils.newtonRaphson(fnmin, 0, 0.1));
+      }
+      catch (ex) {
+        console.log("Error in min calculation", ex);
+      }
+      try {
+        max = Math.round(Utils.newtonRaphson(fnmax, 0, 0.1));
+      }
+      catch (ex) {
+        console.log("Error in min calculation", ex);
+      }
     }
 
 
     return {
       type: type,
+      varKey: varName.trim() !== "" ? varName.trim() : undefined,
       group: this.nodeChildValue("parent", node) as string,
       name: this.nodeChildValue("label", node) as string,
-      hash: ((memory ? "E_" : "R_") + address + mask + bit) as string,
+      hash: [(memory ? "E" : "R"), "" + address, "" + mask].join("_"),
       sanitizedName: sanitizedName,
       address: address,
       min: min,
@@ -164,7 +179,7 @@ export class SeramiParserService {
       group: this.nodeChildValue("parent", node) as string,
       type: this.nodeChildValue("type", node) as string,
       name: this.nodeChildValue("label", node) as string,
-      hash: (memory ? "E_" : "R_") + address + bit,
+      hash: [(memory ? "E" : "R"), "" + address, "" + bit].join("_"),
       sanitizedName: sanitizedName,
       address: address,
       readonly: true,

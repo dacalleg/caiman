@@ -41,7 +41,7 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
 
     this.value$ = this.Device.getStream().pipe(
       switchMap((variables) => from(variables)),
-      filter(variable => !this.writeMode && variable.variable.sanitizedName === this.variable!.sanitizedName),
+      filter(variable => !this.writeMode && variable.variable.hash === this.variable!.hash),
       tap(value => this.newValue = value.value)
     )
 

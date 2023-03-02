@@ -27,6 +27,7 @@ export interface Variable {
   signed: boolean,
   formatstring: string
   description?: string
+  varKey?: string
 }
 
 export interface Project {

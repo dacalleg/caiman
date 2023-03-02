@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, take } from 'rxjs';
+import { BehaviorSubject, debounceTime, take } from 'rxjs';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -26,7 +26,7 @@ export class TranslationService {
   }
 
   getCurrentLanguage() {
-    return this.languageSubject$.asObservable();
+    return this.languageSubject$.asObservable().pipe(debounceTime(500));
   }
 
   changeLanguage(language: string) {

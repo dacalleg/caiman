@@ -66,6 +66,12 @@ export class StoreService {
     );
   }
 
+  getVariablesWithVariableKey() {
+    return this.componentStore.state$.pipe(
+      map(item => item.variables.filter(v => v.varKey !== undefined))
+    )
+  }
+
   getVariableByHash(hash: string) {
     return this.getVariables().pipe(
       map(item => item.find(v => v.hash === hash)),

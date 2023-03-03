@@ -28,7 +28,7 @@ export class SeramiParserService {
       items.forEach(variable => {
         if (variable.type === "RwmsParameterBase" && variable.bits != null) {
           let index = 0;
-          if(variable.varKey)
+          if (variable.varKey)
             ret.push(variable)
           ret = ret.concat(...variable.bits.map(bit => {
 
@@ -44,7 +44,7 @@ export class SeramiParserService {
               type: "RwmsParameterBaseBit",
               name: variable.name + "_" + bit,
               mask: mask,
-              hash: [(variable.memory ? "E" : "R"), "" + variable.address, "" + mask].join("_"),
+              hash: [(variable.memory === "eeprom" ? "E" : "R"), "" + variable.address, "" + mask, "" + index].join("_"),
               sanitizedName: sanitizedName,
               min: 0,
               max: 1,
@@ -77,6 +77,7 @@ export class SeramiParserService {
   }
 
   buildRwmsParameterBase(node: any): Variable {
+    var re = new RegExp('#', 'g');
     const bit = Math.pow(2, (parseInt(this.nodeChildValue("datatype", node)) + 3));
     const memory = this.toBoolean(this.nodeChildValue("memory", node));
     const sanitizedName = this.sanitizeString(this.nodeChildValue("label", node)) as string;
@@ -116,26 +117,15 @@ export class SeramiParserService {
     let min = realmin;
     let max = realmax;
     if (exprval && exprval !== "#") {
-      var re = new RegExp('#', 'g');
-      const fnmin = (x: number) => {
-        let e = exprval.replace(re, "" + x) + " - " + realmin;
-        return eval(e);
-      }
-      const fnmax = (x: number) => {
-        let e = exprval.replace(re, "" + x) + " - " + realmax;
-        return eval(e);
-      }
       try {
-        min = Math.round(Utils.newtonRaphson(fnmin, 0, 0.1));
+        min = eval(exprval.replace(re, "" + realmin))
       }
       catch (ex) {
-        console.log("Error in min calculation", ex);
       }
       try {
-        max = Math.round(Utils.newtonRaphson(fnmax, 0, 0.1));
+        max = eval(exprval.replace(re, "" + realmax))
       }
       catch (ex) {
-        console.log("Error in min calculation", ex);
       }
     }
 

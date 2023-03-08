@@ -1,5 +1,48 @@
 
 module.exports = (sequelize, DataTypes) => {
+    const Log = sequelize.define('logs', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
+        user: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        type: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        data: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        variable: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        gateway: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        product: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        date: {
+            type: DataTypes.DATE,
+            allowNull: false
+        }
+    }, {
+        timestamps: false,
+        indexes: [
+            {
+                unique: false,
+                fields: ['product', 'gateway']
+            }
+        ]
+    });
     const Asset = sequelize.define('assets', {
         id: {
             type: DataTypes.UUID,
@@ -51,7 +94,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Ticket.belongsTo(Ticket, { foreignKey: 'parent_id', as: 'parent' });
     Asset.belongsTo(Ticket, { foreignKey: 'ticket_id' });
-    Ticket.hasMany(Asset, { foreignKey: 'ticket_id'});
+    Ticket.hasMany(Asset, { foreignKey: 'ticket_id' });
 
-    return { Ticket, Asset }
+    return { Ticket, Asset, Log }
 };

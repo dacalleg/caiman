@@ -13,7 +13,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
     host: DB_HOST,
     dialectOptions: {}
 });
-const { Ticket, Asset } = require('./model')(sequelize, DataTypes);
+const { Ticket, Asset, Log } = require('./model')(sequelize, DataTypes);
 const express = require('express');
 var cors = require('cors')
 const fs = require('fs');
@@ -66,6 +66,7 @@ async function init() {
 
         await Ticket.sync({ alter: true });
         await Asset.sync({ alter: true });
+        await Log.sync({ alter: true });
 
         app.use(cors());
         app.use(bodyParser.json({ limit: '10mb' }));
@@ -116,6 +117,49 @@ async function init() {
                     }
                 );
                 res.status(200).send(await Promise.all(tickets.map(async (ticket) => loadTicketHierarchy(ticket.toJSON()))));
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.get('/logs/product/:id', UserRequired, async (req, res) => {
+            const productId = req.params.id;
+            try {
+                const logs = await Log.findAll(
+                    {
+                        where: {
+                            product: productId,
+                        },
+                    }
+                );
+                res.status(200).send(logs);
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.get('/logs/gateway/:id', UserRequired, async (req, res) => {
+            const gatewayId = req.params.id;
+            try {
+                const logs = await Log.findAll(
+                    {
+                        where: {
+                            gateway: gatewayId,
+                        },
+                    }
+                );
+                res.status(200).send(logs);
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.post('/logs', UserRequired, async (req, res) => {
+            const userId = req.user.email;
+            const body = {...req.body, user: userId};
+            try {
+                const log = await Log.create(body);
+                res.status(200).send({ status: "OK" });
             } catch (ex) {
                 res.status(500).send({ message: ex.message });
             }

@@ -9,8 +9,10 @@
             <option value="0">{{'home.deviceinfo'|translate}}</option>
             <option value="1">{{'home.timeline'|translate}}</option>
             <option value="2">{{'home.advanced'|translate}}</option>
+            <option value="3">{{'home.logs'|translate}}</option>
+
             <ng-container *ngIf="connected$|async">
-              <option *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [value]="i+3">
+              <option *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [value]="i+4">
                 {{group|overrideGroupName|async}}
               </option>
             </ng-container>
@@ -49,74 +51,17 @@
             <li ngbNavItem (shown)="unselectGroup()" [id]="2" [domId]="'ngb-nav-' + 2">
               <a ngbNavLink>{{'home.advanced'|translate}}</a>
               <ng-template ngbNavContent>
-                <div class="row align-items-start">
-                  <div class="col-md text-center order-1 order-md-2 sticky-md-top d-none d-md-block">
-                    <img [src]="device?.info?.image" class="w-100 image">
-                  </div>
-                  <div class="col order-2 order-md-1">
-                    <h1 class="fw-bold">{{device?.mac}}</h1>
-                    <div class="fw-bold">{{device?.name_product}}</div>
-
-                    <div class="row my-5">
-                      <div class="col-md">
-                        <h3>{{'home.database'|translate}}</h3>
-                        <div class="input-group">
-                          <select class="form-select" id="inputGroupSelect04"
-                            aria-label="Example select with button addon" [(ngModel)]="databaseSelected">
-                            <option selected disabled [value]="null">{{'choose'|translate}}</option>
-                            <option *ngFor="let db of device.info.database|withRole|async" [ngValue]="db">{{db.name}}</option>
-                          </select>
-                          <button class="btn btn-outline-secondary" type="button" (click)="loadDatabase()">{{'load'|translate}}</button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row my-5">
-                      <div class="col">
-                        <h3>{{'home.firmwaregateway'|translate}}</h3>
-                        <div class="input-group">
-                          <select class="form-select" id="inputGroupSelect04"
-                            aria-label="Example select with button addon" [(ngModel)]="selectedFirmwareGateway">
-                            <option selected disabled [value]="null">{{'choose'|translate}}</option>
-                            <option *ngFor="let firmware of device.info.gateway_firmware_list|withRole|async" [ngValue]="firmware">{{firmware.revision}}</option>
-                          </select>
-                          <button class="btn btn-outline-secondary" type="button" (click)="upgradeFirmwareGateway()" [disabled]="selectedFirmwareGateway === null">{{'load'|translate}}</button>
-                        </div>
-                        <span>{{'home.currentfirmware'|translate}}: {{device.boards_status.Revision}}</span>
-                      </div>
-                    </div>
-                    <div class="row my-5">
-                      <div class="col">
-                        <h3>{{'home.firmwareboard'|translate}}</h3>
-                        <div class="input-group">
-                          <select class="form-select" id="inputGroupSelect04"
-                            aria-label="Example select with button addon" [(ngModel)]="selectedFirmwareBoard">
-                            <option selected disabled [value]="null">{{'choose'|translate}}</option>
-                            <option *ngFor="let firmware of device.info.board_firmware_list|withRole|async" [ngValue]="firmware">{{firmware.revision}}</option>
-                          </select>
-                          <button class="btn btn-outline-secondary" type="button" (click)="upgradeFirmwareBoard()" [disabled]="selectedFirmwareBoard === null">{{'load'|translate}}</button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col">
-                        <h3 class="mb-3">{{'home.network'|translate}}</h3>
-                        <ng-container  *ngIf="(wifiStatus$|async) as status">
-                          <div class="text-end" *ngIf="!status.wifi_connected">
-                            <button class="btn btn-outline-secondary me-2" type="button" (click)="disconnectWifi()">{{'wifi.deletesettings'|translate}}</button>
-                            <button class="btn btn-outline-secondary" type="button" (click)="scanWifi()">{{'update'|translate}}</button>
-                          </div>
-                          <div class="pt-3">
-                            <app-wifi-tease  *ngFor="let station of status.wifi_stations" [connected]="status.wifi_connected" [station]="station" (onDisconnect)="disconnectWifi()" (onConnect)="connectWifi($event)"></app-wifi-tease>
-                          </div>
-                        </ng-container>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <app-advanced [device]="device" (onFirmwareGatewayUpgraded)="disconnect()"></app-advanced>
+              </ng-template>
+            </li>
+            <li ngbNavItem (shown)="unselectGroup()" [id]="3" [domId]="'ngb-nav-' + 3">
+              <a ngbNavLink>{{'home.logs'|translate}}</a>
+              <ng-template ngbNavContent>
+                <app-logs [device]="device"></app-logs>
               </ng-template>
             </li>
             <ng-container *ngIf="connected$|async">
-              <li ngbNavItem *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [id]="i + 3" [domId]="'ngb-nav-' + (i + 3)">
+              <li ngbNavItem *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [id]="i + 4" [domId]="'ngb-nav-' + (i + 4)">
                 <a ngbNavLink>{{group|overrideGroupName|async}}</a>
                 <ng-template ngbNavContent>
                   <div class="row">

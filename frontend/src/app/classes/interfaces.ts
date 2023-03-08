@@ -341,3 +341,19 @@ export interface FirmwareDownloadStatus
   operation: number;
   progress: number;
 }
+
+export enum LogType
+{
+  WRITE_VARIABLE = 0,
+  UPDATE_POWER_BOARD = 1,
+  UPDATE_GATEWAY = 2,
+}
+
+export interface LogItem
+{
+  date: Date;
+  type: LogType;
+  data: string|number|boolean;
+  variable?: string;
+  user?: string
+}

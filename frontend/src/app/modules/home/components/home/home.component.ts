@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, mergeMap, Observable, of, repeat, retry, shareReplay, switchMap, take, takeUntil, tap, throwError, timeout, toArray } from "rxjs";
+import { BehaviorSubject, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, mergeMap, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, tap, throwError, timeout, toArray } from "rxjs";
 import { Agua } from 'src/app/classes/agua';
 import { BleChannel } from 'src/app/classes/ble.channel';
 import { BridgeChannel } from 'src/app/classes/bridge.channel';
-import { Database, DeviceProduct, Firmware, Project, Variable, VariableValue, WifiStation, WifiStatus } from 'src/app/classes/interfaces';
+import { Database, DeviceProduct, Firmware, LogType, Project, Variable, VariableValue, WifiStation, WifiStatus } from 'src/app/classes/interfaces';
 import { Utils } from 'src/app/classes/utils';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -20,7 +20,7 @@ import { StoreService } from 'src/app/services/store.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
 
 
   @ViewChild("nav") nav: NgbNav | null;
@@ -38,15 +38,8 @@ export class HomeComponent implements OnInit {
   BLEChannel$: Observable<BleChannel>;
   bridgeChannel$: Observable<BridgeChannel>;
 
-  databaseSelected: Database | null;
-  wifiStatus$: Observable<WifiStatus>;
-
-  wifiRefreshSubject$: BehaviorSubject<void>;
-
-  selectedFirmwareGateway: Firmware | null;
-  selectedFirmwareBoard: Firmware | null;
-
   mobileMenuOpen: boolean;
+  destroy$: Subject<void> = new Subject<void>();
 
   constructor(
     private Store: StoreService,
@@ -59,12 +52,8 @@ export class HomeComponent implements OnInit {
 
     this.nav = null;
     this.mobileMenuOpen = false;
-    this.selectedFirmwareBoard = null;
-    this.selectedFirmwareGateway = null;
     this.search$ = new BehaviorSubject<string>("");
     this.project$ = this.Store.getProject();
-
-    this.databaseSelected = null;
 
     this.connected$ = this.Device.isConnected();
 
@@ -128,16 +117,28 @@ export class HomeComponent implements OnInit {
       switchMap(roles => this.Store.getGroupsByRole(roles))
     )
 
-    this.wifiRefreshSubject$ = new BehaviorSubject<void>(void 0);
-    this.wifiStatus$ = this.wifiRefreshSubject$.pipe(
-      switchMap(() => this.Device.getWifiStatus())
-    );
-
     this.loadDeviceData$.subscribe();
+
+    this.Device.getLogs().pipe(
+      takeUntil(this.destroy$),
+      filter(log => log.type === LogType.WRITE_VARIABLE || log.type === LogType.UPDATE_POWER_BOARD),
+      switchMap(log => this.loadDeviceData$.pipe(
+        switchMap(device => this.Api.createLogForDevice(device.id_device, log)))
+      )
+    ).subscribe();
+
+    this.destroy$.pipe(
+      switchMap(() => this.Device.disconnect())
+    ).subscribe();
   }
 
   ngOnInit(): void {
 
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onSearchChange($event: any) {
@@ -251,193 +252,6 @@ export class HomeComponent implements OnInit {
   disconnect() {
     this.nav?.select("ngb-nav-0");
     this.Device.disconnect().subscribe();
-  }
-
-  loadDatabase() {
-    if (this.databaseSelected) {
-      let i = 0;
-      let count = this.databaseSelected.values.length;
-      combineLatest([
-        of(this.databaseSelected),
-        this.modal.openAlertModal({
-          title: "modal.writedb.title",
-          progress: true,
-          progressValue: 0,
-          replaceParams: { dbname: this.databaseSelected.name }
-        }),
-      ]).pipe(
-        switchMap(([database, modal]) => from(database.values)),
-        concatMap((dbvalue) => combineLatest([of(dbvalue), this.Store.getVariableByHash(dbvalue.id)]).pipe(
-          map(([dbvalue, variable]) => {
-            if (variable == null)
-              throw new Error("modal.writedb.error.varnotfound");
-            return { variable: variable, value: Utils.convertValuesToWrite([variable], [+dbvalue.value])[0] } as VariableValue
-          }),
-          tap((value) => this.modal.upodateAlertModalConfig({
-            title: "modal.writedb.title",
-            progress: true, progressValue: (i / count) * 100,
-            message: "modal.writedb.message",
-            replaceParams: { dbname: this.databaseSelected!.name, varname: value.variable.name }
-          })),
-          switchMap((value) => this.Device.write([value])),
-          tap(() => i++),
-          timeout(5000),
-          retry(5)
-        )),
-        toArray(),
-        tap(() => this.modal.dismissAll()),
-        switchMap(() => this.modal.openAlertModal({
-          title: "modal.writedb.title",
-          message: "modal.writedb.success",
-          replaceParams: { dbname: this.databaseSelected!.name }
-        }))
-      ).subscribe({
-        error: (err) => {
-          this.modal.upodateAlertModalConfig({
-            title: "modal.writedb.title",
-            progress: false,
-            message: err.message,
-            replaceParams: { dbname: this.databaseSelected!.name }
-          })
-        },
-        complete: () => {
-
-        }
-      });
-    }
-  }
-
-  scanWifi() {
-    this.wifiRefreshSubject$.next();
-  }
-
-  disconnectWifi() {
-    this.modal.openAlertModal({
-      title: "modal.disconnecting",
-      message: "modal.disconnecting.message",
-      progress: true,
-    }).pipe(
-      switchMap(() => this.Device.disconnectWifi().pipe(
-        switchMap(() => of(void 0).pipe(
-          delay(1000),
-          tap(() => this.wifiRefreshSubject$.next()),
-          repeat()
-        )),
-        ignoreElements(),
-        timeout(15000),
-        takeUntil(this.wifiStatus$.pipe(filter(status => !status.wifi_connected))),
-      ))
-    ).subscribe({
-      error: (err) => {
-        this.modal.upodateAlertModalConfig({ title: "modal.disconnecting", progress: false, message: "timeout" })
-      },
-      complete: () => this.modal.dismissAll()
-    });
-  }
-
-  connectWifi($event: { station: WifiStation, password: string }) {
-    this.modal.openAlertModal({
-      title: "modal.wifistation.connection",
-      message: "modal.wifistation.message",
-      progress: true,
-      replaceParams: { ssid: $event.station.ssid }
-    }).pipe(
-      switchMap(() => this.Device.setWifi($event.station.ssid, $event.password).pipe(
-        switchMap(() => of(void 0).pipe(
-          delay(1000),
-          tap(() => this.wifiRefreshSubject$.next()),
-          repeat()
-        )),
-        ignoreElements(),
-        timeout(15000),
-        takeUntil(this.wifiStatus$.pipe(filter(status => status.wifi_connected))),
-      ))
-    ).subscribe({
-      error: (err) => {
-        this.modal.upodateAlertModalConfig(
-          {
-            title: "modal.wifistation.connection",
-            progress: false,
-            message: "modal.wifistation.timeout"
-          })
-      },
-      complete: () => this.modal.dismissAll()
-    });
-  }
-
-  upgradeFirmwareGateway() {
-    of(this.selectedFirmwareGateway).pipe(
-      map(firmware => firmware!),
-      switchMap(firmware => this.Api.getAttachmentUrlWithoutSSL(firmware.file)),
-      switchMap(firmware => this.modal.openAlertModal({
-        title: "modal.upgrading",
-        message: "modal.upgrading.gateway",
-        progress: true,
-        progressValue: 0
-      }).pipe(
-        switchMap(() => this.Device.upgradeGatewayFirmware(firmware.url, firmware.md5).pipe(
-          tap((progress) => this.modal.upodateAlertModalConfig({
-            title: "modal.upgrading",
-            progress: true,
-            progressValue: progress.progress,
-            message: "modal.upgrading.gateway"
-          })),
-        ))
-      )),
-    ).subscribe({
-      error: (err) => {
-        this.modal.upodateAlertModalConfig({
-          title: "modal.upgrading",
-          progress: false,
-          message: err.message
-        })
-      },
-      complete: () => {
-        this.disconnect();
-        this.modal.upodateAlertModalConfig({
-          title: "modal.upgrading",
-          progress: false,
-          message: "modal.upgrading.gateway.success"
-        })
-      }
-    });
-  }
-
-  upgradeFirmwareBoard() {
-    of(this.selectedFirmwareBoard).pipe(
-      map(firmware => firmware!),
-      switchMap(firmware => this.Api.getAttachmentUrlWithoutSSL(firmware.file)),
-      switchMap(firmware => this.modal.openAlertModal({
-        title: "modal.upgrading",
-        message: "modal.upgrading.board",
-        progress: true,
-        progressValue: 0
-      }).pipe(
-        switchMap(() => this.Device.upgradePowerBoardFirmware(firmware.url, firmware.md5).pipe(
-          tap((progress) => this.modal.upodateAlertModalConfig({
-            title: "modal.upgrading",
-            progress: true,
-            progressValue: progress.progress,
-            message: "modal.upgrading.board"
-          })),
-        ))
-      )),
-    ).subscribe({
-      error: (err) => {
-        this.modal.upodateAlertModalConfig({
-          title: "modal.upgrading",
-          progress: false,
-          message: err.message
-        })
-      },
-      complete: () => {
-        this.modal.upodateAlertModalConfig({
-          title: "modal.upgrading",
-          progress: false,
-          message: "modal.upgrading.board.success"
-        })
-      }
-    });
   }
 
   openMobileMenu() {

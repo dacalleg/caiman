@@ -1,0 +1,20 @@
+<ng-container *ngIf="deviceLogs$|async as logs">
+    <table class="table">
+        <tr>
+            <th>{{'logs.th.data'|translate}}</th>
+
+            <th>{{'logs.th.user'|translate}}</th>
+            <th>{{'logs.th.type'|translate}}</th>
+            <th>{{'logs.th.variable'|translate}}</th>
+            <th>{{'logs.th.data'|translate}}</th>
+
+        </tr>
+        <tr *ngFor="let log of logs">
+            <td>{{log.date}}</td>
+            <td>{{log.user}}</td>
+            <td>{{log.type}}</td>
+            <td>{{log.variable}}</td>
+            <td>{{log.data}}</td>
+        </tr>
+    </table>
+</ng-container>

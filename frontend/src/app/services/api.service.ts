@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { bufferCount, catchError, combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap, toArray } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, Gateway, ProductInfo, SeramiACL, Ticket, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, Gateway, LogItem, ProductInfo, SeramiACL, Ticket, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
@@ -243,6 +243,21 @@ export class ApiService {
 
   addTicket(ticket: Partial<Ticket>, parent: Ticket) {
     return this.Http.post<Ticket>(environment.endpoint + "/api/ticket/add", { ticket: ticket, parent: parent.id });
+  }
+
+  createLogForDevice(deviceId: string, log: LogItem)
+  {
+    return this.Http.post(environment.endpoint + "/api/logs", {...log, product: deviceId, date: log.date.toJSON().slice(0, 19).replace('T', ' ')});
+  }
+
+  createLogForGateway(gatewayId: string, log: LogItem)
+  {
+    return this.Http.post(environment.endpoint + "/api/logs", {...log, gateway: gatewayId, date: log.date.toJSON().slice(0, 19).replace('T', ' ')});
+  }
+
+  getLogsForDevice(deviceId: string)
+  {
+    return this.Http.get<any>(environment.endpoint + "/api/logs/product/" + deviceId);
   }
 
   closeTicket(ticket: Ticket) {

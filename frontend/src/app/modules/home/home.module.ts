@@ -31,6 +31,8 @@ import { WithRolePipe } from './pipes/with-role.pipe';
 import { WifiTeaseComponent } from './components/wifi-tease/wifi-tease.component';
 import { TicketsComponent } from './components/tickets/tickets.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { AdvancedComponent } from './components/advanced/advanced.component';
+import { LogsComponent } from './components/logs/logs.component';
 
 const icons = {
   Eye,
@@ -68,6 +70,8 @@ const icons = {
     WithRolePipe,
     WifiTeaseComponent,
     TicketsComponent,
+    AdvancedComponent,
+    LogsComponent,
   ],
   imports: [
     CommonModule,

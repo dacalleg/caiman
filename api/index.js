@@ -108,7 +108,7 @@ async function init() {
                 const tickets = await Ticket.findAll(
                     {
                         where: {
-                            device: req.body.device,
+                            serial: req.body.serial,
                             parent_id: null
                         },
                         include: [
@@ -122,13 +122,13 @@ async function init() {
             }
         });
 
-        app.get('/logs/product/:id', UserRequired, async (req, res) => {
-            const productId = req.params.id;
+        app.get('/logs/serial/:id', UserRequired, async (req, res) => {
+            const serial = req.params.id;
             try {
                 const logs = await Log.findAll(
                     {
                         where: {
-                            product: productId,
+                            serial: serial,
                         },
                     }
                 );

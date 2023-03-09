@@ -18,6 +18,18 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
+        from: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        set: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        written: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
         variable: {
             type: DataTypes.STRING,
             allowNull: true
@@ -26,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
-        product: {
+        serial: {
             type: DataTypes.STRING,
             allowNull: true
         },
@@ -39,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
         indexes: [
             {
                 unique: false,
-                fields: ['product', 'gateway']
+                fields: ['serial', 'gateway']
             }
         ]
     });
@@ -68,7 +80,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
-        device: {
+        serial: {
             type: DataTypes.STRING(20),
             allowNull: false
         },
@@ -87,7 +99,7 @@ module.exports = (sequelize, DataTypes) => {
         indexes: [
             {
                 unique: false,
-                fields: ['device']
+                fields: ['serial']
             }
         ]
     })

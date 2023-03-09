@@ -19,15 +19,15 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         from: {
-            type: DataTypes.STRING,
+            type: DataTypes.FLOAT,
             allowNull: true
         },
         set: {
-            type: DataTypes.STRING,
+            type: DataTypes.FLOAT,
             allowNull: true
         },
         written: {
-            type: DataTypes.STRING,
+            type: DataTypes.FLOAT,
             allowNull: true
         },
         variable: {

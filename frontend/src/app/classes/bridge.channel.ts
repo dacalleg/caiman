@@ -21,7 +21,7 @@ import {
   throwError,
   timeout,
 } from "rxjs";
-import { Channel, FirmwareDownloadStatus, Variable, VariableValue, WifiStation, WifiStatus } from "./interfaces";
+import { Channel, FirmwareDownloadStatus, Variable, VariableValue, VariableWriteResponse, WifiStation, WifiStatus } from "./interfaces";
 import { environment } from "src/environments/environment";
 import { RxStomp, RxStompConfig } from "@stomp/rx-stomp";
 import { IMessage } from '@stomp/stompjs';
@@ -145,7 +145,7 @@ export class BridgeChannel implements Channel {
     throw new Error("Method not implemented.");
   }
 
-  write(variables: VariableValue[]): Observable<VariableValue[]> {
+  write(variables: VariableValue[]): Observable<VariableWriteResponse> {
     return this.writeVariables(variables);
   }
 

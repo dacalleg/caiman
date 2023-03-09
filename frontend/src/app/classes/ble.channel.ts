@@ -8,6 +8,7 @@ import {
   defer,
   delay,
   filter,
+  forkJoin,
   from,
   map,
   Observable,
@@ -25,7 +26,7 @@ import {
   timeout,
   toArray
 } from "rxjs";
-import { Channel, FirmwareDownloadStatus, Variable, VariableValue, WifiStation, WifiStatus } from "./interfaces";
+import { Channel, FirmwareDownloadStatus, Variable, VariableValue, VariableWriteResponse, WifiStation, WifiStatus } from "./interfaces";
 
 export class BleChannel implements Channel {
   private connection$: Observable<{ device: any, server: any, service: any, characteristic: any }>;
@@ -104,8 +105,20 @@ export class BleChannel implements Channel {
 
   }
 
-  write(variables: VariableValue[]): Observable<VariableValue[]> {
+  write(variables: VariableValue[]): Observable<VariableWriteResponse> {
     return this.writeVariables(variables).pipe(
+      catchError((err) => {
+        return this.reconnect$.pipe(
+          switchMap(() => throwError(() => err))
+        )
+      }),
+      retry(),
+    )
+  }
+
+  read(variables: Variable[]): Observable<VariableValue[]> {
+    return this.readVariables(variables).pipe(
+      map(payload => this.getVariablesValue(variables, payload)),
       catchError((err) => {
         return this.reconnect$.pipe(
           switchMap(() => throwError(() => err))
@@ -167,10 +180,6 @@ export class BleChannel implements Channel {
         takeWhile(response => response.operation < 4)
       ))
     )
-  }
-
-  read(variables: Variable[]): Observable<VariableValue[]> {
-    throw new Error("Method not implemented.");
   }
 
   connect() {
@@ -293,19 +302,44 @@ export class BleChannel implements Channel {
     return this.sendCommand(this.generateJsonEnvelope({ Cmd: "SetWifiStation", ...payload }));
   }
 
-  private writeVariables(variables: VariableValue[]) {
+  private writeVariables(variablesValue: VariableValue[]) {
+    const variables = variablesValue.map(item => item.variable);
     const payload = {
-      BitData: variables.map(item => item.variable.bit),
-      Endianess: variables.map(item => item.variable.pattern.includes(">") ? 'B' : 'L'),
-      Items: variables.map(item => item.variable.memory === "eeprom" ? item.variable.address + 0x8000 : item.variable.address),
-      Masks: variables.map(item => item.variable.mask),
-      Values: Utils.convertValuesToWrite(variables.map(v => v.variable), variables.map(v => v.value)),
+      BitData: variablesValue.map(item => item.variable.bit),
+      Endianess: variablesValue.map(item => item.variable.pattern.includes(">") ? 'B' : 'L'),
+      Items: variablesValue.map(item => item.variable.memory === "eeprom" ? item.variable.address + 0x8000 : item.variable.address),
+      Masks: variablesValue.map(item => item.variable.mask),
+      Values: Utils.convertValuesToWrite(variablesValue.map(v => v.variable), variablesValue.map(v => v.value)),
       Protocol: "RWMSmaster",
       Cmd: "RequestWriting"
     }
 
-    return this.sendCommand(this.generateJsonEnvelope(payload));
+    return forkJoin({
+      from: this.read(variables),
+      write: this.sendCommand(this.generateJsonEnvelope(payload)),
+      written: this.read(variables),
+    }).pipe(map(response => {
+      return {
+        from: response.from,
+        written: response.written,
+        set: variablesValue
+      } as VariableWriteResponse
+    }))
   }
+
+  private readVariables(variables: Variable[]) {
+    const payload = {
+      Freq: 0,
+      Protocol: "RWMSmaster",
+      BitData: variables.map(item => item.bit),
+      Endianess: variables.map(item => item.pattern.includes(">") ? 'B' : 'L'),
+      Items: variables.map(item => item.memory === "eeprom" ? item.address + 0x8000 : item.address),
+      Masks: variables.map(item => item.mask),
+    }
+
+    return this.sendCommand(this.generateJsonEnvelope({ Cmd: "RequestReading", ...payload }));
+  }
+
 
   private setBuffer(variables: Variable[], bufferId: number = 3) {
     const payload = {
@@ -327,15 +361,17 @@ export class BleChannel implements Channel {
       Cmd: "GetBufferReading"
     }
     return this.sendCommand(this.generateJsonEnvelope(payload)).pipe(
-      map(r => {
-        const calculated = Utils.convertValuesToRead(variables, r.Values);
-        const ret = [] as VariableValue[];
-        for (let i = 0; i < variables.length; i++) {
-          ret.push({ variable: variables[i], value: calculated[i] });
-        }
-        return ret;
-      }),
+      map(payload => this.getVariablesValue(variables, payload)),
     )
+  }
+
+  private getVariablesValue(variables: Variable[], payload: any) {
+    const calculated = Utils.convertValuesToRead(variables, payload.Values);
+    const ret = [] as VariableValue[];
+    for (let i = 0; i < variables.length; i++) {
+      ret.push({ variable: variables[i], value: calculated[i] });
+    }
+    return ret;
   }
 
   disconnect(): Observable<void> {

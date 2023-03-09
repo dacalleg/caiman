@@ -232,8 +232,8 @@ export class ApiService {
     return this.TranslationProvider.getAvailableTranslations();
   }
 
-  getTickets(device: string) {
-    return this.Http.post<Ticket[]>(environment.endpoint + "/api/ticket/get", { device: device }).pipe(map(resp => {
+  getTickets(serial: string) {
+    return this.Http.post<Ticket[]>(environment.endpoint + "/api/ticket/get", { serial: serial }).pipe(map(resp => {
       return resp.map(item => {
         item.createdAt = new Date(item.createdAt);
         return item;
@@ -245,9 +245,9 @@ export class ApiService {
     return this.Http.post<Ticket>(environment.endpoint + "/api/ticket/add", { ticket: ticket, parent: parent.id });
   }
 
-  createLogForDevice(deviceId: string, log: LogItem)
+  createLogForDevice(serial: string, log: LogItem)
   {
-    return this.Http.post(environment.endpoint + "/api/logs", {...log, product: deviceId, date: log.date.toJSON().slice(0, 19).replace('T', ' ')});
+    return this.Http.post(environment.endpoint + "/api/logs", {...log, serial: serial, date: log.date.toJSON().slice(0, 19).replace('T', ' ')});
   }
 
   createLogForGateway(gatewayId: string, log: LogItem)
@@ -255,9 +255,14 @@ export class ApiService {
     return this.Http.post(environment.endpoint + "/api/logs", {...log, gateway: gatewayId, date: log.date.toJSON().slice(0, 19).replace('T', ' ')});
   }
 
-  getLogsForDevice(deviceId: string)
+  getLogsForDevice(serial: string)
   {
-    return this.Http.get<any>(environment.endpoint + "/api/logs/product/" + deviceId);
+    return this.Http.get<any[]>(environment.endpoint + "/api/logs/serial/" + serial).pipe(map(resp => {
+      return resp.map(item => {
+        item.date = new Date(item.date);
+        return item;
+      })
+    }));
   }
 
   closeTicket(ticket: Ticket) {

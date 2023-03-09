@@ -40,7 +40,7 @@
               </div>
             </div>-->
           <ng-container *ngIf="(value$|async) as value; else notLoaded">
-              <ng-container *ngIf="value|variableValueFormatter as calculatedValue; else notLoaded">
+              <ng-container *ngIf="value.value|variableValueFormatter:value.variable as calculatedValue; else notLoaded">
                 <div class="value flex-grow-1 text-end" *ngIf="!writeMode" [title]="calculatedValue">
                   {{calculatedValue}}</div>
               </ng-container>

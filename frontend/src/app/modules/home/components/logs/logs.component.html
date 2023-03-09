@@ -1,20 +1,35 @@
-<ng-container *ngIf="deviceLogs$|async as logs">
-    <table class="table">
-        <tr>
-            <th>{{'logs.th.data'|translate}}</th>
-
-            <th>{{'logs.th.user'|translate}}</th>
-            <th>{{'logs.th.type'|translate}}</th>
-            <th>{{'logs.th.variable'|translate}}</th>
-            <th>{{'logs.th.data'|translate}}</th>
-
-        </tr>
-        <tr *ngFor="let log of logs">
-            <td>{{log.date}}</td>
-            <td>{{log.user}}</td>
-            <td>{{log.type}}</td>
-            <td>{{log.variable}}</td>
-            <td>{{log.data}}</td>
-        </tr>
-    </table>
-</ng-container>
+<div class="row">
+    <div class="col">
+        <h1 class="fw-bold">{{ 'logs.logs' | translate }}</h1>
+        <ng-container *ngIf="deviceLogs$|async as logs">
+            <ng-container *ngIf="logs|groupLog as groupLogs">
+                <ngb-accordion #acc="ngbAccordion" *ngFor="let group of groupLogs">
+                    <ngb-panel [title]="(group.date|date:'mediumDate') || ''" >
+                        <ng-template ngbPanelContent>
+                            <table class="table">
+                                <tr>
+                                    <th>{{'logs.th.date'|translate}}</th>
+                                    <th>{{'logs.th.user'|translate}}</th>
+                                    <th>{{'logs.th.variable'|translate}}</th>
+                                    <th>{{'logs.th.set'|translate}}</th>
+                                    <th>{{'logs.th.from'|translate}}</th>
+                                    <th>{{'logs.th.written'|translate}}</th>
+                                </tr>
+                                <tr *ngFor="let log of group.logs">
+                                    <ng-container *ngIf="log.variable|variableFromHash|async as variable">
+                                        <td>{{log.date|date:'HH:mm'}}</td>
+                                        <td>{{log.user}}</td>
+                                        <td>{{variable.name}}</td>
+                                        <td><ng-container *ngIf="log.set !== undefined">{{log.set|variableValueFormatter:variable}}</ng-container></td>
+                                        <td><ng-container *ngIf="log.from !== undefined">{{log.from|variableValueFormatter:variable}}</ng-container></td>
+                                        <td><ng-container *ngIf="log.written !== undefined">{{log.written|variableValueFormatter:variable}}</ng-container></td>
+                                    </ng-container>
+                                </tr>
+                            </table>
+                        </ng-template>
+                    </ngb-panel>
+                </ngb-accordion>
+            </ng-container>
+        </ng-container>
+    </div>
+</div>

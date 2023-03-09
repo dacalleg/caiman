@@ -11,11 +11,13 @@ import { ApiService } from 'src/app/services/api.service';
 export class DeviceSelectComponent implements OnInit {
 
   macAddress: string;
+  serialNumber: string;
   products$: Observable<{ name: string, key: string }[]>;
   selectedProduct: string|null;
 
   constructor(private Router: Router, private Api: ApiService) {
     this.selectedProduct = null;
+    this.serialNumber = "5899887445";
     this.macAddress = "7C87CEED9014";
     this.products$ = this.Api.getAllProducts();
   }
@@ -24,11 +26,11 @@ export class DeviceSelectComponent implements OnInit {
   }
 
   connectUsingMAC() {
-    this.Router.navigate(['/dashboard/home', this.macAddress]);
+    this.Router.navigate(['/dashboard/home', this.macAddress, this.serialNumber]);
   }
 
   connectUsingProduct() {
-    this.Router.navigate(['/dashboard/home', this.macAddress, this.selectedProduct]);
+    this.Router.navigate(['/dashboard/home', this.macAddress, this.serialNumber, this.selectedProduct]);
   }
 
 }

@@ -33,6 +33,8 @@ import { TicketsComponent } from './components/tickets/tickets.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { AdvancedComponent } from './components/advanced/advanced.component';
 import { LogsComponent } from './components/logs/logs.component';
+import { GroupLogPipe } from './pipes/group-log.pipe';
+import { VariableFromHashPipe } from './pipes/variable-from-hash.pipe';
 
 const icons = {
   Eye,
@@ -72,6 +74,8 @@ const icons = {
     TicketsComponent,
     AdvancedComponent,
     LogsComponent,
+    GroupLogPipe,
+    VariableFromHashPipe,
   ],
   imports: [
     CommonModule,

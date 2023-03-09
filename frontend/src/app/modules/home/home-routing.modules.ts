@@ -6,8 +6,8 @@ import { HomeComponent } from './components/home/home.component';
 
 const routes: Routes = [
     { path: '', component: DeviceSelectComponent, canActivate: [IsAuthenticatedGuard] },
-    { path: ':mac', component: HomeComponent, canActivate: [IsAuthenticatedGuard] },
-    { path: ':mac/:productKey', component: HomeComponent, canActivate: [IsAuthenticatedGuard] },
+    { path: ':mac/:serial', component: HomeComponent, canActivate: [IsAuthenticatedGuard] },
+    { path: ':mac/:serial/:productKey', component: HomeComponent, canActivate: [IsAuthenticatedGuard] },
 ];
 
 @NgModule({

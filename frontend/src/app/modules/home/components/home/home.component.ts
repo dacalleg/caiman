@@ -68,8 +68,19 @@ export class HomeComponent implements OnInit, OnDestroy {
       shareReplay(1)
     );
 
-    this.loadDeviceData$ = combineLatest([macAddress$, productKey$]).pipe(
-      switchMap(([mac, productKey]) => this.Api.getDeviceInfoFromMac(mac, productKey).pipe(tap(device => this.Store.setDevice(device)))),
+    const serialNumber$ = this.ActivatedRoute.params.pipe(
+      map((params) => params["serial"] as string | null),
+      shareReplay(1)
+    );
+
+    this.loadDeviceData$ = combineLatest([macAddress$, productKey$, serialNumber$]).pipe(
+      switchMap(([mac, productKey, serial]) => this.Api.getDeviceInfoFromMac(mac, productKey).pipe(
+        map(device => {
+          device.info.serial = serial !== null ? serial : device.info.serial;
+          return device;
+        }),
+        tap(device => this.Store.setDevice(device))
+      )),
       shareReplay(1)
     );
 
@@ -123,7 +134,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$),
       filter(log => log.type === LogType.WRITE_VARIABLE || log.type === LogType.UPDATE_POWER_BOARD),
       switchMap(log => this.loadDeviceData$.pipe(
-        switchMap(device => this.Api.createLogForDevice(device.id_device, log)))
+        filter(device => device.info.serial != null),
+        switchMap(device => this.Api.createLogForDevice(device.info.serial!, log)))
       )
     ).subscribe();
 
@@ -133,7 +145,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-
+    this.loadSnet$.subscribe();
   }
 
   ngOnDestroy(): void {

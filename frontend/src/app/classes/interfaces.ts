@@ -77,9 +77,16 @@ export interface VariableValue {
   value: number;
 }
 
+export interface VariableWriteResponse
+{
+  from: VariableValue[];
+  set: VariableValue[];
+  written: VariableValue[];
+}
+
 export interface Channel {
   connect(): Observable<void>;
-  write(variables: VariableValue[]): Observable<VariableValue[]>;
+  write(variables: VariableValue[]): Observable<VariableWriteResponse>;
   read(variables: Variable[]): Observable<VariableValue[]>;
   setVariableStream(variables: Variable[]): Observable<void>;
   getStream(): Observable<VariableValue[]>;
@@ -201,6 +208,7 @@ export interface ProductInfo {
   board_firmware_list: Firmware[];
   database: Database[];
   description: string;
+  serial?: string;
 }
 
 export interface GroupNameOverride {
@@ -353,7 +361,16 @@ export interface LogItem
 {
   date: Date;
   type: LogType;
-  data: string|number|boolean;
+  data?: string|number|boolean;
+  from?: number;
+  set?: number;
+  written?: number;
   variable?: string;
   user?: string
+}
+
+export interface GroupLogItem
+{
+  date: Date;
+  logs: LogItem[];
 }

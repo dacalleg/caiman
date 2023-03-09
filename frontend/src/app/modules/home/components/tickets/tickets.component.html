@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3">
-            <h1>{{ 'tickets.tickets' | translate }}</h1>
+            <h1 class="fw-bold">{{ 'tickets.tickets' | translate }}</h1>
             <div *ngFor="let ticket of tickets$|async" class="main-ticket p-3 d-flex" [ngClass]="ticket.status"
                 (click)="selectTicket(ticket)">
                 <div class="flex-grow-1">

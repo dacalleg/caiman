@@ -13,7 +13,7 @@ import {
   tap,
   throwError,
 } from "rxjs";
-import { Channel, FirmwareDownloadStatus, LogItem, LogType, Variable, VariableValue } from "../classes/interfaces";
+import { Channel, FirmwareDownloadStatus, LogItem, LogType, Variable, VariableValue, VariableWriteResponse } from "../classes/interfaces";
 
 @Injectable({
   providedIn: 'root'
@@ -119,16 +119,18 @@ export class DeviceService {
     );
   }
 
-  write(variables: VariableValue[]): Observable<VariableValue[]> {
+  write(variables: VariableValue[]): Observable<VariableWriteResponse> {
     return this.getChannel().pipe(
       switchMap(channel => channel.write(variables)),
       take(1),
-      tap(() => {
+      tap((response) => {
         variables.forEach(value => {
           this.logSubject$.next({
             date: new Date(),
             type: LogType.WRITE_VARIABLE,
-            data: value.value,
+            from: response.from.find(item => item.variable.hash === value.variable.hash)?.value,
+            set: response.set.find(item => item.variable.hash === value.variable.hash)?.value,
+            written: response.written.find(item => item.variable.hash === value.variable.hash)?.value,
             variable: value.variable.hash
           })
         })

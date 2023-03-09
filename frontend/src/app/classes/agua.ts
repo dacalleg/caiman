@@ -1,5 +1,5 @@
-import { catchError, delay, filter, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, takeWhile, tap, throwError } from "rxjs";
-import { Channel, FirmwareDownloadStatus, Variable, VariableValue, WifiStation, WifiStatus } from "./interfaces";
+import { catchError, delay, filter, forkJoin, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, takeWhile, tap, throwError } from "rxjs";
+import { Channel, FirmwareDownloadStatus, Variable, VariableValue, VariableWriteResponse, WifiStation, WifiStatus } from "./interfaces";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Utils } from "./utils";
 
@@ -35,7 +35,7 @@ export class Agua implements Channel {
         return of(void 0);
     }
 
-    write(variables: VariableValue[]): Observable<VariableValue[]> {
+    write(variables: VariableValue[]): Observable<VariableWriteResponse> {
         return this.protocol.writeVariables(variables);
     }
 
@@ -164,11 +164,18 @@ class AguaProtocol {
             "Values": Utils.convertValuesToWrite(variables.map(v => v.variable), variables.map(v => v.value))
         }
         return this.token$.pipe(
-            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceRequestWriting", payload, { headers: this.getHeaders(token) })
-                .pipe(
-                    switchMap(response => this.getJobStatus(response.idRequest))
-                )),
-            retry({ count: 5 })
+            switchMap(token => forkJoin(
+                {
+                    from: this.readVariables(variables.map(v => v.variable)),
+                    write: this.http.post<any>(this.agua_endpoint + "/deviceRequestWriting", payload, { headers: this.getHeaders(token) }).pipe(
+                        switchMap(response => this.getJobStatus(response.idRequest)),
+                        retry({ count: 5 })),
+                    written: this.readVariables(variables.map(v => v.variable)),
+                }
+            )),
+            map(response => {
+                return {from: response.from, set: variables, written: response.written} as VariableWriteResponse
+            })
         )
     }
 

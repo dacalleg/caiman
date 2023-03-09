@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { combineLatest, concatMap, filter, from, map, merge, Observable, of, Subject, switchMap, take, tap, toArray } from 'rxjs';
+import { combineLatest, concat, concatMap, filter, from, map, merge, Observable, of, shareReplay, Subject, switchMap, take, tap, toArray } from 'rxjs';
 import { Ticket } from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -32,18 +32,20 @@ export class TicketsComponent {
     this.visibleForm = null;
     this.newTicket = this.createEmptyTicket();
     this.reloadTicket$ = new Subject<void>();
-    this.reloadTicket$.subscribe();
 
 
-    this.tickets$ = merge(
+    this.tickets$ = concat(
       of(void 0),
       this.reloadTicket$.asObservable()
     ).pipe(
+      tap(value => console.log(value)),
       switchMap(() => this.Store.getProject().pipe(
         take(1),
-        filter(project => project.device?.mac != null),
-        switchMap(project => this.Api.getTickets(project.device!.mac)))
-      )
+        filter(project => project.device?.info.serial != null),
+        map(project => project.device!.info!.serial!),
+        switchMap(serial => this.Api.getTickets(serial)))
+      ),
+      shareReplay(1)
     )
     this.selectTicket$ = new Subject<string>();
 
@@ -60,10 +62,10 @@ export class TicketsComponent {
 
     this.Store.getProject().pipe(
       take(1),
-      filter(project => project.device?.mac != null),
-      map(project => project.device!.mac)
-    ).subscribe(mac => {
-      this.newTicket.device = mac;
+      filter(project => project.device?.info.serial != null),
+      map(project => project.device?.info.serial!)
+    ).subscribe(serial => {
+      this.newTicket.device = serial;
     })
   }
 
@@ -79,7 +81,7 @@ export class TicketsComponent {
       ])),
       tap(([paths, project, user]) => {
         this.newTicket.assets = paths.map(path => ({ path: path }));
-        this.newTicket.device = project.device!.mac;
+        this.newTicket.device = project.device!.info.serial;
         this.newTicket.email = user.email;
       }),
       switchMap(() => this.Api.addTicket(this.newTicket, parent)),

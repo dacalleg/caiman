@@ -130,7 +130,7 @@ async function init() {
                         where: {
                             serial: serial,
                         },
-                        order: [['date', 'DESC']]
+                        order: [['date', 'ASC']]
                     }
                 );
                 res.status(200).send(logs);
@@ -147,7 +147,7 @@ async function init() {
                         where: {
                             gateway: gatewayId,
                         },
-                        order: [['date', 'DESC']]
+                        order: [['date', 'ASC']]
                     }
                 );
                 res.status(200).send(logs);

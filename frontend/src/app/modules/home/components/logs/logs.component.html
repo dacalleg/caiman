@@ -9,51 +9,64 @@
                             <ng-container *ngIf="(group|filterLog:[0]).logs as logs">
                                 <ng-container *ngIf="logs.length > 0">
 
-                                    <h3>{{'logs.title.variablewrite'}}</h3>
-                                    <table class="table">
-                                        <tr>
-                                            <th>{{'logs.th.date'|translate}}</th>
-                                            <th>{{'logs.th.user'|translate}}</th>
-                                            <th>{{'logs.th.variable'|translate}}</th>
-                                            <th>{{'logs.th.set'|translate}}</th>
-                                            <th>{{'logs.th.from'|translate}}</th>
-                                            <th>{{'logs.th.written'|translate}}</th>
-                                        </tr>
-                                        <tr *ngFor="let log of logs">
-                                            <ng-container *ngIf="log.variable|variableFromHash|async as variable">
-                                                <td>{{log.date|date:'HH:mm'}}</td>
-                                                <td>{{log.user}}</td>
-                                                <td>{{variable.name}}</td>
-                                                <td><ng-container
-                                                        *ngIf="log.set !== undefined">{{log.set|variableValueFormatter:variable}}</ng-container>
-                                                </td>
-                                                <td><ng-container
-                                                        *ngIf="log.from !== undefined">{{log.from|variableValueFormatter:variable}}</ng-container>
-                                                </td>
-                                                <td><ng-container
-                                                        *ngIf="log.written !== undefined">{{log.written|variableValueFormatter:variable}}</ng-container>
-                                                </td>
-                                            </ng-container>
-                                        </tr>
+                                    <h3>{{'logs.title.variablewrite'|translate}}</h3>
+                                    <table class="table table-striped mt-3">
+                                        <thead>
+                                            <tr>
+                                                <th>{{'logs.th.date'|translate}}</th>
+                                                <th>{{'logs.th.user'|translate}}</th>
+                                                <th>{{'logs.th.variable'|translate}}</th>
+                                                <th>{{'logs.th.set'|translate}}</th>
+                                                <th>{{'logs.th.from'|translate}}</th>
+                                                <th>{{'logs.th.written'|translate}}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let log of logs">
+                                                <ng-container *ngIf="log.variable|variableFromHash|async as variable">
+                                                    <td>{{log.date|date:'HH:mm'}}</td>
+                                                    <td>{{log.user}}</td>
+                                                    <td>{{variable.name}}</td>
+                                                    <td><ng-container
+                                                            *ngIf="log.set !== undefined">{{log.set|variableValueFormatter:variable}}</ng-container>
+                                                    </td>
+                                                    <td><ng-container
+                                                            *ngIf="log.from !== undefined">{{log.from|variableValueFormatter:variable}}</ng-container>
+                                                    </td>
+                                                    <td><ng-container
+                                                            *ngIf="log.written !== undefined">{{log.written|variableValueFormatter:variable}}</ng-container>
+                                                    </td>
+                                                </ng-container>
+                                            </tr>
+                                        </tbody>
+
                                     </table>
                                 </ng-container>
                             </ng-container>
                             <ng-container *ngIf="(group|filterLog:[1,2,3]).logs as logs">
                                 <ng-container *ngIf="logs.length > 0">
-                                    <h3>{{'logs.title.powerboard'}}</h3>
-                                    <table class="table">
-                                        <tr>
-                                            <th>{{'logs.th.date'|translate}}</th>
-                                            <th>{{'logs.th.user'|translate}}</th>
-                                            <th>{{'logs.th.status'|translate}}</th>
-                                            <th>{{'logs.th.message'|translate}}</th>
-                                        </tr>
-                                        <tr *ngFor="let log of logs">
-                                            <td>{{log.date|date:'HH:mm'}}</td>
-                                            <td>{{log.user}}</td>
-                                            <td>{{log.type}}</td>
-                                            <td>{{log.data}}</td>
-                                        </tr>
+                                    <h3>{{'logs.title.powerboard'|translate}}</h3>
+                                    <table class="table table-striped mt-3">
+                                        <thead>
+                                            <tr>
+                                                <th>{{'logs.th.date'|translate}}</th>
+                                                <th>{{'logs.th.user'|translate}}</th>
+                                                <th>{{'logs.th.status'|translate}}</th>
+                                                <th>{{'logs.th.message'|translate}}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let log of logs">
+                                                <td>{{log.date|date:'HH:mm'}}</td>
+                                                <td>{{log.user}}</td>
+                                                <td>
+                                                    <span *ngIf="log.type === 1">{{'logs.powerboard.started'|translate}}</span>
+                                                    <span *ngIf="log.type === 2">{{'logs.powerboard.error'|translate}}</span>
+                                                    <span *ngIf="log.type === 3">{{'logs.powerboard.success'|translate}}</span>
+                                                </td>
+                                                <td>{{log.data}}</td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </ng-container>
                             </ng-container>

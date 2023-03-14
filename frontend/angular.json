@@ -31,10 +31,12 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/video.js/dist/video-js.min.css"
             ],
             "scripts": [
-              "node_modules/fmin/build/fmin.min.js"
+              "node_modules/fmin/build/fmin.min.js",
+              "node_modules/video.js/dist/video.min.js"
             ]
           },
           "configurations": {

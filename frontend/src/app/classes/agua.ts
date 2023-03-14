@@ -174,7 +174,7 @@ class AguaProtocol {
                 }
             )),
             map(response => {
-                return {from: response.from, set: variables, written: response.written} as VariableWriteResponse
+                return { from: response.from, set: variables, written: response.written } as VariableWriteResponse
             })
         )
     }
@@ -290,7 +290,9 @@ class AguaProtocol {
             )),
             switchMap(() => this.getDownloadStatus().pipe(
                 map(response => {
-                    return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus
+                    if (response.StatusCode > 0)
+                        return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus;
+                    throw new Error(response.StatusCode);
                 }),
                 repeat({ delay: 1000 }),
                 takeWhile(response => response.operation < 4)

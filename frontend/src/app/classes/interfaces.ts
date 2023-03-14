@@ -265,7 +265,7 @@ export interface AlertModalConfig {
 }
 
 export interface Firmware extends WithRole {
-  version: string;
+  revision: string;
   file: number;
 }
 
@@ -353,8 +353,10 @@ export interface FirmwareDownloadStatus
 export enum LogType
 {
   WRITE_VARIABLE = 0,
-  UPDATE_POWER_BOARD = 1,
-  UPDATE_GATEWAY = 2,
+  START_UPDATE_POWER_BOARD = 1,
+  ERROR_UPDATE_POWER_BOARD = 2,
+  SUCCESS_UPDATE_POWER_BOARD = 3,
+  UPDATE_GATEWAY = 4,
 }
 
 export interface LogItem

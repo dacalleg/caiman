@@ -34,7 +34,7 @@ export class Utils {
 
     static convertValuesToWrite(variables: Variable[], values: number[]) {
         let ret = [] as number[];
-        
+
         var re = new RegExp('#', 'g');
         for (let i = 0; i < variables.length; i++) {
             const variable = variables[i];
@@ -45,7 +45,7 @@ export class Utils {
                 continue;
             }
 
-            if(variable.values && variable.values.length > 0) {
+            if (variable.values && variable.values.length > 0) {
                 ret.push(value);
                 continue;
             }

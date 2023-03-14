@@ -56,6 +56,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.project$ = this.Store.getProject();
 
     this.connected$ = this.Device.isConnected();
+    this.connected$.subscribe((data) => console.log("connected", data));
 
     const macAddress$ = this.ActivatedRoute.params.pipe(
       filter(params => params["mac"] != null),
@@ -132,7 +133,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.Device.getLogs().pipe(
       takeUntil(this.destroy$),
-      filter(log => log.type === LogType.WRITE_VARIABLE || log.type === LogType.UPDATE_POWER_BOARD),
       switchMap(log => this.loadDeviceData$.pipe(
         filter(device => device.info.serial != null),
         switchMap(device => this.Api.createLogForDevice(device.info.serial!, log)))

@@ -260,7 +260,7 @@ export class ApiService {
     return this.Http.get<any[]>(environment.endpoint + "/api/logs/serial/" + serial).pipe(map(resp => {
       return resp.map(item => {
         item.date = new Date(item.date);
-        return item;
+        return item as LogItem;
       })
     }));
   }

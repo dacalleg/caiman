@@ -2,9 +2,13 @@ import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   bufferWhen,
+  catchError,
+  combineLatest,
   filter,
+  finalize,
   map,
   Observable,
+  of,
   shareReplay,
   Subject,
   switchMap,
@@ -112,11 +116,18 @@ export class DeviceService {
   }
 
   disconnect() {
-    return this.getChannel().pipe(
+    return combineLatest([
+      this.connected$,
+      this.channel$
+    ]).pipe(
+      take(1),
+      switchMap(([connected, channel]) => {
+        if(channel !== null && connected)
+          return channel.disconnect();
+        return of(void 0);
+      }),
       tap(() => this.connected$.next(false)),
-      switchMap(channel => channel.disconnect()),
-      take(1)
-    );
+    )
   }
 
   write(variables: VariableValue[]): Observable<VariableWriteResponse> {
@@ -189,12 +200,38 @@ export class DeviceService {
     );
   }
 
-  upgradePowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
+  upgradePowerBoardFirmware(url: string, md5: string, revision:string): Observable<FirmwareDownloadStatus> {
+
     return this.getChannel().pipe(
       switchMap(channel => channel.getWifiStatus().pipe(
         switchMap((status) => {
           if (status.wifi_connected) {
-            return channel.loadPowerBoardFirmware(url, md5);
+            this.logSubject$.next({
+              date: new Date(),
+              type: LogType.START_UPDATE_POWER_BOARD,
+              data: revision
+            });
+            console.log("start");
+            return channel.loadPowerBoardFirmware(url, md5).pipe(
+              tap({
+                complete: () => {
+                  console.log("complete");
+                  this.logSubject$.next({
+                    date: new Date(),
+                    type: LogType.SUCCESS_UPDATE_POWER_BOARD,
+                    data: revision
+                  });
+                },
+                error: (err) => {
+                  console.log("error");
+                  this.logSubject$.next({
+                    date: new Date(),
+                    type: LogType.ERROR_UPDATE_POWER_BOARD,
+                    data: revision + " - " + err.message
+                  });
+                }
+              })
+            )
           }
           return throwError(() => new Error("Wifi not connected"));
         })

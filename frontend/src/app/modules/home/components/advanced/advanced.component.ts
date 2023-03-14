@@ -83,7 +83,7 @@ export class AdvancedComponent {
         progress: true,
         progressValue: 0
       }).pipe(
-        switchMap(() => this.Device.upgradePowerBoardFirmware(firmware.url, firmware.md5).pipe(
+        switchMap(() => this.Device.upgradePowerBoardFirmware(firmware.url, firmware.md5, this.selectedFirmwareBoard!.revision).pipe(
           tap((progress) => this.modal.upodateAlertModalConfig({
             title: "modal.upgrading",
             progress: true,

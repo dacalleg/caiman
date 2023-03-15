@@ -12,9 +12,6 @@
           "/manifest.webmanifest",
           "/*.css",
           "/*.js"
-        ],
-        "urls": [
-          "https://caiman.micronovasrl.com/backend/**"
         ]
       }
     },

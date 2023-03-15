@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -22,6 +22,7 @@ import { TranslationProviderService } from './services/translation-provider.serv
 import { CookieService } from 'ngx-cookie-service';
 import { HeaderInterceptor } from './interceptors/header.interceptor';
 import { TranslationService } from './services/translation.service';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -54,6 +55,12 @@ export function tokenGetter() {
         allowedDomains: [environment.host],
         disallowedRoutes: [/backend\/wp-content\/uploads\/.*/, /backend\/wp-json\/jwt-auth\/v1\/token/, /backend\/wp-json\/wp\/v2\/translation/, /backend\/wp-json\/caiman\/v1\/forgot-password/],
       },
+    }),
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
     }),
     
   ],

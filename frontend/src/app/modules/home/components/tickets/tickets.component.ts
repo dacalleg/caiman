@@ -13,7 +13,6 @@ import { v4 as uuidv4 } from 'uuid';
 })
 export class TicketsComponent {
 
-
   @ViewChild('file') file: ElementRef | null;
 
   tickets$: Observable<Ticket[]>;
@@ -65,7 +64,7 @@ export class TicketsComponent {
       filter(project => project.device?.info.serial != null),
       map(project => project.device?.info.serial!)
     ).subscribe(serial => {
-      this.newTicket.device = serial;
+      this.newTicket.serial = serial;
     })
   }
 
@@ -81,7 +80,7 @@ export class TicketsComponent {
       ])),
       tap(([paths, project, user]) => {
         this.newTicket.assets = paths.map(path => ({ path: path }));
-        this.newTicket.device = project.device!.info.serial;
+        this.newTicket.serial = project.device!.info.serial;
         this.newTicket.email = user.email;
       }),
       switchMap(() => this.Api.addTicket(this.newTicket, parent)),
@@ -124,7 +123,7 @@ export class TicketsComponent {
       id: uuidv4(),
       text: "",
       customer: 0,
-      device: "",
+      serial: "",
       status: "open",
       children: [],
       assets: []

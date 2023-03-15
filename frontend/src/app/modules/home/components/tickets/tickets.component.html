@@ -15,11 +15,11 @@
         </div>
         <div class="col response-container">
             <ng-container *ngIf="(selectedTicket$|async) as selectedTicket">
-                <ng-template #recursiveList let-list>
-                    <div class="response p-3" *ngFor="let response of list; let i = index">
+                <ng-template #recursiveList let-list let-first="first">
+                    <div class="response p-3 pe-0" *ngFor="let response of list; let i = index" [ngClass]="{'first' : first}">
                         <h4 *ngIf="response.title">{{response.title}}</h4>
-                        <div>{{response.createdAt|date:'dd/MM/yy'}}</div>
-                        <div>{{response.text}}</div>
+                        <div>{{response.createdAt|date:'dd/MM/yy HH:mm'}}</div>
+                        <div class="text-container">{{response.text}}</div>
                         <div *ngFor="let asset of response.assets; let i=index">
                             <a [href]="'https://caiman.micronovasrl.com/backend/wp-content/uploads/api/' + asset.path">{{ 'ticket.attachment' | translate }} {{i}}</a>
                         </div>
@@ -28,7 +28,7 @@
                         </div>
 
                         <div class="text-end mt-3">{{response.email}}</div>
-                        <div *ngIf="visibleForm === response.id">
+                        <div *ngIf="visibleForm === response.id" class="my-2">
                             <div class="mb-3">
                                 <label [for]="'message-' + i" class="form-label">{{ 'tickets.message' | translate }}</label>
                                 <textarea class="form-control" [id]="'message-' + i" [(ngModel)]="newTicket.text"></textarea>
@@ -43,12 +43,10 @@
                                 </div>
                             </div>
                         </div>
+                        <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: response.children, first: false }"></ng-container>
                     </div>
-                    <ng-container *ngFor="let response of list; let i = index">
-                        <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: response.children }"></ng-container>
-                    </ng-container>
                 </ng-template>
-                <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: [selectedTicket] }"></ng-container>
+                <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: [selectedTicket], first: true }"></ng-container>
             </ng-container>
         </div>
     </div>

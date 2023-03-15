@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { bufferCount, catchError, combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap, toArray } from 'rxjs';
+import { bufferCount, catchError, combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap, throwError, toArray } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, Gateway, LogItem, ProductInfo, SeramiACL, Ticket, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, Ticket, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
@@ -57,6 +57,13 @@ export class ApiService {
             response.info = info;
             return response;
           }))
+      }),
+      tap(data => localStorage.setItem("device_info_" + mac, JSON.stringify(data))),
+      catchError(err => {
+        let data = localStorage.getItem("device_info_" + mac);
+        if(data !== null)
+          return of(JSON.parse(data)) as Observable<DeviceProduct>;
+        return throwError(() => err);
       })
     );
   }
@@ -84,6 +91,13 @@ export class ApiService {
           database: item.acf.database || [],
           serami_var_formula_override: item.acf.serami_var_formula_override || [],
         } as Board
+      }),
+      tap(data => localStorage.setItem("board_" + id, JSON.stringify(data))),
+      catchError(err => {
+        let data = localStorage.getItem("board_" + id);
+        if(data !== null)
+          return of(JSON.parse(data)) as Observable<Board>;
+        return throwError(() => err);
       })
     )
   }
@@ -99,7 +113,13 @@ export class ApiService {
           firmware_list: item.acf.firmware || [],
         } as Gateway
       }),
-      catchError(err => of(null))
+      tap(data => localStorage.setItem("gateway_" + type + "_" + board, JSON.stringify(data))),
+      catchError(err => {
+        let data = localStorage.getItem("gateway_" + type + "_" + board);
+        if(data !== null)
+          return of(JSON.parse(data)) as Observable<Gateway>;
+        return of(null)
+      }),
     )
   }
 
@@ -198,13 +218,20 @@ export class ApiService {
         } else {
           return of(item);
         }
+      }),
+      tap(data => localStorage.setItem("product_" + product, JSON.stringify(data))),
+      catchError(err => {
+        let data = localStorage.getItem("product_" + product);
+        if(data !== null)
+          return of(JSON.parse(data)) as Observable<ProductInfo>;
+        return throwError(() => err);
       })
     )
   }
 
   getMedia(href: string) {
     return this.Http.get<any>(href).pipe(
-      map(response => response.source_url)
+      map(response => response.source_url),
     )
   }
 
@@ -220,7 +247,14 @@ export class ApiService {
 
   getAttachmentContent(id: number, responseType: 'text' | 'blob' = 'text') {
     return this.getAttachmentUrl(id).pipe(
-      switchMap(url => this.Http.get(url, { responseType: 'text' }))
+      switchMap(url => this.Http.get(url, { responseType: 'text' })),
+      tap(data => localStorage.setItem("attachment_" + id, data)),
+      catchError(err => {
+        let data = localStorage.getItem("attachment_" + id);
+        if(data !== null)
+          return of(data) as Observable<string>;
+        return throwError(() => err);
+      })
     )
   }
 

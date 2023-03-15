@@ -331,7 +331,7 @@ export interface Ticket
   id: string;
   text: string | null;
   title: string | null;
-  device: string;
+  serial: string;
   email: string;
   status: string;
   customer: number;

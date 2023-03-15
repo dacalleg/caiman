@@ -1,42 +1,37 @@
-.main-ticket
-{
-    border-top:2px solid transparent;
+.main-ticket {
+    border-top: 2px solid transparent;
     border-bottom: 1px solid #EEE;
-    .description
-    {
+
+    .description {
         font-size: 14px;
         line-height: 1.2;
     }
 
-    &.open
-    {
-        border-left:2px solid #009218;
+    &.open {
+        border-left: 2px solid #009218;
     }
 
-    &.selected
-    {
+    &.selected {
         background-color: #EEE;
     }
 
-    &:hover{
+    &:hover {
         background-color: #EEE;
     }
 }
 
 
-.response-container
-{
+.response-container {
 
-    .response
-    {
-        border-bottom: 1px solid #EEE;
-        &:nth-child(even)
+    .response {
+        border-left: 2px solid #EEE;
+        &.first
         {
-            background-color: #EEE;
+            border: none;
         }
-        &:nth-child(odd)
-        {
-            background-color: #FFF;
+
+        .text-container {
+            white-space: pre-line;
         }
     }
 }

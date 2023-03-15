@@ -19,7 +19,7 @@
           </div>
         </div>
       </div>
-      <div class="row my-5">
+      <div class="row my-5" *ngIf="(wifiStatus$|async)?.wifi_connected">
         <div class="col">
           <h3>{{'home.firmwaregateway'|translate}}</h3>
           <div class="input-group">
@@ -33,7 +33,7 @@
           <span>{{'home.currentfirmware'|translate}}: {{device.boards_status.Revision}}</span>
         </div>
       </div>
-      <div class="row my-5">
+      <div class="row my-5" *ngIf="(wifiStatus$|async)?.wifi_connected">
         <div class="col">
           <h3>{{'home.firmwareboard'|translate}}</h3>
           <div class="input-group">
@@ -46,10 +46,9 @@
           </div>
         </div>
       </div>
-      <div class="row">
+      <div class="row" *ngIf="(wifiStatus$|async) as status">
         <div class="col">
           <h3 class="mb-3">{{'home.network'|translate}}</h3>
-          <ng-container  *ngIf="(wifiStatus$|async) as status">
             <div class="text-end" *ngIf="!status.wifi_connected">
               <button class="btn btn-outline-secondary me-2" type="button" (click)="disconnectWifi()">{{'wifi.deletesettings'|translate}}</button>
               <button class="btn btn-outline-secondary" type="button" (click)="scanWifi()">{{'update'|translate}}</button>
@@ -57,7 +56,6 @@
             <div class="pt-3">
               <app-wifi-tease  *ngFor="let station of status.wifi_stations" [connected]="status.wifi_connected" [station]="station" (onDisconnect)="disconnectWifi()" (onConnect)="connectWifi($event)"></app-wifi-tease>
             </div>
-          </ng-container>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable, shareReplay } from 'rxjs';
+import { catchError, map, Observable, of, shareReplay, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Translation } from '../classes/interfaces';
 
@@ -23,6 +23,13 @@ export class TranslationProviderService {
           }, {})
         } as Translation
       })),
+      tap(data => localStorage.setItem("translations", JSON.stringify(data))),
+      catchError(err => {
+        let data = localStorage.getItem("translations");
+        if(data !== null)
+          return of(JSON.parse(data) as Translation[]);
+        return throwError(() => err);
+      }),
       shareReplay(1)
     );
   }

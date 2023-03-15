@@ -14,7 +14,7 @@
           "/*.js"
         ],
         "urls": [
-          "/**"
+          "https://caiman.micronovasrl.com/backend/**"
         ]
       }
     },
@@ -26,7 +26,24 @@
         "files": [
           "/assets/**",
           "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+        ],
+        "urls": [
+          "https://fonts.gstatic.com/**",
+          "https://www.youtube.com/**"
         ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "api",
+      "urls": [
+        "https://caiman.micronovasrl.com/backend/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 100,
+        "maxAge": "1d",
+        "strategy": "freshness"
       }
     }
   ]

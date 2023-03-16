@@ -19,20 +19,22 @@
           </div>
         </div>
       </div>
-      <div class="row my-5" *ngIf="(wifiStatus$|async)?.wifi_connected">
-        <div class="col">
-          <h3>{{'home.firmwaregateway'|translate}}</h3>
-          <div class="input-group">
-            <select class="form-select" id="inputGroupSelect04"
-              aria-label="Example select with button addon" [(ngModel)]="selectedFirmwareGateway">
-              <option selected disabled [value]="null">{{'choose'|translate}}</option>
-              <option *ngFor="let firmware of device.info.gateway_firmware_list|withRole|async" [ngValue]="firmware">{{firmware.revision}}</option>
-            </select>
-            <button class="btn btn-outline-secondary" type="button" (click)="upgradeFirmwareGateway()" [disabled]="selectedFirmwareGateway === null">{{'load'|translate}}</button>
+      <ng-container *ngIf="device.boards_status">
+        <div class="row my-5" *ngIf="(wifiStatus$|async)?.wifi_connected">
+          <div class="col">
+            <h3>{{'home.firmwaregateway'|translate}}</h3>
+            <div class="input-group">
+              <select class="form-select" id="inputGroupSelect04"
+                aria-label="Example select with button addon" [(ngModel)]="selectedFirmwareGateway">
+                <option selected disabled [value]="null">{{'choose'|translate}}</option>
+                <option *ngFor="let firmware of device.info.gateway_firmware_list|withRole|async" [ngValue]="firmware">{{firmware.revision}}</option>
+              </select>
+              <button class="btn btn-outline-secondary" type="button" (click)="upgradeFirmwareGateway()" [disabled]="selectedFirmwareGateway === null">{{'load'|translate}}</button>
+            </div>
+            <span>{{'home.currentfirmware'|translate}}: {{device.boards_status.Revision}}</span>
           </div>
-          <span>{{'home.currentfirmware'|translate}}: {{device.boards_status.Revision}}</span>
         </div>
-      </div>
+      </ng-container>
       <div class="row my-5" *ngIf="(wifiStatus$|async)?.wifi_connected">
         <div class="col">
           <h3>{{'home.firmwareboard'|translate}}</h3>

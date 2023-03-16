@@ -211,11 +211,9 @@ export class DeviceService {
               type: LogType.START_UPDATE_POWER_BOARD,
               data: revision
             });
-            console.log("start");
             return channel.loadPowerBoardFirmware(url, md5).pipe(
               tap({
                 complete: () => {
-                  console.log("complete");
                   this.logSubject$.next({
                     date: new Date(),
                     type: LogType.SUCCESS_UPDATE_POWER_BOARD,
@@ -223,7 +221,6 @@ export class DeviceService {
                   });
                 },
                 error: (err) => {
-                  console.log("error");
                   this.logSubject$.next({
                     date: new Date(),
                     type: LogType.ERROR_UPDATE_POWER_BOARD,

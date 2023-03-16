@@ -37,7 +37,6 @@ export class TicketsComponent {
       of(void 0),
       this.reloadTicket$.asObservable()
     ).pipe(
-      tap(value => console.log(value)),
       switchMap(() => this.Store.getProject().pipe(
         take(1),
         filter(project => project.device?.info.serial != null),

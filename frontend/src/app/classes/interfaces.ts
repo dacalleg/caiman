@@ -148,7 +148,7 @@ export interface DeviceProduct {
   id_device: string;
   customer_code: string;
   mac: string;
-  boards_status: BoardsStatus;
+  boards_status?: BoardsStatus;
   id_product: string;
   cod_art: string;
   serial: string;

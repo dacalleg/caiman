@@ -21,11 +21,13 @@
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col">
+                                <label for="macaddress" class="form-label">Mac Address</label>
                                 <input type="text" class="form-control" placeholder="MAC Address"
                                     aria-label="MAC Address" aria-describedby="button-addon2"
                                     [(ngModel)]="macAddress">
                             </div>
                             <div class="col">
+                                <label for="serial" class="form-label">Serial Number</label>
                                 <input type="text" class="form-control" placeholder="Serial Number"
                                 aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
                             </div>
@@ -67,6 +69,50 @@
                         </div>
                         <div class="text-end">
                             <button class="btn btn-primary" (click)="connectUsingProduct()">Connect</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <h1 class="fw-bold">OFFLINE</h1>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="macaddress" class="form-label">Mac Address</label>
+                                <input type="text" class="form-control" placeholder="MAC Address"
+                                    aria-label="MAC Address" aria-describedby="button-addon2"
+                                    [(ngModel)]="macAddress">
+                            </div>
+                            <div class="col">
+                                <label for="serial" class="form-label">Reg Code</label>
+                                <input type="text" class="form-control" placeholder="Serial Number"
+                                aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="regCode">
+                            </div>
+                            <div class="col">
+                                <label for="serial" class="form-label">Serial Number</label>
+                                <input type="text" id="serial" class="form-control" placeholder="Serial Number"
+                                aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+                            </div>
+                            <div class="col">
+                                <label for="productlist" class="form-label">Select a product</label>
+                                <select id="productlist" class="form-select" [(ngModel)]="selectedProduct">
+                                    <option selected [ngValue]="null">Select a product</option>
+                                    <option *ngFor="let product of products$|async" [ngValue]="product.key"
+                                        [innerHtml]="product.name"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end">
+                                <button class="btn btn-primary" (click)="connectOffline()">Connect</button>
+                            </div>
                         </div>
                     </div>
                 </div>

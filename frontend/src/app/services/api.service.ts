@@ -1,11 +1,17 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { bufferCount, catchError, combineLatest, filter, from, map, Observable, of, shareReplay, switchMap, take, tap, throwError, toArray } from 'rxjs';
+import { bufferCount, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, Observable, of, shareReplay, switchMap, take, tap, throwError, toArray } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, Ticket, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
+
+interface DeferredRequest {
+  url: string;
+  body: any;
+  id: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -47,23 +53,16 @@ export class ApiService {
       map(response => response.device_product[0]),
       switchMap(response => {
         if (productKey)
-          return this.getProductInfo(productKey, response.boards_status.Type).pipe(
+          return this.getProductInfo(productKey, response.boards_status?.Type).pipe(
             map(info => {
               response.info = info;
               return response;
             }));
-        return this.getProductInfo(response.id_product, response.boards_status.Type).pipe(
+        return this.getProductInfo(response.id_product, response.boards_status?.Type).pipe(
           map(info => {
             response.info = info;
             return response;
           }))
-      }),
-      tap(data => localStorage.setItem("device_info_" + mac, JSON.stringify(data))),
-      catchError(err => {
-        let data = localStorage.getItem("device_info_" + mac);
-        if (data !== null)
-          return of(JSON.parse(data)) as Observable<DeviceProduct>;
-        return throwError(() => err);
       })
     );
   }
@@ -91,40 +90,35 @@ export class ApiService {
           database: item.acf.database || [],
           serami_var_formula_override: item.acf.serami_var_formula_override || [],
         } as Board
-      }),
-      tap(data => localStorage.setItem("board_" + id, JSON.stringify(data))),
-      catchError(err => {
-        let data = localStorage.getItem("board_" + id);
-        if (data !== null)
-          return of(JSON.parse(data)) as Observable<Board>;
-        return throwError(() => err);
       })
     )
   }
 
   private getGateway(type: string, board: string) {
     return this.Http.get<number[]>(environment.endpoint + "/wp-json/caiman/v1/gateway/" + board + "/" + type).pipe(
-      switchMap(ids => this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/gateway/" + ids[0])),
-      map(item => {
-        return {
-          id: item.id,
-          board: item.acf.board,
-          type: item.acf.type,
-          firmware_list: item.acf.firmware || [],
-        } as Gateway
-      }),
-      tap(data => localStorage.setItem("gateway_" + type + "_" + board, JSON.stringify(data))),
-      catchError(err => {
-        let data = localStorage.getItem("gateway_" + type + "_" + board);
-        if (data !== null)
-          return of(JSON.parse(data)) as Observable<Gateway>;
-        return of(null)
+      switchMap(ids => {
+        if (ids.length > 0)
+          return of(ids[0]).pipe(
+            switchMap(id => this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/gateway/" + id)),
+            map(item => {
+              return {
+                id: item.id,
+                board: item.acf.board,
+                type: item.acf.type,
+                firmware_list: item.acf.firmware || [],
+              } as Gateway
+            })
+          )
+        else {
+          return of(null);
+        }
       }),
     )
   }
 
   getAllProducts() {
     return this.Translation.getCurrentLanguage().pipe(
+      take(1),
       switchMap((lang) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?" + (lang !== "it" ? "lang=" + lang : "")).pipe(
         switchMap(arr => from(arr)),
         map((item) => {
@@ -133,8 +127,76 @@ export class ApiService {
             key: item.acf.key as string,
           }
         }),
-        toArray()
+        toArray(),
       )),
+    )
+  }
+
+  private getDeferredHttpQueue() {
+    const q = localStorage.getItem("http_queue");
+    if (q) {
+      return JSON.parse(q) as DeferredRequest[];
+    }
+    return [] as DeferredRequest[];
+  }
+
+  private removeFromDeferredHttpQueue(id: string)
+  {
+    let queue = this.getDeferredHttpQueue();
+    queue = queue.filter(item => item.id !== id);
+    localStorage.setItem("http_queue", JSON.stringify(queue));
+  }
+
+  private addToDeferredHttpQueue(req: DeferredRequest)
+  {
+    let queue = this.getDeferredHttpQueue();
+    queue = queue.concat(req);
+    localStorage.setItem("http_queue", JSON.stringify(queue));
+  }
+
+  sync() {
+    const syncLogs$ = from(this.getDeferredHttpQueue()).pipe(
+      concatMap(req => this.Http.post<any>(req.url, req.body).pipe(
+        tap(() => this.removeFromDeferredHttpQueue(req.id))
+      )),
+      toArray(),
+      tap({next: (arr) => console.log("Synced", arr.length, "requests")})
+    )
+
+    const syncProducts$ = of(localStorage.getItem("last_sync")).pipe(
+      switchMap(value => {
+        if (value !== null) {
+          const last = +value;
+          const now = new Date();
+          return of(now.getTime() - last > 3600 * 24 * 7 * 1000)
+        }
+        return of(true);
+      }),
+      switchMap((value) => {
+        if (value) {
+          return this.getAllProducts().pipe(
+            switchMap(products => from(products)),
+            concatMap(product => this.getProductInfo(product.key).pipe(
+              switchMap((info) => this.getAttachmentContent(info.serami_file)),
+            )),
+            delay(2000),
+            ignoreElements(),
+            tap({
+              complete: () => {
+                const now = new Date();
+                localStorage.setItem("last_sync", "" + now.getTime())
+              }
+            })
+          )
+        } else {
+          return of(void 0).pipe(ignoreElements());
+        }
+      })
+    )
+
+    return concat(
+      syncLogs$,
+      syncProducts$
     )
   }
 
@@ -202,11 +264,11 @@ export class ApiService {
   }
 
 
-  getProductInfo(product: string, gateway: string) {
+  getProductInfo(product: string, gateway: string | undefined = undefined) {
     return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
       switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => from(arr)),
-      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), this.getGateway(gateway, item.acf.board), this.Auth.getRoles()])),
+      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
       take(1),
       map(([item, board, gateway, roles]) => this.buildProductInfo(item, board, roles, gateway)),
       switchMap(item => {
@@ -219,13 +281,6 @@ export class ApiService {
           return of(item);
         }
       }),
-      tap(data => localStorage.setItem("product_" + product, JSON.stringify(data))),
-      catchError(err => {
-        let data = localStorage.getItem("product_" + product);
-        if (data !== null)
-          return of(JSON.parse(data)) as Observable<ProductInfo>;
-        return throwError(() => err);
-      })
     )
   }
 
@@ -248,13 +303,6 @@ export class ApiService {
   getAttachmentContent(id: number, responseType: 'text' | 'blob' = 'text') {
     return this.getAttachmentUrl(id).pipe(
       switchMap(url => this.Http.get(url, { responseType: 'text' })),
-      tap(data => localStorage.setItem("attachment_" + id, data)),
-      catchError(err => {
-        let data = localStorage.getItem("attachment_" + id);
-        if (data !== null)
-          return of(data) as Observable<string>;
-        return throwError(() => err);
-      })
     )
   }
 
@@ -280,7 +328,13 @@ export class ApiService {
   }
 
   createLogForDevice(serial: string, log: LogItem) {
-    return this.Http.post(environment.endpoint + "/api/logs", { ...log, serial: serial, date: log.date.toJSON().slice(0, 19).replace('T', ' ') });
+    return this.Http.post(environment.endpoint + "/api/logs", { ...log, serial: serial, date: log.date.toJSON().slice(0, 19).replace('T', ' ') }).pipe(
+      catchError(err => {
+        const req = { id: this.makeid(), url: environment.endpoint + "/api/logs", body: { ...log, serial: serial, date: log.date.toJSON().slice(0, 19).replace('T', ' ') } }
+        this.addToDeferredHttpQueue(req);
+        return throwError(() => err)
+      })
+    );
   }
 
   createLogForGateway(gatewayId: string, log: LogItem) {

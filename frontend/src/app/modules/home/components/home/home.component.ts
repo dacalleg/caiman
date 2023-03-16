@@ -56,7 +56,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.project$ = this.Store.getProject();
 
     this.connected$ = this.Device.isConnected();
-    this.connected$.subscribe((data) => console.log("connected", data));
 
     const macAddress$ = this.ActivatedRoute.params.pipe(
       filter(params => params["mac"] != null),
@@ -69,19 +68,38 @@ export class HomeComponent implements OnInit, OnDestroy {
       shareReplay(1)
     );
 
+    const regCode$ = this.ActivatedRoute.params.pipe(
+      map((params) => params["regCode"] as string | null),
+      shareReplay(1)
+    );
+
     const serialNumber$ = this.ActivatedRoute.params.pipe(
       map((params) => params["serial"] as string | null),
       shareReplay(1)
     );
 
-    this.loadDeviceData$ = combineLatest([macAddress$, productKey$, serialNumber$]).pipe(
-      switchMap(([mac, productKey, serial]) => this.Api.getDeviceInfoFromMac(mac, productKey).pipe(
-        map(device => {
-          device.info.serial = serial !== null ? serial : device.info.serial;
-          return device;
-        }),
-        tap(device => this.Store.setDevice(device))
-      )),
+    this.loadDeviceData$ = combineLatest([macAddress$, productKey$, serialNumber$, regCode$]).pipe(
+      switchMap(([mac, productKey, serial, regCode]) => {
+        if(productKey != null && regCode != null)
+        {
+          return this.Api.getProductInfo(productKey).pipe(map(product => {
+            const device = {
+              mac: mac,
+              security_code: regCode,
+              info: product
+            } as DeviceProduct;
+            device.info.serial = serial != null ? serial : device.info.serial;
+            return device;
+          }))
+        }
+        return this.Api.getDeviceInfoFromMac(mac, productKey).pipe(
+          map(device => {
+            device.info.serial = serial != null ? serial : device.info.serial;
+            return device;
+          }),
+        )
+      }),
+      tap(device => this.Store.setDevice(device)),
       shareReplay(1)
     );
 
@@ -135,8 +153,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$),
       switchMap(log => this.loadDeviceData$.pipe(
         filter(device => device.info.serial != null),
-        switchMap(device => this.Api.createLogForDevice(device.info.serial!, log)))
-      )
+        switchMap(device => this.Api.createLogForDevice(device.info.serial!, log)),
+        catchError(err => of(null))
+      )),
     ).subscribe();
 
     this.destroy$.pipe(

@@ -103,12 +103,13 @@ async function init() {
             }
         });
 
-        app.post('/ticket/get', UserRequired, async (req, res) => {
+        app.get('/ticket/get/:serial', UserRequired, async (req, res) => {
+            const serial = req.params.id;
             try {
                 const tickets = await Ticket.findAll(
                     {
                         where: {
-                            serial: req.body.serial,
+                            serial: serial,
                             parent_id: null
                         },
                         include: [

@@ -61,7 +61,7 @@ export class ApiService {
       tap(data => localStorage.setItem("device_info_" + mac, JSON.stringify(data))),
       catchError(err => {
         let data = localStorage.getItem("device_info_" + mac);
-        if(data !== null)
+        if (data !== null)
           return of(JSON.parse(data)) as Observable<DeviceProduct>;
         return throwError(() => err);
       })
@@ -95,7 +95,7 @@ export class ApiService {
       tap(data => localStorage.setItem("board_" + id, JSON.stringify(data))),
       catchError(err => {
         let data = localStorage.getItem("board_" + id);
-        if(data !== null)
+        if (data !== null)
           return of(JSON.parse(data)) as Observable<Board>;
         return throwError(() => err);
       })
@@ -116,7 +116,7 @@ export class ApiService {
       tap(data => localStorage.setItem("gateway_" + type + "_" + board, JSON.stringify(data))),
       catchError(err => {
         let data = localStorage.getItem("gateway_" + type + "_" + board);
-        if(data !== null)
+        if (data !== null)
           return of(JSON.parse(data)) as Observable<Gateway>;
         return of(null)
       }),
@@ -222,7 +222,7 @@ export class ApiService {
       tap(data => localStorage.setItem("product_" + product, JSON.stringify(data))),
       catchError(err => {
         let data = localStorage.getItem("product_" + product);
-        if(data !== null)
+        if (data !== null)
           return of(JSON.parse(data)) as Observable<ProductInfo>;
         return throwError(() => err);
       })
@@ -251,7 +251,7 @@ export class ApiService {
       tap(data => localStorage.setItem("attachment_" + id, data)),
       catchError(err => {
         let data = localStorage.getItem("attachment_" + id);
-        if(data !== null)
+        if (data !== null)
           return of(data) as Observable<string>;
         return throwError(() => err);
       })
@@ -267,7 +267,7 @@ export class ApiService {
   }
 
   getTickets(serial: string) {
-    return this.Http.post<Ticket[]>(environment.endpoint + "/api/ticket/get", { serial: serial }).pipe(map(resp => {
+    return this.Http.get<Ticket[]>(environment.endpoint + "/api/ticket/get/" + serial).pipe(map(resp => {
       return resp.map(item => {
         item.createdAt = new Date(item.createdAt);
         return item;
@@ -279,18 +279,15 @@ export class ApiService {
     return this.Http.post<Ticket>(environment.endpoint + "/api/ticket/add", { ticket: ticket, parent: parent.id });
   }
 
-  createLogForDevice(serial: string, log: LogItem)
-  {
-    return this.Http.post(environment.endpoint + "/api/logs", {...log, serial: serial, date: log.date.toJSON().slice(0, 19).replace('T', ' ')});
+  createLogForDevice(serial: string, log: LogItem) {
+    return this.Http.post(environment.endpoint + "/api/logs", { ...log, serial: serial, date: log.date.toJSON().slice(0, 19).replace('T', ' ') });
   }
 
-  createLogForGateway(gatewayId: string, log: LogItem)
-  {
-    return this.Http.post(environment.endpoint + "/api/logs", {...log, gateway: gatewayId, date: log.date.toJSON().slice(0, 19).replace('T', ' ')});
+  createLogForGateway(gatewayId: string, log: LogItem) {
+    return this.Http.post(environment.endpoint + "/api/logs", { ...log, gateway: gatewayId, date: log.date.toJSON().slice(0, 19).replace('T', ' ') });
   }
 
-  getLogsForDevice(serial: string)
-  {
+  getLogsForDevice(serial: string) {
     return this.Http.get<any[]>(environment.endpoint + "/api/logs/serial/" + serial).pipe(map(resp => {
       return resp.map(item => {
         item.date = new Date(item.date);

@@ -104,7 +104,7 @@ async function init() {
         });
 
         app.get('/ticket/get/:serial', UserRequired, async (req, res) => {
-            const serial = req.params.id;
+            const serial = req.params.serial;
             try {
                 const tickets = await Ticket.findAll(
                     {

@@ -349,15 +349,17 @@ class AguaProtocol {
                 switchMap(() => this.http.get<any>(this.agua_endpoint + "/deviceJobStatus/" + requestId, { headers: this.getHeaders(token) }).pipe(
                     switchMap(response => {
                         switch (response.jobAnswerStatus) {
-                            case "waiting":
-                                return throwError("waiting")
-                            case "Missing job answer":
-                                return throwError("Missing job answer")
+                            case "terminated":
+                            case "completed":
+                                return of(response.jobAnswerData === "" ? null : response.jobAnswerData);
+
+                            default:
+                                return throwError(() => new Error(response.jobAnswerStatus))
                         }
-                        return of(response.jobAnswerData);
-                    }
-                    ),
-                    retry({ count: 10, delay: 1000 }))
+                    }),
+                    retry({ count: 10, delay: 1000 }),
+                    switchMap(response => response === null ? throwError(() => new Error("Empty Response")) : of(response))
+                )
                 ))
             )
         )

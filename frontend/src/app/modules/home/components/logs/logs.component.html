@@ -8,33 +8,41 @@
                         <ng-template ngbPanelContent>
                             <ng-container *ngIf="(group|filterLog:[0]).logs as logs">
                                 <ng-container *ngIf="logs.length > 0">
-
                                     <h3>{{'logs.title.variablewrite'|translate}}</h3>
                                     <table class="table table-striped mt-3">
                                         <thead>
                                             <tr>
-                                                <th>{{'logs.th.date'|translate}}</th>
-                                                <th>{{'logs.th.user'|translate}}</th>
-                                                <th>{{'logs.th.variable'|translate}}</th>
-                                                <th>{{'logs.th.set'|translate}}</th>
-                                                <th>{{'logs.th.from'|translate}}</th>
-                                                <th>{{'logs.th.written'|translate}}</th>
+                                                <th class="d-none d-md-table-cell">{{'logs.th.date'|translate}}</th>
+                                                <th class="d-none d-md-table-cell">{{'logs.th.user'|translate}}</th>
+                                                <th class="d-none d-md-table-cell">{{'logs.th.variable'|translate}}</th>
+                                                <th class="d-none d-md-table-cell">{{'logs.th.set'|translate}}</th>
+                                                <th class="d-none d-md-table-cell">{{'logs.th.from'|translate}}</th>
+                                                <th class="d-none d-md-table-cell">{{'logs.th.written'|translate}}</th>
+                                                <th class="d-md-none d-table-cell"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr *ngFor="let log of logs">
                                                 <ng-container *ngIf="log.variable|variableFromHash|async as variable">
-                                                    <td>{{log.date|date:'HH:mm'}}</td>
-                                                    <td>{{log.user}}</td>
-                                                    <td>{{variable.name}}</td>
-                                                    <td><ng-container
+                                                    <td class="d-none d-md-table-cell">{{log.date|date:'HH:mm'}}</td>
+                                                    <td class="d-none d-md-table-cell">{{log.user}}</td>
+                                                    <td class="d-none d-md-table-cell">{{variable.name}}</td>
+                                                    <td class="d-none d-md-table-cell"><ng-container
                                                             *ngIf="log.set !== undefined">{{log.set|variableValueFormatter:variable}}</ng-container>
                                                     </td>
-                                                    <td><ng-container
+                                                    <td class="d-none d-md-table-cell"><ng-container
                                                             *ngIf="log.from !== undefined">{{log.from|variableValueFormatter:variable}}</ng-container>
                                                     </td>
-                                                    <td><ng-container
+                                                    <td class="d-none d-md-table-cell"><ng-container
                                                             *ngIf="log.written !== undefined">{{log.written|variableValueFormatter:variable}}</ng-container>
+                                                    </td>
+                                                    <td class="d-md-none d-table-cell">
+                                                        <div>{{'logs.th.date'|translate}}: <strong>{{log.date|date:'HH:mm'}}</strong></div>
+                                                        <div>{{'logs.th.user'|translate}}: <strong>{{log.user}}></strong></div>
+                                                        <div>{{'logs.th.variable'|translate}}: <strong>{{variable.name}}</strong></div>
+                                                        <div *ngIf="log.set !== undefined">{{'logs.th.set'|translate}}: <strong>{{log.set|variableValueFormatter:variable}}</strong></div>
+                                                        <div *ngIf="log.from !== undefined">{{'logs.th.from'|translate}}: <strong>{{log.from|variableValueFormatter:variable}}</strong></div>
+                                                        <div *ngIf="log.written !== undefined">{{'logs.th.written'|translate}}: <strong>{{log.written|variableValueFormatter:variable}}</strong></div>
                                                     </td>
                                                 </ng-container>
                                             </tr>
@@ -49,22 +57,43 @@
                                     <table class="table table-striped mt-3">
                                         <thead>
                                             <tr>
-                                                <th>{{'logs.th.date'|translate}}</th>
-                                                <th>{{'logs.th.user'|translate}}</th>
-                                                <th>{{'logs.th.status'|translate}}</th>
-                                                <th>{{'logs.th.message'|translate}}</th>
+                                                <th class="d-none d-md-table-cell">{{'logs.th.date'|translate}}</th>
+                                                <th class="d-none d-md-table-cell">{{'logs.th.user'|translate}}</th>
+                                                <th class="d-none d-md-table-cell">{{'logs.th.status'|translate}}</th>
+                                                <th class="d-none d-md-table-cell">{{'logs.th.message'|translate}}</th>
+                                                <th class="d-md-none d-table-cell"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr *ngFor="let log of logs">
-                                                <td>{{log.date|date:'HH:mm'}}</td>
-                                                <td>{{log.user}}</td>
-                                                <td>
-                                                    <span *ngIf="log.type === 1">{{'logs.powerboard.started'|translate}}</span>
-                                                    <span *ngIf="log.type === 2">{{'logs.powerboard.error'|translate}}</span>
-                                                    <span *ngIf="log.type === 3">{{'logs.powerboard.success'|translate}}</span>
+                                                <td class="d-none d-md-table-cell">{{log.date|date:'HH:mm'}}</td>
+                                                <td class="d-none d-md-table-cell">{{log.user}}</td>
+                                                <td class="d-none d-md-table-cell">
+                                                    <span
+                                                        *ngIf="log.type === 1">{{'logs.powerboard.started'|translate}}</span>
+                                                    <span
+                                                        *ngIf="log.type === 2">{{'logs.powerboard.error'|translate}}</span>
+                                                    <span
+                                                        *ngIf="log.type === 3">{{'logs.powerboard.success'|translate}}</span>
                                                 </td>
-                                                <td>{{log.data}}</td>
+                                                <td class="d-none d-md-table-cell">{{log.data}}</td>
+                                                <td class="d-md-none d-table-cell">
+                                                    <div>{{'logs.th.date'|translate}}: <strong>{{log.date|date:'HH:mm'}}</strong></div>
+                                                    <div>{{'logs.th.user'|translate}}: <strong>{{log.user}}</strong></div>
+                                                    <div>
+                                                        {{'logs.th.status'|translate}}:
+                                                        <span
+                                                            class="fw-bold"
+                                                            *ngIf="log.type === 1">{{'logs.powerboard.started'|translate}}</span>
+                                                        <span
+                                                            class="fw-bold"
+                                                            *ngIf="log.type === 2">{{'logs.powerboard.error'|translate}}</span>
+                                                        <span
+                                                            class="fw-bold"
+                                                            *ngIf="log.type === 3">{{'logs.powerboard.success'|translate}}</span>
+                                                    </div>
+                                                    <div>{{'logs.th.message'|translate}}: <strong>{{log.data}}</strong></div>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>

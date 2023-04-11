@@ -92,7 +92,7 @@ export class BridgeChannel implements Channel {
     this.responses$ = combineLatest(
       [this.stomp$, this.sendCommand$]
     ).pipe(
-      concatMap(([stomp, data]) => of(stomp.publish({ destination: "/topic/command." + this.device, body: JSON.stringify(data) })).pipe(
+      concatMap(([stomp, data]) => of(stomp.publish({ destination: "/topic/command." + this.device, body: JSON.stringify(data), headers: {'content-type': 'application/json'}})).pipe(
         switchMap(() => this.responseTopic$)).pipe(
           take(1),
           map(resp => JSON.parse(resp.body)),

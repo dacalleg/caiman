@@ -6,11 +6,11 @@
                     <h3 class="card-title">{{'auth.login'|translate}}</h3>
                     <div class="mb-3">
                         <label for="email" class="form-label">{{'auth.email'|translate}}</label>
-                        <input type="email" class="form-control" id="email" [(ngModel)]="email" />
+                        <input type="email" class="form-control" id="email" [(ngModel)]="email" (keyup.enter)="login()" />
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">{{'auth.password'|translate}}</label>
-                        <input type="password" class="form-control" id="password" [(ngModel)]="password" />
+                        <input type="password" class="form-control" id="password" [(ngModel)]="password" (keyup.enter)="login()"/>
                     </div>
                     <div class="mb-3" *ngIf="error">
                         <div *ngIf="error === 'account_expired'">{{'auth.account_expired'|translate}}</div>

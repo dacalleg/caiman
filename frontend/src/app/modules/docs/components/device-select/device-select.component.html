@@ -1,0 +1,53 @@
+<div class="container my-5">
+    <div class="row">
+        <div class="col">
+            <a [routerLink]="['/docs']" class="mb-3 d-block">Torna all'indice</a>
+            <h2>Selezione del dispositivo</h2>
+            <img src="assets/device-select.png" class="w-100 p-3 my-3" style="border: 1px solid #CCC">
+            <p>
+                La pagina di selezione del dispositivo permette di indicare a quale dispositivo il Caiman deve collegarsi. Ci
+                sono 3 modalità possibili:
+            </p>
+            <ul>
+                <li>
+                    <strong>Connessione a dispositivo registrato in Agua</strong>
+                    <p>
+                        E' la modalità di default. 
+                        Con questa modalità ci si connette ad un dispositivo la cui associazione tra Navel e apparato è già stata configurata e salvata nel sistema.
+                        Si deve inserire il MAC Address del Navel e il seriale del dispositivo nei rispettivi campi e si procede cliccando il pulsante di connessione.
+                        Questa modalità è quella più automatizzata perchè è in grado di caricare tutte le informazioni sul prodotto in automatico visto che sono già state salvate nel sistema.
+                    </p>
+                </li>
+                <li>
+                    <strong>Connessione a dispositivo NON registrato in Agua</strong>
+                    <p>
+                        Con questa modalità ci si connette ad un dispositivo la cui associazione tra Navel e apparato NON è già stata configurata e salvata nel sistema.
+                        Un esempio di questo tipo può essere quando il Navel non è mai stato collegato ad una rete e quindi l'inizializzazione non è mai avvenuta.
+                        Oppure quando si vuole collegare il proprio Navel al dispositivo.
+                        In questo caso i campi richiesti sono 3, nell'ordine: MAC Address del Navel, il seriale del dispositivo, e il modello del dispositivo(Prodotto) scelto da un menu a tendina.
+                        Attenzione a selezionare il corretto modello di dispositivo, un errore nella selezione porterà ad un problema di comunicazione.
+                    </p>
+                </li>
+                <li>
+                    <strong>Modalità OFFLINE - Sperimentale</strong>
+                    <p>
+                        Questa modalità permette di utilizzare il Caiman in modalità offline, quindi anche in assenza di connessione ad internet.
+                        Per poter utilizzare questa modalità è comunque necessario aver utilizzato il Caimain in precedenza almento una volta.
+                        Vengono richieste all'utente 4 informazioni, nell'ordine: MAC Address del Navel, il Reg Code del Navel, il seriale del dispositivo  e il modello del dispositivo(Prodotto) scelto da un menu a tendina.
+                        Attenzione a selezionare il corretto modello di dispositivo, un errore nella selezione porterà ad un problema di comunicazione.
+                    </p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col text-start">
+
+        </div>
+        <div class="col text-end">
+            <a [routerLink]="['/docs/home']">Informazioni dispositivo →</a>
+        </div>
+    </div>
+
+
+</div>

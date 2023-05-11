@@ -37,7 +37,7 @@ export class BridgeChannel implements Channel {
     private bufferVariables$: BehaviorSubject<Variable[]>;
     private close$: Subject<void>;
     private sendCommand$: Subject<{ data: any, chunkSize: number, id: number }>;
-    private responses$: Observable<{ id: number, payload: any }>;
+    private responses$: Observable<{ id: number, pl: any }>;
     private stomp$: Observable<RxStomp>;
     private stompSubject$: BehaviorSubject<RxStomp | null>;
     private responseTopic$: Observable<IMessage>;
@@ -56,12 +56,12 @@ export class BridgeChannel implements Channel {
             return of(stomp);
         }).pipe(
             tap((stomp) => this.stompSubject$.next(stomp)),
-            /*switchMap((arg) => this.sendBridgePing().pipe(map(() => arg))),
+            switchMap((arg) => this.sendBridgePing().pipe(map(() => arg))),
             timeout(5000),
             catchError((err) => {
                 this.close$.next();
                 return throwError(() => err);
-            }),*/
+            }),
             shareReplay(1),
         );
 
@@ -87,7 +87,6 @@ export class BridgeChannel implements Channel {
         this.responseTopic$ = this.stomp$.pipe(
           switchMap((stomp) => stomp.watch("/topic/response." + mac)),
           takeUntil(this.close$),
-          shareReplay(1)
         );
     
         this.close$.pipe(switchMap(() => this.stomp$)).subscribe((stomp) => {
@@ -192,7 +191,7 @@ export class BridgeChannel implements Channel {
         }).pipe(
             filter(([id, item]) => item.id === id),
             take(1),
-            map(([id, item]) => item.payload),
+            map(([id, item]) => item.pl),
         );
     }
 

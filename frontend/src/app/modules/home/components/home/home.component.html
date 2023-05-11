@@ -48,7 +48,7 @@
                 <app-tickets></app-tickets>
               </ng-template>
             </li>
-            <li ngbNavItem (shown)="unselectGroup()" [id]="2" [domId]="'ngb-nav-' + 2">
+            <li ngbNavItem (shown)="unselectGroup()" [id]="2" [domId]="'ngb-nav-' + 2" *ngIf="connected$|async">
               <a ngbNavLink>{{'home.advanced'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-advanced [device]="device" (onFirmwareGatewayUpgraded)="disconnect()"></app-advanced>

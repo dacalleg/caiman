@@ -1,0 +1,139 @@
+<div class="container my-5">
+    <div class="row">
+        <div class="col">
+            <a [routerLink]="['/docs']" class="mb-3 d-block">Torna all'indice</a>
+            <h2>Informazioni Dispositivo</h2>
+            <img src="assets/home.png" class="w-100 p-3 my-3" style="border: 1px solid #CCC">
+            <p>
+                Questa pagina mostra le informazioni del dispositivo selezionato, è composta da diverse sezioni accessibili tramite il menù di sinistra, nel dettaglio:
+            </p>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col">
+            <h4>INFORMAZIONI DISPOSITIVO</h4>
+            <p>In questa sezione vengono mostrate le seguenti informazioni del dispositivo:</p>
+            <ul>
+                <li>Titolo: MAC ADDRESS del Navel</li>
+                <li>Sottotitolo: Nome assegnato al dispositivo</li>
+                <li>Descrizione: Descrizione breve del prodotto</li>
+                <li>3 pulsanti per effettuare la connessione</li>
+                <li>Documentazione tecnica: contiene una lista di file scaricabili associati al prodotto</li>
+                <li>FAQ: una lista di domande e risposte frequenti riguardanti il dispositivo</li>
+                <li>Video: una lista di video riguardanti il dispositivo</li>
+                <li>Immagine: un'immagine d'esempio del dispositivo</li>
+            </ul>
+            <p>Sono presenti 3 pulsanti che permettono di connettersi al dispositivo in 3 modalità differenti:</p>
+            <ul>
+                <li>
+                    <strong>WIFI</strong>
+                    <p>Richiede che il dispositivo sia connesso tramite Wifi al cloud viceversa la connessione non sarà possibile. Questa modalità non è disponibile Offline</p>
+                </li>
+                <li>
+                    <strong>Bluetooth</strong>
+                    <p>
+                        E' necessario essere in prossimità del dispositvo, se si utilizza un PC è necessario inoltre che sia dotato di adattatore Bluetooth che supporti il BLE.
+                        I browser che attualmente supportano la connessione BLE sono Chrome dalla versione 56, Edge dalla versione 79, Opera dalla versione 43. 
+                        Firefox e Safari non permettono la connessione in questa modalità.
+                        I dispositivi Android in genere montano browser che supportano nativamente la modalità BLE e in ogni caso è sufficiente scaricare ed utilizzare Chrome.
+                        Nel caso di dispositivi Apple la connessione BLE non può essere effettuata nativamente ma un possibile workaround è quello di utilizzare il caiman tramite un Browser che supporta BLE come ad esempio Bluefy: 
+                        <a href="https://apps.apple.com/us/app/bluefy-web-ble-browser/id1492822055?platform=iphone" target="_blank">https://apps.apple.com/us/app/bluefy-web-ble-browser/id1492822055?platform=iphone</a><br>
+                        Questa modalità è disponibile Offline.
+                    </p>
+                </li>
+                <li>
+                    <strong>Bridge</strong>
+                    <p>
+                        Questa modalità permette di collegarsi da remoto al dispositivo sfruttando un dispositivo presente nelle vicinanze dello stesso.
+                        Questa modalità è molto simile a quella usata nei software di controllo remoto tipo TeamViewer o AnyDesk.
+                        E' necessario che in prossimità del dispositivo sia presente un utente che tramite la propria app attivi la modalità ponte.
+                        A questo punto sarà possibile connettersi al dispositivo tramite Caiman. Questa modalità è da preferire quando non è possibile connettere il dispositivo Wifi.
+                        Questa modalità non è disponibile Offline.
+                    </p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col">
+            <h4>TICKETS</h4>
+            <p>In questa sezione vengono visualizzati i ticket associati al dispositivo. Un ticket è una richiesta di intervento per malfunzionamento.
+                Ogni ticket è composto da uno stato(aperto/chiuso), un titolo, una descrizione del problema, una data, un utente che l'ha creato ed eventualmente una lista di allegati.
+                Caiman mette a disposizione un menu per selezionare i ticket e una sottoschermata sulla destra per visualizzare i dati del ticket e le eventuali risposte.
+                I ticket sono creati dagli utenti tramite l'app. L'utilizzatore del Caiman può visualizzare tutti i ticket di un dispsitivo e procedere a fornire una rispost al ticket tramite il pulsante(Scrivi).
+                Ogni risposta contiene un messaggio ed eventualmente una list di allegati.
+            </p>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col">
+            <h4>AVANZATE</h4>
+            <p>Questa sezione è disponibile solo dopo essersi connesso con successo ad un Navel. Vengono visualizzate le seguenti informazioni:
+            </p>
+            <ul>
+                <li>
+                    <strong>Database parametri</strong>
+                    <p>E' un menu a tendina dove è possibile selezionare una dato database parametri da caricare nel dispositivo<br>
+                    Per database parametri si intende una serie di scritture consecutive, questo implica che un database parametri può essere anche una macro che esegue il collaudo come ad esempio un test delle uscite.
+                    Per scrivere un database nel dispositivo è sufficiente selezionarlo e cliccare il pulsante "Carica"
+                    </p>
+                </li>
+                <li>
+                    <strong>FIRMWARE GATEWAY WIFI</strong>
+                    <p>Tramite questo menu a tendina è possibile selezionare la versione firmware del Gateway Wifi(Navel) e caricarla nel dispositivo.
+                        La versione firmware attualmente caricata sul Navel viene mostrata sotto il dropdown.
+                        Questa opzione è attiva solo se il dispositivo è connesso ad una rete Wifi.
+                    </p>
+                </li>
+                <li>
+                    <strong>FIRMWARE Scheda di Potenza</strong>
+                    <p>Tramite questo menu a tendina è possibile selezionare la versione firmware della scheda di potenza e caricarla nel dispositivo.
+                        Questa opzione è attiva solo se il dispositivo è connesso ad una rete Wifi.
+                    </p>
+                </li>
+                <li>
+                    <strong>Connessioni di rete</strong>
+                    <p>In questa sezione vengono visualizzate la lista delle reti wifi viste dal NAVEL. E' possibile connettere il dispositivo ad una rete wifi se non lo è già.
+                        Nel caso in cui il dispositivo sia già connesso ad una rete wifi verrà visualizzata solo la rete a cui è connesso con la possibili di forzare la disconnessione.
+                    </p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col">
+            <h4>LOG INTERVENTI</h4>
+            <p>
+                In questa sezione vengono evidenziate tutte le operazioni di scrittura effettuate sul dispositivo dal Caiman.
+                Tutte le operazioni sono categorizzate per data. Selezionando una determinata data si vedranno tutte le operazioni eseguite sul dispositivo in quella giornata.
+                Possono essere presenti 2 tabelle:
+            </p>
+
+            <ul>
+                <li>
+                    <strong>SCRITTURA PARAMETRI</strong>
+                    <p>Vengono mostrate tutte le richieste di scrittura di un dato parametro o variabile nella scheda di potenza. Ogni riga identifica quindi una scrittura.
+                        Le colonne di questa tabella identificano l'ora in cui si è verificata la scrittura, la mail dell'utente che l'ha richiesta, il parametro/variabile coinvolto, il valore da scrivere,
+                        il valore precedente ed il valore effettivamente scritto.
+                    </p>
+                </li>
+                <li>
+                    <strong>AGGIORNAMENTI SCHEDA DI POTENZA</strong>
+                    <p>Questa tabella viene mostrata solo se è stato richiesto un aggiornamento della scheda di potenza.
+                        Le colonne di questa tabella identificano l'ora, la mail dell'utente, il tipo di avviso(Aggiornamento Avviato, fallito o completato) e la versione dell'aggiornamento.
+                </li>
+            </ul>
+
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col text-start">
+            <a [routerLink]="['/docs/device-select']">← Selezione del dispositivo</a>
+        </div>
+        <div class="col text-end">
+            <a [routerLink]="['/docs/variables']">Parametri e variabili di lavoro →</a>
+        </div>
+    </div>
+
+
+</div>

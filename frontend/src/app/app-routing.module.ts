@@ -9,7 +9,8 @@ const routes: Routes = [
     ]
   },
   { path: '', redirectTo: '/dashboard/home', pathMatch: 'full' },
-  { path: 'auth', loadChildren: () => import('./modules/authentication/authentication.module').then(m => m.AuthenticationModule) }
+  { path: 'auth', loadChildren: () => import('./modules/authentication/authentication.module').then(m => m.AuthenticationModule) },
+  { path: 'docs', loadChildren: () => import('./modules/docs/docs.module').then(m => m.DocsModule) }
 ];
 
 @NgModule({

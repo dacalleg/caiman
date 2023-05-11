@@ -1,0 +1,32 @@
+<div class="container my-5">
+    <div class="row">
+        <div class="col">
+            <a [routerLink]="['/docs']" class="mb-3 d-block">Torna all'indice</a>
+            <h2>Modifica variabili/parametri di lavoro</h2>
+            <img src="assets/variables.png" class="w-100 p-3 my-3" style="border: 1px solid #CCC">
+            <p>
+                Quando si effettua la connessione con il dispositivo verranno mostrate oltre alle voci di menù classiche(INFORMAZIONI DISPOSITIVO, TICKETS, AVANZATE, LOG INTERVENTI) una serie di altre voci di menù che corrispondono
+                a dei gruppi di variabili/parametri.
+                La numerosità di questi gruppi dipende essenzialmente dal dispositivo a cui ci si è connesso.
+                Cliccando su un gruppo verrà visualizzata una schermata che contiene le variabili/parametri di quel dato gruppo.
+                Per ciascuna variabile verrà visualizzato un riquadro contenente:
+
+            </p>
+            <ul>
+                <li>Il nome della variabile/parametro</li>
+                <li>Il valore letto in tempo reale</li>
+                <li>Un pulsante di modifica(a forma di penna)</li>
+            </ul>
+            <p>Per modificare un valore è sufficiente cliccare il pulsante di modifica. Comparirà un'area di testo o una casella di selezione nel caso di valori predefiniti. Dopo 1 secondo circa dalla modifica del campo il valore verrà scritto nella scheda.</p>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col text-start">
+            <a [routerLink]="['/docs/home']">← Informazioni dispositivo</a>
+        </div>
+        <div class="col text-end">
+        </div>
+    </div>
+
+
+</div>

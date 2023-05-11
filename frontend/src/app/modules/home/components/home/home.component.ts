@@ -121,7 +121,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.bridgeChannel$ = this.loadDeviceData$.pipe(
       switchMap((data) => combineLatest([this.Auth.getToken(), this.Auth.getUserName(), of(data)])),
-      map(([token, username, data]) => new BridgeChannel(username, token, data.mac, data.security_code)),
+      map(([token, username, data]) => new BridgeChannel(username, token, data.mac)),
       tap((channel) => this.Device.setChannel(channel))
     )
 

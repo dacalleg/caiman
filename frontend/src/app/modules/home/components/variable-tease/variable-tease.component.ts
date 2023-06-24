@@ -83,4 +83,8 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
     if (this.variable)
       this.Modal.openVariableEditModal(this.variable);
   }
+
+  isNumber(value: any) {
+    return !Number.isNaN(value);
+  }
 }

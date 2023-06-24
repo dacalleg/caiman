@@ -122,7 +122,7 @@ export class DeviceService {
     ]).pipe(
       take(1),
       switchMap(([connected, channel]) => {
-        if(channel !== null && connected)
+        if (channel !== null && connected)
           return channel.disconnect();
         return of(void 0);
       }),
@@ -146,12 +146,14 @@ export class DeviceService {
           })
         })
       }
-    ));
+      ));
   }
 
   read(variables: Variable[]) {
+    const uniqueVariables = [...new Map(variables.map(item =>
+      [item.hash, item])).values()];
     return this.getChannel().pipe(
-      switchMap(channel => channel.read(variables)),
+      switchMap(channel => channel.read(uniqueVariables)),
       take(1)
     );
   }
@@ -200,7 +202,7 @@ export class DeviceService {
     );
   }
 
-  upgradePowerBoardFirmware(url: string, md5: string, revision:string): Observable<FirmwareDownloadStatus> {
+  upgradePowerBoardFirmware(url: string, md5: string, revision: string): Observable<FirmwareDownloadStatus> {
 
     return this.getChannel().pipe(
       switchMap(channel => channel.getWifiStatus().pipe(

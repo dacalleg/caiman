@@ -62,7 +62,7 @@ export class SeramiParserService {
             return value
           }).filter(item => item !== null) as Variable[]);
         } else {
-          ret.push(variable)
+          ret.push(variable);
         }
       });
       return ret;
@@ -71,7 +71,7 @@ export class SeramiParserService {
 
   private nodeChildValue(nodeName: string, node: any) {
     const ret = xpath.select1("./" + nodeName + "/text()", node) as any;
-    if (ret !== null)
+    if (ret != null)
       return ret.nodeValue;
     return null;
   }
@@ -81,6 +81,7 @@ export class SeramiParserService {
     const bit = Math.pow(2, (parseInt(this.nodeChildValue("datatype", node)) + 3));
     const memory = this.toBoolean(this.nodeChildValue("memory", node));
     const sanitizedName = this.sanitizeString(this.nodeChildValue("label", node)) as string;
+    const description = this.nodeChildValue("description", node) as string;
     let address = parseInt(this.nodeChildValue("startaddress", node), 16) as number;
     const mask = parseInt(this.nodeChildValue("mask", node), 16);
     const varName = this.nodeChildValue("var_name", node) as string;
@@ -91,6 +92,7 @@ export class SeramiParserService {
         .replace(/#/g, "x")
         .replace(/&/g, "+")
         .replace(/mod/g, " % ")
+        .replace(/AND/g, " & ")
       if (expval.includes("IIF")) {
         expval = expval.substring(4, expval.length - 1);
         const pieces = expval.split(",")
@@ -112,18 +114,19 @@ export class SeramiParserService {
       redexp.push("x & " + mask);
     const realmin = parseInt(this.nodeChildValue("set_min", node));
     const realmax = parseInt(this.nodeChildValue("set_max", node));
-    const exprval = this.nodeChildValue("expreval", node);
+    //const exprval = this.nodeChildValue("expreval", node);
 
     let min = realmin;
     let max = realmax;
-    if (exprval && exprval !== "#") {
+    
+    if (expval && expval !== "#") {
       try {
-        min = eval(exprval.replace(re, "" + realmin))
+        min = eval(Utils.sanitizeExp(expval).replace(re, "" + realmin))
       }
       catch (ex) {
       }
       try {
-        max = eval(exprval.replace(re, "" + realmax))
+        max =  eval(Utils.sanitizeExp(expval).replace(re, "" + realmax))
       }
       catch (ex) {
       }
@@ -132,6 +135,7 @@ export class SeramiParserService {
 
     return {
       type: type,
+      description: description,
       varKey: varName.trim() !== "" ? varName.trim() : undefined,
       group: this.nodeChildValue("parent", node) as string,
       name: this.nodeChildValue("label", node) as string,
@@ -160,12 +164,14 @@ export class SeramiParserService {
   }
 
   buildAlphanumericParameterBase(node: any): Variable {
+    const description = this.nodeChildValue("description", node) as string;
     const bit = parseInt(this.nodeChildValue("text_value_length", node)) * 8 as number;
     const memory = this.toBoolean(this.nodeChildValue("memory", node));
     const sanitizedName = this.sanitizeString(this.nodeChildValue("label", node)) as string;
     const address = parseInt(this.nodeChildValue("startaddress", node), 16) as number;
     const type = this.nodeChildValue("type", node) as string;
     return {
+      description: description,
       group: this.nodeChildValue("parent", node) as string,
       type: this.nodeChildValue("type", node) as string,
       name: this.nodeChildValue("label", node) as string,

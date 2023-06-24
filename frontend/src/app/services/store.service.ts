@@ -3,6 +3,7 @@ import { ComponentStore } from "@ngrx/component-store";
 import { DeviceProduct, Project, Variable, ViewOption } from "../classes/interfaces";
 import { SeramiParserService } from "./serami-parser.service";
 import { first, from, map, switchMap, take } from "rxjs";
+import { Utils } from '../classes/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -144,6 +145,25 @@ export class StoreService {
                 variable.name = override_variable.title;
               if (override_variable?.description)
                 variable.description = override_variable.description;
+              if (override_variable?.read_exp)
+              {
+                variable.readExp = override_variable.read_exp;
+                
+                if (variable.readExp && variable.readExp !== "#") {
+                  var re = new RegExp('#', 'g');
+
+                  try {
+                    variable.min = eval(Utils.sanitizeExp(variable.readExp).replace(re, "" + variable.min))
+                  }
+                  catch (ex) {
+                  }
+                  try {
+                    variable.max =  eval(Utils.sanitizeExp(variable.readExp).replace(re, "" + variable.max))
+                  }
+                  catch (ex) {
+                  }
+                }
+              }
               if (override_variable?.writable !== undefined)
                 variable.readonly = !override_variable.writable;
               if (override_variable?.options)

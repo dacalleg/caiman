@@ -20,7 +20,7 @@ export class DeviceSelectComponent implements OnInit {
   constructor(private Router: Router, private Api: ApiService) {
     this.selectedProduct = null;
     this.serialNumber = "5899887445";
-    this.macAddress = "7C87CEED9014";
+    this.macAddress = "30C6F7C3E1D4";
     this.regCode = "79890979";
     this.products$ = this.Api.getAllProducts();
   }

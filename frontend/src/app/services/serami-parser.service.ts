@@ -20,8 +20,8 @@ export class SeramiParserService {
       const type = this.nodeChildValue("type", node);
       if (type === "RwmsParameterBase")
         return this.buildRwmsParameterBase(node)
-      if (type === "AlphanumericParameterBase")
-        return this.buildAlphanumericParameterBase(node)
+      /*if (type === "AlphanumericParameterBase")
+        return this.buildAlphanumericParameterBase(node)*/
       return null;
     })).then(items => items.filter(item => item !== null) as Variable[]).then(items => {
       let ret = [] as Variable[];

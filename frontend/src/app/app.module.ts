@@ -1,4 +1,4 @@
-import { NgModule, isDevMode } from '@angular/core';
+import { APP_INITIALIZER, NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -6,7 +6,7 @@ import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FooterComponent } from './components/footer/footer.component';
 import { ComponentStore } from "@ngrx/component-store";
-import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
+import { TranslateLoader, TranslateModule } from "@ngx-translate/core";
 
 import { FormsModule } from "@angular/forms";
 import { HttpClientModule, HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -19,14 +19,29 @@ import { environment } from 'src/environments/environment';
 import { TranslationLoader } from './modules/shared/translations/translation.loader';
 import { ApiService } from './services/api.service';
 import { TranslationProviderService } from './services/translation-provider.service';
-import { CookieService } from 'ngx-cookie-service';
 import { HeaderInterceptor } from './interceptors/header.interceptor';
 import { TranslationService } from './services/translation.service';
-import { ServiceWorkerModule } from '@angular/service-worker';
+import { ServiceWorkerModule, SwUpdate } from '@angular/service-worker';
+import { filter, from } from 'rxjs';
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
 }
+
+export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
+  return (): Promise<void> =>
+    new Promise((resolve) => {
+      swUpdate.checkForUpdate();
+
+      from(swUpdate.activateUpdate())
+        .pipe(filter(value => value === true))
+        .subscribe(() => {
+          window.location.reload();
+      });
+
+      resolve();
+    });
+};
 
 @NgModule({
   declarations: [
@@ -62,7 +77,7 @@ export function tokenGetter() {
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000'
     }),
-    
+
   ],
   providers: [
     AuthService,
@@ -70,11 +85,12 @@ export function tokenGetter() {
     ApiService,
     TranslationProviderService,
     TranslationService,
-    { 
-      provide: HTTP_INTERCEPTORS, 
+    {
+      provide: HTTP_INTERCEPTORS,
       useClass: HeaderInterceptor,
       multi: true
-    }
+    },
+    { provide: APP_INITIALIZER, useFactory: checkForUpdates, multi: true, deps: [SwUpdate] },
   ],
   bootstrap: [AppComponent]
 })

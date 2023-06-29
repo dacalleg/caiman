@@ -20,6 +20,7 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
   value$: Observable<VariableValue>;
   project$: Observable<Project>;
   newValue: number;
+  writing: boolean;
 
   constructor(private Store: StoreService, private Device: DeviceService, private Modal: ModalService) {
     this.variable = null;
@@ -29,15 +30,27 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
     this.writeSubject = new Subject<number>();
     this.fullmask = 0;
     this.newValue = 0;
+    this.writing = false;
 
     this.writeSubject.pipe(
         debounceTime(1000),
-        tap(() => this.writeMode = false),
+        tap(() => 
+        {
+          this.writeMode = false;
+          this.writing = true;
+        }),
         map(value => {
           return { variable: this.variable, value: value } as VariableValue
         }),
         concatMap(value => this.Device.write([value])
-      )).subscribe();
+      )).subscribe({
+        next: () => {
+          this.writing = false;
+        },
+        error: () => {
+          this.writing = false;
+        }
+      });
 
     this.value$ = this.Device.getStream().pipe(
       switchMap((variables) => from(variables)),

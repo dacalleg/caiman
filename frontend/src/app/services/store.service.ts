@@ -80,16 +80,13 @@ export class StoreService {
     );
   }
 
-  getVariablesByRoles(roles: string[]) {
+  getVariablesByRoles(r: string[]) {
+    const roles = r.concat("all");
     return this.componentStore.state$.pipe(
       map(state => {
         if (state.device && state.device.info) {
-          const hidden_groups = state.device.info.serami_acl.find(acl => roles.includes(acl.role))?.hidden_groups;
-          const hidden_variables = state.device.info.serami_acl.find(acl => roles.includes(acl.role))?.hidden_variables;
-          if (!hidden_groups)
-            return state.variables;
-          if (!hidden_variables)
-            return state.variables;
+          let hidden_groups = state.device.info.serami_acl.find(acl => roles.includes(acl.role))?.hidden_groups || [];
+          let hidden_variables = state.device.info.serami_acl.find(acl => roles.includes(acl.role))?.hidden_variables || [];
           return state.variables.filter(variable => !hidden_groups.includes(variable.group) && !hidden_variables.includes(variable.hash));
         }
         return [];
@@ -145,10 +142,9 @@ export class StoreService {
                 variable.name = override_variable.title;
               if (override_variable?.description)
                 variable.description = override_variable.description;
-              if (override_variable?.read_exp)
-              {
+              if (override_variable?.read_exp) {
                 variable.readExp = override_variable.read_exp;
-                
+
                 if (variable.readExp && variable.readExp !== "#") {
                   var re = new RegExp('#', 'g');
 
@@ -158,7 +154,7 @@ export class StoreService {
                   catch (ex) {
                   }
                   try {
-                    variable.max =  eval(Utils.sanitizeExp(variable.readExp).replace(re, "" + variable.max))
+                    variable.max = eval(Utils.sanitizeExp(variable.readExp).replace(re, "" + variable.max))
                   }
                   catch (ex) {
                   }

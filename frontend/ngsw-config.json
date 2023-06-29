@@ -25,8 +25,7 @@
           "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
         ],
         "urls": [
-          "https://fonts.gstatic.com/**",
-          "https://www.youtube.com/**"
+          "https://fonts.gstatic.com/**"
         ]
       }
     }
@@ -40,7 +39,19 @@
       "cacheConfig": {
         "maxSize": 100,
         "maxAge": "1d",
-        "strategy": "freshness"
+        "strategy": "performance"
+      }
+    },
+    {
+      "name": "ytb",
+      "urls": [
+        "https://www.youtube.com/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 100,
+        "maxAge": "1d",
+        "strategy": "freshness",
+        "cacheOpaqueResponses": true
       }
     }
   ]

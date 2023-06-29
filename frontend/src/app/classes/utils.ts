@@ -17,41 +17,48 @@ export class Utils {
         return expval;
     }
 
-    static convertValuesToRead(variables: Variable[], values: number[]) {
+    static convertValuesToRead(variables: Variable[], values: (number|null)[]) {
         let ret = [] as number[];
         const params = variables.filter(v => v.varKey !== undefined);
         const hashes = variables.map(v => v.hash);
 
         var re = new RegExp('#', 'g');
         for (let i = 0; i < variables.length; i++) {
-            try {
-                const variable = variables[i];
-                const value = values[i] & variable.mask!;
-
-                if (variable.type === "RwmsParameterBaseBit") {
-                    ret.push(value > 0 ? 1 : 0);
-                    continue;
-                }
-
-                if (!variable.readExp) {
-                    ret.push(value);
-                } else {
-                    const expval = this.sanitizeExp(variable.readExp);
-                    let exp = expval.replace(re, "" + value);
-                    params.forEach(p => exp = exp.replace(new RegExp(p.varKey!, 'g'), "" + values[hashes.indexOf(p.hash)]));
-                    /*try
-                    {
-                        if(Number.isNaN(eval(exp)))
+            if(values[i] !== null)
+            {
+                try {
+                    const variable = variables[i];
+                    const value = values[i]! & variable.mask!;
+    
+                    if (variable.type === "RwmsParameterBaseBit") {
+                        ret.push(value > 0 ? 1 : 0);
+                        continue;
+                    }
+    
+                    if (!variable.readExp) {
+                        ret.push(value);
+                    } else {
+                        const expval = this.sanitizeExp(variable.readExp);
+                        let exp = expval.replace(re, "" + value);
+                        params.forEach(p => exp = exp.replace(new RegExp(p.varKey!, 'g'), "" + values[hashes.indexOf(p.hash)]));
+                        /*try
+                        {
+                            if(Number.isNaN(eval(exp)))
+                                console.log(exp);
+                        }catch
+                        {
                             console.log(exp);
-                    }catch
-                    {
-                        console.log(exp);
-                    }*/
-
-                    ret.push(eval(exp));
+                        }*/
+    
+                        ret.push(eval(exp));
+                    }
+                }
+                catch (ex) {
+                    ret.push(NaN);
                 }
             }
-            catch (ex) {
+            else
+            {
                 ret.push(NaN);
             }
         }

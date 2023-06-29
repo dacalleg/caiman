@@ -139,7 +139,16 @@ class AguaProtocol {
                     switchMap(response => this.getJobStatus(response.idRequest)),
                     map(response => {
                         let r = response as RequestReadingReponse;
-                        const calculated = Utils.convertValuesToRead(variables, r.Values);
+                        const values = variables.map(v => {
+                            const addr = v.memory === "eeprom" ? v.address + 0x8000 : v.address;
+                            const index = r.Items.indexOf(addr);
+                            if(index >= 0)
+                            {
+                                return r.Values[index];
+                            }
+                            return null;
+                        })
+                        const calculated = Utils.convertValuesToRead(variables, values);
                         const ret = [] as VariableValue[];
                         for (let i = 0; i < variables.length; i++) {
                             ret.push({ variable: variables[i], value: calculated[i] });
@@ -214,7 +223,16 @@ class AguaProtocol {
                     switchMap(response => this.getJobStatus(response.idRequest)),
                     map(response => {
                         let r = response as RequestReadingReponse;
-                        const calculated = Utils.convertValuesToRead(variables, r.Values);
+                        const values = variables.map(v => {
+                            const addr = v.memory === "eeprom" ? v.address + 0x8000 : v.address;
+                            const index = r.Items.indexOf(addr);
+                            if(index >= 0)
+                            {
+                                return r.Values[index];
+                            }
+                            return null;
+                        })
+                        const calculated = Utils.convertValuesToRead(variables, values);
                         const ret = [] as VariableValue[];
                         for (let i = 0; i < variables.length; i++) {
                             ret.push({ variable: variables[i], value: calculated[i] });

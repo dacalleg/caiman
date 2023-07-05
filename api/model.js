@@ -1,5 +1,25 @@
 
 module.exports = (sequelize, DataTypes) => {
+    const Serami = sequelize.define('serami', {
+        key: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        data: {
+            type: DataTypes.TEXT,
+            get: function () {
+                return JSON.parse(this.getDataValue('data'));
+            },
+            set: function (data) {
+                this.setDataValue('data', JSON.stringify(data));
+            }
+        }
+    });
     const Log = sequelize.define('logs', {
         id: {
             type: DataTypes.UUID,
@@ -108,5 +128,5 @@ module.exports = (sequelize, DataTypes) => {
     Asset.belongsTo(Ticket, { foreignKey: 'ticket_id' });
     Ticket.hasMany(Asset, { foreignKey: 'ticket_id' });
 
-    return { Ticket, Asset, Log }
+    return { Ticket, Asset, Log, Serami }
 };

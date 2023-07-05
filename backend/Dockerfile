@@ -51,7 +51,7 @@ RUN chmod 755 /etc/services.d/nginx/run
 COPY start-fpm.sh /etc/services.d/php_fpm/run
 RUN chmod 755 /etc/services.d/php_fpm/run
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY . /var/www/public
+#COPY . /var/www/public
 
 ENTRYPOINT ["/init"]
 CMD []

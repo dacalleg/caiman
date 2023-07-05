@@ -13,7 +13,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
     host: DB_HOST,
     dialectOptions: {}
 });
-const { Ticket, Asset, Log } = require('./model')(sequelize, DataTypes);
+const { Ticket, Asset, Log, Serami } = require('./model')(sequelize, DataTypes);
 const express = require('express');
 var cors = require('cors')
 const fs = require('fs');
@@ -67,6 +67,7 @@ async function init() {
         await Ticket.sync({ alter: true });
         await Asset.sync({ alter: true });
         await Log.sync({ alter: true });
+        await Serami.sync({ alter: true });
 
         app.use(cors());
         app.use(bodyParser.json({ limit: '10mb' }));
@@ -163,6 +164,32 @@ async function init() {
             try {
                 const log = await Log.create(body);
                 res.status(200).send({ status: "OK" });
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.get('/serami', UserRequired, async (req, res) => {
+            try {
+                res.status(200).send(await Serami.findAll({attributes: {exclude: ['data']}}));
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.post('/serami/update', UserRequired, async (req, res) => {
+            try {
+                await Serami.upsert(req.body)
+                res.status(200).send({ status: "OK" });
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.get('/serami/get/:id', UserRequired, async (req, res) => {
+            const id = req.params.id;
+            try {
+                res.status(200).send(await Serami.findByPk(id));
             } catch (ex) {
                 res.status(500).send({ message: ex.message });
             }

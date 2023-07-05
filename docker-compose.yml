@@ -38,6 +38,7 @@ services:
       - caiman_db
     volumes:
       - ./volumes/uploads:/var/www/public/wp-content/uploads
+      - ./backend:/var/www/public
     healthcheck:
       interval: 5m
     environment:
@@ -118,6 +119,7 @@ services:
       - ./volumes/mariadb:/var/lib/mysql
 
   caiman_broker:
+    hostname: rabbitmqbroker
     restart: always
     image: caiman_broker:latest
     build: ./rabbitmq

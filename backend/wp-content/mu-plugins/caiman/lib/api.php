@@ -19,6 +19,15 @@ add_action( 'rest_api_init', function(){
             'permission_callback' => '__return_true'
         )
     );
+    register_rest_route(
+        'caiman/v1',
+        '/info',
+        array(
+            'methods' => 'GET',
+            'callback' => 'caiman_get_info',
+            'permission_callback' => '__return_true'
+        )
+    );
 });
 
 function caiman_get_unsecure_file( WP_REST_Request $request ) {
@@ -53,3 +62,8 @@ function caiman_get_gateway( WP_REST_Request $request ) {
     ));
     return new WP_REST_Response($posts, 200);
 }
+
+function caiman_get_info( WP_REST_Request $request ) {
+    return get_fields('options');
+}
+

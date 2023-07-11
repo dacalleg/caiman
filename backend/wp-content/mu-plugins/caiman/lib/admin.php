@@ -36,3 +36,12 @@ add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id
     }
     return $val;
 }, 10, 3 );
+
+function init_op_page()
+{
+    if( function_exists('acf_add_options_page') ) {
+        acf_add_options_page();
+    }
+}
+
+add_action('acf/init', 'init_op_page');

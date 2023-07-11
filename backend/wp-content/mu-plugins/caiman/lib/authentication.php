@@ -33,6 +33,7 @@ add_filter( 'jwt_auth_whitelist', function ( $endpoints ) {
         '/wp-json/caiman/v1/reset-password',
         '/wp-json/caiman/v1/register',
         '/wp-json/caiman/v1/confirm',
+        '/wp-json/caiman/v1/info',
     );
 
     return array_unique( array_merge( $endpoints, $your_endpoints ) );

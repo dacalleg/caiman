@@ -2,7 +2,7 @@
   "name": "Caiman",
   "short_name": "Caiman",
   "theme_color": "#496356",
-  "background_color": "#fafafa",
+  "background_color": "#ffffff",
   "display": "standalone",
   "id": "caiman.micronovasrl.com",
   "scope": "./",

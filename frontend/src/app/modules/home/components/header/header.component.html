@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="d-flex align-items-center justify-content-between w-100">
       <div class="d-flex align-items-center justify-content-center">
-        <img [src]="(info$|async).logo" style="height: 37px;">
+        <img [src]="(info$|async)?.logo" style="height: 37px;">
         <h2 class="m-0 fw-bold ms-2">CAIMAN</h2>
       </div>
       <div class="menu d-block d-md-none">

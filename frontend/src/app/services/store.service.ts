@@ -94,28 +94,6 @@ export class StoreService {
     );
   }
 
-  showVariable(variable: Variable) {
-    this.componentStore.setState((project) => {
-      let variables = project.variables.map(v => {
-        if (v.hash === variable.hash)
-          v.hide = false;
-        return v;
-      });
-      return { ...project, variables: variables } as Project;
-    })
-  }
-
-  hideVariable(variable: Variable) {
-    this.componentStore.setState((project) => {
-      let variables = project.variables.map(v => {
-        if (v.hash === variable.hash)
-          v.hide = true;
-        return v;
-      });
-      return { ...project, variables: variables } as Project;
-    })
-  }
-
   getGroups() {
     return this.componentStore.state$.pipe(map(project => {
       const tmp = project.variables.map(item => item.group);

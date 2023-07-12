@@ -1,5 +1,6 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { Variable } from 'src/app/classes/interfaces';
+import { Utils } from 'src/app/classes/utils';
 
 @Pipe({
   name: 'type'
@@ -11,8 +12,9 @@ export class TypePipe implements PipeTransform {
       return null;
     if (value.type === "AlphanumericParameterBase")
       return "string"
-    if (value.binaryMask) {
-      const ones = value.binaryMask.split("").reduce((acc, item) => {
+    if (value.mask) {
+      const binaryMask = Utils.hex2bin(value.mask.toString(16));
+      const ones = binaryMask.split("").reduce((acc, item) => {
         acc = acc + (item === "1" ? 1 : 0);
         return acc;
       }, 0);

@@ -176,26 +176,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.search$.next($event.target.value);
   }
 
-  hideAll(group: string) {
-    this.variables$.pipe(
-      take(1),
-      switchMap(variables => from(variables)),
-      filter(variable => variable.group === group)
-    ).subscribe(variable => this.Store.hideVariable(variable))
-  }
-
-  showAll(group: string) {
-    this.variables$.pipe(
-      take(1),
-      switchMap(variables => from(variables)),
-      filter(variable => variable.group === group)
-    ).subscribe(variable => this.Store.showVariable(variable))
-  }
-
   onGroupSelected(group: string) {
     combineLatest([
       this.Store.getVariablesWithVariableKey(),
-      this.variables$.pipe(map(variables => variables.filter(v => v.group == group && !v.hide)))
+      this.variables$.pipe(map(variables => variables.filter(v => v.group == group)))
     ]).pipe(
       take(1),
       map(([variableswithKey, variables]) => {

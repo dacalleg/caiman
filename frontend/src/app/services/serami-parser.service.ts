@@ -44,17 +44,13 @@ export class SeramiParserService {
               type: "RwmsParameterBaseBit",
               name: variable.name + "_" + bit,
               mask: mask,
-              hash: [(variable.memory === "eeprom" ? "E" : "R"), "" + variable.address, "" + mask, "" + index].join("_"),
+              hash: [(variable.memory === "eeprom" ? "E" : "R"), "" + variable.address, "" + mask].join("_"),
               sanitizedName: sanitizedName,
               min: 0,
               max: 1,
-              binaryMask: this.hex2bin(mask.toString(16)),
-              hexMask: mask.toString(16),
               bits: null,
               readExp: null,
               writeExp: null,
-              readExpPy: ["1 if (x & " + mask + ") > 0 else 0"],
-              writeExpPy: ["crv | (1 << " + index + ") if x > 0 else crv & ~(1 << " + index + ")"]
             } as Variable;
 
             index++;
@@ -88,11 +84,7 @@ export class SeramiParserService {
     let expval = this.nodeChildValue("expreval", node)
     let signed = false;
     if (expval && typeof expval === "string") {
-      expval = expval
-        .replace(/#/g, "x")
-        .replace(/&/g, "+")
-        .replace(/mod/g, " % ")
-        .replace(/AND/g, " & ")
+      expval = Utils.sanitizeExp(expval);
       if (expval.includes("IIF")) {
         expval = expval.substring(4, expval.length - 1);
         const pieces = expval.split(",")
@@ -107,14 +99,8 @@ export class SeramiParserService {
     }
     const type = this.nodeChildValue("type", node) as string;
     const reverse = this.toBoolean(this.nodeChildValue("reversebytes", node));
-    let redexp = [] as string[];
-    if (expval !== "x")
-      redexp.push(expval);
-    if (mask !== (Math.pow(2, bit) - 1))
-      redexp.push("x & " + mask);
     const realmin = parseInt(this.nodeChildValue("set_min", node));
     const realmax = parseInt(this.nodeChildValue("set_max", node));
-    //const exprval = this.nodeChildValue("expreval", node);
 
     let min = realmin;
     let max = realmax;
@@ -147,16 +133,11 @@ export class SeramiParserService {
       readonly: this.toBoolean(this.nodeChildValue("readonly", node)),
       memory: memory ? "eeprom" : "ram",
       mask: mask,
-      binaryMask: this.hex2bin(mask.toString(16)),
-      hexMask: mask.toString(16),
       bit: bit,
-      readExp: this.nodeChildValue("expreval", node),
-      readExpPy: redexp.length !== 0 ? redexp : null,
-      writeExpPy: null,
+      readExp: expval,
       writeExp: null,
       values: this.values(this.nodeChildValue("customvaluemsg", node)),
       bits: this.getChildrens("bitsdescrption", node),
-      write: false,
       pattern: this.getPattern(type, bit, reverse, signed),
       signed: signed,
       formatstring: this.nodeChildValue("formatstring", node)
@@ -181,8 +162,6 @@ export class SeramiParserService {
       readonly: true,
       memory: memory ? "eeprom" : "ram",
       bit: bit,
-      write: false,
-      readExpPy: ["x.rsplit(b'\\x00')[0].decode(\"ascii\")"],
       pattern: this.getPattern(type, bit, false),
       signed: false,
       formatstring: this.nodeChildValue("formatstring", node)
@@ -258,7 +237,7 @@ export class SeramiParserService {
     if (visualmode !== 8)
       return null;
     let ret = [];
-    const mask = this.hex2bin(this.nodeChildValue("mask", node)).split("").reverse();
+    const mask = Utils.hex2bin(this.nodeChildValue("mask", node)).split("").reverse();
     for (let i of [...Array(32).keys()]) {
       const val = xpath.select1("./" + nodeName + "/" + "bit" + i + "descr" + "/text()", node) as any;
       if (val != null) {
@@ -288,7 +267,4 @@ export class SeramiParserService {
     return false;
   }
 
-  hex2bin(hex: string): string {
-    return (parseInt(hex, 16).toString(2)).padStart(8, '0');
-  }
 }

@@ -3,8 +3,7 @@ import { Variable } from "./interfaces";
 export class Utils {
 
     //IIF(S_LEN(Math.floor(144/6)) = 1, '0' + Math.floor(144/6), Math.floor(144/6)) + ':' + IIF(S_LEN((144 MOD 6) * 10) = 1, '0' + (144 MOD 6) * 10, (144 MOD 6) * 10)
-    public static sanitizeExp(expval: string)
-    {
+    public static sanitizeExp(expval: string) {
         expval = expval
             .replace(/&/g, "+")
             .replace(/mod/g, "%")
@@ -14,27 +13,27 @@ export class Utils {
             .replace(/&amp;/g, "+")
             .replace(/int\(/g, "Math.floor(")
             .replace(/INT\(/g, "Math.floor(")
+            .replace(/\$([0-9a-f]+)/gi, "0x$1")
         return expval;
     }
 
-    static convertValuesToRead(variables: Variable[], values: (number|null)[]) {
+    static convertValuesToRead(variables: Variable[], values: (number | null)[]) {
         let ret = [] as number[];
         const params = variables.filter(v => v.varKey !== undefined);
         const hashes = variables.map(v => v.hash);
 
         var re = new RegExp('#', 'g');
         for (let i = 0; i < variables.length; i++) {
-            if(values[i] !== null)
-            {
+            if (values[i] !== null) {
                 try {
                     const variable = variables[i];
                     const value = values[i]! & variable.mask!;
-    
+
                     if (variable.type === "RwmsParameterBaseBit") {
                         ret.push(value > 0 ? 1 : 0);
                         continue;
                     }
-    
+
                     if (!variable.readExp) {
                         ret.push(value);
                     } else {
@@ -49,7 +48,7 @@ export class Utils {
                         {
                             console.log(exp);
                         }*/
-    
+
                         ret.push(eval(exp));
                     }
                 }
@@ -57,15 +56,14 @@ export class Utils {
                     ret.push(NaN);
                 }
             }
-            else
-            {
+            else {
                 ret.push(NaN);
             }
         }
         return ret;
     }
 
-    static convertValuesToWrite(variables: Variable[], values: number[]) {
+    static convertValuesToWrite(variables: Variable[], values: number[], skipValues=false) {
         let ret = [] as number[];
 
         var re = new RegExp('#', 'g');
@@ -78,10 +76,9 @@ export class Utils {
                 continue;
             }
 
-            if (variable.values && variable.values.length > 0) {
+            if (!skipValues && variable.values && variable.values.length > 0) {
                 const keys = variable.values.map(item => item[0]);
-                if(keys.includes("" + value))
-                {
+                if (keys.includes("" + value)) {
                     ret.push(value);
                     continue;
                 }
@@ -97,9 +94,8 @@ export class Utils {
                         return eval(exp);
                     }
                     //const result = Utils.newtonRaphson(fn, 0, 0.1);
-                    const result = Utils.bisectionAlgorithm(fn, variable.min || 0, variable.max || 0)
-                    if(result == null) 
-                    {
+                    const result = Utils.bisectionAlgorithm(fn, 0, (2 ** variable.bit - 1))
+                    if (result == null) {
                         throw new Error("Bisection Error")
                     }
                     ret.push(Math.round(result));
@@ -122,8 +118,16 @@ export class Utils {
     ): number | null {
         let left = a;
         let right = b;
+        let fleft = f(left);
+        let fright = f(right);
 
-        if (f(left) * f(right) >= 0) {
+        if (fleft === 0)
+            return left;
+
+        if (fright === 0)
+            return right;
+
+        if (fleft * fright >= 0) {
             return null; // L'algoritmo di bisezione richiede che f(a) * f(b) < 0
         }
 
@@ -156,5 +160,9 @@ export class Utils {
 
     static derivative(f: (x: number) => number, x: number, h: number = 0.0001) {
         return (f(x + h) - f(x - h)) / (2 * h);
+    }
+
+    static hex2bin(hex: string): string {
+        return (parseInt(hex, 16).toString(2)).padStart(8, '0');
     }
 }

@@ -1,0 +1,17 @@
+import {Pipe, PipeTransform} from '@angular/core';
+import { Variable } from 'src/app/classes/interfaces';
+
+@Pipe({
+  name: 'varByGroup',
+  pure: false
+})
+export class VarByGroupPipe implements PipeTransform {
+
+  transform(value: Variable[] | null | undefined, group: string): Variable[] {
+    if (value == null) {
+      return [];
+    }
+    return value.filter(item => item.group === group);
+  }
+
+}

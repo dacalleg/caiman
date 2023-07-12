@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { bufferCount, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, Observable, of, shareReplay, switchMap, take, tap, throwError, toArray } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, Ticket, Translation, UserData, VariableInfoOverride } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, SeramiEntry, Ticket, Translation, UserData, Variable, VariableInfoOverride, Info } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
@@ -19,6 +19,7 @@ interface DeferredRequest {
 export class ApiService {
 
   private options$: Observable<AguaOptions>;
+  private info$: Observable<Info>;
 
   constructor(
     private Http: HttpClient,
@@ -26,6 +27,7 @@ export class ApiService {
     private TranslationProvider: TranslationProviderService,
     private Translation: TranslationService) {
     this.options$ = this.Http.get<AguaOptions>(environment.endpoint + "/wp-json/caiman/v1/options").pipe(shareReplay(1));
+    this.info$ = this.Http.get<Info>(environment.endpoint + "/wp-json/caiman/v1/info").pipe(shareReplay(1));
   }
 
   private getAguaHeaders() {
@@ -42,6 +44,10 @@ export class ApiService {
           .set('authorization', token || "")
           .set('local', 'false')
       }))
+  }
+
+  getInfo() {
+    return this.info$;
   }
 
   getDeviceInfoFromMac(mac: string, productKey: string | null = null) {
@@ -140,15 +146,13 @@ export class ApiService {
     return [] as DeferredRequest[];
   }
 
-  private removeFromDeferredHttpQueue(id: string)
-  {
+  private removeFromDeferredHttpQueue(id: string) {
     let queue = this.getDeferredHttpQueue();
     queue = queue.filter(item => item.id !== id);
     localStorage.setItem("http_queue", JSON.stringify(queue));
   }
 
-  private addToDeferredHttpQueue(req: DeferredRequest)
-  {
+  private addToDeferredHttpQueue(req: DeferredRequest) {
     let queue = this.getDeferredHttpQueue();
     queue = queue.concat(req);
     localStorage.setItem("http_queue", JSON.stringify(queue));
@@ -160,7 +164,7 @@ export class ApiService {
         tap(() => this.removeFromDeferredHttpQueue(req.id))
       )),
       toArray(),
-      tap({next: (arr) => console.log("Synced", arr.length, "requests")})
+      tap({ next: (arr) => console.log("Synced", arr.length, "requests") })
     )
 
     const syncProducts$ = of(localStorage.getItem("last_sync")).pipe(
@@ -312,6 +316,18 @@ export class ApiService {
 
   getTranslations() {
     return this.TranslationProvider.getAvailableTranslations();
+  }
+
+  getSeramiList() {
+    return this.Http.get<SeramiEntry[]>(environment.endpoint + "/api/serami");
+  }
+
+  getSerami(key: string) {
+    return this.Http.get<SeramiEntry>(environment.endpoint + "/api/serami/get/" + key);
+  }
+
+  updateSerami(data: SeramiEntry) {
+    return this.Http.post<any>(environment.endpoint + "/api/serami/update", data);
   }
 
   getTickets(serial: string) {

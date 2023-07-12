@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { ProductInfo } from 'src/app/classes/interfaces';
+import { Info, ProductInfo } from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
 @Component({
   selector: 'app-device-select',
@@ -14,6 +14,7 @@ export class DeviceSelectComponent implements OnInit {
   macAddress: string;
   serialNumber: string;
   products$: Observable<{ name: string, key: string }[]>;
+  info$: Observable<Info>;
   selectedProduct: string | null;
   regCode: string;
 
@@ -23,6 +24,7 @@ export class DeviceSelectComponent implements OnInit {
     this.macAddress = "30C6F7C3E1D4";
     this.regCode = "79890979";
     this.products$ = this.Api.getAllProducts();
+    this.info$ = this.Api.getInfo();
   }
 
   ngOnInit(): void {

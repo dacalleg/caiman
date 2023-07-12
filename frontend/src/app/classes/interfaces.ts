@@ -1,13 +1,17 @@
 import { Observable } from "rxjs";
 
+export interface SeramiEntry {
+  key?: string;
+  name: string;
+  data: Variable[];
+}
+
 export interface Variable {
   address: number
-  binaryMask?: string
   bit: number
   bits?: (string | null)[] | null
   group: string
   hash: string
-  hexMask?: string
   mask?: number
   max?: number
   memory: string
@@ -15,15 +19,11 @@ export interface Variable {
   name: string
   pattern: string
   readExp?: string | null
-  readExpPy?: string[] | null
   readonly: boolean
   sanitizedName: string
   type: string
   values?: string[][] | null
-  write: boolean
   writeExp?: string | null
-  writeExpPy?: string[] | null
-  hide?: boolean,
   signed: boolean,
   formatstring: string
   description?: string
@@ -77,8 +77,7 @@ export interface VariableValue {
   value: number;
 }
 
-export interface VariableWriteResponse
-{
+export interface VariableWriteResponse {
   from: VariableValue[];
   set: VariableValue[];
   written: VariableValue[];
@@ -95,8 +94,8 @@ export interface Channel {
   setWifi(ssid: string, password: string): Observable<void>;
   getWifiStatus(): Observable<WifiStatus>;
   disconnectWifi(): Observable<void>;
-  loadGatewayFirmware(url:string, md5:string): Observable<FirmwareDownloadStatus>;
-  loadPowerBoardFirmware(url:string, md5:string): Observable<FirmwareDownloadStatus>;
+  loadGatewayFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus>;
+  loadPowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus>;
 }
 
 
@@ -185,7 +184,7 @@ export interface Board {
   serami_var_formula_override: any[];
 }
 
-export interface Gateway{
+export interface Gateway {
   type: string;
   board: number;
   firmware_list: Firmware[];
@@ -261,7 +260,7 @@ export interface AlertModalConfig {
   message?: string;
   progress?: boolean;
   progressValue?: number;
-  replaceParams? : { [key: string]: string };
+  replaceParams?: { [key: string]: string };
 }
 
 export interface Firmware extends WithRole {
@@ -326,8 +325,7 @@ export interface UserData {
   fields: UserField;
 }
 
-export interface Ticket
-{
+export interface Ticket {
   id: string;
   text: string | null;
   title: string | null;
@@ -344,14 +342,12 @@ export interface TicketAsset {
   path: string;
 }
 
-export interface FirmwareDownloadStatus
-{
+export interface FirmwareDownloadStatus {
   operation: number;
   progress: number;
 }
 
-export enum LogType
-{
+export enum LogType {
   WRITE_VARIABLE = 0,
   START_UPDATE_POWER_BOARD = 1,
   ERROR_UPDATE_POWER_BOARD = 2,
@@ -359,11 +355,10 @@ export enum LogType
   UPDATE_GATEWAY = 4,
 }
 
-export interface LogItem
-{
+export interface LogItem {
   date: Date;
   type: LogType;
-  data?: string|number|boolean;
+  data?: string | number | boolean;
   from?: number;
   set?: number;
   written?: number;
@@ -371,8 +366,11 @@ export interface LogItem
   user?: string
 }
 
-export interface GroupLogItem
-{
+export interface GroupLogItem {
   date: Date;
   logs: LogItem[];
+}
+
+export interface Info {
+  logo: string;
 }

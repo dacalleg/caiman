@@ -70,16 +70,6 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
       this.fullmask = 2 ** this.variable.bit - 1;
   }
 
-  hideVariable() {
-    if (this.variable)
-      this.Store.hideVariable(this.variable);
-  }
-
-  showVariable() {
-    if (this.variable)
-      this.Store.showVariable(this.variable);
-  }
-
   ngOnDestroy(): void {
     this.destroy$.next();
   }

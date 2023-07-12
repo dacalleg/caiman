@@ -7,6 +7,7 @@ import { DeviceService } from "../../../../services/device.service";
 import { ExportService } from "../../../../services/export.service";
 import { AuthService } from 'src/app/services/auth.service';
 import { Router } from '@angular/router'
+import { ApiService } from 'src/app/services/api.service';
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -21,20 +22,22 @@ export class HeaderComponent implements OnInit {
   isDeviceConnected$: Observable<boolean>;
   username$: Observable<any>;
   roles$: Observable<string>;
+  info$: Observable<any>;
 
   constructor(
     private Store: StoreService,
     private modalService: ModalService,
-    private exporter: ExportService,
     private Device: DeviceService,
     private AuthService: AuthService,
-    private Router: Router
+    private Router: Router,
+    private Api: ApiService
   ) {
     this.file = null;
     this.project$ = this.Store.getProject();
     this.isDeviceConnected$ = this.Device.isConnected();
     this.username$ = this.AuthService.getUserName();
     this.roles$ = this.AuthService.getRoles().pipe(map(roles => roles.join(", ")));
+    this.info$ = this.Api.getInfo();
   }
 
   ngOnInit(): void {
@@ -83,15 +86,6 @@ export class HeaderComponent implements OnInit {
     this.modalService.openOptimizationModal();
   }
 
-  exportForNavelMicropython() {
-    this.Store.getProject().pipe(take(1), map(project => {
-      let variables = project.variables.filter(item => !item.hide);
-      return this.exporter.variableToModbusNavel(variables, project.view.modbusEEpromOffset);
-    })).subscribe(result => {
-      this.download("export.json", JSON.stringify(result));
-    })
-  }
-
   private download(filename: string, text: string) {
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -119,15 +113,6 @@ export class HeaderComponent implements OnInit {
 
   setExtentedView(value: boolean) {
     this.Store.setExtendedView(value);
-  }
-
-  exportForNova() {
-    this.Store.getProject().pipe(take(1), map(project => {
-      let variables = project.variables.filter(item => !item.hide);
-      return this.exporter.variableToNova(variables);
-    })).subscribe(result => {
-      this.download("export.json", JSON.stringify(result));
-    })
   }
 
   logout() {

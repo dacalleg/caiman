@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         data: {
-            type: DataTypes.TEXT,
+            type: DataTypes.TEXT('long'),
             get: function () {
                 return JSON.parse(this.getDataValue('data'));
             },
@@ -109,7 +109,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         text: {
-            type: DataTypes.TEXT('long'),
+            type: DataTypes.TEXT,
             allowNull: true
         },
         customer: {

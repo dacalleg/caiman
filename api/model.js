@@ -109,7 +109,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         text: {
-            type: DataTypes.TEXT,
+            type: DataTypes.TEXT('long'),
             allowNull: true
         },
         customer: {

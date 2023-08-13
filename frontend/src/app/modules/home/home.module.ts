@@ -16,7 +16,7 @@ import { NumberFormatPipe } from './pipes/number-format.pipe';
 import { AddressPipe } from './pipes/address.pipe';
 import { VarByGroupPipe } from './pipes/var-by-group.pipe';
 import { HomeRoutingModule } from './home-routing.modules';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {BootstrapIconsModule} from "ng-bootstrap-icons";
 import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle} from 'ng-bootstrap-icons/icons';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
@@ -36,6 +36,8 @@ import { LogsComponent } from './components/logs/logs.component';
 import { GroupLogPipe } from './pipes/group-log.pipe';
 import { VariableFromHashPipe } from './pipes/variable-from-hash.pipe';
 import { FilterLogPipe } from './pipes/filter-log.pipe';
+import { RegistryComponent } from './components/registry/registry.component';
+import { OperationComponent } from './components/operation/operation.component';
 
 const icons = {
   Eye,
@@ -79,12 +81,15 @@ const icons = {
     GroupLogPipe,
     VariableFromHashPipe,
     FilterLogPipe,
+    RegistryComponent,
+    OperationComponent,
   ],
   imports: [
     CommonModule,
     SharedModule,
     HomeRoutingModule,
     FormsModule,
+    ReactiveFormsModule,
     NgbModule,
     YouTubePlayerModule,
     BootstrapIconsModule.pick(icons),

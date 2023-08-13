@@ -1,0 +1,238 @@
+<div class="row">
+    <div class="col-md my-2">
+        <h1 class="fw-bold">ANAGRAFICA</h1>
+    </div>
+</div>
+<form (ngSubmit)="onSubmit()" [ngClass]="{'was-validated': submitted}" #myForm="ngForm">
+    <div class="row">
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="codiceFiscale">Codice Fiscale o Partita IVA</label>
+                <input class="form-control" id="codiceFiscale" type="text" placeholder="Codice Fiscale"
+                    pattern="^([A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1})$|([0-9]{11})$|^(IT)?[0-9]{11}$"
+                    required [(ngModel)]="registry.fiscal_code" name="fiscal_code" />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="ragioneSociale">Ragione Sociale</label>
+                <input class="form-control" id="ragioneSociale" type="text" placeholder="Ragione Sociale"
+                    [(ngModel)]="registry.business_name" name="business_name" #businessname="ngModel" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="nome">Nome</label>
+                <input class="form-control" id="nome" type="text" [(ngModel)]="registry.name" name="name"
+                    placeholder="Nome" required />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="cognome">Cognome</label>
+                <input class="form-control" id="cognome" type="text" [(ngModel)]="registry.surname" name="surname"
+                    placeholder="Cognome" required />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="email">E-mail</label>
+                <input class="form-control" id="email" type="email" [(ngModel)]="registry.email" name="email"
+                    placeholder="E-mail" pattern="[^@\s]+@[^@\s]+\.[^@\s]+" required />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="address">Indirizzo</label>
+                <input class="form-control" id="address" type="text" [(ngModel)]="registry.address"
+                    placeholder="Indirizzo" name="address" required />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="streetnumber">Nr. Civico</label>
+                <input class="form-control" id="streetnumber" [(ngModel)]="registry.street_number" type="text" required
+                    name="streetnumber" placeholder="Nr. Civico" />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="telefono">Telefono</label>
+                <input class="form-control" id="telefono" [(ngModel)]="registry.phone" type="text" name="phone"
+                    placeholder="Telefono" required />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="mobile">Cellulare</label>
+                <input class="form-control" id="mobile" [(ngModel)]="registry.mobile" name="mobile" type="text"
+                    placeholder="Cellulare" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="city">Città</label>
+                <input class="form-control" id="city" type="text" [(ngModel)]="registry.city" name="city"
+                    placeholder="Città" required />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="province">Provincia</label>
+            <input class="form-control" id="province" type="text" [(ngModel)]="registry.province" name="province"
+                placeholder="Provincia" required />
+            <div class="invalid-feedback">
+                Il campo non è valido
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="zip">CAP</label>
+                <input class="form-control" id="zip" type="text" [(ngModel)]="registry.zip" name="zip" placeholder="CAP"
+                    required />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="country">Nazione</label>
+                <select class="form-control" id="country" name="country" [(ngModel)]="registry.country" required>
+                    <option *ngFor="let country of countries$|async" [ngValue]="country.code">{{country.name}}</option>
+                </select>
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md my-2">
+            <h3 class="">ACQUISTO E GARANZIA</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="purchasedate">Data di acquisto</label>
+                <input class="form-control" id="purchasedate" type="date" name="purchasedate"
+                    [ngModel]="registry.purchase_date | date:'yyyy-MM-dd'" required
+                    (ngModelChange)="ngUpdatePurchaseDate($event)" placeholder="Data di acquisto"
+                    data-sb-validations="required" />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="startdate">Data di prima accesione</label>
+                <input class="form-control" id="startdate" type="date" name="startdate"
+                    [ngModel]="registry.first_ignition_date | date:'yyyy-MM-dd'" required
+                    (ngModelChange)="ngUpdateFirstIgnitionDate($event)" placeholder="Data di prima accesione"
+                    data-sb-validations="required" />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="dealer">Rivenditore</label>
+                <input class="form-control" id="dealer" type="text" [(ngModel)]="registry.dealer" required name="dealer"
+                    placeholder="Rivenditore" />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="invoicenr">Numero Fattura</label>
+                <input class="form-control" id="invoicenr" type="text" [(ngModel)]="registry.invoice" required
+                    name="invoicenr" placeholder="Numero Fattura" />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="warranty">Numero Certificato Garanzia</label>
+                <input class="form-control" id="warranty" type="text" [(ngModel)]="registry.warranty" required
+                    name="warranty" placeholder="Numero Certificato Garanzia" />
+                <div class="invalid-feedback">
+                    Il campo non è valido
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md text-end">
+            <button type="submit" class="btn btn-primary" [disabled]="!myForm.form.dirty">Aggiorna</button>
+        </div>
+    </div>
+</form>
+<div class="row">
+    <div class="col">
+        <h3>LISTA VARIAZIONI</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th class="d-none d-md-table-cell">{{'logs.th.date'|translate}}</th>
+                    <th class="d-none d-md-table-cell">{{'logs.th.user'|translate}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let variation of registries$|async">
+                    <td>{{variation.createdAt|date:'dd/MM/YYYY HH:mm'}}</td>
+                    <td>{{variation.user}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

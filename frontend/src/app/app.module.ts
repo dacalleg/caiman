@@ -68,7 +68,12 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
       config: {
         tokenGetter: tokenGetter,
         allowedDomains: [environment.host],
-        disallowedRoutes: [/backend\/wp-content\/uploads\/.*/, /backend\/wp-json\/jwt-auth\/v1\/token/, /backend\/wp-json\/wp\/v2\/translation/, /backend\/wp-json\/caiman\/v1\/forgot-password/],
+        disallowedRoutes: [
+          /backend\/wp-content\/uploads\/.*/,
+          /backend\/wp-json\/jwt-auth\/v1\/token/,
+          /backend\/wp-json\/wp\/v2\/translation/, 
+          /backend\/wp-json\/caiman\/v1\/forgot-password/, 
+          /backend\/wp-json\/caiman\/v1\/info/],
       },
     }),
     ServiceWorkerModule.register('ngsw-worker.js', {

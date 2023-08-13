@@ -1,0 +1,134 @@
+<div class="row">
+    <div class="col-md my-2">
+        <h1 class="fw-bold">INTERVENTI</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col text-end">
+        <button class="btn btn-primary">Crea Nuovo Intervento</button>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md">
+        <ngb-accordion #acc="ngbAccordion">
+            <ngb-panel [title]="'Intervento #558844 del 22/07/2023 - info@service.com'">
+                <ng-template ngbPanelContent>
+                    <div class="row">
+                        <div class="col text-end">
+                            <a class="btn btn-primary my-3" [routerLink]="'/print/operation'" target="_blank">Stampa Report</a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row">
+                                <div class="col-md">
+                                    <h3>Tipologia intervento eseguito</h3>
+                                    <p>Pulizia e Manutenzione</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md">
+                                    <h3>Descrizione intervento</h3>
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                                        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md">
+                                    <h3>Componenti sostituiti</h3>
+                                    <p>Sonda Fumi</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md">
+                                    <h3>Guasti segnalati</h3>
+                                    <div class="badge bg-danger">E01 - BLACKOUT</div>
+                                    <div class="badge bg-danger ms-2">E100 - ALLARME VENTOLA FUMI</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="row">
+                                <div class="col-md">
+                                    <h3>Condizioni Intervento</h3>
+                                    <p>In Garanzia</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md">
+                                    <h3>Nr Verbale o certificato di garanzia</h3>
+                                    <p>AS58996655</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-5">
+                        <div class="col-md">
+                            <h3>Dichiarazione di Conformità</h3>
+                            <dl class="row">
+                                <dd class="col-6">Impianto Elettrico</dd>
+                                <dt class="col-6">Conforme</dt>
+                                <dd class="col-6">Impianto di Riscaldamento e Idrosanitario</dd>
+                                <dt class="col-6">Conforme</dt>
+                                <dd class="col-6">Impianto Scarico Fumi</dd>
+                                <dt class="col-6">Conforme</dt>
+                            </dl>
+                            <h3>Locale Installazione</h3>
+                            <dl class="row">
+                                <dd class="col-6">Idoneità locale installazione</dd>
+                                <dt class="col-6">Conforme</dt>
+                                <dd class="col-6">Spazi rispettati attorno e sopra</dd>
+                                <dt class="col-6">Conforme</dt>
+                                <dd class="col-6">Presenza apertura di ventilazione</dd>
+                                <dt class="col-6">Conforme</dt>
+                                <dd class="col-6">Apertura vent. Adeguata</dd>
+                                <dt class="col-6">Conforme</dt>
+                                <dd class="col-6">Apertura vent. Libera</dd>
+                                <dt class="col-6">Conforme</dt>
+                            </dl>
+                        </div>
+                        <div class="col-md">
+                            <h3>Dati Canna Fumaria</h3>
+                            <dl class="row">
+                                <dd class="col-6">Sezioni corrette</dd>
+                                <dt class="col-6">Conforme</dt>
+                                <dd class="col-6">Tratto semiorizzontale entro i limiti</dd>
+                                <dt class="col-6">Conforme</dt>
+                                <dd class="col-6">Pendenza corretta (>5%)</dd>
+                                <dt class="col-6">Conforme</dt>
+                                <dd class="col-6">Lunghezza tratti semiorizzontali</dd>
+                                <dt class="col-6">100cm</dt>
+                                <dd class="col-6">Lunghezza tratti verticali</dd>
+                                <dt class="col-6">100cm</dt>
+                                <dd class="col-6">Numero curve a 45°</dd>
+                                <dt class="col-6">2</dt>
+                                <dd class="col-6">Numero curve a 90°</dd>
+                                <dt class="col-6">2</dt>
+                                <dd class="col-6">Sezione Tubo Fumi</dd>
+                                <dt class="col-6">300mm</dt>
+                                <dd class="col-6">Sezione Canna Fumaria</dd>
+                                <dt class="col-6">300mm</dt>
+                                <dd class="col-6">Ispezione a T</dd>
+                                <dt class="col-6">Conforme</dt>
+                                <dd class="col-6">Stato conservazione</dd>
+                                <dt class="col-6">OTTIMO</dt>
+                                <dd class="col-6">Perdite condotti di scarico</dd>
+                                <dt class="col-6">ASSENTI</dt>
+                                <dd class="col-6">Scarico fumi a tetto</dd>
+                                <dt class="col-6">PRESENTE</dt>
+                                <dd class="col-6">Comignolo antivento</dd>
+                                <dt class="col-6">ASSENTE</dt>
+                                <dd class="col-6">Coibentazione canna fumaria</dd>
+                                <dt class="col-6">ASSENTE</dt>
+                                <dd class="col-6">Classificazione Tiraggio</dd>
+                                <dt class="col-6">OTTIMO</dt>
+                                <dd class="col-6">Valore Tiraggio</dd>
+                                <dt class="col-6">30Pa</dt>
+                            </dl>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngb-panel>
+        </ngb-accordion>
+    </div>
+</div>

@@ -1,5 +1,5 @@
 import { Component, Input, ViewChild } from '@angular/core';
-import { Form, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
+import { NgForm } from '@angular/forms';
 import { Observable, delay, filter, map, shareReplay, switchMap, take, tap } from 'rxjs';
 import { Country, Project, Registry } from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
@@ -17,14 +17,14 @@ export class RegistryComponent {
   countries$: Observable<Country[]>;
   registry: Registry;
   registries$: Observable<Registry[]>;
-  submitted = false;
+  submitted:boolean;
 
   constructor(
     private Store: StoreService,
     private Api: ApiService,
     private Builder: BuilderService,
-    private fb: FormBuilder,
   ) {
+    this.submitted = false;
     this.registry = this.Builder.buildRegistry();
     this.project$ = this.Store.getProject();
     this.countries$ = this.Api.getCountries();

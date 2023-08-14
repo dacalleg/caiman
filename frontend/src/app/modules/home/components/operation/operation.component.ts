@@ -7,4 +7,17 @@ import { Component } from '@angular/core';
 })
 export class OperationComponent {
 
+  newOperation: boolean;
+
+  constructor() {
+    this.newOperation = false;
+  }
+
+  createNewOperation() {
+    this.newOperation = true;
+  }
+
+  back() {
+    this.newOperation = false;
+  }
 }

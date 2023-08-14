@@ -38,6 +38,7 @@ import { VariableFromHashPipe } from './pipes/variable-from-hash.pipe';
 import { FilterLogPipe } from './pipes/filter-log.pipe';
 import { RegistryComponent } from './components/registry/registry.component';
 import { OperationComponent } from './components/operation/operation.component';
+import { OperationFormComponent } from './components/operation-form/operation-form.component';
 
 const icons = {
   Eye,
@@ -83,6 +84,7 @@ const icons = {
     FilterLogPipe,
     RegistryComponent,
     OperationComponent,
+    OperationFormComponent,
   ],
   imports: [
     CommonModule,

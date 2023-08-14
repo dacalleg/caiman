@@ -387,13 +387,13 @@ export interface Operation
 {
   serial: string;
   user: string;
-  date: Date;
-  confirmed_date: Date;
+  createdAt?: Date;
+  confirmed_date: Date|null;
   email_confirmed: boolean;
   web_confirmed: boolean;
   type: string;
   description: string;
-  replaced_components: string[];
+  replaced_components: string;
   breakdowns: string[];
   condition: string;
   warranty: string;

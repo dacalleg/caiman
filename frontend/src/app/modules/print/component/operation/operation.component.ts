@@ -7,7 +7,7 @@ import { AfterViewInit, Component } from '@angular/core';
 })
 export class OperationComponent implements AfterViewInit {
   ngAfterViewInit(): void {
-    window.print();
+    //window.print();
   }
 
 }

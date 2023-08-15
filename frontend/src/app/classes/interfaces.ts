@@ -383,14 +383,8 @@ export interface Country
   code: string;
 }
 
-export interface Operation
+export interface OperationData
 {
-  serial: string;
-  user: string;
-  createdAt?: Date;
-  confirmed_date: Date|null;
-  email_confirmed: boolean;
-  web_confirmed: boolean;
   type: string;
   description: string;
   replaced_components: string;
@@ -422,6 +416,18 @@ export interface Operation
   chimney_insulation: boolean;
   draught_classification: number;
   draught_value: number;
+}
+
+export interface Operation
+{
+  key?: string;
+  serial: string;
+  user: string;
+  createdAt?: Date;
+  confirmed_date: Date|null;
+  email_confirmed: boolean;
+  web_confirmed: boolean;
+  data: OperationData
 }
 
 export interface Registry

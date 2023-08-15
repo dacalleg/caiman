@@ -1,8 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Operation } from 'src/app/classes/interfaces';
+import { Observable, filter, map, take, tap } from 'rxjs';
+import { Operation, Project } from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
 import { BuilderService } from 'src/app/services/builder.service';
+import { StoreService } from 'src/app/services/store.service';
 
 @Component({
   selector: 'app-operation-form',
@@ -13,18 +15,28 @@ export class OperationFormComponent {
   @ViewChild("myForm") myForm: NgForm|undefined;
   operation: Operation;
   submitted:boolean;
+  project$: Observable<Project>;
 
-  constructor(private Api: ApiService, private Builder: BuilderService)
+  constructor(private Api: ApiService, private Builder: BuilderService, private Store: StoreService)
   {
     this.submitted = false;
     this.operation = this.Builder.buildOperation();
+    this.project$ = this.Store.getProject();
+    const serial$ = this.project$.pipe(
+      filter(p => p.device?.info.serial != null),
+      map(p => p.device!.info.serial!),
+      take(1),
+      tap(i => console.log(i))
+    );
+    serial$.subscribe(serial => this.operation.serial = serial);
   }
 
   onSubmit() {
     this.submitted = true;
-    if(this.myForm?.form.valid)
+    //this.Api.updateOperation(this.operation).subscribe();
+    /*if(this.myForm?.form.valid)
     {
 
-    }
+    }*/
   }
 }

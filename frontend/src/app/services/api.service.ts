@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { bufferCount, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, Observable, of, shareReplay, switchMap, take, tap, throwError, toArray } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, SeramiEntry, Ticket, Translation, UserData, Variable, VariableInfoOverride, Info, Country, Registry } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, SeramiEntry, Ticket, Translation, UserData, Variable, VariableInfoOverride, Info, Country, Registry, Operation } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
@@ -411,6 +411,26 @@ export class ApiService {
         })
       }),
     )
+  }
+
+  getOperations(serial: string) {
+    return this.Http.get<Operation[]>(environment.endpoint + "/api/operation/get/" + serial).pipe(
+      map(resp => {
+        return resp.map(item => {
+          if(item.createdAt)
+            item.createdAt = new Date(item.createdAt);
+          return item;
+        }).sort((b, a) => {
+          if(a.createdAt && b.createdAt)
+            return a.createdAt.getTime() - b.createdAt.getTime();
+          return 0
+        })
+      }),
+    )
+  }
+
+  updateOperation(operation: Operation) {
+    return this.Http.post<any>(environment.endpoint + "/api/operation/update", { ...operation });
   }
 
   updateRegistry(registry: Registry) {

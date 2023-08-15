@@ -4,7 +4,7 @@
             <div class="mb-3">
                 <label class="form-label" for="replaced_components">Componenti sostituiti</label>
                 <input class="form-control" id="replaced_components" type="text" placeholder="Componenti sostituiti"
-                    required [(ngModel)]="operation.replaced_components" name="replaced_components" />
+                    required [(ngModel)]="operation.data.replaced_components" name="replaced_components" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -16,7 +16,7 @@
             <div class="mb-3">
                 <label class="form-label" for="breakdowns">Guasti segnalati</label>
                 <input class="form-control" id="breakdowns" type="text" placeholder="Guasti segnalati" required
-                    [(ngModel)]="operation.breakdowns" name="breakdowns" />
+                    [(ngModel)]="operation.data.breakdowns" name="breakdowns" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -27,8 +27,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="condition">Condizioni Intervento</label>
-                <input class="form-control" id="condition" type="text" placeholder="Condizioni Intervento" required
-                    [(ngModel)]="operation.condition" name="condition" />
+                <select pattern="^.$" [(ngModel)]="operation.data.condition" class="form-control" 
+                id="condition" 
+                name="condition" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="W">In Garanzia</option>
+                    <option value="N">Fuori Garanzia</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -40,7 +46,7 @@
             <div class="mb-3">
                 <label class="form-label" for="warranty">Nr Verbale o certificato di garanzia</label>
                 <input class="form-control" id="warranty" type="text" placeholder="Nr Verbale o certificato di garanzia"
-                    required [(ngModel)]="operation.warranty" name="warranty" />
+                    required [(ngModel)]="operation.data.warranty" name="warranty" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -51,8 +57,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="e_system">Impianto Elettrico</label>
-                <input class="form-control" id="e_system" type="text" placeholder="Impianto Elettrico" required
-                    [(ngModel)]="operation.e_system" name="e_system" />
+                <select pattern="^.$" [(ngModel)]="operation.data.e_system" class="form-control" 
+                id="e_system" 
+                name="e_system" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="C">CONFORME</option>
+                    <option value="N">NON CONFORME</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -63,9 +75,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="hp_system">Impianto di Riscaldamento e Idrosanitario</label>
-                <input class="form-control" id="hp_system" type="text"
-                    placeholder="Impianto di Riscaldamento e Idrosanitario" required [(ngModel)]="operation.hp_system"
-                    name="hp_system" />
+                <select pattern="^.$" [(ngModel)]="operation.data.hp_system" class="form-control" 
+                id="hp_system" 
+                name="hp_system" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="C">CONFORME</option>
+                    <option value="N">NON CONFORME</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -76,8 +93,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="se_system">Impianto Scarico Fumi</label>
-                <input class="form-control" id="se_system" type="text" placeholder="Impianto Scarico Fumi" required
-                    [(ngModel)]="operation.se_system" name="se_system" />
+                <select pattern="^.$" [(ngModel)]="operation.data.se_system" class="form-control" 
+                id="se_system" 
+                name="se_system" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="C">CONFORME</option>
+                    <option value="N">NON CONFORME</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -88,8 +111,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="li_suitability">Idoneità locale installazione</label>
-                <input class="form-control" id="li_suitability" type="text" placeholder="Idoneità locale installazione"
-                    required [(ngModel)]="operation.li_suitability" name="li_suitability" />
+                <select pattern="^.$" [(ngModel)]="operation.data.li_suitability" class="form-control" 
+                id="li_suitability" 
+                name="li_suitability" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="C">CONFORME</option>
+                    <option value="N">NON CONFORME</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -100,9 +129,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="spaces_respected">Spazi rispettati attorno e sopra</label>
-                <input class="form-control" id="spaces_respected" type="text"
-                    placeholder="Spazi rispettati attorno e sopra" required [(ngModel)]="operation.spaces_respected"
-                    name="spaces_respected" />
+                <select pattern="^.$" [(ngModel)]="operation.data.spaces_respected" class="form-control" 
+                id="spaces_respected" 
+                name="spaces_respected" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="C">CONFORME</option>
+                    <option value="N">NON CONFORME</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -113,9 +147,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="presence_ventilation_opening">Presenza apertura di ventilazione</label>
-                <input class="form-control" id="presence_ventilation_opening" type="text"
-                    placeholder="Presenza apertura di ventilazione" required
-                    [(ngModel)]="operation.presence_ventilation_opening" name="presence_ventilation_opening" />
+                <select pattern="^.$" [(ngModel)]="operation.data.presence_ventilation_opening" class="form-control" 
+                id="presence_ventilation_opening" 
+                name="presence_ventilation_opening" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="C">PRESENTE</option>
+                    <option value="N">NON PRESENTE</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -126,9 +165,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="vent_opening_appropriate">Apertura vent. Adeguata</label>
-                <input class="form-control" id="vent_opening_appropriate" type="text"
-                    placeholder="Apertura vent. Adeguata" required [(ngModel)]="operation.vent_opening_appropriate"
-                    name="vent_opening_appropriate" />
+                <select pattern="^.$" [(ngModel)]="operation.data.vent_opening_appropriate" class="form-control" 
+                id="vent_opening_appropriate" 
+                name="vent_opening_appropriate" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="C">CONFORME</option>
+                    <option value="N">NON CONFORME</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -139,8 +183,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="vent_opening_free">Apertura vent. Libera</label>
-                <input class="form-control" id="vent_opening_free" type="text" placeholder="Apertura vent. Libera"
-                    required [(ngModel)]="operation.vent_opening_free" name="vent_opening_free" />
+                <select pattern="^.$" [(ngModel)]="operation.data.vent_opening_free" class="form-control" 
+                id="vent_opening_free" 
+                name="vent_opening_free" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="C">CONFORME</option>
+                    <option value="N">NON CONFORME</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -151,8 +201,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="correct_sections">Sezioni corrette</label>
-                <input class="form-control" id="correct_sections" type="text" placeholder="Sezioni corrette" required
-                    [(ngModel)]="operation.correct_sections" name="correct_sections" />
+                <select pattern="^.$" [(ngModel)]="operation.data.correct_sections" class="form-control" 
+                id="correct_sections" 
+                name="correct_sections" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="C">CONFORME</option>
+                    <option value="N">NON CONFORME</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -163,9 +219,14 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="sh_section_limits">Tratto semiorizzontale entro i limiti</label>
-                <input class="form-control" id="sh_section_limits" type="text"
-                    placeholder="Tratto semiorizzontale entro i limiti" required
-                    [(ngModel)]="operation.sh_section_limits" name="sh_section_limits" />
+                <select pattern="^.$" [(ngModel)]="operation.data.sh_section_limits" class="form-control" 
+                id="sh_section_limits" 
+                name="sh_section_limits" 
+                required>
+                    <option value="" selected hidden>Seleziona</option>
+                    <option value="C">CONFORME</option>
+                    <option value="N">NON CONFORME</option>
+                </select>
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -177,7 +238,7 @@
             <div class="mb-3">
                 <label class="form-label" for="correct_slope">Pendenza corretta (&gt;5%)</label>
                 <input class="form-control" id="correct_slope" type="text" placeholder="Pendenza corretta (&gt;5%)"
-                    required [(ngModel)]="operation.correct_slope" name="correct_slope" />
+                    required [(ngModel)]="operation.data.correct_slope" name="correct_slope" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -189,7 +250,7 @@
             <div class="mb-3">
                 <label class="form-label" for="length_se_sections">Lunghezza tratti semiorizzontali</label>
                 <input class="form-control" id="length_se_sections" type="text"
-                    placeholder="Lunghezza tratti semiorizzontali" required [(ngModel)]="operation.length_se_sections"
+                    placeholder="Lunghezza tratti semiorizzontali" required [(ngModel)]="operation.data.length_se_sections"
                     name="length_se_sections" />
                 <div class="invalid-feedback">
                     Il campo non è valido
@@ -202,7 +263,7 @@
             <div class="mb-3">
                 <label class="form-label" for="vs_length">Lunghezza tratti verticali</label>
                 <input class="form-control" id="vs_length" type="text" placeholder="Lunghezza tratti verticali" required
-                    [(ngModel)]="operation.vs_length" name="vs_length" />
+                    [(ngModel)]="operation.data.vs_length" name="vs_length" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -214,7 +275,7 @@
             <div class="mb-3">
                 <label class="form-label" for="bends_45">Numero curve a 45°</label>
                 <input class="form-control" id="bends_45" type="text" placeholder="Numero curve a 45°" required
-                    [(ngModel)]="operation.bends_45" name="bends_45" />
+                    [(ngModel)]="operation.data.bends_45" name="bends_45" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -226,7 +287,7 @@
             <div class="mb-3">
                 <label class="form-label" for="bends_90">Numero curve a 90°</label>
                 <input class="form-control" id="bends_90" type="text" placeholder="Numero curve a 90°" required
-                    [(ngModel)]="operation.bends_90" name="bends_90" />
+                    [(ngModel)]="operation.data.bends_90" name="bends_90" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -238,7 +299,7 @@
             <div class="mb-3">
                 <label class="form-label" for="smoke_pipe_section">Sezione Tubo Fumi</label>
                 <input class="form-control" id="smoke_pipe_section" type="text" placeholder="Sezione Tubo Fumi" required
-                    [(ngModel)]="operation.smoke_pipe_section" name="smoke_pipe_section" />
+                    [(ngModel)]="operation.data.smoke_pipe_section" name="smoke_pipe_section" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -250,7 +311,7 @@
             <div class="mb-3">
                 <label class="form-label" for="chimney_section">Sezione Canna Fumaria</label>
                 <input class="form-control" id="chimney_section" type="text" placeholder="Sezione Canna Fumaria"
-                    required [(ngModel)]="operation.chimney_section" name="chimney_section" />
+                    required [(ngModel)]="operation.data.chimney_section" name="chimney_section" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -262,7 +323,7 @@
             <div class="mb-3">
                 <label class="form-label" for="t_inspection">Ispezione a T</label>
                 <input class="form-control" id="t_inspection" type="text" placeholder="Ispezione a T" required
-                    [(ngModel)]="operation.t_inspection" name="t_inspection" />
+                    [(ngModel)]="operation.data.t_inspection" name="t_inspection" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -274,7 +335,7 @@
             <div class="mb-3">
                 <label class="form-label" for="conservation_status">Stato conservazione</label>
                 <input class="form-control" id="conservation_status" type="text" placeholder="Stato conservazione"
-                    required [(ngModel)]="operation.conservation_status" name="conservation_status" />
+                    required [(ngModel)]="operation.data.conservation_status" name="conservation_status" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -286,7 +347,7 @@
             <div class="mb-3">
                 <label class="form-label" for="exhaust_duct_leaks">Perdite condotti di scarico</label>
                 <input class="form-control" id="exhaust_duct_leaks" type="text"
-                    placeholder="Perdite condotti di scarico" required [(ngModel)]="operation.exhaust_duct_leaks"
+                    placeholder="Perdite condotti di scarico" required [(ngModel)]="operation.data.exhaust_duct_leaks"
                     name="exhaust_duct_leaks" />
                 <div class="invalid-feedback">
                     Il campo non è valido
@@ -299,7 +360,7 @@
             <div class="mb-3">
                 <label class="form-label" for="roof_smoke_exhaust">Scarico fumi a tetto</label>
                 <input class="form-control" id="roof_smoke_exhaust" type="text" placeholder="Scarico fumi a tetto"
-                    required [(ngModel)]="operation.roof_smoke_exhaust" name="roof_smoke_exhaust" />
+                    required [(ngModel)]="operation.data.roof_smoke_exhaust" name="roof_smoke_exhaust" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -310,7 +371,7 @@
         <div class="col">
             <div class="mb-3">
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" [(ngModel)]="operation.windproof_chimney"
+                    <input class="form-check-input" type="checkbox" [(ngModel)]="operation.data.windproof_chimney"
                         name="windproof_chimney" id="windproof_chimney">
                     <label class="form-check-label" for="windproof_chimney">
                         Il campo non è valido
@@ -323,7 +384,7 @@
         <div class="col">
             <div class="mb-3">
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" [(ngModel)]="operation.chimney_insulation"
+                    <input class="form-check-input" type="checkbox" [(ngModel)]="operation.data.chimney_insulation"
                         name="chimney_insulation" id="chimney_insulation">
                     <label class="form-check-label" for="chimney_insulation">
                         Coibentazione canna fumaria
@@ -337,7 +398,7 @@
             <div class="mb-3">
                 <label class="form-label" for="draught_classification">Classificazione Tiraggio</label>
                 <input class="form-control" id="draught_classification" type="text"
-                    placeholder="Classificazione Tiraggio" required [(ngModel)]="operation.draught_classification"
+                    placeholder="Classificazione Tiraggio" required [(ngModel)]="operation.data.draught_classification"
                     name="draught_classification" />
                 <div class="invalid-feedback">
                     Il campo non è valido
@@ -350,7 +411,7 @@
             <div class="mb-3">
                 <label class="form-label" for="draught_value">Valore Tiraggio</label>
                 <input class="form-control" id="draught_value" type="text" placeholder="Valore Tiraggio" required
-                    [(ngModel)]="operation.draught_value" name="draught_value" />
+                    [(ngModel)]="operation.data.draught_value" name="draught_value" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>
@@ -363,3 +424,4 @@
         </div>
     </div>
 </form>
+<pre>{{operation|json}}</pre>

@@ -416,6 +416,7 @@ export interface OperationData
   chimney_insulation: boolean;
   draught_classification: number;
   draught_value: number;
+  registry?: Registry
 }
 
 export interface Operation

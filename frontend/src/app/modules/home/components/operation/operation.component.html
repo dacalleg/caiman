@@ -12,11 +12,11 @@
     <div class="row mt-3">
         <div class="col-md">
             <ngb-accordion #acc="ngbAccordion">
-                <ngb-panel [title]="'Intervento #558844 del 22/07/2023 - info@service.com'">
+                <ngb-panel [title]="'Intervento del '+ (op.createdAt|date:'d/M/Y' || '') +' - ' + op.user" *ngFor="let op of operations$|async">
                     <ng-template ngbPanelContent>
                         <div class="row">
                             <div class="col text-end">
-                                <a class="btn btn-primary my-3" [routerLink]="'/print/operation'" target="_blank">Stampa Report</a>
+                                <a class="btn btn-primary my-3" [routerLink]="'/print/operation/' + op.key" target="_blank">Stampa Report</a>
                             </div>
                         </div>
                         <div class="row">
@@ -24,27 +24,25 @@
                                 <div class="row">
                                     <div class="col-md">
                                         <h3>Tipologia intervento eseguito</h3>
-                                        <p>Pulizia e Manutenzione</p>
+                                        <p>{{op.data.type}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
                                         <h3>Descrizione intervento</h3>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                                            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</p>
+                                        <p>{{op.data.description}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
                                         <h3>Componenti sostituiti</h3>
-                                        <p>Sonda Fumi</p>
+                                        <p>{{op.data.replaced_components}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
                                         <h3>Guasti segnalati</h3>
-                                        <div class="badge bg-danger">E01 - BLACKOUT</div>
-                                        <div class="badge bg-danger ms-2">E100 - ALLARME VENTOLA FUMI</div>
+                                        <div class="badge bg-danger" [ngClass]="{'ms-2': i > 0}" *ngFor="let br of op.data.breakdowns;let i = index">{{br}}</div>
                                     </div>
                                 </div>
                             </div>
@@ -52,13 +50,13 @@
                                 <div class="row">
                                     <div class="col-md">
                                         <h3>Condizioni Intervento</h3>
-                                        <p>In Garanzia</p>
+                                        <p>{{op.data.condition}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
                                         <h3>Nr Verbale o certificato di garanzia</h3>
-                                        <p>AS58996655</p>
+                                        <p>{{op.data.warranty}}</p>
                                     </div>
                                 </div>
                             </div>
@@ -68,63 +66,63 @@
                                 <h3>Dichiarazione di Conformità</h3>
                                 <dl class="row">
                                     <dd class="col-6">Impianto Elettrico</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.e_system ? "compliant" : "notcompliant")|translate}}</dt>
                                     <dd class="col-6">Impianto di Riscaldamento e Idrosanitario</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.hp_system ? "compliant" : "notcompliant")|translate}}</dt>
                                     <dd class="col-6">Impianto Scarico Fumi</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.se_system ? "compliant" : "notcompliant")|translate}}</dt>
                                 </dl>
                                 <h3>Locale Installazione</h3>
                                 <dl class="row">
                                     <dd class="col-6">Idoneità locale installazione</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.li_suitability ? "compliant" : "notcompliant")|translate}}</dt>
                                     <dd class="col-6">Spazi rispettati attorno e sopra</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.spaces_respected ? "compliant" : "notcompliant")|translate}}</dt>
                                     <dd class="col-6">Presenza apertura di ventilazione</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.presence_ventilation_opening ? "compliant" : "notcompliant")|translate}}</dt>
                                     <dd class="col-6">Apertura vent. Adeguata</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.vent_opening_appropriate ? "compliant" : "notcompliant")|translate}}</dt>
                                     <dd class="col-6">Apertura vent. Libera</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.vent_opening_free ? "compliant" : "notcompliant")|translate}}</dt>
                                 </dl>
                             </div>
                             <div class="col-md">
                                 <h3>Dati Canna Fumaria</h3>
                                 <dl class="row">
                                     <dd class="col-6">Sezioni corrette</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.correct_sections ? "compliant" : "notcompliant")|translate}}</dt>
                                     <dd class="col-6">Tratto semiorizzontale entro i limiti</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.sh_section_limits ? "compliant" : "notcompliant")|translate}}</dt>
                                     <dd class="col-6">Pendenza corretta (>5%)</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.correct_slope ? "compliant" : "notcompliant")|translate}}</dt>
                                     <dd class="col-6">Lunghezza tratti semiorizzontali</dd>
-                                    <dt class="col-6">100cm</dt>
+                                    <dt class="col-6">{{op.data.length_se_sections}}</dt>
                                     <dd class="col-6">Lunghezza tratti verticali</dd>
-                                    <dt class="col-6">100cm</dt>
+                                    <dt class="col-6">{{op.data.vs_length}}</dt>
                                     <dd class="col-6">Numero curve a 45°</dd>
-                                    <dt class="col-6">2</dt>
+                                    <dt class="col-6">{{op.data.bends_45}}</dt>
                                     <dd class="col-6">Numero curve a 90°</dd>
-                                    <dt class="col-6">2</dt>
+                                    <dt class="col-6">{{op.data.bends_90}}</dt>
                                     <dd class="col-6">Sezione Tubo Fumi</dd>
-                                    <dt class="col-6">300mm</dt>
+                                    <dt class="col-6">{{op.data.smoke_pipe_section}}</dt>
                                     <dd class="col-6">Sezione Canna Fumaria</dd>
-                                    <dt class="col-6">300mm</dt>
+                                    <dt class="col-6">{{op.data.chimney_section}}</dt>
                                     <dd class="col-6">Ispezione a T</dd>
-                                    <dt class="col-6">Conforme</dt>
+                                    <dt class="col-6">{{(op.data.t_inspection ? "compliant" : "notcompliant")|translate}}</dt>
                                     <dd class="col-6">Stato conservazione</dd>
-                                    <dt class="col-6">OTTIMO</dt>
+                                    <dt class="col-6">{{op.data.conservation_status}}</dt>
                                     <dd class="col-6">Perdite condotti di scarico</dd>
-                                    <dt class="col-6">ASSENTI</dt>
+                                    <dt class="col-6">{{(op.data.exhaust_duct_leaks ? "present" : "notpresent")|translate}}</dt>
                                     <dd class="col-6">Scarico fumi a tetto</dd>
-                                    <dt class="col-6">PRESENTE</dt>
+                                    <dt class="col-6">{{(op.data.roof_smoke_exhaust ? "present" : "notpresent")|translate}}</dt>
                                     <dd class="col-6">Comignolo antivento</dd>
-                                    <dt class="col-6">ASSENTE</dt>
+                                    <dt class="col-6">{{(op.data.windproof_chimney ? "present" : "notpresent")|translate}}</dt>
                                     <dd class="col-6">Coibentazione canna fumaria</dd>
-                                    <dt class="col-6">ASSENTE</dt>
+                                    <dt class="col-6">{{(op.data.chimney_insulation ? "present" : "notpresent")|translate}}</dt>
                                     <dd class="col-6">Classificazione Tiraggio</dd>
-                                    <dt class="col-6">OTTIMO</dt>
+                                    <dt class="col-6">{{op.data.draught_classification}}</dt>
                                     <dd class="col-6">Valore Tiraggio</dd>
-                                    <dt class="col-6">30Pa</dt>
+                                    <dt class="col-6">{{op.data.draught_value}} Pa</dt>
                                 </dl>
                             </div>
                         </div>

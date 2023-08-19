@@ -1,0 +1,157 @@
+<div class="container">
+    <div class="row">
+        <div class="col p-3 p-md-5">
+            <div class="row">
+                <div class="col-md my-2">
+                    <h1 class="fw-bold">{{'profile'|translate}}</h1>
+                </div>
+            </div>
+            <form (ngSubmit)="onSubmit()" #myForm="ngForm">
+                <div class="row">
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="codiceFiscale">Codice Fiscale o Partita IVA</label>
+                            <input class="form-control" id="codiceFiscale" type="text" placeholder="Codice Fiscale"
+                                pattern="^([A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1})$|([0-9]{11})$|^(IT)?[0-9]{11}$"
+                                required [(ngModel)]="data.fiscal_code" name="fiscal_code" />
+                            <div class="invalid-feedback">
+                                {{ 'field.invalid' | translate }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="ragioneSociale">Ragione Sociale</label>
+                            <input class="form-control" id="ragioneSociale" type="text" placeholder="Ragione Sociale"
+                                [(ngModel)]="data.business_name" name="business_name" #businessname="ngModel" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="nome">Nome</label>
+                            <input class="form-control" id="nome" type="text" [(ngModel)]="data.name" name="name"
+                                placeholder="Nome" required />
+                            <div class="invalid-feedback">
+                                {{ 'field.invalid' | translate }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="cognome">Cognome</label>
+                            <input class="form-control" id="cognome" type="text" [(ngModel)]="data.surname" name="surname"
+                                placeholder="Cognome" required />
+                            <div class="invalid-feedback">
+                                {{ 'field.invalid' | translate }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="email">E-mail</label>
+                            <input class="form-control" id="email" type="email" [(ngModel)]="data.email" name="email"
+                                placeholder="E-mail" pattern="[^@\s]+@[^@\s]+\.[^@\s]+" required disabled />
+                            <div class="invalid-feedback">
+                                {{ 'field.invalid' | translate }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="address">Indirizzo</label>
+                            <input class="form-control" id="address" type="text" [(ngModel)]="data.address"
+                                placeholder="Indirizzo" name="address" required />
+                            <div class="invalid-feedback">
+                                {{ 'field.invalid' | translate }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="streetnumber">Nr. Civico</label>
+                            <input class="form-control" id="streetnumber" [(ngModel)]="data.street_number" type="text" required
+                                name="streetnumber" placeholder="Nr. Civico" />
+                            <div class="invalid-feedback">
+                                {{ 'field.invalid' | translate }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="telefono">Telefono</label>
+                            <input class="form-control" id="telefono" [(ngModel)]="data.phone" type="text" name="phone"
+                                placeholder="Telefono" required />
+                            <div class="invalid-feedback">
+                                {{ 'field.invalid' | translate }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="mobile">Cellulare</label>
+                            <input class="form-control" id="mobile" [(ngModel)]="data.mobile" name="mobile" type="text"
+                                placeholder="Cellulare" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="city">Città</label>
+                            <input class="form-control" id="city" type="text" [(ngModel)]="data.city" name="city"
+                                placeholder="Città" required />
+                            <div class="invalid-feedback">
+                                {{ 'field.invalid' | translate }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="province">Provincia</label>
+                        <input class="form-control" id="province" type="text" [(ngModel)]="data.province" name="province"
+                            placeholder="Provincia" required />
+                        <div class="invalid-feedback">
+                            {{ 'field.invalid' | translate }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="zip">CAP</label>
+                            <input class="form-control" id="zip" type="text" [(ngModel)]="data.zip" name="zip" placeholder="CAP"
+                                required />
+                            <div class="invalid-feedback">
+                                {{ 'field.invalid' | translate }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="mb-3">
+                            <label class="form-label" for="country">Nazione</label>
+                            <select class="form-control" id="country" name="country" [(ngModel)]="data.country" required>
+                                <option *ngFor="let country of countries$|async" [ngValue]="country.code">{{country.name}}</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                {{ 'field.invalid' | translate }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md text-end">
+                        <button type="submit" class="btn btn-primary" [disabled]="!myForm.form.dirty">Aggiorna</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>

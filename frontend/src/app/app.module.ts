@@ -23,6 +23,21 @@ import { HeaderInterceptor } from './interceptors/header.interceptor';
 import { TranslationService } from './services/translation.service';
 import { ServiceWorkerModule, SwUpdate } from '@angular/service-worker';
 import { filter, from } from 'rxjs';
+import { HeaderComponent } from './components/header/header.component';
+import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle} from 'ng-bootstrap-icons/icons';
+import { BootstrapIconsModule } from 'ng-bootstrap-icons';
+
+const icons = {
+  Eye,
+  EyeSlash,
+  Search,
+  InfoCircle,
+  Pen,
+  PersonCircle,
+  Wifi,
+  List,
+  QuestionCircle
+};
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -49,6 +64,7 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     FooterComponent,
     DashboardComponent,
     AlertComponent,
+    HeaderComponent
   ],
   imports: [
     BrowserModule,
@@ -57,6 +73,7 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     SharedModule,
     FormsModule,
     HttpClientModule,
+    BootstrapIconsModule.pick(icons),
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

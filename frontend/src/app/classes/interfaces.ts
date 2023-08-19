@@ -305,17 +305,25 @@ export interface WifiStation {
   bssid: string;
 }
 
-export interface User {
+export interface User{
   name: string;
   surname: string;
   email: string;
   password?: string;
-  company: string;
+  fiscal_code: string;
+  business_name: string;
+  address:string;
+  street_number: string;
+  phone: string;
+  mobile: string;
+  city: string;
+  province: string;
+  zip: string;
+  country: string;
 }
 
 export interface UserField {
   language: string;
-  company: string;
 }
 
 export interface UserData {
@@ -416,6 +424,7 @@ export interface OperationData
   chimney_insulation: boolean;
   draught_classification: number;
   draught_value: number;
+  registry?: Registry
 }
 
 export interface Operation

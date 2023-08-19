@@ -1,4 +1,4 @@
-<div class="container-fluid report">
+<div class="container-fluid report" *ngIf="(operation$|async) as op">
     <div class="page">
         <div class="row">
             <img src="https://caiman.micronovasrl.com/backend/wp-content/uploads/2023/07/mstile-icon-558.png"
@@ -8,7 +8,7 @@
             <div class="col">
                 <h3>Cliente</h3>
                 <div>
-                    Daniele Callegaro<br>
+                    {{op.data.registry?.name}} {{op.data.registry?.surname}}<br>
                     Via Annibale Testa, 4B<br>
                     35128 - Padova(PD) - Italia
                 </div>
@@ -36,27 +36,27 @@
             <div class="col">
                 <dl class="row">
                     <dd class="col-6 m-0">Numero Intervento</dd>
-                    <dt class="col-6 m-0">558844</dt>
+                    <dt class="col-6 m-0">{{op.key}}</dt>
                     <dd class="col-6 m-0">Data Intervento</dd>
-                    <dt class="col-6 m-0">21/07/2023</dt>
+                    <dt class="col-6 m-0">{{op.createdAt|date:'d/M/Y'}}</dt>
                     <dd class="col-6 m-0">Matricola</dd>
-                    <dt class="col-6 m-0">5899887445</dt>
+                    <dt class="col-6 m-0">{{op.serial}}</dt>
                     <dd class="col-6 m-0">Data Acquisto</dd>
-                    <dt class="col-6 m-0">02/08/2011</dt>
+                    <dt class="col-6 m-0">{{op.data.registry?.purchase_date|date:'d/M/Y'}}</dt>
                     <dd class="col-6 m-0">Data Primo Funzionamento</dd>
-                    <dt class="col-6 m-0">02/10/2011</dt>
+                    <dt class="col-6 m-0">{{op.data.registry?.first_ignition_date|date:'d/M/Y'}}</dt>
                     <dd class="col-6 m-0">Famiglia</dd>
-                    <dt class="col-6 m-0">DUO AIR</dt>
+                    <dt class="col-6 m-0">----</dt>
                     <dd class="col-6 m-0">TIPOLOGIA INTERVENTO ESEGUITO</dd>
-                    <dt class="col-6 m-0">Pulizia e Manutenzione</dt>
+                    <dt class="col-6 m-0">{{op.data.type}}</dt>
                     <dd class="col-6 m-0">COMPONENTI SOSTITUITI</dd>
-                    <dt class="col-6 m-0">Sonda Fumi</dt>
+                    <dt class="col-6 m-0">{{op.data.replaced_components}}</dt>
                     <dd class="col-6 m-0">GUASTI SEGNALATI</dd>
                     <dt class="col-6 m-0">E01 - BLACKOUT<br>E100 - ALLARME VENTOLA FUMI</dt>
                     <dd class="col-6 m-0">CONDIZIONI INTERVENTI</dd>
-                    <dt class="col-6 m-0">In Garanzia</dt>
+                    <dt class="col-6 m-0">{{op.data.condition}}</dt>
                     <dd class="col-6 m-0">NR VERBALE O CERTIFICATO DI GARANZIA</dd>
-                    <dt class="col-6 m-0">AS58996655</dt>
+                    <dt class="col-6 m-0">{{op.data.warranty}}</dt>
                 </dl>
             </div>
         </div>

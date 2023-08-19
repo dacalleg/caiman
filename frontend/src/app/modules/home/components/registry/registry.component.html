@@ -3,7 +3,7 @@
         <h1 class="fw-bold">ANAGRAFICA</h1>
     </div>
 </div>
-<form (ngSubmit)="onSubmit()" [ngClass]="{'was-validated': submitted}" #myForm="ngForm">
+<form (ngSubmit)="onSubmit()" #myForm="ngForm">
     <div class="row">
         <div class="col-md">
             <div class="mb-3">
@@ -12,7 +12,7 @@
                     pattern="^([A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1})$|([0-9]{11})$|^(IT)?[0-9]{11}$"
                     required [(ngModel)]="registry.fiscal_code" name="fiscal_code" />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -31,7 +31,7 @@
                 <input class="form-control" id="nome" type="text" [(ngModel)]="registry.name" name="name"
                     placeholder="Nome" required />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -41,7 +41,7 @@
                 <input class="form-control" id="cognome" type="text" [(ngModel)]="registry.surname" name="surname"
                     placeholder="Cognome" required />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -53,7 +53,7 @@
                 <input class="form-control" id="email" type="email" [(ngModel)]="registry.email" name="email"
                     placeholder="E-mail" pattern="[^@\s]+@[^@\s]+\.[^@\s]+" required />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -65,7 +65,7 @@
                 <input class="form-control" id="address" type="text" [(ngModel)]="registry.address"
                     placeholder="Indirizzo" name="address" required />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -75,7 +75,7 @@
                 <input class="form-control" id="streetnumber" [(ngModel)]="registry.street_number" type="text" required
                     name="streetnumber" placeholder="Nr. Civico" />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -88,7 +88,7 @@
                 <input class="form-control" id="telefono" [(ngModel)]="registry.phone" type="text" name="phone"
                     placeholder="Telefono" required />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -107,7 +107,7 @@
                 <input class="form-control" id="city" type="text" [(ngModel)]="registry.city" name="city"
                     placeholder="Città" required />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -116,7 +116,7 @@
             <input class="form-control" id="province" type="text" [(ngModel)]="registry.province" name="province"
                 placeholder="Provincia" required />
             <div class="invalid-feedback">
-                Il campo non è valido
+                {{ 'field.invalid' | translate }}
             </div>
         </div>
     </div>
@@ -127,7 +127,7 @@
                 <input class="form-control" id="zip" type="text" [(ngModel)]="registry.zip" name="zip" placeholder="CAP"
                     required />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -138,7 +138,7 @@
                     <option *ngFor="let country of countries$|async" [ngValue]="country.code">{{country.name}}</option>
                 </select>
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -157,7 +157,7 @@
                     (ngModelChange)="ngUpdatePurchaseDate($event)" placeholder="Data di acquisto"
                     data-sb-validations="required" />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -169,7 +169,7 @@
                     (ngModelChange)="ngUpdateFirstIgnitionDate($event)" placeholder="Data di prima accesione"
                     data-sb-validations="required" />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -181,7 +181,7 @@
                 <input class="form-control" id="dealer" type="text" [(ngModel)]="registry.dealer" required name="dealer"
                     placeholder="Rivenditore" />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -191,7 +191,7 @@
                 <input class="form-control" id="invoicenr" type="text" [(ngModel)]="registry.invoice" required
                     name="invoicenr" placeholder="Numero Fattura" />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
@@ -201,7 +201,7 @@
                 <input class="form-control" id="warranty" type="text" [(ngModel)]="registry.warranty" required
                     name="warranty" placeholder="Numero Certificato Garanzia" />
                 <div class="invalid-feedback">
-                    Il campo non è valido
+                    {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>

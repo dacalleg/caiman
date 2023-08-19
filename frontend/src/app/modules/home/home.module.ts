@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HeaderComponent } from './components/header/header.component';
 import { HomeComponent } from './components/home/home.component';
 import { VariableTeaseComponent } from './components/variable-tease/variable-tease.component';
 import { OptionModalComponent } from './components/option-modal/option-modal.component';
@@ -39,6 +38,7 @@ import { FilterLogPipe } from './pipes/filter-log.pipe';
 import { RegistryComponent } from './components/registry/registry.component';
 import { OperationComponent } from './components/operation/operation.component';
 import { OperationFormComponent } from './components/operation-form/operation-form.component';
+import { ProfileComponent } from '../profile/components/profile/profile.component';
 
 const icons = {
   Eye,
@@ -55,7 +55,6 @@ const icons = {
 @NgModule({
   declarations: [
     VarByGroupPipe,
-    HeaderComponent,
     HomeComponent,
     VariableTeaseComponent,
     AddressPipe,
@@ -85,6 +84,7 @@ const icons = {
     RegistryComponent,
     OperationComponent,
     OperationFormComponent,
+    ProfileComponent,
   ],
   imports: [
     CommonModule,

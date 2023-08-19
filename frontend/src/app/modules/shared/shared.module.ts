@@ -5,7 +5,7 @@ import { LanguageSwitcherComponent } from './components/language-switcher/langua
 import { FormsModule } from '@angular/forms';
 import { VideojsComponent } from './components/videojs/videojs.component';
 import { IsURLPipe } from './pipes/is-url.pipe';
-
+import { RouterModule } from '@angular/router';
 
 
 @NgModule({
@@ -13,17 +13,18 @@ import { IsURLPipe } from './pipes/is-url.pipe';
     InfiniteProgressBarComponent,
     LanguageSwitcherComponent,
     VideojsComponent,
-    IsURLPipe
+    IsURLPipe,
   ],
   exports: [
     InfiniteProgressBarComponent,
     LanguageSwitcherComponent,
     VideojsComponent,
-    IsURLPipe
+    IsURLPipe,
   ],
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
   ]
 })
 export class SharedModule { }

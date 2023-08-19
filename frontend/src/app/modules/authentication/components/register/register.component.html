@@ -4,61 +4,182 @@
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title">{{'auth.register'|translate}}</h3>
-                    <ng-container *ngIf="!finish && !validation">
-                        <div class="row">
-                            <div class="col-md">
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">{{'auth.register.name'|translate}}</label>
-                                    <input type="text" class="form-control" id="name" [(ngModel)]="user.name" />
+                    <form (ngSubmit)="onSubmit()" #myForm="ngForm">
+                        <ng-container *ngIf="!finish && !validation">
+                            <div class="row">
+                                <div class="col-md">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="nome">Nome</label>
+                                        <input class="form-control" id="nome" type="text" [(ngModel)]="user.name" name="name"
+                                            placeholder="Nome" required />
+                                        <div class="invalid-feedback">
+                                            {{ 'field.invalid' | translate }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="cognome">Cognome</label>
+                                        <input class="form-control" id="cognome" type="text" [(ngModel)]="user.surname" name="surname"
+                                            placeholder="Cognome" required />
+                                        <div class="invalid-feedback">
+                                            {{ 'field.invalid' | translate }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md">
-                                <div class="mb-3">
-                                    <label for="surname" class="form-label">{{'auth.register.surname'|translate}}</label>
-                                    <input type="text" class="form-control" id="surname" [(ngModel)]="user.surname" />
+                            <div class="row">
+                                <div class="col">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="email">{{'auth.email'|translate}}</label>
+                                        <input class="form-control" id="email" type="email" [(ngModel)]="user.email" name="email"
+                                            placeholder="E-mail" pattern="[^@\s]+@[^@\s]+\.[^@\s]+" required #emailModel="ngModel"/>
+                                        <div class="invalid-feedback">
+                                            {{ 'field.invalid' | translate }}
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">{{'auth.password'|translate}}</label>
+                                        <input type="password" class="form-control" id="password" name="password" 
+                                            [(ngModel)]="user.password" required pattern=".{8,}" />
+                                        <div class="invalid-feedback">
+                                            {{'auth.password_short'|translate}}
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="repeatpassword" class="form-label">{{'auth.repeatpassword'|translate}}</label>
+                                        <input type="password" class="form-control" id="repeatpassword" name="repeatpassword" #pwConfirmModel="ngModel"
+                                            [(ngModel)]="repeatPassword" />
+                                        <div class="invalid-feedback">
+                                            {{'auth.password_not_match'|translate}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="codiceFiscale">Codice Fiscale o Partita IVA</label>
+                                                <input class="form-control" id="codiceFiscale" type="text" placeholder="Codice Fiscale"
+                                                    pattern="^([A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1})$|([0-9]{11})$|^(IT)?[0-9]{11}$"
+                                                    required [(ngModel)]="user.fiscal_code" name="fiscal_code" />
+                                                <div class="invalid-feedback">
+                                                    {{ 'field.invalid' | translate }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="ragioneSociale">Ragione Sociale</label>
+                                                <input class="form-control" id="ragioneSociale" type="text" placeholder="Ragione Sociale"
+                                                    [(ngModel)]="user.business_name" name="business_name" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="address">Indirizzo</label>
+                                                <input class="form-control" id="address" type="text" [(ngModel)]="user.address"
+                                                    placeholder="Indirizzo" name="address" required />
+                                                <div class="invalid-feedback">
+                                                    {{ 'field.invalid' | translate }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="streetnumber">Nr. Civico</label>
+                                                <input class="form-control" id="streetnumber" [(ngModel)]="user.street_number" type="text" required
+                                                    name="streetnumber" placeholder="Nr. Civico" />
+                                                <div class="invalid-feedback">
+                                                    {{ 'field.invalid' | translate }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="telefono">Telefono</label>
+                                                <input class="form-control" id="telefono" [(ngModel)]="user.phone" type="text" name="phone"
+                                                    placeholder="Telefono" required />
+                                                <div class="invalid-feedback">
+                                                    {{ 'field.invalid' | translate }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="mobile">Cellulare</label>
+                                                <input class="form-control" id="mobile" [(ngModel)]="user.mobile" name="mobile" type="text"
+                                                    placeholder="Cellulare" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="city">Città</label>
+                                                <input class="form-control" id="city" type="text" [(ngModel)]="user.city" name="city"
+                                                    placeholder="Città" required />
+                                                <div class="invalid-feedback">
+                                                    {{ 'field.invalid' | translate }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" for="province">Provincia</label>
+                                            <input class="form-control" id="province" type="text" [(ngModel)]="user.province" name="province"
+                                                placeholder="Provincia" required />
+                                            <div class="invalid-feedback">
+                                                {{ 'field.invalid' | translate }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="zip">CAP</label>
+                                                <input class="form-control" id="zip" type="text" [(ngModel)]="user.zip" name="zip" placeholder="CAP"
+                                                    required />
+                                                <div class="invalid-feedback">
+                                                    {{ 'field.invalid' | translate }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="country">Nazione</label>
+                                                <select class="form-control" id="country" name="country" [(ngModel)]="user.country" required>
+                                                    <option *ngFor="let country of countries$|async" [ngValue]="country.code">{{country.name}}</option>
+                                                </select>
+                                                <div class="invalid-feedback">
+                                                    {{ 'field.invalid' | translate }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="error" class="mb-3">
+                                        <div *ngIf="error === 'existing_user_email'">{{'auth.existing_user_email'|translate}}</div>
+                                        <div *ngIf="error === 'password_short'">{{'auth.password_short'|translate}}</div>
+                                        <div *ngIf="error === 'password_not_match'">{{'auth.password_not_match'|translate}}</div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">{{'submit'|translate}}</button>
+                                    <a routerLink="/auth/login" class="btn btn-link">{{'auth.back'|translate}}</a>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">{{'auth.email'|translate}}</label>
-                                    <input type="email" class="form-control" id="email" [(ngModel)]="user.email" />
-                                </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">{{'auth.password'|translate}}</label>
-                                    <input type="password" class="form-control" id="password"
-                                        [(ngModel)]="user.password" />
-                                </div>
-                                <div class="mb-3">
-                                    <label for="repeatpassword" class="form-label">{{'auth.repeatpassword'|translate}}</label>
-                                    <input type="password" class="form-control" id="repeatpassword"
-                                        [(ngModel)]="repeatPassword" />
-                                </div>
-                                <div class="mb-3">
-                                    <label for="company" class="form-label">{{'auth.register.company'|translate}}</label>
-                                    <input type="text" class="form-control" id="company" [(ngModel)]="user.company" />
-                                </div>
-                                <div *ngIf="error" class="mb-3">
-                                    <div *ngIf="error === 'existing_user_email'">{{'auth.existing_user_email'|translate}}</div>
-                                    <div *ngIf="error === 'password_short'">{{'auth.password_short'|translate}}</div>
-                                    <div *ngIf="error === 'password_not_match'">{{'auth.password_not_match'|translate}}</div>
-                                </div>
-                                <button type="submit" class="btn btn-primary" (click)="signUp()">{{'submit'|translate}}</button>
-                                <a routerLink="/auth/login" class="btn btn-link">{{'auth.back'|translate}}</a>
-                            </div>
-                        </div>
-                    </ng-container>
-                    <ng-container *ngIf="!finish && validation">
-                        <div class="mb-2">{{'validation'|translate}}</div>
-                        <a routerLink="/auth/login" class="btn btn-link">{{'auth.back'|translate}}</a>
-                    </ng-container>
-                    <ng-container *ngIf="finish">
-                        <div class="mb-2">{{'auth.register.success'|translate}}</div>
-                        <a routerLink="/auth/login" class="btn btn-link">{{'auth.back'|translate}}</a>
-                    </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="!finish && validation">
+                            <div class="mb-2">{{'validation'|translate}}</div>
+                            <a routerLink="/auth/login" class="btn btn-link">{{'auth.back'|translate}}</a>
+                        </ng-container>
+                        <ng-container *ngIf="finish">
+                            <div class="mb-2">{{'auth.register.success'|translate}}</div>
+                            <a routerLink="/auth/login" class="btn btn-link">{{'auth.back'|translate}}</a>
+                        </ng-container>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+

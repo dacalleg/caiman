@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
-import { combineLatest, of, switchMap, tap, throwError } from 'rxjs';
-import { User } from 'src/app/classes/interfaces';
+import { Component, ViewChild } from '@angular/core';
+import { NgForm, NgModel } from '@angular/forms';
+import { Observable, combineLatest, of, switchMap, tap, throwError } from 'rxjs';
+import { Country, User } from 'src/app/classes/interfaces';
+import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { BuilderService } from 'src/app/services/builder.service';
 
 @Component({
   selector: 'app-register',
@@ -15,15 +18,32 @@ export class RegisterComponent {
   repeatPassword: string = "";
   finish: boolean = false;
   validation: boolean = false;
+  submitted: boolean;
+  @ViewChild("myForm") myForm: NgForm | undefined;
+  @ViewChild('pwConfirmModel') pwConfirmModel: NgModel|undefined;
+  @ViewChild('emailModel') emailModel: NgModel|undefined;
 
-  constructor(private AuthService: AuthService) {
-    this.user = {
-      email: "",
-      password: "",
-      company: "",
-      name: "",
-      surname: "",
-    };
+  countries$: Observable<Country[]>;
+
+  constructor(private AuthService: AuthService, private Builder: BuilderService, private Api: ApiService) {
+    this.user = this.Builder.buildUser();
+    this.submitted = false;
+    this.countries$ = this.Api.getCountries();
+
+  }
+
+  onSubmit() {
+    this.submitted = true;
+    if(this.pwConfirmModel)
+    {
+      if(this.checkPassword(this.user.password!, this.repeatPassword) !== "ok")
+      {
+        this.pwConfirmModel.control.setErrors({'nomatch': true});
+      }
+    }
+    if (this.myForm?.form.valid) {
+      console.log("Form Valid");
+    }
   }
 
   signUp() {

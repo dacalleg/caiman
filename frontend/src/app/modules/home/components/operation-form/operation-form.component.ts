@@ -33,7 +33,7 @@ export class OperationFormComponent {
 
   onSubmit() {
     this.submitted = true;
-    //this.Api.updateOperation(this.operation).subscribe();
+    this.Api.updateOperation(this.operation).subscribe();
     /*if(this.myForm?.form.valid)
     {
 

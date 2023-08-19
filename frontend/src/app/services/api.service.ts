@@ -401,11 +401,11 @@ export class ApiService {
     return this.Http.get<Registry[]>(environment.endpoint + "/api/registry/get/" + serial).pipe(
       map(resp => {
         return resp.map(item => {
-          if(item.createdAt)
+          if (item.createdAt)
             item.createdAt = new Date(item.createdAt);
           return item;
         }).sort((b, a) => {
-          if(a.createdAt && b.createdAt)
+          if (a.createdAt && b.createdAt)
             return a.createdAt.getTime() - b.createdAt.getTime();
           return 0
         })
@@ -417,16 +417,20 @@ export class ApiService {
     return this.Http.get<Operation[]>(environment.endpoint + "/api/operation/get/" + serial).pipe(
       map(resp => {
         return resp.map(item => {
-          if(item.createdAt)
+          if (item.createdAt)
             item.createdAt = new Date(item.createdAt);
           return item;
         }).sort((b, a) => {
-          if(a.createdAt && b.createdAt)
+          if (a.createdAt && b.createdAt)
             return a.createdAt.getTime() - b.createdAt.getTime();
           return 0
         })
       }),
     )
+  }
+
+  getOperationByKey(key: string) {
+    return this.Http.get<Operation>(environment.endpoint + "/api/operation/key/" + key);
   }
 
   updateOperation(operation: Operation) {

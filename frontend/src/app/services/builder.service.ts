@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Operation, Registry } from '../classes/interfaces';
+import { Operation, Registry, User } from '../classes/interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BuilderService {
+
 
   constructor() { }
 
@@ -31,6 +32,25 @@ export class BuilderService {
       warranty: "",
       user: "",
     } as Registry;
+  }
+
+  buildUser() {
+    return {
+
+      fiscal_code: "",
+      business_name: "",
+      name: "",
+      surname:"",
+      email:"",
+      address:"",
+      street_number: "",
+      phone: "",
+      mobile: "",
+      city: "",
+      province: "",
+      zip: "",
+      country: "",
+    } as User;
   }
 
   buildOperation() {

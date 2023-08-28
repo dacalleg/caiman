@@ -18,7 +18,6 @@ export class RegisterComponent {
   repeatPassword: string = "";
   finish: boolean = false;
   validation: boolean = false;
-  submitted: boolean;
   @ViewChild("myForm") myForm: NgForm | undefined;
   @ViewChild('pwConfirmModel') pwConfirmModel: NgModel|undefined;
   @ViewChild('emailModel') emailModel: NgModel|undefined;
@@ -27,13 +26,12 @@ export class RegisterComponent {
 
   constructor(private AuthService: AuthService, private Builder: BuilderService, private Api: ApiService) {
     this.user = this.Builder.buildUser();
-    this.submitted = false;
     this.countries$ = this.Api.getCountries();
 
   }
 
   onSubmit() {
-    this.submitted = true;
+    this.validation = true;
     if(this.pwConfirmModel)
     {
       if(this.checkPassword(this.user.password!, this.repeatPassword) !== "ok")
@@ -42,7 +40,19 @@ export class RegisterComponent {
       }
     }
     if (this.myForm?.form.valid) {
-      console.log("Form Valid");
+      this.AuthService.register(this.user).subscribe({
+        error: (error) => {
+          this.validation = false;
+        },
+        complete: () => {
+          this.validation = false;
+          this.finish = true;
+        }
+      })
+    }
+    else
+    {
+      this.validation = false;
     }
   }
 

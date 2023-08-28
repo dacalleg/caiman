@@ -1,11 +1,11 @@
 import { Component, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { Country, Project, User } from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { BuilderService } from 'src/app/services/builder.service';
-import { StoreService } from 'src/app/services/store.service';
+import { ToastService } from 'src/app/services/toast.service';
 
 @Component({
   selector: 'app-profile',
@@ -14,27 +14,34 @@ import { StoreService } from 'src/app/services/store.service';
 })
 export class ProfileComponent {
   @ViewChild("myForm") myForm: NgForm | undefined;
-  project$: Observable<Project>;
   countries$: Observable<Country[]>;
   data: User;
   submitted: boolean;
 
   constructor(
-    private Store: StoreService,
     private Api: ApiService,
     private Builder: BuilderService,
-    private Auth: AuthService
+    private Auth: AuthService,
+    private Toast: ToastService
   ) {
     this.submitted = false;
     this.data = this.Builder.buildUser();
-    this.project$ = this.Store.getProject();
     this.countries$ = this.Api.getCountries();
-    this.Auth.getUserName().subscribe(user => this.data.email = user);
+    combineLatest(
+      [
+        this.Auth.getUserData(),
+        this.Auth.getUserName()
+      ]
+    ).subscribe(([ud, username]) => {
+      this.data = ud.fields;
+      this.data.email = username;
+    })
   }
 
   onSubmit() {
     this.submitted = true;
     if (this.myForm?.form.valid) {
+      this.Auth.updateUserData(this.data).subscribe(() => this.Toast.addSuccessToast("Il Profilo è stato aggiornato con successo"));
     }
   }
 }

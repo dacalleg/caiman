@@ -322,7 +322,7 @@ export interface User{
   country: string;
 }
 
-export interface UserField {
+export interface UserField extends User {
   language: string;
 }
 
@@ -462,4 +462,11 @@ export interface Registry
   warranty: string;
   user: string;
   createdAt?: Date;
+}
+
+export interface Toast {
+  message: string,
+  delay: number
+  id?: number;
+  classes: string;
 }

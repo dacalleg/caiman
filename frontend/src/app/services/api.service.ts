@@ -413,6 +413,13 @@ export class ApiService {
     )
   }
 
+  getLastRegisry(serial: string)
+  {
+    return this.getRegistries(serial).pipe(
+      map(registries => registries.length > 0 ? registries[0] : null)
+    )
+  }
+
   getOperations(serial: string) {
     return this.Http.get<Operation[]>(environment.endpoint + "/api/operation/get/" + serial).pipe(
       map(resp => {

@@ -1,0 +1,13 @@
+<div class="p-2">
+    <ngb-toast
+      *ngFor="let toast of toasts"
+      [class]="toast.classes"
+      [autohide]="true"
+      [delay]="toast.delay"
+      (hidden)="remove(toast)"
+    >
+      {{toast.message|translate}}
+    </ngb-toast>
+  </div>
+  
+  

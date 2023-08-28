@@ -1,3 +1,26 @@
+<div class="row my-5">
+    <div class="col-md">
+        <h4>CLIENTE</h4>
+        <ng-container *ngIf="(registry$|async) as registry">
+            <ng-container *ngIf="registry.business_name">{{registry.business_name}}<br></ng-container>
+            {{registry.surname}} {{registry.name}}<br>
+            {{registry.address}} {{registry.street_number}}<br>
+            {{registry.zip}} ({{registry.province}}) - {{registry.country}}<br>
+            P.IVA/CF {{registry.fiscal_code}}<br>
+            Tel. {{registry.phone}}
+        </ng-container>
+    </div>
+    <div class="col-md">
+        <h4>CENTRO TECNICO</h4>
+        <ng-container *ngIf="(user$|async) as user">
+            {{user.business_name}}<br>
+            {{user.address}} {{user.street_number}}<br>
+            {{user.zip}} ({{user.province}}) - {{user.country}}<br>
+            P.IVA/CF {{user.fiscal_code}}<br>
+            Tel. {{user.phone}}
+        </ng-container>
+    </div>
+</div>
 <form (ngSubmit)="onSubmit()" [ngClass]="{'was-validated': submitted}" #myForm="ngForm">
     <div class="row">
         <div class="col">
@@ -27,10 +50,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="condition">Condizioni Intervento</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.condition" class="form-control" 
-                id="condition" 
-                name="condition" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.condition" class="form-control" id="condition"
+                    name="condition" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="W">In Garanzia</option>
                     <option value="N">Fuori Garanzia</option>
@@ -57,10 +78,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="e_system">Impianto Elettrico</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.e_system" class="form-control" 
-                id="e_system" 
-                name="e_system" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.e_system" class="form-control" id="e_system"
+                    name="e_system" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="C">CONFORME</option>
                     <option value="N">NON CONFORME</option>
@@ -75,10 +94,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="hp_system">Impianto di Riscaldamento e Idrosanitario</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.hp_system" class="form-control" 
-                id="hp_system" 
-                name="hp_system" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.hp_system" class="form-control" id="hp_system"
+                    name="hp_system" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="C">CONFORME</option>
                     <option value="N">NON CONFORME</option>
@@ -93,10 +110,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="se_system">Impianto Scarico Fumi</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.se_system" class="form-control" 
-                id="se_system" 
-                name="se_system" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.se_system" class="form-control" id="se_system"
+                    name="se_system" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="C">CONFORME</option>
                     <option value="N">NON CONFORME</option>
@@ -111,10 +126,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="li_suitability">Idoneità locale installazione</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.li_suitability" class="form-control" 
-                id="li_suitability" 
-                name="li_suitability" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.li_suitability" class="form-control"
+                    id="li_suitability" name="li_suitability" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="C">CONFORME</option>
                     <option value="N">NON CONFORME</option>
@@ -129,10 +142,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="spaces_respected">Spazi rispettati attorno e sopra</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.spaces_respected" class="form-control" 
-                id="spaces_respected" 
-                name="spaces_respected" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.spaces_respected" class="form-control"
+                    id="spaces_respected" name="spaces_respected" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="C">CONFORME</option>
                     <option value="N">NON CONFORME</option>
@@ -147,10 +158,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="presence_ventilation_opening">Presenza apertura di ventilazione</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.presence_ventilation_opening" class="form-control" 
-                id="presence_ventilation_opening" 
-                name="presence_ventilation_opening" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.presence_ventilation_opening" class="form-control"
+                    id="presence_ventilation_opening" name="presence_ventilation_opening" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="C">PRESENTE</option>
                     <option value="N">NON PRESENTE</option>
@@ -165,10 +174,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="vent_opening_appropriate">Apertura vent. Adeguata</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.vent_opening_appropriate" class="form-control" 
-                id="vent_opening_appropriate" 
-                name="vent_opening_appropriate" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.vent_opening_appropriate" class="form-control"
+                    id="vent_opening_appropriate" name="vent_opening_appropriate" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="C">CONFORME</option>
                     <option value="N">NON CONFORME</option>
@@ -183,10 +190,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="vent_opening_free">Apertura vent. Libera</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.vent_opening_free" class="form-control" 
-                id="vent_opening_free" 
-                name="vent_opening_free" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.vent_opening_free" class="form-control"
+                    id="vent_opening_free" name="vent_opening_free" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="C">CONFORME</option>
                     <option value="N">NON CONFORME</option>
@@ -201,10 +206,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="correct_sections">Sezioni corrette</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.correct_sections" class="form-control" 
-                id="correct_sections" 
-                name="correct_sections" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.correct_sections" class="form-control"
+                    id="correct_sections" name="correct_sections" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="C">CONFORME</option>
                     <option value="N">NON CONFORME</option>
@@ -219,10 +222,8 @@
         <div class="col">
             <div class="mb-3">
                 <label class="form-label" for="sh_section_limits">Tratto semiorizzontale entro i limiti</label>
-                <select pattern="^.$" [(ngModel)]="operation.data.sh_section_limits" class="form-control" 
-                id="sh_section_limits" 
-                name="sh_section_limits" 
-                required>
+                <select pattern="^.$" [(ngModel)]="operation.data.sh_section_limits" class="form-control"
+                    id="sh_section_limits" name="sh_section_limits" required>
                     <option value="" selected hidden>Seleziona</option>
                     <option value="C">CONFORME</option>
                     <option value="N">NON CONFORME</option>
@@ -250,8 +251,8 @@
             <div class="mb-3">
                 <label class="form-label" for="length_se_sections">Lunghezza tratti semiorizzontali</label>
                 <input class="form-control" id="length_se_sections" type="text"
-                    placeholder="Lunghezza tratti semiorizzontali" required [(ngModel)]="operation.data.length_se_sections"
-                    name="length_se_sections" />
+                    placeholder="Lunghezza tratti semiorizzontali" required
+                    [(ngModel)]="operation.data.length_se_sections" name="length_se_sections" />
                 <div class="invalid-feedback">
                     Il campo non è valido
                 </div>

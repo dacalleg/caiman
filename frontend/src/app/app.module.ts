@@ -26,6 +26,8 @@ import { filter, from } from 'rxjs';
 import { HeaderComponent } from './components/header/header.component';
 import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle} from 'ng-bootstrap-icons/icons';
 import { BootstrapIconsModule } from 'ng-bootstrap-icons';
+import { ToastManagerComponent } from './components/toast-manager/toast-manager.component';
+import { ToastService } from './services/toast.service';
 
 const icons = {
   Eye,
@@ -64,7 +66,8 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     FooterComponent,
     DashboardComponent,
     AlertComponent,
-    HeaderComponent
+    HeaderComponent,
+    ToastManagerComponent
   ],
   imports: [
     BrowserModule,
@@ -107,6 +110,7 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     ApiService,
     TranslationProviderService,
     TranslationService,
+    ToastService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: HeaderInterceptor,

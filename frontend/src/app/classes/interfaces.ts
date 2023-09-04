@@ -420,11 +420,12 @@ export interface OperationData
   conservation_status: string;
   exhaust_duct_leaks: string;
   roof_smoke_exhaust: string;
-  windproof_chimney: boolean;
-  chimney_insulation: boolean;
+  windproof_chimney: string;
+  chimney_insulation: string;
   draught_classification: number;
   draught_value: number;
-  registry?: Registry
+  registry?: Registry;
+  service?: User
 }
 
 export interface Operation
@@ -469,4 +470,11 @@ export interface Toast {
   delay: number
   id?: number;
   classes: string;
+}
+
+export interface Failure
+{
+  name: string;
+  key: string;
+  description: string;
 }

@@ -16,7 +16,6 @@ export class ProfileComponent {
   @ViewChild("myForm") myForm: NgForm | undefined;
   countries$: Observable<Country[]>;
   data: User;
-  submitted: boolean;
 
   constructor(
     private Api: ApiService,
@@ -24,7 +23,6 @@ export class ProfileComponent {
     private Auth: AuthService,
     private Toast: ToastService
   ) {
-    this.submitted = false;
     this.data = this.Builder.buildUser();
     this.countries$ = this.Api.getCountries();
     combineLatest(
@@ -39,7 +37,6 @@ export class ProfileComponent {
   }
 
   onSubmit() {
-    this.submitted = true;
     if (this.myForm?.form.valid) {
       this.Auth.updateUserData(this.data).subscribe(() => this.Toast.addSuccessToast("Il Profilo è stato aggiornato con successo"));
     }

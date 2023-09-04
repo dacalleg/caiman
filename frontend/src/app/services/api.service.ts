@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { bufferCount, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, Observable, of, shareReplay, switchMap, take, tap, throwError, toArray } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, SeramiEntry, Ticket, Translation, UserData, Variable, VariableInfoOverride, Info, Country, Registry, Operation } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, SeramiEntry, Ticket, Translation, UserData, Variable, VariableInfoOverride, Info, Country, Registry, Operation, Failure } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
@@ -120,6 +120,24 @@ export class ApiService {
           return of(null);
         }
       }),
+    )
+  }
+
+  getFailures()
+  {
+    return this.Translation.getCurrentLanguage().pipe(
+      take(1),
+      switchMap((lang) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/failure/?" + (lang !== "it" ? "lang=" + lang : "")).pipe(
+        switchMap(arr => from(arr)),
+        map((item) => {
+          return {
+            name: item.title.rendered as string,
+            key: item.acf.key as string,
+            description: ""
+          } as Failure
+        }),
+        toArray(),
+      )),
     )
   }
 
@@ -438,6 +456,13 @@ export class ApiService {
 
   getOperationByKey(key: string) {
     return this.Http.get<Operation>(environment.endpoint + "/api/operation/key/" + key);
+  }
+
+  confirmOperation(key: string, from_email?: string) {
+    return this.Http.post<Operation>(environment.endpoint + "/api/operation/confirm", {
+      key: key,
+      from_email: from_email
+    });
   }
 
   updateOperation(operation: Operation) {

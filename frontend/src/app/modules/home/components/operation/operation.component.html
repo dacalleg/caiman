@@ -6,17 +6,36 @@
 <ng-container *ngIf="!newOperation">
     <div class="row">
         <div class="col text-end">
-            <button class="btn btn-primary" (click)="createNewOperation()">Crea Nuovo Intervento</button>
+            <span class="me-3" *ngIf="(registry$|async) === null">Prima di creare un intervento devi compilare l'anagrafica del dispositivo</span>
+            <button class="btn btn-primary" (click)="createNewOperation()" [disabled]="(registry$|async) === null">Crea Nuovo Intervento</button>
         </div>
     </div>
     <div class="row mt-3">
         <div class="col-md">
             <ngb-accordion #acc="ngbAccordion">
-                <ngb-panel [title]="'Intervento del '+ (op.createdAt|date:'d/M/Y' || '') +' - ' + op.user" *ngFor="let op of operations$|async">
+                <ngb-panel [title]="op|operationTitle" *ngFor="let op of operations$|async">
                     <ng-template ngbPanelContent>
                         <div class="row">
                             <div class="col text-end">
                                 <a class="btn btn-primary my-3" [routerLink]="'/print/operation/' + op.key" target="_blank">Stampa Report</a>
+                                <button class="btn btn-warning m-3" *ngIf="!op.email_confirmed && !op.web_confirmed" (click)="confirmOperation(op)">Conferma intervento</button>
+                            </div>
+                        </div>
+                        <div class="row mb-5">
+                            <div class="col">
+                                <h4>CENTRO ASSISTENZA</h4>
+                                <ng-container *ngIf="op.data.service as service">
+                                    {{service.business_name}}<br>
+                                    {{service.address}} {{service.street_number}}<br>
+                                    {{service.zip}} ({{service.province}}) - {{service.country}}<br>
+                                    P.IVA/CF {{service.fiscal_code}}<br>
+                                    Tel. {{service.phone}}<br>
+                                </ng-container>
+                            </div>
+                        </div>
+                        <div class="row mb-5">
+                            <div class="col">
+                                <h4>REPORT</h4>
                             </div>
                         </div>
                         <div class="row">
@@ -24,7 +43,7 @@
                                 <div class="row">
                                     <div class="col-md">
                                         <h3>Tipologia intervento eseguito</h3>
-                                        <p>{{op.data.type}}</p>
+                                        <p>{{op.data.type|operationOption|translate}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -50,7 +69,7 @@
                                 <div class="row">
                                     <div class="col-md">
                                         <h3>Condizioni Intervento</h3>
-                                        <p>{{op.data.condition}}</p>
+                                        <p>{{op.data.condition | operationOption |translate}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -66,35 +85,35 @@
                                 <h3>Dichiarazione di Conformità</h3>
                                 <dl class="row">
                                     <dd class="col-6">Impianto Elettrico</dd>
-                                    <dt class="col-6">{{(op.data.e_system ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.e_system | operationOption)|translate}}</dt>
                                     <dd class="col-6">Impianto di Riscaldamento e Idrosanitario</dd>
-                                    <dt class="col-6">{{(op.data.hp_system ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.hp_system | operationOption)|translate}}</dt>
                                     <dd class="col-6">Impianto Scarico Fumi</dd>
-                                    <dt class="col-6">{{(op.data.se_system ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.se_system | operationOption)|translate}}</dt>
                                 </dl>
                                 <h3>Locale Installazione</h3>
                                 <dl class="row">
                                     <dd class="col-6">Idoneità locale installazione</dd>
-                                    <dt class="col-6">{{(op.data.li_suitability ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.li_suitability | operationOption)|translate}}</dt>
                                     <dd class="col-6">Spazi rispettati attorno e sopra</dd>
-                                    <dt class="col-6">{{(op.data.spaces_respected ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.spaces_respected | operationOption)|translate}}</dt>
                                     <dd class="col-6">Presenza apertura di ventilazione</dd>
-                                    <dt class="col-6">{{(op.data.presence_ventilation_opening ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.presence_ventilation_opening | operationOption)|translate}}</dt>
                                     <dd class="col-6">Apertura vent. Adeguata</dd>
-                                    <dt class="col-6">{{(op.data.vent_opening_appropriate ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.vent_opening_appropriate | operationOption)|translate}}</dt>
                                     <dd class="col-6">Apertura vent. Libera</dd>
-                                    <dt class="col-6">{{(op.data.vent_opening_free ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.vent_opening_free | operationOption)|translate}}</dt>
                                 </dl>
                             </div>
                             <div class="col-md">
                                 <h3>Dati Canna Fumaria</h3>
                                 <dl class="row">
                                     <dd class="col-6">Sezioni corrette</dd>
-                                    <dt class="col-6">{{(op.data.correct_sections ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.correct_sections | operationOption)|translate}}</dt>
                                     <dd class="col-6">Tratto semiorizzontale entro i limiti</dd>
-                                    <dt class="col-6">{{(op.data.sh_section_limits ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.sh_section_limits | operationOption)|translate}}</dt>
                                     <dd class="col-6">Pendenza corretta (>5%)</dd>
-                                    <dt class="col-6">{{(op.data.correct_slope ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.correct_slope | operationOption)|translate}}</dt>
                                     <dd class="col-6">Lunghezza tratti semiorizzontali</dd>
                                     <dt class="col-6">{{op.data.length_se_sections}}</dt>
                                     <dd class="col-6">Lunghezza tratti verticali</dd>
@@ -108,17 +127,17 @@
                                     <dd class="col-6">Sezione Canna Fumaria</dd>
                                     <dt class="col-6">{{op.data.chimney_section}}</dt>
                                     <dd class="col-6">Ispezione a T</dd>
-                                    <dt class="col-6">{{(op.data.t_inspection ? "compliant" : "notcompliant")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.t_inspection | operationOption)|translate}}</dt>
                                     <dd class="col-6">Stato conservazione</dd>
-                                    <dt class="col-6">{{op.data.conservation_status}}</dt>
+                                    <dt class="col-6">{{op.data.conservation_status | operationOption|translate}}</dt>
                                     <dd class="col-6">Perdite condotti di scarico</dd>
-                                    <dt class="col-6">{{(op.data.exhaust_duct_leaks ? "present" : "notpresent")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.exhaust_duct_leaks | operationOption)|translate}}</dt>
                                     <dd class="col-6">Scarico fumi a tetto</dd>
-                                    <dt class="col-6">{{(op.data.roof_smoke_exhaust ? "present" : "notpresent")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.roof_smoke_exhaust | operationOption)|translate}}</dt>
                                     <dd class="col-6">Comignolo antivento</dd>
-                                    <dt class="col-6">{{(op.data.windproof_chimney ? "present" : "notpresent")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.windproof_chimney| operationOption)|translate}}</dt>
                                     <dd class="col-6">Coibentazione canna fumaria</dd>
-                                    <dt class="col-6">{{(op.data.chimney_insulation ? "present" : "notpresent")|translate}}</dt>
+                                    <dt class="col-6">{{(op.data.chimney_insulation| operationOption)|translate}}</dt>
                                     <dd class="col-6">Classificazione Tiraggio</dd>
                                     <dt class="col-6">{{op.data.draught_classification}}</dt>
                                     <dd class="col-6">Valore Tiraggio</dd>
@@ -138,5 +157,5 @@
             <button class="btn btn-primary" (click)="back()">Torna alla lista</button>
         </div>
     </div>
-    <app-operation-form></app-operation-form>
+    <app-operation-form (submitted)="onOperationSubmitted()"></app-operation-form>
 </ng-container>

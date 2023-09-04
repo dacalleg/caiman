@@ -39,6 +39,8 @@ import { RegistryComponent } from './components/registry/registry.component';
 import { OperationComponent } from './components/operation/operation.component';
 import { OperationFormComponent } from './components/operation-form/operation-form.component';
 import { ProfileComponent } from '../profile/components/profile/profile.component';
+import { OperationOptionPipe } from './pipes/operation-option.pipe';
+import { OperationTitlePipe } from './pipes/operation-title.pipe';
 
 const icons = {
   Eye,
@@ -85,6 +87,8 @@ const icons = {
     OperationComponent,
     OperationFormComponent,
     ProfileComponent,
+    OperationOptionPipe,
+    OperationTitlePipe,
   ],
   imports: [
     CommonModule,

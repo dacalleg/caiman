@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Operation, Registry, User } from '../classes/interfaces';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -7,7 +8,7 @@ import { Operation, Registry, User } from '../classes/interfaces';
 export class BuilderService {
 
 
-  constructor() { }
+  constructor(private AuthService: AuthService) { }
 
   buildRegistry() {
     return {
@@ -88,10 +89,10 @@ export class BuilderService {
         conservation_status: "",
         exhaust_duct_leaks: "",
         roof_smoke_exhaust: "",
-        windproof_chimney: false,
-        chimney_insulation: false,
+        windproof_chimney: "",
+        chimney_insulation: "",
         draught_classification: 0,
-        draught_value: 0
+        draught_value: 0,
       }
     } as Operation
   }

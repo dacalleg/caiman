@@ -21,7 +21,6 @@ export class OperationTitlePipe implements PipeTransform {
     let ret = 'Intervento del ' + date;
     if (confirmed) {
       ret = 'Intervento del ' + date + ' - confermato il ' + confirmedDate + " da " + (operation.email_confirmed ? "E-mail" : "Web")
-
     }
     return ret;
   }

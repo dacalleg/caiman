@@ -14,13 +14,5 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.Api.sync().subscribe({
-      complete: () => {
-        console.log("Syncronization Completed")
-      },
-      error: (err) => {
-        console.log("Syncronization Error")
-      }
-    })
   }
 }

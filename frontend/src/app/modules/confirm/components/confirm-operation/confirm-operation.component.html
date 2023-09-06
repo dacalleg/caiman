@@ -1,12 +1,8 @@
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md vh-100">
-            <div class="p-3"  style="width: 100%;height:100%">
-                <iframe src="/print/operation/bd2e7395-f1a5-4b5d-af72-e53d210af38d" style="width: 100%;height:100%"></iframe>
-            </div>
-        </div>
-        <div class="col-md vh-100 d-flex flex-column justify-content-end">
-            <button class="btn btn-primary my-3">Conferma</button>
-        </div>
+<div class="d-flex vh-100 flex-column">
+    <div class="p-5 flex-grow-1">
+        <iframe *ngIf="key$|async as key" [src]="('/print/operation/' + key) | safe" class="w-100 h-100"></iframe>
+    </div>
+    <div class="p-5" *ngIf="!(operation$|async)?.confirmed_date">
+        <button class="btn btn-primary w-100" (click)="confirm()">Conferma</button>
     </div>
 </div>

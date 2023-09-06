@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { ConfirmOperationComponent } from './components/confirm-operation/confirm-operation.component';
 
 const routes: Routes = [
-  {path: 'operation', component: ConfirmOperationComponent}
+  {path: 'operation/:key', component: ConfirmOperationComponent}
 ];
 
 @NgModule({

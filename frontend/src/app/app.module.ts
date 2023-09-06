@@ -67,7 +67,7 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     DashboardComponent,
     AlertComponent,
     HeaderComponent,
-    ToastManagerComponent
+    ToastManagerComponent,
   ],
   imports: [
     BrowserModule,

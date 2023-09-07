@@ -11,7 +11,6 @@ import { ToastService } from 'src/app/services/toast.service';
   styleUrls: ['./confirm-operation.component.scss']
 })
 export class ConfirmOperationComponent {
-
   key$: Observable<string>;
   operation$: Observable<Operation>;
   reload$: Subject<void>;
@@ -37,6 +36,5 @@ export class ConfirmOperationComponent {
       this.Toast.addSuccessToast("Il report è stato confermato!");
       this.reload$.next();
     });
-
   }
 }

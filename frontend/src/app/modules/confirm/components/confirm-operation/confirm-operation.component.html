@@ -3,6 +3,6 @@
         <iframe *ngIf="key$|async as key" [src]="('/print/operation/' + key) | safe" class="w-100 h-100"></iframe>
     </div>
     <div class="p-5" *ngIf="!(operation$|async)?.confirmed_date">
-        <button class="btn btn-primary w-100" (click)="confirm()">Conferma</button>
+        <button class="btn btn-primary w-100" (click)="confirm()">{{'confirm'|translate}}</button>
     </div>
 </div>

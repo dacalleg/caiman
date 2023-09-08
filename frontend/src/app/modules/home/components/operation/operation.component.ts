@@ -54,7 +54,7 @@ export class OperationComponent {
 
   confirmOperation(operation: Operation) {
     this.Api.confirmOperation(operation.key!).subscribe(() => {
-      this.Toast.addSuccessToast("Intervento Confermato");
+      this.Toast.addSuccessToast("op.confirmed");
       this.reloadOperation$.next();
     }
     )

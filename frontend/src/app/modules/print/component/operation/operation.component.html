@@ -6,31 +6,31 @@
         </div>
         <div class="row my-5">
             <div class="col">
-                <h3>CLIENTE</h3>
+                <h3>{{'customer'|translate}}</h3>
                 <ng-container *ngIf="op.data.registry as registry">
                     <ng-container *ngIf="registry.business_name">{{registry.business_name}}<br></ng-container>
                     {{registry.surname}} {{registry.name}}<br>
                     {{registry.address}} {{registry.street_number}}<br>
                     {{registry.zip}} ({{registry.province}}) - {{registry.country}}<br>
-                    P.IVA/CF {{registry.fiscal_code}}<br>
-                    Tel. {{registry.phone}}
+                    {{'vat.cf'|translate}} {{registry.fiscal_code}}<br>
+                    {{'tel.abbr'|translate}} {{registry.phone}}
                 </ng-container>
             </div>
             <div class="col text-end">
-                <h3>CENTRO ASSISTENZA</h3>
+                <h3>{{'cat'|translate}}</h3>
                 <ng-container *ngIf="op.data.service as service">
                     {{service.business_name}}<br>
                     {{service.address}} {{service.street_number}}<br>
                     {{service.zip}} ({{service.province}}) - {{service.country}}<br>
-                    P.IVA/CF {{service.fiscal_code}}<br>
-                    Tel. {{service.phone}}<br>
+                    {{'vat.cf'|translate}} {{service.fiscal_code}}<br>
+                    {{'tel.abbr'|translate}} {{service.phone}}<br>
                 </ng-container>
             </div>
         </div>
     
         <div class="row title">
             <div class="col text-center">
-                <h2>REPORT INTERVENTO TECNICO</h2>
+                <h2>{{'report.title'|translate}}</h2>
                 <p>{{op.createdAt|date:'dd/MM/yyyy'}} - {{ op.serial }}</p>
             </div>
         </div>
@@ -40,101 +40,101 @@
         <div class="row">
             <div class="col">
                 <dl class="row">
-                    <dd class="col-6 m-0">Numero Intervento</dd>
+                    <dd class="col-6 m-0">{{'op.number'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.key}}</dt>
-                    <dd class="col-6 m-0">Data Intervento</dd>
+                    <dd class="col-6 m-0">{{'op.date'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.createdAt|date:'d/M/Y'}}</dt>
-                    <dd class="col-6 m-0">Matricola</dd>
+                    <dd class="col-6 m-0">{{'serial'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.serial}}</dt>
-                    <dd class="col-6 m-0">Data Acquisto</dd>
+                    <dd class="col-6 m-0">{{'purchase.date'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.registry?.purchase_date|date:'d/M/Y'}}</dt>
-                    <dd class="col-6 m-0">Data Primo Funzionamento</dd>
+                    <dd class="col-6 m-0">{{'first.ignition.date'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.registry?.first_ignition_date|date:'d/M/Y'}}</dt>
-                    <dd class="col-6 m-0">TIPOLOGIA INTERVENTO ESEGUITO</dd>
+                    <dd class="col-6 m-0">{{'report.trans.1'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.type|operationOption|translate}}</dt>
-                    <dd class="col-6 m-0">COMPONENTI SOSTITUITI</dd>
+                    <dd class="col-6 m-0">{{'report.trans.2'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.replaced_components}}</dt>
-                    <dd class="col-6 m-0">GUASTI SEGNALATI</dd>
+                    <dd class="col-6 m-0">{{'report.trans.3'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.breakdowns.join(", ")}}</dt>
-                    <dd class="col-6 m-0">CONDIZIONI INTERVENTI</dd>
+                    <dd class="col-6 m-0">{{'report.trans.4'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.condition | operationOption |translate}}</dt>
-                    <dd class="col-6 m-0">NR VERBALE O CERTIFICATO DI GARANZIA</dd>
+                    <dd class="col-6 m-0">{{'report.trans.5'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.warranty}}</dt>
                 </dl>
             </div>
         </div>
         <div class="row">
             <div class="col">
-                <h3>Dichiarazione di Conformità</h3>
+                <h3>{{'report.trans.6'|translate}}</h3>
                 <dl class="row">
-                    <dd class="col-6 m-0">Impianto Elettrico</dd>
+                    <dd class="col-6 m-0">{{'report.trans.7'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.e_system | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Impianto di Riscaldamento e Idrosanitario</dd>
+                    <dd class="col-6 m-0">{{'report.trans.8'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.hp_system | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Impianto Scarico Fumi</dd>
+                    <dd class="col-6 m-0">{{'report.trans.9'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.se_system | operationOption)|translate}}</dt>
                 </dl>
-                <h3>Locale Installazione</h3>
+                <h3>{{'report.trans.10'|translate}}</h3>
                 <dl class="row">
-                    <dd class="col-6 m-0">Idoneità locale installazione</dd>
+                    <dd class="col-6 m-0">{{'report.trans.11'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.li_suitability | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Spazi rispettati attorno e sopra</dd>
+                    <dd class="col-6 m-0">{{'report.trans.12'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.spaces_respected | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Presenza apertura di ventilazione</dd>
+                    <dd class="col-6 m-0">{{'report.trans.13'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.presence_ventilation_opening | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Apertura vent. Adeguata</dd>
+                    <dd class="col-6 m-0">{{'report.trans.14'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.vent_opening_appropriate | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Apertura vent. Libera</dd>
+                    <dd class="col-6 m-0">{{'report.trans.15'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.vent_opening_free | operationOption)|translate}}</dt>
                 </dl>
-                <h3>Dati Canna Fumaria</h3>
+                <h3>{{'report.trans.16'|translate}}</h3>
                 <dl class="row">
-                    <dd class="col-6 m-0">Sezioni corrette</dd>
+                    <dd class="col-6 m-0">{{'report.trans.17'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.correct_sections | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Tratto semiorizzontale entro i limiti</dd>
+                    <dd class="col-6 m-0">{{'report.trans.18'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.sh_section_limits | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Pendenza corretta (>5%)</dd>
+                    <dd class="col-6 m-0">{{'report.trans.19'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.correct_slope | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Lunghezza tratti semiorizzontali</dd>
+                    <dd class="col-6 m-0">{{'report.trans.20'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.length_se_sections}}</dt>
-                    <dd class="col-6 m-0">Lunghezza tratti verticali</dd>
+                    <dd class="col-6 m-0">{{'report.trans.21'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.vs_length}}</dt>
-                    <dd class="col-6 m-0">Numero curve a 45°</dd>
+                    <dd class="col-6 m-0">{{'report.trans.22'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.bends_45}}</dt>
-                    <dd class="col-6 m-0">Numero curve a 90°</dd>
+                    <dd class="col-6 m-0">{{'report.trans.23'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.bends_90}}</dt>
-                    <dd class="col-6 m-0">Sezione Tubo Fumi</dd>
+                    <dd class="col-6 m-0">{{'report.trans.24'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.smoke_pipe_section}}</dt>
-                    <dd class="col-6 m-0">Sezione Canna Fumaria</dd>
+                    <dd class="col-6 m-0">{{'report.trans.25'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.chimney_section}}</dt>
-                    <dd class="col-6 m-0">Ispezione a T</dd>
+                    <dd class="col-6 m-0">{{'report.trans.26'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.t_inspection | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Stato conservazione</dd>
+                    <dd class="col-6 m-0">{{'report.trans.27'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.conservation_status | operationOption|translate}}</dt>
-                    <dd class="col-6 m-0">Perdite condotti di scarico</dd>
+                    <dd class="col-6 m-0">{{'report.trans.28'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.exhaust_duct_leaks | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Scarico fumi a tetto</dd>
+                    <dd class="col-6 m-0">{{'report.trans.29'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.roof_smoke_exhaust | operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Comignolo antivento</dd>
+                    <dd class="col-6 m-0">{{'report.trans.30'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.windproof_chimney| operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Coibentazione canna fumaria</dd>
+                    <dd class="col-6 m-0">{{'report.trans.31'|translate}}</dd>
                     <dt class="col-6 m-0">{{(op.data.chimney_insulation| operationOption)|translate}}</dt>
-                    <dd class="col-6 m-0">Classificazione Tiraggio</dd>
+                    <dd class="col-6 m-0">{{'report.trans.32'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.draught_classification}}</dt>
-                    <dd class="col-6 m-0">Valore Tiraggio</dd>
+                    <dd class="col-6 m-0">{{'report.trans.33'|translate}}</dd>
                     <dt class="col-6 m-0">{{op.data.draught_value}}</dt>
                 </dl>
             </div>
         </div>
         <div class="row my-4">
             <div class="col">
-                <h3>DESCRIZIONE INTERVENTO</h3>
+                <h3>{{'report.trans.34'|translate}}</h3>
                 <p>{{ op.data.description }}</p>
             </div>
         </div>
         <div class="row my-4">
             <div class="col-6 m-0 offset-6">
-                Firma per accettazione
+                {{'report.trans.35'|translate}}
                 <div class="space-sign"></div>
             </div>
         </div>

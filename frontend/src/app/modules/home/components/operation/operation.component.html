@@ -1,13 +1,13 @@
 <div class="row">
     <div class="col-md my-2">
-        <h1 class="fw-bold">INTERVENTI</h1>
+        <h1 class="fw-bold">{{'operations'|translate}}</h1>
     </div>
 </div>
 <ng-container *ngIf="!newOperation">
     <div class="row">
         <div class="col text-end">
-            <span class="me-3" *ngIf="(registry$|async) === null">Prima di creare un intervento devi compilare l'anagrafica del dispositivo</span>
-            <button class="btn btn-primary" (click)="createNewOperation()" [disabled]="(registry$|async) === null">Crea Nuovo Intervento</button>
+            <span class="me-3" *ngIf="(registry$|async) === null">{{'op.warning.registry'|translate}}</span>
+            <button class="btn btn-primary" (click)="createNewOperation()" [disabled]="(registry$|async) === null">{{'op.new'|translate}}</button>
         </div>
     </div>
     <div class="row mt-3">
@@ -17,56 +17,56 @@
                     <ng-template ngbPanelContent>
                         <div class="row">
                             <div class="col text-end">
-                                <a class="btn btn-primary my-3" [routerLink]="'/print/operation/' + op.key" target="_blank">Stampa Report</a>
-                                <button class="btn btn-warning m-3" *ngIf="!op.email_confirmed && !op.web_confirmed" (click)="confirmOperation(op)">Conferma intervento</button>
+                                <a class="btn btn-primary my-3" [routerLink]="'/print/operation/' + op.key" target="_blank">{{'op.print'|translate}}</a>
+                                <button class="btn btn-warning m-3" *ngIf="!op.email_confirmed && !op.web_confirmed" (click)="confirmOperation(op)">{{'op.confirm'|translate}}</button>
                             </div>
                         </div>
                         <div class="row mb-5">
                             <div class="col">
-                                <h4>CENTRO ASSISTENZA</h4>
+                                <h4>{{'cat'|translate}}</h4>
                                 <ng-container *ngIf="op.data.service as service">
                                     {{service.business_name}}<br>
                                     {{service.address}} {{service.street_number}}<br>
                                     {{service.zip}} ({{service.province}}) - {{service.country}}<br>
-                                    P.IVA/CF {{service.fiscal_code}}<br>
-                                    Tel. {{service.phone}}<br>
+                                    {{'vat.cf'|translate}} {{service.fiscal_code}}<br>
+                                    {{'tel.abbr'|translate}} {{service.phone}}<br>
                                 </ng-container>
                             </div>
                         </div>
                         <div class="row mb-5">
                             <div class="col">
-                                <h4>REPORT</h4>
+                                <h4>{{'report.title'|translate}}</h4>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md">
                                 <div class="row">
                                     <div class="col-md">
-                                        <h3>Codice Intervento</h3>
+                                        <h3>{{'op.number'|translate}}</h3>
                                         <p>{{op.key}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        <h3>Tipologia intervento eseguito</h3>
+                                        <h3>{{'report.trans.1'|translate}}</h3>
                                         <p>{{op.data.type|operationOption|translate}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        <h3>Descrizione intervento</h3>
+                                        <h3>{{'report.trans.34'|translate}}</h3>
                                         <p>{{op.data.description}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        <h3>Componenti sostituiti</h3>
+                                        <h3>{{'report.trans.2'|translate}}</h3>
                                         <p>{{op.data.replaced_components}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        <h3>Guasti segnalati</h3>
+                                        <h3>{{'report.trans.3'|translate}}</h3>
                                         <div class="badge bg-danger" [ngClass]="{'ms-2': i > 0}" *ngFor="let br of op.data.breakdowns;let i = index">{{br}}</div>
                                     </div>
                                 </div>
@@ -74,13 +74,13 @@
                             <div class="col-md">
                                 <div class="row">
                                     <div class="col-md">
-                                        <h3>Condizioni Intervento</h3>
+                                        <h3>{{'report.trans.4'|translate}}</h3>
                                         <p>{{op.data.condition | operationOption |translate}}</p>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        <h3>Nr Verbale o certificato di garanzia</h3>
+                                        <h3>{{'report.trans.5'|translate}}</h3>
                                         <p>{{op.data.warranty}}</p>
                                     </div>
                                 </div>
@@ -88,65 +88,65 @@
                         </div>
                         <div class="row mt-5">
                             <div class="col-md">
-                                <h3>Dichiarazione di Conformità</h3>
+                                <h3>{{'report.trans.6'|translate}}</h3>
                                 <dl class="row">
-                                    <dd class="col-6">Impianto Elettrico</dd>
+                                    <dd class="col-6">{{'report.trans.7'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.e_system | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Impianto di Riscaldamento e Idrosanitario</dd>
+                                    <dd class="col-6">{{'report.trans.8'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.hp_system | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Impianto Scarico Fumi</dd>
+                                    <dd class="col-6">{{'report.trans.9'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.se_system | operationOption)|translate}}</dt>
                                 </dl>
-                                <h3>Locale Installazione</h3>
+                                <h3>{{'report.trans.10'|translate}}</h3>
                                 <dl class="row">
-                                    <dd class="col-6">Idoneità locale installazione</dd>
+                                    <dd class="col-6">{{'report.trans.11'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.li_suitability | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Spazi rispettati attorno e sopra</dd>
+                                    <dd class="col-6">{{'report.trans.12'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.spaces_respected | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Presenza apertura di ventilazione</dd>
+                                    <dd class="col-6">{{'report.trans.13'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.presence_ventilation_opening | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Apertura vent. Adeguata</dd>
+                                    <dd class="col-6">{{'report.trans.14'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.vent_opening_appropriate | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Apertura vent. Libera</dd>
+                                    <dd class="col-6">{{'report.trans.15'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.vent_opening_free | operationOption)|translate}}</dt>
                                 </dl>
                             </div>
                             <div class="col-md">
-                                <h3>Dati Canna Fumaria</h3>
+                                <h3>{{'report.trans.16'|translate}}</h3>
                                 <dl class="row">
-                                    <dd class="col-6">Sezioni corrette</dd>
+                                    <dd class="col-6">{{'report.trans.17'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.correct_sections | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Tratto semiorizzontale entro i limiti</dd>
+                                    <dd class="col-6">{{'report.trans.18'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.sh_section_limits | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Pendenza corretta (>5%)</dd>
+                                    <dd class="col-6">{{'report.trans.19'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.correct_slope | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Lunghezza tratti semiorizzontali</dd>
+                                    <dd class="col-6">{{'report.trans.20'|translate}}</dd>
                                     <dt class="col-6">{{op.data.length_se_sections}}</dt>
-                                    <dd class="col-6">Lunghezza tratti verticali</dd>
+                                    <dd class="col-6">{{'report.trans.21'|translate}}</dd>
                                     <dt class="col-6">{{op.data.vs_length}}</dt>
-                                    <dd class="col-6">Numero curve a 45°</dd>
+                                    <dd class="col-6">{{'report.trans.22'|translate}}</dd>
                                     <dt class="col-6">{{op.data.bends_45}}</dt>
-                                    <dd class="col-6">Numero curve a 90°</dd>
+                                    <dd class="col-6">{{'report.trans.23'|translate}}</dd>
                                     <dt class="col-6">{{op.data.bends_90}}</dt>
-                                    <dd class="col-6">Sezione Tubo Fumi</dd>
+                                    <dd class="col-6">{{'report.trans.24'|translate}}</dd>
                                     <dt class="col-6">{{op.data.smoke_pipe_section}}</dt>
-                                    <dd class="col-6">Sezione Canna Fumaria</dd>
+                                    <dd class="col-6">{{'report.trans.25'|translate}}</dd>
                                     <dt class="col-6">{{op.data.chimney_section}}</dt>
-                                    <dd class="col-6">Ispezione a T</dd>
+                                    <dd class="col-6">{{'report.trans.26'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.t_inspection | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Stato conservazione</dd>
+                                    <dd class="col-6">{{'report.trans.27'|translate}}</dd>
                                     <dt class="col-6">{{op.data.conservation_status | operationOption|translate}}</dt>
-                                    <dd class="col-6">Perdite condotti di scarico</dd>
+                                    <dd class="col-6">{{'report.trans.28'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.exhaust_duct_leaks | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Scarico fumi a tetto</dd>
+                                    <dd class="col-6">{{'report.trans.29'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.roof_smoke_exhaust | operationOption)|translate}}</dt>
-                                    <dd class="col-6">Comignolo antivento</dd>
+                                    <dd class="col-6">{{'report.trans.30'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.windproof_chimney| operationOption)|translate}}</dt>
-                                    <dd class="col-6">Coibentazione canna fumaria</dd>
+                                    <dd class="col-6">{{'report.trans.31'|translate}}</dd>
                                     <dt class="col-6">{{(op.data.chimney_insulation| operationOption)|translate}}</dt>
-                                    <dd class="col-6">Classificazione Tiraggio</dd>
+                                    <dd class="col-6">{{'report.trans.32'|translate}}</dd>
                                     <dt class="col-6">{{op.data.draught_classification}}</dt>
-                                    <dd class="col-6">Valore Tiraggio</dd>
+                                    <dd class="col-6">{{'report.trans.33'|translate}}</dd>
                                     <dt class="col-6">{{op.data.draught_value}} Pa</dt>
                                 </dl>
                             </div>
@@ -160,7 +160,7 @@
 <ng-container *ngIf="newOperation">
     <div class="row">
         <div class="col text-end">
-            <button class="btn btn-primary" (click)="back()">Torna alla lista</button>
+            <button class="btn btn-primary" (click)="back()">{{'back'|translate}}</button>
         </div>
     </div>
     <app-operation-form (submitted)="onOperationSubmitted()"></app-operation-form>

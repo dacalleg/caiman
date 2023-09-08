@@ -38,7 +38,7 @@ export class ProfileComponent {
 
   onSubmit() {
     if (this.myForm?.form.valid) {
-      this.Auth.updateUserData(this.data).subscribe(() => this.Toast.addSuccessToast("Il Profilo è stato aggiornato con successo"));
+      this.Auth.updateUserData(this.data).subscribe(() => this.Toast.addSuccessToast("profile.update.success"));
     }
   }
 }

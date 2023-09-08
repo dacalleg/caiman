@@ -1,14 +1,14 @@
 <div class="row">
     <div class="col-md my-2">
-        <h1 class="fw-bold">ANAGRAFICA</h1>
+        <h1 class="fw-bold">{{'title.registry'|translate}}</h1>
     </div>
 </div>
 <form (ngSubmit)="onSubmit()" #myForm="ngForm">
     <div class="row">
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="codiceFiscale">Codice Fiscale o Partita IVA</label>
-                <input class="form-control" id="codiceFiscale" type="text" placeholder="Codice Fiscale"
+                <label class="form-label" for="codiceFiscale">{{'auth.register.vat'|translate}}</label>
+                <input class="form-control" id="codiceFiscale" type="text" [placeholder]="'auth.register.vat'|translate"
                     pattern="^([A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1})$|([0-9]{11})$|^(IT)?[0-9]{11}$"
                     required [(ngModel)]="registry.fiscal_code" name="fiscal_code" />
                 <div class="invalid-feedback">
@@ -18,8 +18,8 @@
         </div>
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="ragioneSociale">Ragione Sociale</label>
-                <input class="form-control" id="ragioneSociale" type="text" placeholder="Ragione Sociale"
+                <label class="form-label" for="ragioneSociale">{{'auth.register.businessname'|translate}}</label>
+                <input class="form-control" id="ragioneSociale" type="text" [placeholder]="'auth.register.businessname'|translate"
                     [(ngModel)]="registry.business_name" name="business_name" #businessname="ngModel" />
             </div>
         </div>
@@ -27,9 +27,9 @@
     <div class="row">
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="nome">Nome</label>
+                <label class="form-label" for="nome">{{'auth.register.name'|translate}}</label>
                 <input class="form-control" id="nome" type="text" [(ngModel)]="registry.name" name="name"
-                    placeholder="Nome" required />
+                [placeholder]="'auth.register.name'|translate" required />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
                 </div>
@@ -37,9 +37,9 @@
         </div>
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="cognome">Cognome</label>
+                <label class="form-label" for="cognome">{{'auth.register.surname'|translate}}</label>
                 <input class="form-control" id="cognome" type="text" [(ngModel)]="registry.surname" name="surname"
-                    placeholder="Cognome" required />
+                [placeholder]="'auth.register.surname'|translate" required />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
                 </div>
@@ -49,9 +49,9 @@
     <div class="row">
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="email">E-mail</label>
+                <label class="form-label" for="email">{{'auth.email'|translate}}</label>
                 <input class="form-control" id="email" type="email" [(ngModel)]="registry.email" name="email"
-                    placeholder="E-mail" pattern="[^@\s]+@[^@\s]+\.[^@\s]+" required />
+                [placeholder]="'auth.register.email'|translate" pattern="[^@\s]+@[^@\s]+\.[^@\s]+" required />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
                 </div>
@@ -61,9 +61,9 @@
     <div class="row">
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="address">Indirizzo</label>
+                <label class="form-label" for="address">{{'auth.register.address'|translate}}</label>
                 <input class="form-control" id="address" type="text" [(ngModel)]="registry.address"
-                    placeholder="Indirizzo" name="address" required />
+                [placeholder]="'auth.register.address'|translate" name="address" required />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
                 </div>
@@ -71,9 +71,9 @@
         </div>
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="streetnumber">Nr. Civico</label>
+                <label class="form-label" for="streetnumber">{{'auth.register.streetnumber'|translate}}</label>
                 <input class="form-control" id="streetnumber" [(ngModel)]="registry.street_number" type="text" required
-                    name="streetnumber" placeholder="Nr. Civico" />
+                    name="streetnumber" [placeholder]="'auth.register.streetnumber'|translate" />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
                 </div>
@@ -84,9 +84,9 @@
     <div class="row">
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="telefono">Telefono</label>
+                <label class="form-label" for="telefono">{{'auth.register.phone'|translate}}</label>
                 <input class="form-control" id="telefono" [(ngModel)]="registry.phone" type="text" name="phone"
-                    placeholder="Telefono" required />
+                [placeholder]="'auth.register.phone'|translate" required />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
                 </div>
@@ -94,27 +94,27 @@
         </div>
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="mobile">Cellulare</label>
+                <label class="form-label" for="mobile">{{'auth.register.mobile'|translate}}</label>
                 <input class="form-control" id="mobile" [(ngModel)]="registry.mobile" name="mobile" type="text"
-                    placeholder="Cellulare" />
+                [placeholder]="'auth.register.mobile'|translate" />
             </div>
         </div>
     </div>
     <div class="row">
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="city">Città</label>
+                <label class="form-label" for="city">{{'auth.register.city'|translate}}</label>
                 <input class="form-control" id="city" type="text" [(ngModel)]="registry.city" name="city"
-                    placeholder="Città" required />
+                [placeholder]="'auth.register.city'|translate" required />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
                 </div>
             </div>
         </div>
         <div class="mb-3">
-            <label class="form-label" for="province">Provincia</label>
+            <label class="form-label" for="province">{{'auth.register.province'|translate}}</label>
             <input class="form-control" id="province" type="text" [(ngModel)]="registry.province" name="province"
-                placeholder="Provincia" required />
+            [placeholder]="'auth.register.province'|translate" required />
             <div class="invalid-feedback">
                 {{ 'field.invalid' | translate }}
             </div>
@@ -123,8 +123,8 @@
     <div class="row">
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="zip">CAP</label>
-                <input class="form-control" id="zip" type="text" [(ngModel)]="registry.zip" name="zip" placeholder="CAP"
+                <label class="form-label" for="zip">{{'auth.register.zip'|translate}}</label>
+                <input class="form-control" id="zip" type="text" [(ngModel)]="registry.zip" name="zip" [placeholder]="'auth.register.zip'|translate"
                     required />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
@@ -133,7 +133,7 @@
         </div>
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="country">Nazione</label>
+                <label class="form-label" for="country">{{'auth.register.country'|translate}}</label>
                 <select class="form-control" id="country" name="country" [(ngModel)]="registry.country" required>
                     <option *ngFor="let country of countries$|async" [ngValue]="country.code">{{country.name}}</option>
                 </select>
@@ -151,10 +151,10 @@
     <div class="row">
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="purchasedate">Data di acquisto</label>
+                <label class="form-label" for="purchasedate">{{'purchase.date'|translate}}</label>
                 <input class="form-control" id="purchasedate" type="date" name="purchasedate"
                     [ngModel]="registry.purchase_date | date:'yyyy-MM-dd'" required
-                    (ngModelChange)="ngUpdatePurchaseDate($event)" placeholder="Data di acquisto"
+                    (ngModelChange)="ngUpdatePurchaseDate($event)" [placeholder]="'purchase.date'|translate"
                     data-sb-validations="required" />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
@@ -163,10 +163,10 @@
         </div>
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="startdate">Data di prima accesione</label>
+                <label class="form-label" for="startdate">{{'first.ignition.date'|translate}}</label>
                 <input class="form-control" id="startdate" type="date" name="startdate"
                     [ngModel]="registry.first_ignition_date | date:'yyyy-MM-dd'" required
-                    (ngModelChange)="ngUpdateFirstIgnitionDate($event)" placeholder="Data di prima accesione"
+                    (ngModelChange)="ngUpdateFirstIgnitionDate($event)" [placeholder]="'first.ignition.date'|translate"
                     data-sb-validations="required" />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
@@ -177,9 +177,9 @@
     <div class="row">
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="dealer">Rivenditore</label>
+                <label class="form-label" for="dealer">{{'dealer'|translate}}</label>
                 <input class="form-control" id="dealer" type="text" [(ngModel)]="registry.dealer" required name="dealer"
-                    placeholder="Rivenditore" />
+                [placeholder]="'first.ignition.dealer'|translate" />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
                 </div>
@@ -187,9 +187,9 @@
         </div>
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="invoicenr">Numero Fattura</label>
+                <label class="form-label" for="invoicenr">{{'invoice.nr'|translate}}</label>
                 <input class="form-control" id="invoicenr" type="text" [(ngModel)]="registry.invoice" required
-                    name="invoicenr" placeholder="Numero Fattura" />
+                    name="invoicenr" [placeholder]="'invoice.nr'|translate" />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
                 </div>
@@ -197,9 +197,9 @@
         </div>
         <div class="col-md">
             <div class="mb-3">
-                <label class="form-label" for="warranty">Numero Certificato Garanzia</label>
+                <label class="form-label" for="warranty">{{'warranty.certificate'|translate}}</label>
                 <input class="form-control" id="warranty" type="text" [(ngModel)]="registry.warranty" required
-                    name="warranty" placeholder="Numero Certificato Garanzia" />
+                    name="warranty" [placeholder]="'warranty.certificate'|translate" />
                 <div class="invalid-feedback">
                     {{ 'field.invalid' | translate }}
                 </div>
@@ -209,13 +209,13 @@
 
     <div class="row">
         <div class="col-md text-end">
-            <button type="submit" class="btn btn-primary" [disabled]="!myForm.form.dirty">Aggiorna</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!myForm.form.dirty">{{'update'|translate}}</button>
         </div>
     </div>
 </form>
 <div class="row">
     <div class="col">
-        <h3>LISTA VARIAZIONI</h3>
+        <h3>{{'title.variation.list'|translate}}</h3>
     </div>
 </div>
 <div class="row">

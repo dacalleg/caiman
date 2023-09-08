@@ -60,7 +60,7 @@ export class RegistryComponent {
     if(this.myForm?.form.valid)
     {
       this.Api.updateRegistry(this.registry).subscribe(() => {
-        this.Toast.addSuccessToast("L\'anagrafica è stata salvata correttamente");
+        this.Toast.addSuccessToast("registry.update.success");
         this.update$.next();
       });
     }

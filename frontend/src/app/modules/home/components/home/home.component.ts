@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, mergeMap, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, tap, throwError, timeout, toArray } from "rxjs";
 import { Agua } from 'src/app/classes/agua';
@@ -31,7 +31,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   search$: BehaviorSubject<string>;
   wifiConnectionAvailable$: Observable<boolean>;
   loadDeviceData$: Observable<DeviceProduct>;
-  loadSnet$: Observable<string>;
+  loadSnet$: Observable<DeviceProduct>;
   connected$: Observable<boolean>;
 
   aguaChannel$: Observable<Agua>;
@@ -48,7 +48,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private Api: ApiService,
     private Auth: AuthService,
     private http: HttpClient,
-    private modal: ModalService) {
+    private modal: ModalService,
+    private Router: Router) {
 
     this.nav = null;
     this.mobileMenuOpen = false;
@@ -104,7 +105,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
 
     this.loadSnet$ = this.loadDeviceData$.pipe(
-      switchMap((device) => this.Api.getAttachmentContent(device.info.serami_file).pipe(tap((content) => this.Store.loadFromSnet(content)))),
+      tap((device) => console.log(device.info)),
+      tap((device) => this.Store.loadFromJson(device.info.variables)),
       shareReplay(1)
     )
 

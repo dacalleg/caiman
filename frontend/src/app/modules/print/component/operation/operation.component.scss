@@ -1,0 +1,27 @@
+.page
+{
+    //min-height: 100vh;
+}
+
+.report
+{
+    font-size: 12px;
+}
+
+@media print {
+    .page
+    {
+        page-break-after:always;
+    }
+}
+
+.title
+{
+    margin-top: 300px
+}
+
+.space-sign
+{
+    border-bottom: 1px solid black;
+    margin-top: 35px;
+}

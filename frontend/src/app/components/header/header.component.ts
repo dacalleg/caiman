@@ -1,10 +1,9 @@
 import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
-import { StoreService } from "../../../../services/store.service";
-import { ModalService } from "../../../../services/modal.service";
+import { StoreService } from "../../services/store.service";
+import { ModalService } from "../../services/modal.service";
 import { map, Observable, take, tap } from "rxjs";
-import { DeviceData, Project, Variable } from "../../../../classes/interfaces";
-import { DeviceService } from "../../../../services/device.service";
-import { ExportService } from "../../../../services/export.service";
+import { Project } from "../../classes/interfaces";
+import { DeviceService } from "../../services/device.service";
 import { AuthService } from 'src/app/services/auth.service';
 import { Router } from '@angular/router'
 import { ApiService } from 'src/app/services/api.service';
@@ -14,7 +13,6 @@ import { ApiService } from 'src/app/services/api.service';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-
 
   @ViewChild("file") file: ElementRef | null;
   @Output() onBurgerClicked = new EventEmitter<void>();
@@ -119,6 +117,10 @@ export class HeaderComponent implements OnInit {
     this.AuthService.logout().pipe(
       tap(() => this.Router.navigate(['/auth/login']))
     ).subscribe();
+  }
+
+  profile() {
+    this.Router.navigate(['/dashboard/profile'])
   }
 
   burgerMenuClicked() {

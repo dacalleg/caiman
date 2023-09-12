@@ -29,7 +29,8 @@
               <small class="role">{{roles$|async}}</small>
             </div>
             <hr class="dropdown-divider">
-            <a class="text-end" ngbDropdownItem (click)="logout()">Logout</a>
+            <a class="text-end" ngbDropdownItem (click)="profile()">{{'profile'|translate}}</a>
+            <a class="text-end" ngbDropdownItem (click)="logout()">{{'logout'|translate}}</a>
           </div>
         </li>
       </ul>

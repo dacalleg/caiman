@@ -1,6 +1,11 @@
 <div class="dashboard-container">
     <div class="d-flex flex-grow-1 w-100 h-100">
-        <router-outlet></router-outlet>
+        <div class="w-100 h-100 d-flex flex-column">
+            <div class="header">
+                <app-header (onBurgerClicked)="openMobileMenu()"></app-header>
+            </div>
+            <router-outlet></router-outlet>
+        </div>
     </div>
     <div class="footer">
         <app-footer></app-footer>

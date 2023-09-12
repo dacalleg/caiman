@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HeaderComponent } from './components/header/header.component';
 import { HomeComponent } from './components/home/home.component';
 import { VariableTeaseComponent } from './components/variable-tease/variable-tease.component';
 import { OptionModalComponent } from './components/option-modal/option-modal.component';
@@ -16,7 +15,7 @@ import { NumberFormatPipe } from './pipes/number-format.pipe';
 import { AddressPipe } from './pipes/address.pipe';
 import { VarByGroupPipe } from './pipes/var-by-group.pipe';
 import { HomeRoutingModule } from './home-routing.modules';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {BootstrapIconsModule} from "ng-bootstrap-icons";
 import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle} from 'ng-bootstrap-icons/icons';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
@@ -36,6 +35,11 @@ import { LogsComponent } from './components/logs/logs.component';
 import { GroupLogPipe } from './pipes/group-log.pipe';
 import { VariableFromHashPipe } from './pipes/variable-from-hash.pipe';
 import { FilterLogPipe } from './pipes/filter-log.pipe';
+import { RegistryComponent } from './components/registry/registry.component';
+import { OperationComponent } from './components/operation/operation.component';
+import { OperationFormComponent } from './components/operation-form/operation-form.component';
+import { ProfileComponent } from '../profile/components/profile/profile.component';
+import { OperationTitlePipe } from './pipes/operation-title.pipe';
 
 const icons = {
   Eye,
@@ -52,7 +56,6 @@ const icons = {
 @NgModule({
   declarations: [
     VarByGroupPipe,
-    HeaderComponent,
     HomeComponent,
     VariableTeaseComponent,
     AddressPipe,
@@ -79,12 +82,18 @@ const icons = {
     GroupLogPipe,
     VariableFromHashPipe,
     FilterLogPipe,
+    RegistryComponent,
+    OperationComponent,
+    OperationFormComponent,
+    ProfileComponent,
+    OperationTitlePipe,
   ],
   imports: [
     CommonModule,
     SharedModule,
     HomeRoutingModule,
     FormsModule,
+    ReactiveFormsModule,
     NgbModule,
     YouTubePlayerModule,
     BootstrapIconsModule.pick(icons),

@@ -1,0 +1,459 @@
+<div class="row my-5">
+    <div class="col-md">
+        <h4>{{'customer'|translate}}</h4>
+        <ng-container *ngIf="(registry$|async) as registry">
+            <ng-container *ngIf="registry.business_name">{{registry.business_name}}<br></ng-container>
+            {{registry.surname}} {{registry.name}}<br>
+            {{registry.address}} {{registry.street_number}}<br>
+            {{registry.zip}} ({{registry.province}}) - {{registry.country}}<br>
+            {{'vat.cf'|translate}} {{registry.fiscal_code}}<br>
+            {{'tel.abbr'|translate}} {{registry.phone}}
+        </ng-container>
+    </div>
+    <div class="col-md text-end">
+        <h4>{{'cat'|translate}}</h4>
+        <ng-container *ngIf="(user$|async) as user">
+            {{user.business_name}}<br>
+            {{user.address}} {{user.street_number}}<br>
+            {{user.zip}} ({{user.province}}) - {{user.country}}<br>
+            {{'vat.cf'|translate}} {{user.fiscal_code}}<br>
+            {{'tel.abbr'|translate}} {{user.phone}}
+        </ng-container>
+    </div>
+</div>
+<form (ngSubmit)="onSubmit()" #myForm="ngForm">
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label class="form-label" for="type">{{'report.trans.1'|translate}}</label>
+                <select pattern="^.$" [(ngModel)]="operation.data.type" class="form-control" id="type" name="type"
+                    required>
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="I">{{'option.technical.intervention'|translate}}</option>
+                    <option value="F">{{'option.first.ignition'|translate}}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label class="form-label" for="description">{{'report.trans.34'|translate}}</label>
+                <textarea class="form-control" id="description" type="text" [placeholder]="'report.trans.34'|translate"
+                    required [(ngModel)]="operation.data.description" name="description" ></textarea>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label class="form-label" for="replaced_components">{{'report.trans.2'|translate}}</label>
+                <input class="form-control" id="replaced_components" type="text" [placeholder]="'report.trans.2'|translate"
+                    required [(ngModel)]="operation.data.replaced_components" name="replaced_components" />
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label class="form-label" for="breakdowns">{{'report.trans.3'|translate}}</label>
+                <div class="form-check" *ngFor="let failure of failures$|async">
+                    <input class="form-check-input" type="checkbox" value="" [id]="failure.key"
+                        (change)="onFailureChange(failure.key)">
+                    <label class="form-check-label" [for]="failure.key" [innerHTML]="failure.name">
+                    </label>
+                </div>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="condition">{{'report.trans.4'|translate}}</label>
+                <select [(ngModel)]="operation.data.condition" class="form-control" id="condition" name="condition"
+                    required>
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="W">{{ 'under_warranty' | translate }}</option>
+                    <option value="NW">{{ 'out_warranty' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="mb-3">
+                <label class="form-label" for="warranty">{{'report.trans.5'|translate}}</label>
+                <input class="form-control" id="warranty" type="text" [placeholder]="'report.trans.5'|translate"
+                    required [(ngModel)]="operation.data.warranty" name="warranty" />
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-4">
+            <div class="mb-3">
+                <label class="form-label" for="e_system">{{'report.trans.7'|translate}}</label>
+                <select [(ngModel)]="operation.data.e_system" class="form-control" id="e_system" name="e_system"
+                    >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="CNF">{{ 'conforming' | translate }}</option>
+                    <option value="NCNF">{{ 'not_conforming' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="mb-3">
+                <label class="form-label" for="hp_system">{{'report.trans.8'|translate}}</label>
+                <select [(ngModel)]="operation.data.hp_system" class="form-control" id="hp_system" name="hp_system"
+                    >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="CNF">{{ 'conforming' | translate }}</option>
+                    <option value="NCNF">{{ 'not_conforming' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="mb-3">
+                <label class="form-label" for="se_system">{{'report.trans.9'|translate}}</label>
+                <select [(ngModel)]="operation.data.se_system" class="form-control" id="se_system" name="se_system"
+                    >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="CNF">{{ 'conforming' | translate }}</option>
+                    <option value="NCNF">{{ 'not_conforming' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="li_suitability">{{'report.trans.11'|translate}}</label>
+                <select [(ngModel)]="operation.data.li_suitability" class="form-control" id="li_suitability"
+                    name="li_suitability" >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="CNF">{{ 'conforming' | translate }}</option>
+                    <option value="NCNF">{{ 'not_conforming' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="spaces_respected">{{'report.trans.12'|translate}}</label>
+                <select [(ngModel)]="operation.data.spaces_respected" class="form-control" id="spaces_respected"
+                    name="spaces_respected" >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="CNF">{{ 'conforming' | translate }}</option>
+                    <option value="NCNF">{{ 'not_conforming' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="presence_ventilation_opening">{{'report.trans.13'|translate}}</label>
+                <select [(ngModel)]="operation.data.presence_ventilation_opening" class="form-control"
+                    id="presence_ventilation_opening" name="presence_ventilation_opening" >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="CNF">{{ 'conforming' | translate }}</option>
+                    <option value="NCNF">{{ 'not_conforming' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="vent_opening_appropriate">{{'report.trans.14'|translate}}</label>
+                <select [(ngModel)]="operation.data.vent_opening_appropriate" class="form-control"
+                    id="vent_opening_appropriate" name="vent_opening_appropriate" >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="CNF">{{ 'conforming' | translate }}</option>
+                    <option value="NCNF">{{ 'not_conforming' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="vent_opening_free">{{'report.trans.15'|translate}}</label>
+                <select [(ngModel)]="operation.data.vent_opening_free" class="form-control" id="vent_opening_free"
+                    name="vent_opening_free" >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="CNF">{{ 'conforming' | translate }}</option>
+                    <option value="NCNF">{{ 'not_conforming' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="correct_sections">{{'report.trans.16'|translate}}</label>
+                <select [(ngModel)]="operation.data.correct_sections" class="form-control" id="correct_sections"
+                    name="correct_sections" >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="Y">{{ 'yes' | translate }}</option>
+                    <option value="N">{{ 'no' | translate }}</option>
+                    <option value="NC">{{ 'not_verifiable' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="sh_section_limits">{{'report.trans.18'|translate}}</label>
+                <select [(ngModel)]="operation.data.sh_section_limits" class="form-control" id="sh_section_limits"
+                    name="sh_section_limits" >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="Y">{{ 'yes' | translate }}</option>
+                    <option value="N">{{ 'no' | translate }}</option>
+                    <option value="NC">{{ 'not_verifiable' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="correct_slope">{{'report.trans.19'|translate}}</label>
+                <select [(ngModel)]="operation.data.correct_slope" class="form-control" id="correct_slope"
+                    name="correct_slope" >
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="Y">{{ 'yes' | translate }}</option>
+                    <option value="N">{{ 'no' | translate }}</option>
+                    <option value="NC">{{ 'not_verifiable' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="length_se_sections">{{'report.trans.20'|translate}}</label>
+                <input class="form-control" id="length_se_sections" type="text"
+                    [placeholder]="'report.trans.20'|translate" required
+                    [(ngModel)]="operation.data.length_se_sections" name="length_se_sections" />
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="vs_length">{{'report.trans.21'|translate}}</label>
+                <input class="form-control" id="vs_length" type="text" [placeholder]="'report.trans.21'|translate" required
+                    [(ngModel)]="operation.data.vs_length" name="vs_length" />
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="bends_45">{{'report.trans.22'|translate}}</label>
+                <input class="form-control" id="bends_45" type="text" [placeholder]="'report.trans.22'|translate" required
+                    [(ngModel)]="operation.data.bends_45" name="bends_45" />
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="bends_90">{{'report.trans.23'|translate}}</label>
+                <input class="form-control" id="bends_90" type="text" [placeholder]="'report.trans.23'|translate" required
+                    [(ngModel)]="operation.data.bends_90" name="bends_90" />
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="smoke_pipe_section">{{'report.trans.24'|translate}}</label>
+                <input class="form-control" id="smoke_pipe_section" type="text" [placeholder]="'report.trans.24'|translate" required
+                    [(ngModel)]="operation.data.smoke_pipe_section" name="smoke_pipe_section" />
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="chimney_section">{{'report.trans.25'|translate}}</label>
+                <input class="form-control" id="chimney_section" type="text" [placeholder]="'report.trans.25'|translate"
+                    required [(ngModel)]="operation.data.chimney_section" name="chimney_section" />
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="t_inspection">{{'report.trans.26'|translate}}</label>
+                <select [(ngModel)]="operation.data.t_inspection" class="form-control" id="t_inspection"
+                    name="t_inspection">
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="Y">{{ 'yes' | translate }}</option>
+                    <option value="N">{{ 'no' | translate }}</option>
+                    <option value="NC">{{ 'not_verifiable' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="conservation_status">{{'report.trans.27'|translate}}</label>
+                <select [(ngModel)]="operation.data.conservation_status" class="form-control" id="conservation_status"
+                    name="conservation_status">
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="Y">{{ 'yes' | translate }}</option>
+                    <option value="N">{{ 'no' | translate }}</option>
+                    <option value="NC">{{ 'not_verifiable' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="exhaust_duct_leaks">{{'report.trans.28'|translate}}</label>
+                <select [(ngModel)]="operation.data.exhaust_duct_leaks" class="form-control" id="exhaust_duct_leaks"
+                    name="exhaust_duct_leaks">
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="Y">{{ 'yes' | translate }}</option>
+                    <option value="N">{{ 'no' | translate }}</option>
+                    <option value="NC">{{ 'not_verifiable' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="roof_smoke_exhaust">{{'report.trans.29'|translate}}</label>
+                <select [(ngModel)]="operation.data.roof_smoke_exhaust" class="form-control" id="roof_smoke_exhaust"
+                    name="roof_smoke_exhaust">
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="Y">{{ 'yes' | translate }}</option>
+                    <option value="N">{{ 'no' | translate }}</option>
+                    <option value="NC">{{ 'not_verifiable' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="windproof_chimney">{{'report.trans.30'|translate}}</label>
+                <select [(ngModel)]="operation.data.windproof_chimney" class="form-control" id="windproof_chimney"
+                    name="windproof_chimney">
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="Y">{{ 'yes' | translate }}</option>
+                    <option value="N">{{ 'no' | translate }}</option>
+                    <option value="NC">{{ 'not_verifiable' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="chimney_insulation">{{'report.trans.31'|translate}}</label>
+                <select [(ngModel)]="operation.data.chimney_insulation" class="form-control" id="chimney_insulation"
+                    name="chimney_insulation">
+                    <option value="" selected>{{ 'not_selected' | translate }}</option>
+                    <option value="Y">{{ 'yes' | translate }}</option>
+                    <option value="N">{{ 'no' | translate }}</option>
+                    <option value="NC">{{ 'not_verifiable' | translate }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="draught_classification">{{'report.trans.32'|translate}}</label>
+                <input class="form-control" id="draught_classification" type="text"
+                    [placeholder]="'report.trans.32'|translate" required [(ngModel)]="operation.data.draught_classification"
+                    name="draught_classification" />
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl">
+            <div class="mb-3">
+                <label class="form-label" for="draught_value">{{'report.trans.33'|translate}}</label>
+                <input class="form-control" id="draught_value" type="text" [placeholder]="'report.trans.33'|translate" required
+                    [(ngModel)]="operation.data.draught_value" name="draught_value" />
+                <div class="invalid-feedback">
+                    {{ 'field.invalid' | translate }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md text-end">
+            <button type="submit" class="btn btn-primary" [disabled]="!myForm.form.dirty">{{'update'|translate}}</button>
+        </div>
+    </div>
+</form>

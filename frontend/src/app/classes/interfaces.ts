@@ -182,6 +182,7 @@ export interface Board {
   firmware_list: Firmware[];
   database: Database[];
   serami_var_formula_override: any[];
+  key: string;
 }
 
 export interface Gateway {
@@ -205,6 +206,7 @@ export interface ProductInfo {
   serami_group_override: GroupNameOverride[];
   gateway_firmware_list: Firmware[];
   board_firmware_list: Firmware[];
+  variables: Variable[];
   database: Database[];
   description: string;
   serial?: string;
@@ -303,17 +305,25 @@ export interface WifiStation {
   bssid: string;
 }
 
-export interface User {
+export interface User{
   name: string;
   surname: string;
   email: string;
   password?: string;
-  company: string;
+  fiscal_code: string;
+  business_name: string;
+  address:string;
+  street_number: string;
+  phone: string;
+  mobile: string;
+  city: string;
+  province: string;
+  zip: string;
+  country: string;
 }
 
-export interface UserField {
+export interface UserField extends User {
   language: string;
-  company: string;
 }
 
 export interface UserData {
@@ -373,4 +383,98 @@ export interface GroupLogItem {
 
 export interface Info {
   logo: string;
+}
+
+export interface Country
+{
+  name: string;
+  code: string;
+}
+
+export interface OperationData
+{
+  type: string;
+  description: string;
+  replaced_components: string;
+  breakdowns: string[];
+  condition: string;
+  warranty: string;
+  e_system: string;
+  hp_system: string;
+  se_system: string;
+  li_suitability: string;
+  spaces_respected: string;
+  presence_ventilation_opening: string;
+  vent_opening_appropriate: string;
+  vent_opening_free: string;
+  correct_sections: string;
+  sh_section_limits: string;
+  correct_slope: string;
+  length_se_sections: number;
+  vs_length: number;
+  bends_45: number;
+  bends_90: number;
+  smoke_pipe_section:number;
+  chimney_section: number;
+  t_inspection: string;
+  conservation_status: string;
+  exhaust_duct_leaks: string;
+  roof_smoke_exhaust: string;
+  windproof_chimney: string;
+  chimney_insulation: string;
+  draught_classification: number;
+  draught_value: number;
+  registry?: Registry;
+  service?: User
+}
+
+export interface Operation
+{
+  key?: string;
+  serial: string;
+  user: string;
+  createdAt?: Date;
+  confirmed_date: Date|null;
+  email_confirmed: boolean;
+  web_confirmed: boolean;
+  data: OperationData
+}
+
+export interface Registry
+{
+  serial: string;
+  fiscal_code: string;
+  business_name: string;
+  name: string;
+  surname:string;
+  email:string;
+  address:string;
+  street_number: string;
+  phone: string;
+  mobile: string;
+  city: string;
+  province: string;
+  zip: string;
+  country: string;
+  purchase_date: Date;
+  first_ignition_date: Date;
+  dealer: string;
+  invoice: string;
+  warranty: string;
+  user: string;
+  createdAt?: Date;
+}
+
+export interface Toast {
+  message: string,
+  delay: number
+  id?: number;
+  classes: string;
+}
+
+export interface Failure
+{
+  name: string;
+  key: string;
+  description: string;
 }

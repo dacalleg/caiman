@@ -1,5 +1,155 @@
 
 module.exports = (sequelize, DataTypes) => {
+    const Registry = sequelize.define('registry', {
+        key: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
+        user: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        serial: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        fiscal_code: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        business_name: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        surname: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        address: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        street_number: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        phone: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        mobile: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        city: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        province: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        zip: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        country: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        purchase_date: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        first_ignition_date:{
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        dealer: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        invoice: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        warranty: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+    },
+    {
+        indexes: [
+            {
+                unique: false,
+                fields: ['serial']
+            },
+            {
+                unique: false,
+                fields: ['user']
+            }
+        ]
+    });
+    const Operation = sequelize.define('operation',
+    {
+        key: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
+        serial: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        user: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        confirmed_date: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        email_confirmed: {
+            type: DataTypes.BOOLEAN,
+        },
+        web_confirmed: {
+            type: DataTypes.BOOLEAN,
+        },
+        data: {
+            type: DataTypes.TEXT('long'),
+            get: function () {
+                const data = this.getDataValue('data');
+                if(data)
+                    return JSON.parse(data);
+                return null;
+            },
+            set: function (data) {
+                this.setDataValue('data', JSON.stringify(data));
+            }
+        }
+    },
+    {
+        indexes: [
+            {
+                unique: false,
+                fields: ['serial']
+            },
+            {
+                unique: false,
+                fields: ['user']
+            }
+        ]
+    }
+    );
     const Serami = sequelize.define('serami', {
         key: {
             type: DataTypes.UUID,
@@ -13,7 +163,10 @@ module.exports = (sequelize, DataTypes) => {
         data: {
             type: DataTypes.TEXT('long'),
             get: function () {
-                return JSON.parse(this.getDataValue('data'));
+                const data = this.getDataValue('data');
+                if(data)
+                    return JSON.parse(data);
+                return null;
             },
             set: function (data) {
                 this.setDataValue('data', JSON.stringify(data));
@@ -128,5 +281,5 @@ module.exports = (sequelize, DataTypes) => {
     Asset.belongsTo(Ticket, { foreignKey: 'ticket_id' });
     Ticket.hasMany(Asset, { foreignKey: 'ticket_id' });
 
-    return { Ticket, Asset, Log, Serami }
+    return { Ticket, Asset, Log, Serami, Registry, Operation }
 };

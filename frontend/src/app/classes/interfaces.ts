@@ -177,7 +177,6 @@ export interface DeviceInfoResponse {
 
 export interface Board {
   id: string;
-  serami_file: number;
   serami_acl: SeramiACL[];
   firmware_list: Firmware[];
   database: Database[];
@@ -196,7 +195,6 @@ export interface ProductInfo {
   id_product: string;
   id: number;
   name: string;
-  serami_file: number;
   documents: Document[];
   image: string | null;
   serami_acl: SeramiACL[];

@@ -90,7 +90,6 @@ export class ApiService {
         }
         return {
           id: item.id,
-          serami_file: item.acf.serami_file,
           serami_acl: serami_acl,
           firmware_list: item.acf.firmware || [],
           database: item.acf.database || [],
@@ -199,9 +198,7 @@ export class ApiService {
         if (value) {
           return this.getAllProducts().pipe(
             switchMap(products => from(products)),
-            concatMap(product => this.getProductInfo(product.key).pipe(
-              switchMap((info) => this.getAttachmentContent(info.serami_file)),
-            )),
+            concatMap(product => this.getProductInfo(product.key)),
             delay(2000),
             ignoreElements(),
             tap({
@@ -272,7 +269,6 @@ export class ApiService {
       name: item.title.rendered,
       description: item.excerpt.rendered ? item.excerpt.rendered.replace(/(<([^>]+)>)/gi, "") : "",
       id_product: item.acf.key,
-      serami_file: board.serami_file,
       serami_acl: board.serami_acl,
       gateway_firmware_list: gateway !== null ? gateway.firmware_list : [],
       board_firmware_list: board.firmware_list,

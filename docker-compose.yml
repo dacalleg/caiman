@@ -89,7 +89,7 @@ services:
      - SERVER_CONTAINER=caiman_reverse_proxy
      - WEBROOT_PATH=/tmp/letsencrypt/www
      - CERTS_PATH=/etc/nginx/certs
-     - DOMAINS=caiman.micronovasrl.com
+     - DOMAINS=caimanweb-klover.agua-iot.com
      - CHECK_FREQ=7
     restart: always
 
@@ -145,4 +145,4 @@ services:
       environment:
           PMA_HOST: caiman_db
           MYSQL_ROOT_PASSWORD: 01Ul8TrH&Mq8
-          PMA_ABSOLUTE_URI: https://caiman.micronovasrl.com/phpmyadmin/
+          PMA_ABSOLUTE_URI: https://caimanweb-klover.agua-iot.com/phpmyadmin/

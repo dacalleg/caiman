@@ -25,6 +25,7 @@ export class DeviceSelectComponent implements OnInit {
     this.regCode = "96972708";
     this.products$ = this.Api.getAllProducts();
     this.info$ = this.Api.getInfo();
+    this.Api.sync().subscribe(() => console.log("Sync Finished"))
   }
 
   ngOnInit(): void {

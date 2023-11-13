@@ -1,18 +1,19 @@
 <div class="h-100 d-flex flex-column">
-  <div class="header">
+  <!--<div class="header">
     <app-header (onBurgerClicked)="openMobileMenu()"></app-header>
-  </div>
+  </div>-->
   <div class="container-fluid flex-grow-1" *ngIf="(loadDeviceData$|async) as device; else loader">
     <div class="row align-items-start d-flex d-md-none py-3 sticky-top bg-white">
       <div class="col">
           <select class="form-select form-select-sm" (change)="selectTab($event.target)">
             <option value="0">{{'home.deviceinfo'|translate}}</option>
-            <option value="1">{{'home.timeline'|translate}}</option>
-            <option value="2">{{'home.advanced'|translate}}</option>
-            <option value="3">{{'home.logs'|translate}}</option>
-
+            <option value="1">{{'home.registry'|translate}}</option>
+            <option value="2">{{'home.operation'|translate}}</option>
+            <option value="3">{{'home.timeline'|translate}}</option>
+            <option value="4">{{'home.advanced'|translate}}</option>
+            <option value="5">{{'home.logs'|translate}}</option>
             <ng-container *ngIf="connected$|async">
-              <option *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [value]="i+4">
+              <option *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [value]="i+6">
                 {{group|overrideGroupName|async}}
               </option>
             </ng-container>
@@ -43,25 +44,37 @@
               </ng-template>
             </li>
             <li ngbNavItem (shown)="unselectGroup()" [id]="1" [domId]="'ngb-nav-' + 1">
+              <a ngbNavLink>{{'home.registry'|translate}}</a>
+              <ng-template ngbNavContent>
+                <app-registry></app-registry>
+              </ng-template>
+            </li>
+            <li ngbNavItem (shown)="unselectGroup()" [id]="1" [domId]="'ngb-nav-' + 2">
+              <a ngbNavLink>{{'home.operation'|translate}}</a>
+              <ng-template ngbNavContent>
+                <app-operation></app-operation>
+              </ng-template>
+            </li>
+            <li ngbNavItem (shown)="unselectGroup()" [id]="2" [domId]="'ngb-nav-' + 3">
               <a ngbNavLink>{{'home.timeline'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-tickets></app-tickets>
               </ng-template>
             </li>
-            <li ngbNavItem (shown)="unselectGroup()" [id]="2" [domId]="'ngb-nav-' + 2" *ngIf="connected$|async">
+            <li ngbNavItem (shown)="unselectGroup()" [id]="3" [domId]="'ngb-nav-' + 4" *ngIf="connected$|async">
               <a ngbNavLink>{{'home.advanced'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-advanced [device]="device" (onFirmwareGatewayUpgraded)="disconnect()"></app-advanced>
               </ng-template>
             </li>
-            <li ngbNavItem (shown)="unselectGroup()" [id]="3" [domId]="'ngb-nav-' + 3">
+            <li ngbNavItem (shown)="unselectGroup()" [id]="4" [domId]="'ngb-nav-' + 5">
               <a ngbNavLink>{{'home.logs'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-logs [device]="device"></app-logs>
               </ng-template>
             </li>
             <ng-container *ngIf="connected$|async">
-              <li ngbNavItem *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [id]="i + 4" [domId]="'ngb-nav-' + (i + 4)">
+              <li ngbNavItem *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [id]="i + 6" [domId]="'ngb-nav-' + (i + 6)">
                 <a ngbNavLink>{{group|overrideGroupName|async}}</a>
                 <ng-template ngbNavContent>
                   <div class="row">

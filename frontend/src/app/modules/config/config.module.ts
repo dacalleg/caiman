@@ -8,6 +8,7 @@ import { NgbAccordion, NgbAccordionModule, NgbModule, NgbNavModule } from '@ng-b
 import { FormsModule } from '@angular/forms';
 import { VarByGroupPipe } from './pipes/var-by-group.pipe';
 import { EditOptionsComponent } from './components/edit-options/edit-options.component';
+import { SearchPipe } from './pipes/search.pipe';
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import { EditOptionsComponent } from './components/edit-options/edit-options.com
     ListComponent,
     EditComponent,
     VarByGroupPipe,
-    EditOptionsComponent
+    EditOptionsComponent,
+    SearchPipe
   ],
   imports: [
     CommonModule,

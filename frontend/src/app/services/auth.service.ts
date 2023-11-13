@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { BehaviorSubject, defer, distinctUntilChanged, filter, interval, map, Observable, of, shareReplay, skip, Subject, switchMap, take, tap } from 'rxjs';
+import { BehaviorSubject, defer, distinctUntilChanged, filter, interval, map, merge, Observable, of, shareReplay, skip, Subject, switchMap, take, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { LoginResponse, User, UserData } from '../classes/interfaces';
+import { LoginResponse, User, UserData, UserField } from '../classes/interfaces';
 import { TranslationService } from './translation.service';
 
 @Injectable({
@@ -14,9 +14,11 @@ export class AuthService {
   private tokenChanges$: BehaviorSubject<string | null>;
   private tokenValidityChanges$: Observable<boolean>;
   private userData$: Observable<UserData>;
+  private updateUserData$: Subject<void>;
 
   constructor(private Http: HttpClient, private jwtHelper: JwtHelperService, private Translation: TranslationService) {
     this.tokenChanges$ = new BehaviorSubject<string | null>(localStorage.getItem('access_token'));
+    this.updateUserData$ = new Subject();
     this.tokenValidityChanges$ = interval(5000).pipe(
       switchMap(() => this.tokenChanges$.pipe(take(1))),
       map(token => token !== null && !this.jwtHelper.isTokenExpired(token)),
@@ -26,6 +28,7 @@ export class AuthService {
 
     this.userData$ = this.tokenChanges$.pipe(
       filter(token => token !== null && !this.jwtHelper.isTokenExpired(token)),
+      switchMap(() => merge(of(void 0), this.updateUserData$)),
       switchMap(() => this.Http.get<UserData>(environment.endpoint + "/wp-json/caiman/v1/me")),
       shareReplay(1)
     );
@@ -110,5 +113,10 @@ export class AuthService {
 
   getUserData(): Observable<UserData> {
     return this.userData$;
+  }
+
+  updateUserData(user: User): Observable<User>
+  {
+    return this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/update-user', user).pipe(tap(() => this.updateUserData$.next()))
   }
 }

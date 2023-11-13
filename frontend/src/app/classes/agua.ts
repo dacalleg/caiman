@@ -1,4 +1,4 @@
-import { catchError, delay, filter, forkJoin, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, takeWhile, tap, throwError } from "rxjs";
+import { catchError, concat, delay, filter, forkJoin, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, takeWhile, tap, throwError, toArray } from "rxjs";
 import { Channel, FirmwareDownloadStatus, Variable, VariableValue, VariableWriteResponse, WifiStation, WifiStatus } from "./interfaces";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Utils } from "./utils";
@@ -142,8 +142,7 @@ class AguaProtocol {
                         const values = variables.map(v => {
                             const addr = v.memory === "eeprom" ? v.address + 0x8000 : v.address;
                             const index = r.Items.indexOf(addr);
-                            if(index >= 0)
-                            {
+                            if (index >= 0) {
                                 return r.Values[index];
                             }
                             return null;
@@ -173,17 +172,17 @@ class AguaProtocol {
             "Values": Utils.convertValuesToWrite(variables.map(v => v.variable), variables.map(v => v.value))
         }
         return this.token$.pipe(
-            switchMap(token => forkJoin(
-                {
-                    from: this.readVariables(variables.map(v => v.variable)),
-                    write: this.http.post<any>(this.agua_endpoint + "/deviceRequestWriting", payload, { headers: this.getHeaders(token) }).pipe(
-                        switchMap(response => this.getJobStatus(response.idRequest)),
-                        retry({ count: 5 })),
-                    written: this.readVariables(variables.map(v => v.variable)),
-                }
+            switchMap(token => concat(
+                this.readVariables(variables.map(v => v.variable)),
+                this.http.post<any>(this.agua_endpoint + "/deviceRequestWriting", payload, { headers: this.getHeaders(token) }).pipe(
+                    switchMap(response => this.getJobStatus(response.idRequest)),
+                    retry({ count: 5 }),
+                    delay(2000),
+                    switchMap(() => this.readVariables(variables.map(v => v.variable))))
             )),
+            toArray(),
             map(response => {
-                return { from: response.from, set: variables, written: response.written } as VariableWriteResponse
+                return { from: response[0], set: variables, written: response[1] } as VariableWriteResponse
             })
         )
     }
@@ -226,8 +225,7 @@ class AguaProtocol {
                         const values = variables.map(v => {
                             const addr = v.memory === "eeprom" ? v.address + 0x8000 : v.address;
                             const index = r.Items.indexOf(addr);
-                            if(index >= 0)
-                            {
+                            if (index >= 0) {
                                 return r.Values[index];
                             }
                             return null;

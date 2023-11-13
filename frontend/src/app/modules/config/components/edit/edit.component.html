@@ -1,13 +1,153 @@
+<ng-template let-data="data" #variablesAccordion>
+    <ngb-accordion #acc="ngbAccordion" activeIds="0">
+        <ngb-panel *ngFor="let variable of data">
+            <ng-template ngbPanelHeader let-opened="opened">
+                <button ngbPanelToggle class="accordion-button">{{variable.name}}<br>{{variable.hash}}</button>
+            </ng-template>
+            <ng-template ngbPanelContent>
+                <div class="row">
+                    <div class="col text-end">
+                        <div ngbDropdown class="d-inline-block">
+                            <button type="button"
+                                class="btn btn-sm btn-secondary md-2"
+                                id="dropdownBasic1" ngbDropdownToggle>
+                                Move to
+                            </button>
+                            <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                                <button ngbDropdownItem *ngFor="let group of groups"
+                                    (click)="moveToGroup(variable, group)">{{ group
+                                    }}</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-danger ms-2"
+                            (click)="deleteVariable(variable)">Delete</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="mb-3">
+                            <label for="ID" class="form-label">ID</label>
+                            <input type="text" class="form-control" id="ID"
+                                [(ngModel)]="variable.hash" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name"
+                                [(ngModel)]="variable.name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description"
+                                class="form-label">Description</label>
+                            <textarea class="form-control" id="description"
+                                [(ngModel)]="variable.description"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="addr"
+                                        class="form-label">Memoria</label>
+                                    <select class="form-select"
+                                        [(ngModel)]="variable.memory"
+                                        (ngModelChange)="updateHash(variable)">
+                                        <option disabled>Open this select menu
+                                        </option>
+                                        <option value="eeprom">EEPROM</option>
+                                        <option value="ram">RAM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="addr"
+                                        class="form-label">Address</label>
+                                    <input type="number" class="form-control"
+                                        id="addr" [(ngModel)]="variable.address"
+                                        (ngModelChange)="updateHash(variable)">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="addr"
+                                        class="form-label">Mask</label>
+                                    <input type="number" class="form-control"
+                                        id="addr" [(ngModel)]="variable.mask"
+                                        (ngModelChange)="updateHash(variable)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Endianess</label>
+                            <select class="form-select"
+                                [(ngModel)]="variable.pattern">
+                                <option disabled>Open this select menu</option>
+                                <option value="B">Big Endian</option>
+                                <option value="L">Little Endian</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="min" class="form-label">Min</label>
+                                    <input type="number" class="form-control"
+                                        id="min" [(ngModel)]="variable.min">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="max" class="form-label">Max</label>
+                                    <input type="number" class="form-control"
+                                        id="max" [(ngModel)]="variable.max">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bit" class="form-label">Bit</label>
+                            <input type="number" class="form-control" id="bit"
+                                [(ngModel)]="variable.bit">
+                        </div>
+                        <div class="mb-3">
+                            <label for="format" class="form-label">Format</label>
+                            <textarea class="form-control" id="format"
+                                [(ngModel)]="variable.formatstring"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="format"
+                                        class="form-label">Formula</label>
+                                    <textarea class="form-control" id="format"
+                                        [(ngModel)]="variable.readExp"></textarea>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-3">
+                                    <label for="format" class="form-label">Inverse
+                                        Formula</label>
+                                    <textarea class="form-control" id="format"
+                                        [(ngModel)]="variable.writeExp"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" value=""
+                                id="readonly" [(ngModel)]="variable.readonly"
+                                [ngModelOptions]="{standalone: true}" />
+                            <label class="form-check-label" for="readonly">
+                                Readonly
+                            </label>
+                        </div>
+                        <app-edit-options [variable]="variable"></app-edit-options>
+                    </div>
+                </div>
+            </ng-template>
+        </ngb-panel>
+    </ngb-accordion>
+</ng-template>
 <div class="container p-5" *ngIf="seramiEntry">
     <div class="row">
         <div class="col">
             <button class="btn btn-secondary" (click)="beforeSave()">Check</button>
             <button class="btn btn-primary ms-2" (click)="save()">Save</button>
-        </div>
-    </div>
-    <div class="row" *ngIf="logs">
-        <div class="col">
-            <div [innerHTML]="logs"></div>
         </div>
     </div>
     <div class="row mt-3">
@@ -53,147 +193,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col">
-                                        <ngb-accordion #acc="ngbAccordion" activeIds="0">
-                                            <ngb-panel [title]="variable.name + ' ' + variable.hash"
-                                                *ngFor="let variable of (seramiEntry$|async)?.data|varByGroup:group">
-                                                <ng-template ngbPanelContent>
-                                                    <div class="row">
-                                                        <div class="col text-end">
-                                                            <div ngbDropdown class="d-inline-block">
-                                                                <button type="button"
-                                                                    class="btn btn-sm btn-secondary md-2"
-                                                                    id="dropdownBasic1" ngbDropdownToggle>
-                                                                    Move to
-                                                                </button>
-                                                                <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-                                                                    <button ngbDropdownItem *ngFor="let group of groups"
-                                                                        (click)="moveToGroup(variable, group)">{{ group
-                                                                        }}</button>
-                                                                </div>
-                                                            </div>
-                                                            <button class="btn btn-sm btn-danger ms-2"
-                                                                (click)="deleteVariable(variable)">Delete</button>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col">
-                                                            <div class="mb-3">
-                                                                <label for="ID" class="form-label">ID</label>
-                                                                <input type="text" class="form-control" id="ID"
-                                                                    [(ngModel)]="variable.hash" disabled>
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="name" class="form-label">Name</label>
-                                                                <input type="text" class="form-control" id="name"
-                                                                    [(ngModel)]="variable.name">
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="description"
-                                                                    class="form-label">Description</label>
-                                                                <textarea class="form-control" id="description"
-                                                                    [(ngModel)]="variable.description"></textarea>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col">
-                                                                    <div class="mb-3">
-                                                                        <label for="addr"
-                                                                            class="form-label">Memoria</label>
-                                                                        <select class="form-select"
-                                                                            [(ngModel)]="variable.memory"
-                                                                            (ngModelChange)="updateHash(variable)">
-                                                                            <option disabled>Open this select menu
-                                                                            </option>
-                                                                            <option value="eeprom">EEPROM</option>
-                                                                            <option value="ram">RAM</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col">
-                                                                    <div class="mb-3">
-                                                                        <label for="addr"
-                                                                            class="form-label">Address</label>
-                                                                        <input type="number" class="form-control"
-                                                                            id="addr" [(ngModel)]="variable.address"
-                                                                            (ngModelChange)="updateHash(variable)">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col">
-                                                                    <div class="mb-3">
-                                                                        <label for="addr"
-                                                                            class="form-label">Mask</label>
-                                                                        <input type="number" class="form-control"
-                                                                            id="addr" [(ngModel)]="variable.mask"
-                                                                            (ngModelChange)="updateHash(variable)">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="name" class="form-label">Endianess</label>
-                                                                <select class="form-select"
-                                                                    [(ngModel)]="variable.pattern">
-                                                                    <option disabled>Open this select menu</option>
-                                                                    <option value="B">Big Endian</option>
-                                                                    <option value="L">Little Endian</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col">
-                                                                    <div class="mb-3">
-                                                                        <label for="min" class="form-label">Min</label>
-                                                                        <input type="number" class="form-control"
-                                                                            id="min" [(ngModel)]="variable.min">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col">
-                                                                    <div class="mb-3">
-                                                                        <label for="max" class="form-label">Max</label>
-                                                                        <input type="number" class="form-control"
-                                                                            id="max" [(ngModel)]="variable.max">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="bit" class="form-label">Bit</label>
-                                                                <input type="number" class="form-control" id="bit"
-                                                                    [(ngModel)]="variable.bit">
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="format" class="form-label">Format</label>
-                                                                <textarea class="form-control" id="format"
-                                                                    [(ngModel)]="variable.formatstring"></textarea>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col">
-                                                                    <div class="mb-3">
-                                                                        <label for="format"
-                                                                            class="form-label">Formula</label>
-                                                                        <textarea class="form-control" id="format"
-                                                                            [(ngModel)]="variable.readExp"></textarea>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col">
-                                                                    <div class="mb-3">
-                                                                        <label for="format" class="form-label">Inverse
-                                                                            Formula</label>
-                                                                        <textarea class="form-control" id="format"
-                                                                            [(ngModel)]="variable.writeExp"></textarea>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-check mb-3">
-                                                                <input class="form-check-input" type="checkbox" value=""
-                                                                    id="readonly" [(ngModel)]="variable.readonly"
-                                                                    [ngModelOptions]="{standalone: true}" />
-                                                                <label class="form-check-label" for="readonly">
-                                                                    Readonly
-                                                                </label>
-                                                            </div>
-                                                            <app-edit-options [variable]="variable"></app-edit-options>
-                                                        </div>
-                                                    </div>
-                                                </ng-template>
-                                            </ngb-panel>
-                                        </ngb-accordion>
+                                        <ng-container *ngTemplateOutlet="variablesAccordion; context: {data: (seramiEntry$|async)?.data|varByGroup:group}"></ng-container>
                                     </div>
                                 </div>
                             </div>
@@ -208,9 +208,58 @@
                                 <div class="row mb-3">
                                     <div class="col">
                                         <div class="mb-3">
+                                            <label for="ID" class="form-label">Search Text</label>
+                                            <input type="text" class="form-control" id="search"
+                                                [(ngModel)]="search">
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <ng-container *ngTemplateOutlet="variablesAccordion; context: {data: (seramiEntry$|async)?.data|search:search}"></ng-container>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-template>
+                </li>
+                <li [ngbNavItem]="groups.length + 1">
+                    <a ngbNavLink>Check</a>
+                    <ng-template ngbNavContent>
+                        <div class="row">
+                            <div class="col px-5 mt-5">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Group</th>
+                                            <th>Error</th>
+                                            <th>Message</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ng-container *ngFor="let log of logs">
+                                            <tr *ngFor="let v of log.variables;let i = index">
+                                                <td *ngIf="i == 0" [attr.rowspan]="log.variables.length" (click)="serachFor(v)">
+                                                    {{v.hash}}
+                                                </td>
+                                                <td>
+                                                    {{v.name}}
+                                                </td>
+                                                <td>
+                                                    {{v.group}}
+                                                </td>
+                                                <td *ngIf="i == 0" [attr.rowspan]="log.variables.length">
+                                                    {{log.type}}
+                                                </td>
+                                                <td *ngIf="i == 0" [attr.rowspan]="log.variables.length">
+                                                    {{log.message}}
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </ng-template>

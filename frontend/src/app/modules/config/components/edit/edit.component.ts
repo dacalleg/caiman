@@ -1,10 +1,17 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Observable, Subject, combineLatest, concat, filter, map, merge, of, shareReplay, switchMap, take, tap } from 'rxjs';
 import { SeramiEntry, Variable } from 'src/app/classes/interfaces';
 import { Utils } from 'src/app/classes/utils';
 import { ApiService } from 'src/app/services/api.service';
 import { SeramiParserService } from 'src/app/services/serami-parser.service';
+
+interface CheckLog {
+  variables: Variable[];
+  type: string;
+  message?: string;
+}
 
 @Component({
   selector: 'app-edit',
@@ -13,6 +20,8 @@ import { SeramiParserService } from 'src/app/services/serami-parser.service';
 })
 export class EditComponent {
 
+
+  @ViewChild("nav") nav: NgbNav | undefined;
   refresh$: Subject<void>;
   seramiEntry: SeramiEntry;
   currentGroup$: BehaviorSubject<string>;
@@ -22,11 +31,12 @@ export class EditComponent {
   variables: Variable[];
   groups: string[];
   active = 2;
-  logs: string | null;
+  logs: CheckLog[];
+  search: string | undefined;
 
-  constructor(private activatedRoute: ActivatedRoute, private Api: ApiService, private Serami: SeramiParserService) {
+  constructor(private activatedRoute: ActivatedRoute, private Api: ApiService, private Router: Router) {
     this.refresh$ = new Subject();
-    this.logs = null;
+    this.logs = [];
     this.seramiEntry = { data: [], name: "" };
     this.groups = [];
     this.variables = [];
@@ -75,14 +85,18 @@ export class EditComponent {
   }
 
   clearLog() {
-    this.logs = "";
+    this.logs = [];
   }
 
-  addLog(...text: string[]) {
-    this.logs = (this.logs ? this.logs : "") + text.join(" ") + "<br>";
+  addLog(log: CheckLog) {
+    this.logs.push(log);
   }
 
   beforeSave() {
+    if (this.nav) {
+      this.nav.select(this.groups.length + 1);
+    }
+
     this.clearLog();
     this.seramiEntry$.pipe(take(1)).subscribe(entry => {
       this.checkDuplicates(entry.data);
@@ -90,23 +104,23 @@ export class EditComponent {
         this.check(variable);
         try {
           if (variable.min != null)
-            this.checkFormula(variable, variable.min) ? null : this.addLog("Error in MIN", variable.name, ", group:", variable.group);
+            this.checkFormula(variable, variable.min) ? null : this.addLog({ type: "Error in MIN", variables: [variable] });
         } catch {
-          this.addLog("Error in MIN", variable.name, ", group:", variable.group)
+          this.addLog({ type: "Error in MIN", variables: [variable] })
         }
 
         try {
           if (variable.max != null)
-            this.checkFormula(variable, variable.max) ? null : this.addLog("Error in MAX", variable.name, ", group:", variable.group);
+            this.checkFormula(variable, variable.max) ? null : this.addLog({ type: "Error in MAX", variables: [variable] });
         } catch {
-          this.addLog("Error in MAX", variable.name, ", group:", variable.group)
+          this.addLog({ type: "Error in MAX", variables: [variable] })
         }
 
         try {
           if (variable.min == null && variable.max == null)
             this.checkFormula(variable, 0);
         } catch {
-          this.addLog("Error in formula", variable.name, ", group:", variable.group)
+          this.addLog({ type: "Error in Formula", variables: [variable] })
         }
       })
     })
@@ -114,7 +128,7 @@ export class EditComponent {
 
   check(variable: Variable) {
     if (variable.readExp?.includes("&"))
-      this.addLog("Warning in formula", variable.name, ", group:", variable.group, "contains logical operation")
+      this.addLog({ type: "Warning in Formula", variables: [variable], message: "contains logical operation" })
   }
 
   checkFormula(variable: Variable, target: number) {
@@ -144,7 +158,9 @@ export class EditComponent {
   }
 
   save() {
-    this.Api.updateSerami(this.seramiEntry).subscribe();
+    this.Api.updateSerami(this.seramiEntry).subscribe(() => {
+      this.Router.navigate(["/config/list"]);
+    });
   }
 
   updateHash(v: Variable) {
@@ -186,14 +202,14 @@ export class EditComponent {
           const compare = group[i];
           const others = group.filter((item, index) => index > i);
           others.forEach(item => {
-            if (!item.readonly || !compare.readonly) {
+            if (!item.readonly && !compare.readonly) {
               if (item.min !== compare.min)
-                this.addLog("Error in duplicates, ", compare.name, ", group:", compare.group, " MIN: " + compare.min, " ", item.name, ", group:", item.group, " MIN: " + item.min)
+                this.addLog({ variables: [compare, item], type: "Error in duplicates", message: "MIN is different" })
               if (item.max !== compare.max)
-                this.addLog("Error in duplicates, ", compare.name, ", group:", compare.group, " MAX: " + compare.max, " ", item.name, ", group:", item.group, " MAX: " + item.max)
+                this.addLog({ variables: [compare, item], type: "Error in duplicates", message: "MAX is different" })
             }
             if (item.readExp !== compare.readExp)
-              this.addLog("Error in duplicates, ", compare.name, ", group:", compare.group, " formula: " + compare.readExp, " ", item.name, ", group:", item.group, " formula: " + item.readExp)
+              this.addLog({ variables: [compare, item], type: "Error in duplicates", message: "Formula is different" })
           })
         }
       })
@@ -227,4 +243,10 @@ export class EditComponent {
     this.refresh$.next();
   }
 
+
+  serachFor(variable: Variable) {
+    this.search = variable.hash;
+    if (this.nav)
+      this.nav.select(this.groups.length);
+  }
 }

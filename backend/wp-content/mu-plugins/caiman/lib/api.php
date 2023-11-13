@@ -28,6 +28,15 @@ add_action( 'rest_api_init', function(){
             'permission_callback' => '__return_true'
         )
     );
+    register_rest_route(
+        'caiman/v1',
+        '/email',
+        array(
+            'methods' => 'POST',
+            'callback' => 'caiman_send_email',
+            'permission_callback' => '__return_true'
+        )
+    );
 });
 
 function caiman_get_unsecure_file( WP_REST_Request $request ) {
@@ -66,4 +75,17 @@ function caiman_get_gateway( WP_REST_Request $request ) {
 function caiman_get_info( WP_REST_Request $request ) {
     return get_fields('options');
 }
+
+function caiman_send_email( WP_REST_Request $request ) {
+    $obj = $request->get_json_params();
+    $to = $obj['to'];
+    $subject = nl2br(get_translation_value($obj['subject'], $obj['placeholders']));
+    $body = nl2br(get_translation_value($obj['body'], $obj['placeholders']));
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+
+    wp_mail( $to, $subject, $body, $headers );
+
+    return new WP_REST_Response(array('status' => 200));
+}
+
 

@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { bufferCount, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, Observable, of, shareReplay, switchMap, take, tap, throwError, toArray } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, SeramiEntry, Ticket, Translation, UserData, Variable, VariableInfoOverride, Info } from '../classes/interfaces';
+import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, SeramiEntry, Ticket, Translation, UserData, Variable, VariableInfoOverride, Info, Country, Registry, Operation, Failure } from '../classes/interfaces';
 import { AuthService } from './auth.service';
 import { TranslationProviderService } from './translation-provider.service';
 import { TranslationService } from './translation.service';
@@ -90,11 +90,11 @@ export class ApiService {
         }
         return {
           id: item.id,
-          serami_file: item.acf.serami_file,
           serami_acl: serami_acl,
           firmware_list: item.acf.firmware || [],
           database: item.acf.database || [],
           serami_var_formula_override: item.acf.serami_var_formula_override || [],
+          key: item.acf.key
         } as Board
       })
     )
@@ -119,6 +119,24 @@ export class ApiService {
           return of(null);
         }
       }),
+    )
+  }
+
+  getFailures()
+  {
+    return this.Translation.getCurrentLanguage().pipe(
+      take(1),
+      switchMap((lang) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/failure/?" + (lang !== "it" ? "lang=" + lang : "")).pipe(
+        switchMap(arr => from(arr)),
+        map((item) => {
+          return {
+            name: item.title.rendered as string,
+            key: item.acf.key as string,
+            description: ""
+          } as Failure
+        }),
+        toArray(),
+      )),
     )
   }
 
@@ -180,9 +198,7 @@ export class ApiService {
         if (value) {
           return this.getAllProducts().pipe(
             switchMap(products => from(products)),
-            concatMap(product => this.getProductInfo(product.key).pipe(
-              switchMap((info) => this.getAttachmentContent(info.serami_file)),
-            )),
+            concatMap(product => this.getProductInfo(product.key)),
             delay(2000),
             ignoreElements(),
             tap({
@@ -205,7 +221,7 @@ export class ApiService {
   }
 
 
-  private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null) {
+  private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[]) {
     let serami_var_override = item.acf.serami_var_override as any[] || [];
     let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
     let serami_var_formula_override = board.serami_var_formula_override as any[] || [];
@@ -244,7 +260,7 @@ export class ApiService {
         options: options ? options : undefined,
         read_exp: formula ? formula.read_exp : undefined,
         write_exp: formula ? formula.write_exp : undefined,
-        writable: writable
+        writable: writable,
       } as VariableInfoOverride
     })
 
@@ -253,7 +269,6 @@ export class ApiService {
       name: item.title.rendered,
       description: item.excerpt.rendered ? item.excerpt.rendered.replace(/(<([^>]+)>)/gi, "") : "",
       id_product: item.acf.key,
-      serami_file: board.serami_file,
       serami_acl: board.serami_acl,
       gateway_firmware_list: gateway !== null ? gateway.firmware_list : [],
       board_firmware_list: board.firmware_list,
@@ -263,7 +278,8 @@ export class ApiService {
       serami_group_override: item.acf.serami_group_override || [],
       database: board.database || [],
       image: item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
-      faq: item.acf.faq || []
+      faq: item.acf.faq || [],
+      variables: variables
     } as ProductInfo
   }
 
@@ -274,7 +290,8 @@ export class ApiService {
       switchMap(arr => from(arr)),
       switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
       take(1),
-      map(([item, board, gateway, roles]) => this.buildProductInfo(item, board, roles, gateway)),
+      switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
+      map(([item, board, gateway, roles, serami]) => this.buildProductInfo(item, board, roles, gateway, serami.data)),
       switchMap(item => {
         if (item.image) {
           return this.getMedia(item.image).pipe(map(image => {
@@ -381,6 +398,75 @@ export class ApiService {
       switchMap(base64 => this.Http.post(environment.endpoint + "/api/chunkupload", { name: filename, ext: ext, chunk: base64 })),
       map(() => filename + "." + ext)
     );
+  }
+
+  getCountries() {
+    return this.Http.get<any[]>("https://restcountries.com/v3.1/all?fields=name,cca2").pipe(map(countries => {
+      return countries.map(c => {
+        return {
+          name: c.name.common,
+          code: c.cca2
+        } as Country
+      }).sort((a, b) => a.name.localeCompare(b.name));
+    }))
+  }
+
+  getRegistries(serial: string) {
+    return this.Http.get<Registry[]>(environment.endpoint + "/api/registry/get/" + serial).pipe(
+      map(resp => {
+        return resp.map(item => {
+          if (item.createdAt)
+            item.createdAt = new Date(item.createdAt);
+          return item;
+        }).sort((b, a) => {
+          if (a.createdAt && b.createdAt)
+            return a.createdAt.getTime() - b.createdAt.getTime();
+          return 0
+        })
+      }),
+    )
+  }
+
+  getLastRegisry(serial: string)
+  {
+    return this.getRegistries(serial).pipe(
+      map(registries => registries.length > 0 ? registries[0] : null)
+    )
+  }
+
+  getOperations(serial: string) {
+    return this.Http.get<Operation[]>(environment.endpoint + "/api/operation/get/" + serial).pipe(
+      map(resp => {
+        return resp.map(item => {
+          if (item.createdAt)
+            item.createdAt = new Date(item.createdAt);
+          return item;
+        }).sort((b, a) => {
+          if (a.createdAt && b.createdAt)
+            return a.createdAt.getTime() - b.createdAt.getTime();
+          return 0
+        })
+      }),
+    )
+  }
+
+  getOperationByKey(key: string) {
+    return this.Http.get<Operation>(environment.endpoint + "/api/operation/key/" + key);
+  }
+
+  confirmOperation(key: string, from_email?: string) {
+    return this.Http.post<Operation>(environment.endpoint + "/api/operation/confirm", {
+      key: key,
+      from_email: from_email
+    });
+  }
+
+  updateOperation(operation: Operation) {
+    return this.Http.post<any>(environment.endpoint + "/api/operation/update", { ...operation });
+  }
+
+  updateRegistry(registry: Registry) {
+    return this.Http.post<any>(environment.endpoint + "/api/registry/update", { ...registry, key: undefined });
   }
 
   private makeid(length = 8) {

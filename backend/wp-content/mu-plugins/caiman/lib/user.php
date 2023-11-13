@@ -52,6 +52,25 @@ function caiman_confirm_user(WP_REST_Request $request)
     return new WP_REST_Response(200);
 }
 
+function caiman_update_user(WP_REST_Request $request)
+{
+    $body = $request->get_json_params();
+    $wp_user_id = get_current_user_id();
+    update_field("fiscal_code", $body["fiscal_code"], "user_" . $wp_user_id);
+    update_field("business_name", $body["business_name"], "user_" . $wp_user_id);
+    update_field("name", $body["name"], "user_" . $wp_user_id);
+    update_field("surname", $body["surname"], "user_" . $wp_user_id);
+    update_field("address", $body["address"], "user_" . $wp_user_id);
+    update_field("street_number", $body["street_number"], "user_" . $wp_user_id);
+    update_field("phone", $body["phone"], "user_" . $wp_user_id);
+    update_field("mobile", $body["mobile"], "user_" . $wp_user_id);
+    update_field("city", $body["city"], "user_" . $wp_user_id);
+    update_field("province", $body["province"], "user_" . $wp_user_id);
+    update_field("zip", $body["zip"], "user_" . $wp_user_id);
+    update_field("country", $body["country"], "user_" . $wp_user_id);
+    return new WP_REST_Response(200);
+}
+
 function caiman_register_user(WP_REST_Request $request)
 {
     $body = $request->get_json_params();
@@ -81,6 +100,19 @@ function caiman_register_user(WP_REST_Request $request)
     update_field("user_access", $_ENV["DEFAULT_USER_ACCESS"], "user_" . $wp_user_id);
     update_field("reg_code", $reg_code, "user_" . $wp_user_id);
     update_field("language", get_language_code(), "user_" . $wp_user_id);
+    update_field("fiscal_code", $body["fiscal_code"], "user_" . $wp_user_id);
+    update_field("business_name", $body["business_name"], "user_" . $wp_user_id);
+    update_field("name", $body["name"], "user_" . $wp_user_id);
+    update_field("surname", $body["surname"], "user_" . $wp_user_id);
+    update_field("address", $body["address"], "user_" . $wp_user_id);
+    update_field("street_number", $body["street_number"], "user_" . $wp_user_id);
+    update_field("phone", $body["phone"], "user_" . $wp_user_id);
+    update_field("mobile", $body["mobile"], "user_" . $wp_user_id);
+    update_field("city", $body["city"], "user_" . $wp_user_id);
+    update_field("province", $body["province"], "user_" . $wp_user_id);
+    update_field("zip", $body["zip"], "user_" . $wp_user_id);
+    update_field("country", $body["country"], "user_" . $wp_user_id);
+
 
     foreach ($body as $key => $value) {
         if($key != "email" && $key != "password" && $key != "name" && $key != "surname")
@@ -281,6 +313,15 @@ add_action( 'rest_api_init', function(){
         array(
             'methods' => 'POST',
             'callback' => 'caiman_update_user_language',
+            'permission_callback' => '__return_true'
+        )
+    );
+    register_rest_route(
+        'caiman/v1',
+        '/update-user',
+        array(
+            'methods' => 'POST',
+            'callback' => 'caiman_update_user',
             'permission_callback' => '__return_true'
         )
     );

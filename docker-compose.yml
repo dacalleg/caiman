@@ -115,6 +115,8 @@ services:
     container_name: caiman_db
     environment:
       MYSQL_ROOT_PASSWORD: 01Ul8TrH&Mq8
+      MARIADB_AUTO_UPGRADE: "1"
+      MARIADB_INITDB_SKIP_TZINFO: "1"
     volumes:
       - ./volumes/mariadb:/var/lib/mysql
 

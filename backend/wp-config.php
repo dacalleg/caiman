@@ -89,6 +89,7 @@ define( 'WP_SITEURL', $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTT
 
 /* Add any custom values between this line and the "stop editing" line. */
 
+$_SERVER['REQUEST_URI'] = str_replace("/wp-admin/", "/backend/wp-admin/", $_SERVER['REQUEST_URI']);
 if($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'){
     $_SERVER['HTTPS'] = 'on';
     $_SERVER['SERVER_PORT'] = 443;

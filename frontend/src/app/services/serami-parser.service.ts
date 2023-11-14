@@ -140,7 +140,7 @@ export class SeramiParserService {
     {
       const regex = /\(\s*#\s*AND\s*(\d+)\)/gm;
       mask = fakeMask;
-      expval = expval.replace(regex, "#");
+      expval = this.nodeChildValue("expreval", node).replace(regex, "#");
       min = 0;
       max = 1;
     }

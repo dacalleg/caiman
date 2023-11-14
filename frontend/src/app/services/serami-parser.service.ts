@@ -74,8 +74,8 @@ export class SeramiParserService {
 
   private hasFakeMask(formula: string)
   {
-    const regex = /\(\s*#\s*AND\s*(\d+)\)\s*\/\s*(\d+)/gm;
-    const str = formula;
+    const regex = /\(\s*#\s*AND\s*(\d+)\)/gm;
+    const str = formula.toUpperCase();
     let m;
 
     while ((m = regex.exec(str)) !== null) {
@@ -84,11 +84,7 @@ export class SeramiParserService {
             regex.lastIndex++;
         }
 
-        const first = m[1];
-        const last = m[2];
-
-        if(first == last)
-          return parseInt(m[1]);
+        return parseInt(m[1]);
     }
     return null;
   }
@@ -142,8 +138,9 @@ export class SeramiParserService {
     const fakeMask = this.hasFakeMask(this.nodeChildValue("expreval", node));
     if(fakeMask)
     {
+      const regex = /\(\s*#\s*AND\s*(\d+)\)/gm;
       mask = fakeMask;
-      expval = "# / " + mask;
+      expval = expval.replace(regex, "#");
       min = 0;
       max = 1;
     }

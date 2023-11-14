@@ -72,6 +72,27 @@ export class SeramiParserService {
     return null;
   }
 
+  private hasFakeMask(formula: string)
+  {
+    const regex = /\(\s*#\s*AND\s*(\d+)\)\s*\/\s*(\d+)/gm;
+    const str = formula;
+    let m;
+
+    while ((m = regex.exec(str)) !== null) {
+        // This is necessary to avoid infinite loops with zero-width matches
+        if (m.index === regex.lastIndex) {
+            regex.lastIndex++;
+        }
+
+        const first = m[1];
+        const last = m[2];
+
+        if(first == last)
+          return parseInt(m[1]);
+    }
+    return null;
+  }
+
   buildRwmsParameterBase(node: any): Variable {
     var re = new RegExp('#', 'g');
     const bit = Math.pow(2, (parseInt(this.nodeChildValue("datatype", node)) + 3));
@@ -79,7 +100,7 @@ export class SeramiParserService {
     const sanitizedName = this.sanitizeString(this.nodeChildValue("label", node)) as string;
     const description = this.nodeChildValue("description", node) as string;
     let address = parseInt(this.nodeChildValue("startaddress", node), 16) as number;
-    const mask = parseInt(this.nodeChildValue("mask", node), 16);
+    let mask = parseInt(this.nodeChildValue("mask", node), 16);
     const varName = this.nodeChildValue("var_name", node) as string;
     let expval = this.nodeChildValue("expreval", node)
     let signed = false;
@@ -118,6 +139,14 @@ export class SeramiParserService {
       }
     }
 
+    const fakeMask = this.hasFakeMask(this.nodeChildValue("expreval", node));
+    if(fakeMask)
+    {
+      mask = fakeMask;
+      expval = "# / " + mask;
+      min = 0;
+      max = 1;
+    }
 
     return {
       type: type,

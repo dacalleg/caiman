@@ -40,6 +40,7 @@ import { OperationComponent } from './components/operation/operation.component';
 import { OperationFormComponent } from './components/operation-form/operation-form.component';
 import { ProfileComponent } from '../profile/components/profile/profile.component';
 import { OperationTitlePipe } from './pipes/operation-title.pipe';
+import { UnescapePipe } from './pipes/unescape.pipe';
 
 const icons = {
   Eye,
@@ -87,6 +88,7 @@ const icons = {
     OperationFormComponent,
     ProfileComponent,
     OperationTitlePipe,
+    UnescapePipe,
   ],
   imports: [
     CommonModule,

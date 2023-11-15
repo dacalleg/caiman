@@ -3,9 +3,9 @@
       <img [src]="device?.info?.image" class="w-100 image">
     </div>
     <div class="col-md order-2 order-md-1">
-      <h1 class="fw-bold" [innerHTML]="device?.info?.name|unescape"></h1>
+      <h1 class="fw-bold" [innerHTML]="device?.info?.name"></h1>
       <div class="fw-bold">{{device?.mac}}</div>
-      <p class="my-5" [innerHTML]="device?.info?.description|unescape"></p>
+      <p class="my-5" [innerHTML]="device?.info?.description"></p>
 
       <ul class="nav pb-5">
 

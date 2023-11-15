@@ -138,8 +138,8 @@ export class AdvancedComponent {
           })),
           switchMap((value) => this.Device.write([value])),
           tap(() => i++),
-          timeout(5000),
-          retry(5)
+          timeout(30000),
+          //retry(5)
         )),
         toArray(),
         tap(() => this.modal.dismissAll()),

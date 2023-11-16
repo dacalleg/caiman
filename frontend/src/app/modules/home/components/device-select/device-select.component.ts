@@ -20,9 +20,9 @@ export class DeviceSelectComponent implements OnInit {
 
   constructor(private Router: Router, private Api: ApiService) {
     this.selectedProduct = null;
-    this.serialNumber = "5899887445";
-    this.macAddress = "4CEBD65994FC";
-    this.regCode = "96972708";
+    this.serialNumber = "";
+    this.macAddress = "";
+    this.regCode = "";
     this.products$ = this.Api.getAllProducts();
     this.info$ = this.Api.getInfo();
     this.Api.sync().subscribe(() => console.log("Sync Finished"))

@@ -1,6 +1,6 @@
 <div class="d-flex vh-100 flex-column">
     <div class="p-5 flex-grow-1">
-        <iframe *ngIf="key$|async as key" [src]="('/print/operation/' + key) | safe" class="w-100 h-100"></iframe>
+        <iframe *ngIf="key$|async as key" [src]="('/app/print/operation/' + key) | safe" class="w-100 h-100"></iframe>
     </div>
     <div class="p-5" *ngIf="!(operation$|async)?.confirmed_date">
         <button class="btn btn-primary w-100" (click)="confirm()">{{'confirm'|translate}}</button>

@@ -4,30 +4,30 @@
   "theme_color": "#496356",
   "background_color": "#ffffff",
   "display": "standalone",
-  "id": "caimanweb-klover.agua-iot.com",
+  "id": "caimanweb-nobis.agua-iot.com",
   "scope": "./",
   "start_url": "./",
   "icons": [
     {
-      "src": "assets/klover/manifest-icon-192.maskable.png",
+      "src": "assets/nobis/manifest-icon-192.maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/klover/manifest-icon-192.maskable.png",
+      "src": "assets/nobis/manifest-icon-192.maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "assets/klover/manifest-icon-512.maskable.png",
+      "src": "assets/nobis/manifest-icon-512.maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/klover/manifest-icon-512.maskable.png",
+      "src": "assets/nobis/manifest-icon-512.maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

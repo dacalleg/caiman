@@ -31,7 +31,7 @@
           </ng-template>
           <div class="d-flex flex-grow-1 align-items-center justify-content-end" *ngIf="writeMode">
             <input type="number" [min]="variable.min || 0" [max]="variable.max || 9999999999"
-              *ngIf="true" [ngModel]="newValue"
+              *ngIf="!variable.values || variable.values.length == 0" [ngModel]="newValue"
               (ngModelChange)="write($event)" class="form-control my-1">
             <select class="form-select" *ngIf="variable.values && variable.values.length > 0" [ngModel]="newValue"
               (ngModelChange)="write($event)">
@@ -40,12 +40,14 @@
           </div>
         </div>
       </div>
-      <div class="d-flex justify-content-between icons">
-        <div>
+      <div class="d-flex justify-content-between icons" *ngIf="{ value: counter$|async } as counter">
+        <div class="d-flex flex-column justify-content-center">
           <span *ngIf="'administrator'|roleInCurrentUser|async">{{variable.hash}}</span>
+          <div *ngIf="!writing && counter.value !== null && counter.value > 0">Scrittura tra...<span>{{counter.value}}</span></div>
           <div *ngIf="writing" class="fst-italic">{{'tease.writing'|translate}}</div>
         </div>
-        <button class="btn btn-sm btn-link mt-2" (click)="toggleWrite()"><bi name="pen" class="mx-1"  *ngIf="!variable.readonly"></bi></button>
+        <button *ngIf="counter.value !== null && counter.value > 0" (click)="cancel()" class="cancel">{{'cancel'|translate}}</button>
+        <button class="btn btn-sm btn-link my-2" (click)="toggleWrite()" *ngIf="!writing && !(counter.value !== null && counter.value > 0) && !variable.readonly"><bi name="pen" class="mx-1"></bi></button>
       </div>
     </div>
   </div>

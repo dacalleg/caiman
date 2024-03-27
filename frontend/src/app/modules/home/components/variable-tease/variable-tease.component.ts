@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { concatMap, debounceTime, filter, from, map, Observable, Subject, switchMap, takeUntil, tap } from "rxjs";
+import { concat, concatMap, debounceTime, filter, finalize, from, map, Observable, of, scan, shareReplay, Subject, switchMap, takeUntil, takeWhile, tap, timer } from "rxjs";
 import { Project, Variable, VariableValue, ViewOption } from 'src/app/classes/interfaces';
 import { DeviceService } from 'src/app/services/device.service';
 import { ModalService } from 'src/app/services/modal.service';
@@ -15,42 +15,35 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
   destroy$: Subject<void>;
   viewOpt: ViewOption | null;
   writeMode: boolean;
-  writeSubject: Subject<number>;
   fullmask: number;
   value$: Observable<VariableValue>;
   project$: Observable<Project>;
   newValue: number;
   writing: boolean;
+  cancelSubject: Subject<void>;
+  startCounter: Subject<void>;
+  counter$: Observable<number>;
 
   constructor(private Store: StoreService, private Device: DeviceService, private Modal: ModalService) {
     this.variable = null;
     this.destroy$ = new Subject<void>();
     this.viewOpt = null;
     this.writeMode = false;
-    this.writeSubject = new Subject<number>();
+    this.cancelSubject = new Subject<void>();
     this.fullmask = 0;
     this.newValue = 0;
     this.writing = false;
+    this.startCounter = new Subject<void>();
 
-    this.writeSubject.pipe(
-        debounceTime(1000),
-        tap(() => 
-        {
-          this.writeMode = false;
-          this.writing = true;
-        }),
-        map(value => {
-          return { variable: this.variable, value: value } as VariableValue
-        }),
-        concatMap(value => this.Device.write([value])
-      )).subscribe({
-        next: () => {
-          this.writing = false;
-        },
-        error: () => {
-          this.writing = false;
-        }
-      });
+    this.counter$ = concat(of(0), this.startCounter.pipe(
+      switchMap(() => concat(timer(0, 1000).pipe(
+        scan(acc => --acc, 6),
+        takeUntil(this.startCounter),
+        takeUntil(this.cancelSubject),
+        takeWhile(x => x >= 1),
+      ), of(0))),
+      shareReplay(1),
+    ));
 
     this.value$ = this.Device.getStream().pipe(
       switchMap((variables) => from(variables)),
@@ -75,7 +68,32 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
   }
 
   write(value: number) {
-    this.writeSubject.next(+value);
+    const writeSubject = new Subject<number>();
+    this.startCounter.next();
+    writeSubject.pipe(
+      debounceTime(5000),
+      tap(() => {
+        this.writeMode = false;
+        this.writing = true;
+      }),
+      takeUntil(this.cancelSubject),
+      map(value => {
+        return { variable: this.variable, value: value } as VariableValue
+      }),
+      concatMap(value => this.Device.write([value])
+      )).subscribe({
+        next: () => {
+          this.writing = false;
+        },
+        error: () => {
+          this.writing = false;
+          this.cancelSubject.next();
+        },
+        complete: () => {
+          this.cancelSubject.next();
+        }
+      });
+    writeSubject.next(+value);
   }
 
   toggleWrite() {
@@ -89,5 +107,10 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
 
   isNumber(value: any) {
     return !Number.isNaN(value);
+  }
+
+  cancel() {
+    this.cancelSubject.next();
+    this.writeMode = false;
   }
 }

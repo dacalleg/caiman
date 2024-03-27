@@ -30,7 +30,6 @@ export class EditComponent {
   groups$: Observable<string[]>;
   variables: Variable[];
   groups: string[];
-  active = 2;
   logs: CheckLog[];
   search: string | undefined;
 
@@ -63,7 +62,7 @@ export class EditComponent {
       }),
     );
 
-    this.groups$.pipe(filter(g => g.length > 0), take(1)).subscribe(g => this.groups = g);
+    this.groups$.pipe(filter(g => g.length > 0), map(g => g.sort((b,a) => b.localeCompare(a)))).subscribe(g => this.groups = g);
 
     this.variables$ = combineLatest([
       this.seramiEntry$,
@@ -179,6 +178,7 @@ export class EditComponent {
       this.seramiEntry.data.filter(i => i.group == oldName).forEach(i => i.group = newName);
       const index = this.groups.indexOf(oldName);
       this.groups[index] = newName;
+      this.refresh$.next();
     }
   }
 

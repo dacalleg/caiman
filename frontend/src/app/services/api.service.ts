@@ -1,11 +1,48 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { bufferCount, catchError, combineLatest, concat, concatMap, delay, filter, from, ignoreElements, map, Observable, of, shareReplay, switchMap, take, tap, throwError, toArray } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { AguaOptions, Board, DeviceInfoResponse, DeviceProduct, Gateway, LogItem, ProductInfo, SeramiACL, SeramiEntry, Ticket, Translation, UserData, Variable, VariableInfoOverride, Info, Country, Registry, Operation, Failure } from '../classes/interfaces';
-import { AuthService } from './auth.service';
-import { TranslationProviderService } from './translation-provider.service';
-import { TranslationService } from './translation.service';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {
+  bufferCount,
+  catchError,
+  combineLatest,
+  concat,
+  concatMap,
+  defer,
+  delay,
+  from,
+  ignoreElements,
+  map,
+  Observable,
+  of,
+  repeat,
+  shareReplay,
+  switchMap,
+  take,
+  tap,
+  throwError,
+  toArray
+} from 'rxjs';
+import {environment} from 'src/environments/environment';
+import {
+  AguaOptions,
+  Board,
+  Country,
+  DeviceInfoResponse,
+  Failure,
+  Gateway,
+  Info,
+  LogItem,
+  Operation,
+  ProductInfo,
+  Registry,
+  SeramiACL,
+  SeramiEntry,
+  Ticket,
+  Variable,
+  VariableInfoOverride
+} from '../classes/interfaces';
+import {AuthService} from './auth.service';
+import {TranslationProviderService} from './translation-provider.service';
+import {TranslationService} from './translation.service';
 
 interface DeferredRequest {
   url: string;
@@ -20,6 +57,7 @@ export class ApiService {
 
   private options$: Observable<AguaOptions>;
   private info$: Observable<Info>;
+  private products$: Observable<{ name: string, key: string }[]>;
 
   constructor(
     private Http: HttpClient,
@@ -28,6 +66,316 @@ export class ApiService {
     private Translation: TranslationService) {
     this.options$ = this.Http.get<AguaOptions>(environment.endpoint + "/wp-json/caiman/v1/options").pipe(shareReplay(1));
     this.info$ = this.Http.get<Info>(environment.endpoint + "/wp-json/caiman/v1/info").pipe(shareReplay(1));
+    this.products$ = this.Translation.getCurrentLanguage().pipe(
+      take(1),
+      switchMap((lang) => of(1,2,3,4,5,6,7,8,9, 10).pipe(
+        concatMap(page => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?" + (lang !== "it" ? "lang=" + lang : "") + "&page=" + page + "&per_page=" + 99).pipe(
+          switchMap(arr => from(arr)),
+          map((item) => {
+            return {
+              name: item.title.rendered as string,
+              key: item.acf.key as string,
+            }
+          }),
+        ))
+      )),
+      catchError((err, caught) => of()),
+      toArray(),
+      map(arr => arr.sort((a,b) => a.name.localeCompare(b.name))),
+      shareReplay(1)
+    )
+  }
+
+  getInfo() {
+    return this.info$;
+  }
+
+  getDeviceInfoFromMac(mac: string, productKey: string | null = null) {
+    return combineLatest([
+      this.getAguaHeaders(),
+      this.options$,
+    ]).pipe(
+      switchMap(([headers, options]) => this.Http.post<DeviceInfoResponse>(options.agua_endpoint + "/deviceInfoFromMac", {mac: mac}, {headers: headers})),
+      map(response => response.device_product[0]),
+      switchMap(response => {
+        if (productKey)
+          return this.getProductInfo(productKey, response.boards_status?.Type).pipe(
+            map(info => {
+              response.info = info;
+              return response;
+            }));
+        return this.getProductInfo(response.id_product, response.boards_status?.Type).pipe(
+          map(info => {
+            response.info = info;
+            return response;
+          }))
+      })
+    );
+  }
+
+  getFailures() {
+    return this.Translation.getCurrentLanguage().pipe(
+      take(1),
+      switchMap((lang) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/failure/?" + (lang !== "it" ? "lang=" + lang : "")).pipe(
+        switchMap(arr => from(arr)),
+        map((item) => {
+          return {
+            name: item.title.rendered as string,
+            key: item.acf.key as string,
+            description: ""
+          } as Failure
+        }),
+        toArray(),
+      )),
+    )
+  }
+
+  getAllProducts() {
+    return this.products$;
+  }
+
+  sync() {
+    const syncLogs$ = from(this.getDeferredHttpQueue()).pipe(
+      concatMap(req => this.Http.post<any>(req.url, req.body).pipe(
+        tap(() => this.removeFromDeferredHttpQueue(req.id))
+      )),
+      toArray(),
+      tap({next: (arr) => console.log("Synced", arr.length, "requests")})
+    )
+
+    const syncProducts$ = of(localStorage.getItem("last_sync")).pipe(
+      switchMap(value => {
+        if (value !== null) {
+          const last = +value;
+          const now = new Date();
+          return of(now.getTime() - last > 3600 * 24 * 7 * 1000)
+        }
+        return of(true);
+      }),
+      switchMap((value) => {
+        if (value) {
+          return this.getAllProducts().pipe(
+            switchMap(products => from(products)),
+            concatMap(product => this.getProductInfo(product.key)),
+            delay(2000),
+            ignoreElements(),
+            tap({
+              complete: () => {
+                const now = new Date();
+                localStorage.setItem("last_sync", "" + now.getTime())
+              }
+            })
+          )
+        } else {
+          return of(void 0).pipe(ignoreElements());
+        }
+      })
+    )
+
+    return concat(
+      syncLogs$,
+      syncProducts$
+    )
+  }
+
+  getProductInfo(product: string, gateway: string | undefined = undefined) {
+    return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
+      switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
+      switchMap(arr => from(arr)),
+      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
+      take(1),
+      switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
+      map(([item, board, gateway, roles, serami]) => this.buildProductInfo(item, board, roles, gateway, serami.data)),
+      switchMap(item => {
+        if (item.image) {
+          return this.getMedia(item.image).pipe(map(image => {
+            item.image = image;
+            return item;
+          }))
+        } else {
+          return of(item);
+        }
+      }),
+    )
+  }
+
+  getMedia(href: string) {
+    return this.Http.get<any>(href).pipe(
+      map(response => response.source_url),
+    )
+  }
+
+  getAttachmentUrl(id: number | string) {
+    return this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/media/" + id).pipe(
+      map(response => response.source_url)
+    )
+  }
+
+  getAttachmentUrlWithoutSSL(id: number | string) {
+    return this.Http.get<{ url: string, md5: string }>(environment.endpoint + "/wp-json/caiman/v1/unsecure_file/" + id)
+  }
+
+  getAttachmentContent(id: number, responseType: 'text' | 'blob' = 'text') {
+    return this.getAttachmentUrl(id).pipe(
+      switchMap(url => this.Http.get(url, {responseType: 'text'})),
+    )
+  }
+
+  getAguaEnv() {
+    return this.options$;
+  }
+
+  getTranslations() {
+    return this.TranslationProvider.getAvailableTranslations();
+  }
+
+  getSeramiList() {
+    return this.Http.get<SeramiEntry[]>(environment.endpoint + "/api/serami");
+  }
+
+  getSerami(key: string) {
+    return this.Http.get<SeramiEntry>(environment.endpoint + "/api/serami/get/" + key);
+  }
+
+  updateSerami(data: SeramiEntry) {
+    return this.Http.post<any>(environment.endpoint + "/api/serami/update", data);
+  }
+
+  getTickets(serial: string) {
+    return this.Http.get<Ticket[]>(environment.endpoint + "/api/ticket/get/" + serial).pipe(map(resp => {
+      return resp.map(item => {
+        item.createdAt = new Date(item.createdAt);
+        return item;
+      })
+    }))
+  }
+
+  addTicket(ticket: Partial<Ticket>, parent: Ticket) {
+    return this.Http.post<Ticket>(environment.endpoint + "/api/ticket/add", {ticket: ticket, parent: parent.id});
+  }
+
+  createLogForDevice(serial: string, log: LogItem) {
+    return this.Http.post(environment.endpoint + "/api/logs", {
+      ...log,
+      serial: serial,
+      date: log.date.toJSON().slice(0, 19).replace('T', ' ')
+    }).pipe(
+      catchError(err => {
+        const req = {
+          id: this.makeid(),
+          url: environment.endpoint + "/api/logs",
+          body: {...log, serial: serial, date: log.date.toJSON().slice(0, 19).replace('T', ' ')}
+        }
+        this.addToDeferredHttpQueue(req);
+        return throwError(() => err)
+      })
+    );
+  }
+
+  createLogForGateway(gatewayId: string, log: LogItem) {
+    return this.Http.post(environment.endpoint + "/api/logs", {
+      ...log,
+      gateway: gatewayId,
+      date: log.date.toJSON().slice(0, 19).replace('T', ' ')
+    });
+  }
+
+  getLogsForDevice(serial: string) {
+    return this.Http.get<any[]>(environment.endpoint + "/api/logs/serial/" + serial).pipe(map(resp => {
+      return resp.map(item => {
+        item.date = new Date(item.date);
+        return item as LogItem;
+      })
+    }));
+  }
+
+  closeTicket(ticket: Ticket) {
+    return this.Http.post<Ticket>(environment.endpoint + "/api/ticket/close", {id: ticket.id});
+  }
+
+  chunkUpload(file: File, chunkSize: number = 1024 * 1024) {
+    const splitted = file.name.split(".", 2);
+    const ext = splitted[1];
+    const filename = this.makeid(10);
+    return from(file.arrayBuffer()).pipe(
+      bufferCount(chunkSize),
+      map(buffer => new Blob(buffer, {type: file.type})),
+      switchMap(blob => from(this.blobToBase64(blob))),
+      switchMap(base64 => this.Http.post(environment.endpoint + "/api/chunkupload", {
+        name: filename,
+        ext: ext,
+        chunk: base64
+      })),
+      map(() => filename + "." + ext)
+    );
+  }
+
+  getCountries() {
+    return this.Http.get<any[]>("https://restcountries.com/v3.1/all?fields=name,cca2").pipe(map(countries => {
+      return countries.map(c => {
+        return {
+          name: c.name.common,
+          code: c.cca2
+        } as Country
+      }).sort((a, b) => a.name.localeCompare(b.name));
+    }))
+  }
+
+  getRegistries(serial: string) {
+    return this.Http.get<Registry[]>(environment.endpoint + "/api/registry/get/" + serial).pipe(
+      map(resp => {
+        return resp.map(item => {
+          if (item.createdAt)
+            item.createdAt = new Date(item.createdAt);
+          return item;
+        }).sort((b, a) => {
+          if (a.createdAt && b.createdAt)
+            return a.createdAt.getTime() - b.createdAt.getTime();
+          return 0
+        })
+      }),
+    )
+  }
+
+  getLastRegisry(serial: string) {
+    return this.getRegistries(serial).pipe(
+      map(registries => registries.length > 0 ? registries[0] : null)
+    )
+  }
+
+  getOperations(serial: string) {
+    return this.Http.get<Operation[]>(environment.endpoint + "/api/operation/get/" + serial).pipe(
+      map(resp => {
+        return resp.map(item => {
+          if (item.createdAt)
+            item.createdAt = new Date(item.createdAt);
+          return item;
+        }).sort((b, a) => {
+          if (a.createdAt && b.createdAt)
+            return a.createdAt.getTime() - b.createdAt.getTime();
+          return 0
+        })
+      }),
+    )
+  }
+
+  getOperationByKey(key: string) {
+    return this.Http.get<Operation>(environment.endpoint + "/api/operation/key/" + key);
+  }
+
+  confirmOperation(key: string, from_email?: string) {
+    return this.Http.post<Operation>(environment.endpoint + "/api/operation/confirm", {
+      key: key,
+      from_email: from_email
+    });
+  }
+
+  updateOperation(operation: Operation) {
+    return this.Http.post<any>(environment.endpoint + "/api/operation/update", {...operation});
+  }
+
+  updateRegistry(registry: Registry) {
+    return this.Http.post<any>(environment.endpoint + "/api/registry/update", {...registry, key: undefined});
   }
 
   private getAguaHeaders() {
@@ -44,33 +392,6 @@ export class ApiService {
           .set('authorization', token || "")
           .set('local', 'false')
       }))
-  }
-
-  getInfo() {
-    return this.info$;
-  }
-
-  getDeviceInfoFromMac(mac: string, productKey: string | null = null) {
-    return combineLatest([
-      this.getAguaHeaders(),
-      this.options$,
-    ]).pipe(
-      switchMap(([headers, options]) => this.Http.post<DeviceInfoResponse>(options.agua_endpoint + "/deviceInfoFromMac", { mac: mac }, { headers: headers })),
-      map(response => response.device_product[0]),
-      switchMap(response => {
-        if (productKey)
-          return this.getProductInfo(productKey, response.boards_status?.Type).pipe(
-            map(info => {
-              response.info = info;
-              return response;
-            }));
-        return this.getProductInfo(response.id_product, response.boards_status?.Type).pipe(
-          map(info => {
-            response.info = info;
-            return response;
-          }))
-      })
-    );
   }
 
   private getBoard(id: string) {
@@ -122,40 +443,6 @@ export class ApiService {
     )
   }
 
-  getFailures()
-  {
-    return this.Translation.getCurrentLanguage().pipe(
-      take(1),
-      switchMap((lang) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/failure/?" + (lang !== "it" ? "lang=" + lang : "")).pipe(
-        switchMap(arr => from(arr)),
-        map((item) => {
-          return {
-            name: item.title.rendered as string,
-            key: item.acf.key as string,
-            description: ""
-          } as Failure
-        }),
-        toArray(),
-      )),
-    )
-  }
-
-  getAllProducts() {
-    return this.Translation.getCurrentLanguage().pipe(
-      take(1),
-      switchMap((lang) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?" + (lang !== "it" ? "lang=" + lang : "")).pipe(
-        switchMap(arr => from(arr)),
-        map((item) => {
-          return {
-            name: item.title.rendered as string,
-            key: item.acf.key as string,
-          }
-        }),
-        toArray(),
-      )),
-    )
-  }
-
   private getDeferredHttpQueue() {
     const q = localStorage.getItem("http_queue");
     if (q) {
@@ -176,51 +463,6 @@ export class ApiService {
     localStorage.setItem("http_queue", JSON.stringify(queue));
   }
 
-  sync() {
-    const syncLogs$ = from(this.getDeferredHttpQueue()).pipe(
-      concatMap(req => this.Http.post<any>(req.url, req.body).pipe(
-        tap(() => this.removeFromDeferredHttpQueue(req.id))
-      )),
-      toArray(),
-      tap({ next: (arr) => console.log("Synced", arr.length, "requests") })
-    )
-
-    const syncProducts$ = of(localStorage.getItem("last_sync")).pipe(
-      switchMap(value => {
-        if (value !== null) {
-          const last = +value;
-          const now = new Date();
-          return of(now.getTime() - last > 3600 * 24 * 7 * 1000)
-        }
-        return of(true);
-      }),
-      switchMap((value) => {
-        if (value) {
-          return this.getAllProducts().pipe(
-            switchMap(products => from(products)),
-            concatMap(product => this.getProductInfo(product.key)),
-            delay(2000),
-            ignoreElements(),
-            tap({
-              complete: () => {
-                const now = new Date();
-                localStorage.setItem("last_sync", "" + now.getTime())
-              }
-            })
-          )
-        } else {
-          return of(void 0).pipe(ignoreElements());
-        }
-      })
-    )
-
-    return concat(
-      syncLogs$,
-      syncProducts$
-    )
-  }
-
-
   private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[]) {
     let serami_var_override = item.acf.serami_var_override as any[] || [];
     let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
@@ -238,7 +480,9 @@ export class ApiService {
 
     const var_override = identifiers.map(id => {
       const info = serami_var_override.find(item => item.id === id);
-      const options = serami_var_opt_override.find(item => item.id === id)?.options.split("\n").reduce((acc: { [key: string]: string }, item: string) => {
+      const options = serami_var_opt_override.find(item => item.id === id)?.options.split("\n").reduce((acc: {
+        [key: string]: string
+      }, item: string) => {
         const [key, value] = item.split(":");
         acc[value.trim()] = key.trim();
         return acc;
@@ -281,192 +525,6 @@ export class ApiService {
       faq: item.acf.faq || [],
       variables: variables
     } as ProductInfo
-  }
-
-
-  getProductInfo(product: string, gateway: string | undefined = undefined) {
-    return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
-      switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
-      switchMap(arr => from(arr)),
-      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
-      take(1),
-      switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
-      map(([item, board, gateway, roles, serami]) => this.buildProductInfo(item, board, roles, gateway, serami.data)),
-      switchMap(item => {
-        if (item.image) {
-          return this.getMedia(item.image).pipe(map(image => {
-            item.image = image;
-            return item;
-          }))
-        } else {
-          return of(item);
-        }
-      }),
-    )
-  }
-
-  getMedia(href: string) {
-    return this.Http.get<any>(href).pipe(
-      map(response => response.source_url),
-    )
-  }
-
-  getAttachmentUrl(id: number | string) {
-    return this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/media/" + id).pipe(
-      map(response => response.source_url)
-    )
-  }
-
-  getAttachmentUrlWithoutSSL(id: number | string) {
-    return this.Http.get<{ url: string, md5: string }>(environment.endpoint + "/wp-json/caiman/v1/unsecure_file/" + id)
-  }
-
-  getAttachmentContent(id: number, responseType: 'text' | 'blob' = 'text') {
-    return this.getAttachmentUrl(id).pipe(
-      switchMap(url => this.Http.get(url, { responseType: 'text' })),
-    )
-  }
-
-  getAguaEnv() {
-    return this.options$;
-  }
-
-  getTranslations() {
-    return this.TranslationProvider.getAvailableTranslations();
-  }
-
-  getSeramiList() {
-    return this.Http.get<SeramiEntry[]>(environment.endpoint + "/api/serami");
-  }
-
-  getSerami(key: string) {
-    return this.Http.get<SeramiEntry>(environment.endpoint + "/api/serami/get/" + key);
-  }
-
-  updateSerami(data: SeramiEntry) {
-    return this.Http.post<any>(environment.endpoint + "/api/serami/update", data);
-  }
-
-  getTickets(serial: string) {
-    return this.Http.get<Ticket[]>(environment.endpoint + "/api/ticket/get/" + serial).pipe(map(resp => {
-      return resp.map(item => {
-        item.createdAt = new Date(item.createdAt);
-        return item;
-      })
-    }))
-  }
-
-  addTicket(ticket: Partial<Ticket>, parent: Ticket) {
-    return this.Http.post<Ticket>(environment.endpoint + "/api/ticket/add", { ticket: ticket, parent: parent.id });
-  }
-
-  createLogForDevice(serial: string, log: LogItem) {
-    return this.Http.post(environment.endpoint + "/api/logs", { ...log, serial: serial, date: log.date.toJSON().slice(0, 19).replace('T', ' ') }).pipe(
-      catchError(err => {
-        const req = { id: this.makeid(), url: environment.endpoint + "/api/logs", body: { ...log, serial: serial, date: log.date.toJSON().slice(0, 19).replace('T', ' ') } }
-        this.addToDeferredHttpQueue(req);
-        return throwError(() => err)
-      })
-    );
-  }
-
-  createLogForGateway(gatewayId: string, log: LogItem) {
-    return this.Http.post(environment.endpoint + "/api/logs", { ...log, gateway: gatewayId, date: log.date.toJSON().slice(0, 19).replace('T', ' ') });
-  }
-
-  getLogsForDevice(serial: string) {
-    return this.Http.get<any[]>(environment.endpoint + "/api/logs/serial/" + serial).pipe(map(resp => {
-      return resp.map(item => {
-        item.date = new Date(item.date);
-        return item as LogItem;
-      })
-    }));
-  }
-
-  closeTicket(ticket: Ticket) {
-    return this.Http.post<Ticket>(environment.endpoint + "/api/ticket/close", { id: ticket.id });
-  }
-
-  chunkUpload(file: File, chunkSize: number = 1024 * 1024) {
-    const splitted = file.name.split(".", 2);
-    const ext = splitted[1];
-    const filename = this.makeid(10);
-    return from(file.arrayBuffer()).pipe(
-      bufferCount(chunkSize),
-      map(buffer => new Blob(buffer, { type: file.type })),
-      switchMap(blob => from(this.blobToBase64(blob))),
-      switchMap(base64 => this.Http.post(environment.endpoint + "/api/chunkupload", { name: filename, ext: ext, chunk: base64 })),
-      map(() => filename + "." + ext)
-    );
-  }
-
-  getCountries() {
-    return this.Http.get<any[]>("https://restcountries.com/v3.1/all?fields=name,cca2").pipe(map(countries => {
-      return countries.map(c => {
-        return {
-          name: c.name.common,
-          code: c.cca2
-        } as Country
-      }).sort((a, b) => a.name.localeCompare(b.name));
-    }))
-  }
-
-  getRegistries(serial: string) {
-    return this.Http.get<Registry[]>(environment.endpoint + "/api/registry/get/" + serial).pipe(
-      map(resp => {
-        return resp.map(item => {
-          if (item.createdAt)
-            item.createdAt = new Date(item.createdAt);
-          return item;
-        }).sort((b, a) => {
-          if (a.createdAt && b.createdAt)
-            return a.createdAt.getTime() - b.createdAt.getTime();
-          return 0
-        })
-      }),
-    )
-  }
-
-  getLastRegisry(serial: string)
-  {
-    return this.getRegistries(serial).pipe(
-      map(registries => registries.length > 0 ? registries[0] : null)
-    )
-  }
-
-  getOperations(serial: string) {
-    return this.Http.get<Operation[]>(environment.endpoint + "/api/operation/get/" + serial).pipe(
-      map(resp => {
-        return resp.map(item => {
-          if (item.createdAt)
-            item.createdAt = new Date(item.createdAt);
-          return item;
-        }).sort((b, a) => {
-          if (a.createdAt && b.createdAt)
-            return a.createdAt.getTime() - b.createdAt.getTime();
-          return 0
-        })
-      }),
-    )
-  }
-
-  getOperationByKey(key: string) {
-    return this.Http.get<Operation>(environment.endpoint + "/api/operation/key/" + key);
-  }
-
-  confirmOperation(key: string, from_email?: string) {
-    return this.Http.post<Operation>(environment.endpoint + "/api/operation/confirm", {
-      key: key,
-      from_email: from_email
-    });
-  }
-
-  updateOperation(operation: Operation) {
-    return this.Http.post<any>(environment.endpoint + "/api/operation/update", { ...operation });
-  }
-
-  updateRegistry(registry: Registry) {
-    return this.Http.post<any>(environment.endpoint + "/api/registry/update", { ...registry, key: undefined });
   }
 
   private makeid(length = 8) {

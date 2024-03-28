@@ -28,6 +28,7 @@ export interface Variable {
   formatstring: string
   description?: string
   varKey?: string
+  sort?: number
 }
 
 export interface Project {

@@ -2,7 +2,10 @@
     <ngb-accordion #acc="ngbAccordion" activeIds="0">
         <ngb-panel *ngFor="let variable of data">
             <ng-template ngbPanelHeader let-opened="opened">
-                <button ngbPanelToggle class="accordion-button">{{variable.name}}<br>{{variable.hash}}</button>
+                <button ngbPanelToggle class="accordion-button" *ngIf="variable.name && variable.name.trim() !== '';else descr">{{variable.name}}<br>{{variable.hash}}</button>
+                <ng-template #descr>
+                    <button ngbPanelToggle class="accordion-button">{{variable.description}}<br>{{variable.hash}}</button>
+                </ng-template>
             </ng-template>
             <ng-template ngbPanelContent>
                 <div class="row">
@@ -15,8 +18,7 @@
                             </button>
                             <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
                                 <button ngbDropdownItem *ngFor="let group of groups"
-                                    (click)="moveToGroup(variable, group)">{{ group
-                                    }}</button>
+                                    (click)="moveToGroup(variable, group)">{{ group }}</button>
                             </div>
                         </div>
                         <button class="btn btn-sm btn-danger ms-2"
@@ -29,6 +31,11 @@
                             <label for="ID" class="form-label">ID</label>
                             <input type="text" class="form-control" id="ID"
                                 [(ngModel)]="variable.hash" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sort" class="form-label">Order</label>
+                            <input type="text" class="form-control" id="sort"
+                                [(ngModel)]="variable.sort">
                         </div>
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>

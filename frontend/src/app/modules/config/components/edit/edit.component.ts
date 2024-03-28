@@ -53,7 +53,7 @@ export class EditComponent {
     this.seramiEntry$ = merge(
       s1$,
       this.refresh$.pipe(switchMap(() => of(this.seramiEntry)))
-    ).pipe(tap(() => console.log("refreshed")), shareReplay(1));
+    ).pipe(shareReplay(1));
 
     this.groups$ = this.seramiEntry$.pipe(
       map(s => {

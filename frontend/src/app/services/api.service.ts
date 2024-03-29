@@ -6,14 +6,13 @@ import {
   combineLatest,
   concat,
   concatMap,
-  defer,
   delay,
+  filter,
   from,
   ignoreElements,
   map,
   Observable,
   of,
-  repeat,
   shareReplay,
   switchMap,
   take,
@@ -68,7 +67,7 @@ export class ApiService {
     this.info$ = this.Http.get<Info>(environment.endpoint + "/wp-json/caiman/v1/info").pipe(shareReplay(1));
     this.products$ = this.Translation.getCurrentLanguage().pipe(
       take(1),
-      switchMap((lang) => of(1,2,3,4,5,6,7,8,9, 10).pipe(
+      switchMap((lang) => of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).pipe(
         concatMap(page => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?" + (lang !== "it" ? "lang=" + lang : "") + "&page=" + page + "&per_page=" + 99).pipe(
           switchMap(arr => from(arr)),
           map((item) => {
@@ -81,7 +80,7 @@ export class ApiService {
       )),
       catchError((err, caught) => of()),
       toArray(),
-      map(arr => arr.sort((a,b) => a.name.localeCompare(b.name))),
+      map(arr => arr.sort((a, b) => a.name.localeCompare(b.name))),
       shareReplay(1)
     )
   }
@@ -143,38 +142,56 @@ export class ApiService {
       tap({next: (arr) => console.log("Synced", arr.length, "requests")})
     )
 
-    const syncProducts$ = of(localStorage.getItem("last_sync")).pipe(
-      switchMap(value => {
+    const syncProducts$ = this.getAllProducts().pipe(
+      switchMap(products => from(products)),
+      filter(product => {
+        let value = localStorage.getItem("last_sync_prod_" + product.key)
         if (value !== null) {
           const last = +value;
           const now = new Date();
-          return of(now.getTime() - last > 3600 * 24 * 7 * 1000)
+          return now.getTime() - last > 3600 * 24 * 7 * 1000
         }
-        return of(true);
+        return true;
       }),
-      switchMap((value) => {
-        if (value) {
-          return this.getAllProducts().pipe(
-            switchMap(products => from(products)),
-            concatMap(product => this.getProductInfo(product.key)),
-            delay(2000),
-            ignoreElements(),
-            tap({
-              complete: () => {
-                const now = new Date();
-                localStorage.setItem("last_sync", "" + now.getTime())
-              }
-            })
-          )
-        } else {
-          return of(void 0).pipe(ignoreElements());
-        }
-      })
+      concatMap(product => this.getProductInfo(product.key).pipe(
+        delay(2000),
+        tap(() => {
+          console.log("Synced", product.key);
+          const now = new Date();
+          localStorage.setItem("last_sync_prod_" + product.key, "" + now.getTime())
+        }),
+        catchError((err => {
+          console.log("Error Sync ", product.name)
+          return of();
+        }))
+      )),
+      ignoreElements(),
     )
 
     return concat(
       syncLogs$,
       syncProducts$
+    )
+  }
+
+  getProductInfoByPrefix(prefix: string, gateway: string | undefined = undefined) {
+    return combineLatest([of(prefix), this.Translation.getCurrentLanguage()]).pipe(
+      switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?prefix=" + prefix + (lang !== "it" ? "&lang=" + lang : ""))),
+      switchMap(arr => from(arr)),
+      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
+      take(1),
+      switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
+      map(([item, board, gateway, roles, serami]) => this.buildProductInfo(item, board, roles, gateway, serami.data)),
+      switchMap(item => {
+        if (item.image) {
+          return this.getMedia(item.image).pipe(map(image => {
+            item.image = image;
+            return item;
+          }))
+        } else {
+          return of(item);
+        }
+      }),
     )
   }
 
@@ -523,6 +540,7 @@ export class ApiService {
       database: board.database || [],
       image: item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
       faq: item.acf.faq || [],
+      prefix: item.acf.prefix,
       variables: variables
     } as ProductInfo
   }

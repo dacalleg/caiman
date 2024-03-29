@@ -1,6 +1,13 @@
 FROM nginx
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
-RUN apt-get install -y nodejs npm
+
+RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh > install.sh
+RUN bash install.sh
+ENV NVM_DIR=/root/.nvm
+RUN . "$NVM_DIR/nvm.sh" && nvm install 18.18.2
+RUN . "$NVM_DIR/nvm.sh" && nvm use v18.18.2
+RUN . "$NVM_DIR/nvm.sh" && nvm alias default v18.18.2
+ENV PATH="/root/.nvm/versions/node/v18.18.2/bin/:${PATH}"
+
 COPY . /usr/share/nginx/html
 RUN rm -rf /usr/share/nginx/html/node_modules
 RUN rm -rf /usr/share/nginx/html/.angular

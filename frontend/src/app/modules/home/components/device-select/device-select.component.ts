@@ -17,6 +17,7 @@ export class DeviceSelectComponent implements OnInit {
   info$: Observable<Info>;
   selectedProduct: string | null;
   regCode: string;
+  selectedOption: number;
 
   constructor(private Router: Router, private Api: ApiService) {
     this.selectedProduct = null;
@@ -25,7 +26,8 @@ export class DeviceSelectComponent implements OnInit {
     this.regCode = "";
     this.products$ = this.Api.getAllProducts();
     this.info$ = this.Api.getInfo();
-    this.Api.sync().subscribe(() => console.log("Sync Finished"))
+    this.Api.sync().subscribe({complete: () => console.log("Sync Finished")})
+    this.selectedOption = 0;
   }
 
   ngOnInit(): void {
@@ -43,4 +45,11 @@ export class DeviceSelectComponent implements OnInit {
     this.Router.navigate(['/dashboard/home', this.macAddress, this.serialNumber, this.selectedProduct, this.regCode]);
   }
 
+  connectUsingOnlySerial() {
+    this.Router.navigate(['/dashboard/home', '0000', this.serialNumber]);
+  }
+
+  selectOption(n: number) {
+    this.selectedOption = n;
+  }
 }

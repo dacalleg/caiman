@@ -1,118 +1,180 @@
 <div class="h-100 d-flex flex-column">
-    <div class="container mt-5">
-        <div class="row mb-5">
-            <div class="col text-center">
-                <div class="d-flex align-items-center justify-content-center">
-                    <img [src]="(info$|async)?.logo" width="200px">
-                    <div class="text-start d-none">
-                        <h1 class="fw-bold mb-0">CAIMAN</h1>
-                        <small>By Micronova Srl</small>
-                    </div>
-                </div>
-            </div>
+  <div class="container mt-5">
+    <div class="row mb-5">
+      <div class="col text-center">
+        <div class="d-flex align-items-center justify-content-center">
+          <img [src]="(info$|async)?.logo" width="200px">
+          <div class="text-start d-none">
+            <h1 class="fw-bold mb-0">CAIMAN</h1>
+            <small>By Micronova Srl</small>
+          </div>
         </div>
-        <div class="row">
-            <div class="col">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row ">
-                            <div class="col-md mb-3">
-                                <label for="macaddress" class="form-label">Mac Address</label>
-                                <input type="text" class="form-control" placeholder="MAC Address"
-                                    aria-label="MAC Address" aria-describedby="button-addon2"
-                                    [(ngModel)]="macAddress">
-                            </div>
-                            <div class="col-md mb-3">
-                                <label for="serial" class="form-label">Serial Number</label>
-                                <input type="text" class="form-control" placeholder="Serial Number"
-                                aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col text-end">
-                                <button class="btn btn-primary" (click)="connectUsingMAC()">Connect</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md mb-3">
-                                <label for="macaddress" class="form-label">Mac Address</label>
-                                <input type="text" class="form-control" placeholder="MAC Address"
-                                    aria-label="MAC Address" aria-describedby="button-addon2" [(ngModel)]="macAddress"
-                                    id="macaddress">
-                            </div>
-                            <div class="col-md mb-3">
-                                <label for="serial" class="form-label">Serial Number</label>
-                                <input type="text" id="serial" class="form-control" placeholder="Serial Number"
-                                aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
-                            </div>
-                            <div class="col-md mb-3">
-                                <label for="productlist" class="form-label">Select a product</label>
-                                <select id="productlist" class="form-select" [(ngModel)]="selectedProduct">
-                                    <option selected [ngValue]="null">Select a product</option>
-                                    <option *ngFor="let product of products$|async" [ngValue]="product.key"
-                                        [innerHtml]="product.name"></option>
-                                </select>
-                            </div>
-
-                        </div>
-                        <div class="text-end">
-                            <button class="btn btn-primary" (click)="connectUsingProduct()">Connect</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col">
-                                <h1 class="fw-bold">OFFLINE</h1>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md mb-3">
-                                <label for="macaddress" class="form-label">Mac Address</label>
-                                <input type="text" class="form-control" placeholder="MAC Address"
-                                    aria-label="MAC Address" aria-describedby="button-addon2"
-                                    [(ngModel)]="macAddress">
-                            </div>
-                            <div class="col-md mb-3">
-                                <label for="serial" class="form-label">AP Password</label>
-                                <input type="text" class="form-control" placeholder="Serial Number"
-                                aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="regCode">
-                            </div>
-                            <div class="col-md mb-3">
-                                <label for="serial" class="form-label">Serial Number</label>
-                                <input type="text" id="serial" class="form-control" placeholder="Serial Number"
-                                aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
-                            </div>
-                            <div class="col-md mb-3">
-                                <label for="productlist" class="form-label">Select a product</label>
-                                <select id="productlist" class="form-select" [(ngModel)]="selectedProduct">
-                                    <option selected [ngValue]="null">Select a product</option>
-                                    <option *ngFor="let product of products$|async" [ngValue]="product.key"
-                                        [innerHtml]="product.name"></option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col text-end">
-                                <button class="btn btn-primary" (click)="connectOffline()">Connect</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+    <div class="row mb-3">
+      <div class="col">
+        <h1>Scegli una modalità</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="card h-100" (click)="selectOption(1)" [ngClass]="{'selected': selectedOption == 1}">
+          <div class="card-body d-flex justify-content-between flex-column h-100">
+            <h5>Solo intervento</h5>
+            <p>Questa modalità non prevede una connessione per la modifica dei parametri del dispositivo. Permette solo
+              di generare il report dell'intervento.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="card h-100" (click)="selectOption(2)" [ngClass]="{'selected': selectedOption == 2}">
+          <div class="card-body d-flex justify-content-between flex-column h-100">
+            <h5>Intervento con dispositivo collegato al WiFi</h5>
+            <p>Questa modalità permette di modificare i parametri del dispositivo sfruttando il modulo WiFi del cliente
+              già connesso e configurato alla rete.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="card h-100" (click)="selectOption(3)" [ngClass]="{'selected': selectedOption == 3}">
+          <div class="card-body d-flex justify-content-between flex-column h-100">
+            <h5>Intervento con modulo WiFi proprio</h5>
+            <p>Questa modalità permette di modificare i parametri del dispositivo collegando un proprio modulo WiFi. E'
+              necessario selezionare il modello a cui si sta collegando</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="card h-100" (click)="selectOption(4)" [ngClass]="{'selected': selectedOption == 4}">
+          <div class="card-body d-flex justify-content-between flex-column h-100">
+            <h5>Offline</h5>
+            <p>Questa modalità è da utilizzare solo nel caso in cui sia necessario eseguire una modifica dei parametri
+              in zone remote non coperte da rete internet. E' possibile collegarsi al modulo WiFi solo tramite
+              Bluetooth.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-5" *ngIf="selectedOption == 1">
+      <div class="col">
+        <div class="card h-100">
+          <div class="card-body h-100">
+            <div class="row ">
+              <div class="col-md mb-3">
+                <label for="serial" class="form-label">Serial Number</label>
+                <input type="text" class="form-control" placeholder="Serial Number"
+                       aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col text-end">
+                <button class="btn btn-primary" (click)="connectUsingOnlySerial()">Apri</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-5" *ngIf="selectedOption == 2">
+      <div class="col">
+        <div class="card">
+          <div class="card-body">
+            <div class="row ">
+              <div class="col-md mb-3">
+                <label for="macaddress" class="form-label">Mac Address</label>
+                <input type="text" class="form-control" placeholder="MAC Address"
+                       aria-label="MAC Address" aria-describedby="button-addon2"
+                       [(ngModel)]="macAddress">
+              </div>
+              <div class="col-md mb-3">
+                <label for="serial" class="form-label">Serial Number</label>
+                <input type="text" class="form-control" placeholder="Serial Number"
+                       aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col text-end">
+                <button class="btn btn-primary" (click)="connectUsingMAC()">Apri</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-5" *ngIf="selectedOption == 3">
+      <div class="col">
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md mb-3">
+                <label for="macaddress" class="form-label">Mac Address</label>
+                <input type="text" class="form-control" placeholder="MAC Address"
+                       aria-label="MAC Address" aria-describedby="button-addon2" [(ngModel)]="macAddress"
+                       id="macaddress">
+              </div>
+              <div class="col-md mb-3">
+                <label for="serial" class="form-label">Serial Number</label>
+                <input type="text" id="serial" class="form-control" placeholder="Serial Number"
+                       aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+              </div>
+              <div class="col-md mb-3">
+                <label for="productlist" class="form-label">Select a product</label>
+                <select id="productlist" class="form-select" [(ngModel)]="selectedProduct">
+                  <option selected [ngValue]="null">Select a product</option>
+                  <option *ngFor="let product of products$|async" [ngValue]="product.key"
+                          [innerHtml]="product.name"></option>
+                </select>
+              </div>
+
+            </div>
+            <div class="text-end">
+              <button class="btn btn-primary" (click)="connectUsingProduct()">Apri</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-5" *ngIf="selectedOption == 4">
+      <div class="col">
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md mb-3">
+                <label for="macaddress" class="form-label">Mac Address</label>
+                <input type="text" class="form-control" placeholder="MAC Address"
+                       aria-label="MAC Address" aria-describedby="button-addon2"
+                       [(ngModel)]="macAddress">
+              </div>
+              <div class="col-md mb-3">
+                <label for="serial" class="form-label">AP Password</label>
+                <input type="text" class="form-control" placeholder="Serial Number"
+                       aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="regCode">
+              </div>
+              <div class="col-md mb-3">
+                <label for="serial" class="form-label">Serial Number</label>
+                <input type="text" id="serial" class="form-control" placeholder="Serial Number"
+                       aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+              </div>
+              <div class="col-md mb-3">
+                <label for="productlist" class="form-label">Select a product</label>
+                <select id="productlist" class="form-select" [(ngModel)]="selectedProduct">
+                  <option selected [ngValue]="null">Select a product</option>
+                  <option *ngFor="let product of products$|async" [ngValue]="product.key"
+                          [innerHtml]="product.name"></option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col text-end">
+                <button class="btn btn-primary" (click)="connectOffline()">Apri</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+

@@ -9,7 +9,6 @@
             <option value="0">{{'home.deviceinfo'|translate}}</option>
             <option value="1">{{'home.registry'|translate}}</option>
             <option value="2">{{'home.operation'|translate}}</option>
-            <option value="3">{{'home.timeline'|translate}}</option>
             <option value="4">{{'home.advanced'|translate}}</option>
             <option value="5">{{'home.logs'|translate}}</option>
             <ng-container *ngIf="connected$|async">
@@ -53,12 +52,6 @@
               <a ngbNavLink>{{'home.operation'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-operation></app-operation>
-              </ng-template>
-            </li>
-            <li ngbNavItem (shown)="unselectGroup()" [id]="2" [domId]="'ngb-nav-' + 3">
-              <a ngbNavLink>{{'home.timeline'|translate}}</a>
-              <ng-template ngbNavContent>
-                <app-tickets></app-tickets>
               </ng-template>
             </li>
             <li ngbNavItem (shown)="unselectGroup()" [id]="3" [domId]="'ngb-nav-' + 4" *ngIf="connected$|async">

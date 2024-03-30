@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Info, ProductInfo } from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
+import {BarcodeService} from "../../../../services/barcode.service";
 @Component({
   selector: 'app-device-select',
   templateUrl: './device-select.component.html',
@@ -19,7 +20,7 @@ export class DeviceSelectComponent implements OnInit {
   regCode: string;
   selectedOption: number;
 
-  constructor(private Router: Router, private Api: ApiService) {
+  constructor(private Router: Router, private Api: ApiService, private Barcode: BarcodeService) {
     this.selectedProduct = null;
     this.serialNumber = "";
     this.macAddress = "";
@@ -51,5 +52,14 @@ export class DeviceSelectComponent implements OnInit {
 
   selectOption(n: number) {
     this.selectedOption = n;
+  }
+
+  scanMac()
+  {
+    this.Barcode.scan().subscribe(result => this.macAddress = result)
+  }
+
+  scanSerial() {
+    this.Barcode.scan().subscribe(result => this.serialNumber = result)
   }
 }

@@ -96,7 +96,7 @@ export class AuthService {
   }
 
   isValidToken() {
-    return of(!this.jwtHelper.isTokenExpired(localStorage.getItem('access_token')));
+    return of(localStorage.getItem('access_token') !== null && !this.jwtHelper.isTokenExpired(localStorage.getItem('access_token')));
   }
 
   getRoles(): Observable<string[]> {

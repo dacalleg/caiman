@@ -64,8 +64,11 @@
             <div class="row ">
               <div class="col-md mb-3">
                 <label for="serial" class="form-label">Serial Number</label>
-                <input type="text" class="form-control" placeholder="Serial Number"
-                       aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+                <div class="input-group mb-3">
+                  <button class="btn btn-outline-secondary" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
+                  <input type="text" id="serial" class="form-control" placeholder="Serial Number"
+                         aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+                </div>
               </div>
             </div>
             <div class="row">
@@ -84,14 +87,20 @@
             <div class="row ">
               <div class="col-md mb-3">
                 <label for="macaddress" class="form-label">Mac Address</label>
-                <input type="text" class="form-control" placeholder="MAC Address"
-                       aria-label="MAC Address" aria-describedby="button-addon2"
-                       [(ngModel)]="macAddress">
+                <div class="input-group mb-3">
+                  <button class="btn btn-outline-secondary" type="button" (click)="scanMac()"><bi name="qr-code" class="mx-1"></bi></button>
+                  <input type="text" class="form-control" placeholder="MAC Address"
+                         aria-label="MAC Address" aria-describedby="button-addon2" [(ngModel)]="macAddress"
+                         id="macaddress">
+                </div>
               </div>
               <div class="col-md mb-3">
                 <label for="serial" class="form-label">Serial Number</label>
-                <input type="text" class="form-control" placeholder="Serial Number"
-                       aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+                <div class="input-group mb-3">
+                  <button class="btn btn-outline-secondary" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
+                  <input type="text" id="serial" class="form-control" placeholder="Serial Number"
+                         aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+                </div>
               </div>
             </div>
             <div class="row">
@@ -110,14 +119,20 @@
             <div class="row">
               <div class="col-md mb-3">
                 <label for="macaddress" class="form-label">Mac Address</label>
-                <input type="text" class="form-control" placeholder="MAC Address"
-                       aria-label="MAC Address" aria-describedby="button-addon2" [(ngModel)]="macAddress"
-                       id="macaddress">
+                <div class="input-group mb-3">
+                  <button class="btn btn-outline-secondary" type="button" (click)="scanMac()"><bi name="qr-code" class="mx-1"></bi></button>
+                  <input type="text" class="form-control" placeholder="MAC Address"
+                         aria-label="MAC Address" aria-describedby="button-addon2" [(ngModel)]="macAddress"
+                         id="macaddress">
+                </div>
               </div>
               <div class="col-md mb-3">
                 <label for="serial" class="form-label">Serial Number</label>
-                <input type="text" id="serial" class="form-control" placeholder="Serial Number"
-                       aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+                <div class="input-group mb-3">
+                  <button class="btn btn-outline-secondary" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
+                  <input type="text" id="serial" class="form-control" placeholder="Serial Number"
+                         aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+                </div>
               </div>
               <div class="col-md mb-3">
                 <label for="productlist" class="form-label">Select a product</label>
@@ -127,7 +142,6 @@
                           [innerHtml]="product.name"></option>
                 </select>
               </div>
-
             </div>
             <div class="text-end">
               <button class="btn btn-primary" (click)="connectUsingProduct()">Apri</button>
@@ -143,9 +157,12 @@
             <div class="row">
               <div class="col-md mb-3">
                 <label for="macaddress" class="form-label">Mac Address</label>
-                <input type="text" class="form-control" placeholder="MAC Address"
-                       aria-label="MAC Address" aria-describedby="button-addon2"
-                       [(ngModel)]="macAddress">
+                <div class="input-group mb-3">
+                  <button class="btn btn-outline-secondary" type="button" (click)="scanMac()"><bi name="qr-code" class="mx-1"></bi></button>
+                  <input type="text" class="form-control" placeholder="MAC Address"
+                         aria-label="MAC Address" aria-describedby="button-addon2" [(ngModel)]="macAddress"
+                         id="macaddress">
+                </div>
               </div>
               <div class="col-md mb-3">
                 <label for="serial" class="form-label">AP Password</label>
@@ -154,8 +171,11 @@
               </div>
               <div class="col-md mb-3">
                 <label for="serial" class="form-label">Serial Number</label>
-                <input type="text" id="serial" class="form-control" placeholder="Serial Number"
-                       aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+                <div class="input-group mb-3">
+                  <button class="btn btn-outline-secondary" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
+                  <input type="text" id="serial" class="form-control" placeholder="Serial Number"
+                         aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+                </div>
               </div>
               <div class="col-md mb-3">
                 <label for="productlist" class="form-label">Select a product</label>

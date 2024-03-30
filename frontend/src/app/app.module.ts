@@ -24,10 +24,15 @@ import { TranslationService } from './services/translation.service';
 import { ServiceWorkerModule, SwUpdate } from '@angular/service-worker';
 import { filter, from } from 'rxjs';
 import { HeaderComponent } from './components/header/header.component';
-import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle} from 'ng-bootstrap-icons/icons';
+import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle, QrCode} from 'ng-bootstrap-icons/icons';
 import { BootstrapIconsModule } from 'ng-bootstrap-icons';
 import { ToastManagerComponent } from './components/toast-manager/toast-manager.component';
 import { ToastService } from './services/toast.service';
+import {BarcodeComponent} from "./components/barcode/barcode.component";
+import { NgxScannerQrcodeModule, LOAD_WASM } from 'ngx-scanner-qrcode';
+
+LOAD_WASM().subscribe();
+
 
 const icons = {
   Eye,
@@ -38,7 +43,8 @@ const icons = {
   PersonCircle,
   Wifi,
   List,
-  QuestionCircle
+  QuestionCircle,
+  QrCode
 };
 
 export function tokenGetter() {
@@ -68,6 +74,7 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     AlertComponent,
     HeaderComponent,
     ToastManagerComponent,
+    BarcodeComponent
   ],
   imports: [
     BrowserModule,
@@ -76,6 +83,7 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     SharedModule,
     FormsModule,
     HttpClientModule,
+    NgxScannerQrcodeModule,
     BootstrapIconsModule.pick(icons),
     TranslateModule.forRoot({
       loader: {
@@ -91,8 +99,8 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
         disallowedRoutes: [
           /backend\/wp-content\/uploads\/.*/,
           /backend\/wp-json\/jwt-auth\/v1\/token/,
-          /backend\/wp-json\/wp\/v2\/translation/, 
-          /backend\/wp-json\/caiman\/v1\/forgot-password/, 
+          /backend\/wp-json\/wp\/v2\/translation/,
+          /backend\/wp-json\/caiman\/v1\/forgot-password/,
           /backend\/wp-json\/caiman\/v1\/info/],
       },
     }),

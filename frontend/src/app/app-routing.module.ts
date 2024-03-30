@@ -1,10 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import {IsAuthenticatedGuard} from "./guards/isauthenticated.guard";
 
 const routes: Routes = [
   {
-    path: 'dashboard', component: DashboardComponent, children: [
+    path: 'dashboard', component: DashboardComponent, canActivate: [IsAuthenticatedGuard], children: [
       { path: 'home', loadChildren: () => import('./modules/home/home.module').then(m => m.HomeModule) },
       { path: 'profile', loadChildren: () => import('./modules/profile/profile.module').then(m => m.ProfileModule) },
     ]

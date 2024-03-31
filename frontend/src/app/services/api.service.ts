@@ -7,10 +7,9 @@ import {
   concat,
   concatMap,
   delay,
-  filter,
   from,
   ignoreElements,
-  map,
+  map, mergeMap,
   Observable,
   of,
   shareReplay,
@@ -56,7 +55,7 @@ export class ApiService {
 
   private options$: Observable<AguaOptions>;
   private info$: Observable<Info>;
-  private products$: Observable<{ name: string, key: string }[]>;
+  private products$: Observable<{ name: string, key: string, hash: string }[]>;
 
   constructor(
     private Http: HttpClient,
@@ -70,12 +69,13 @@ export class ApiService {
       switchMap((lang) => of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).pipe(
         concatMap(page => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?" + (lang !== "it" ? "lang=" + lang : "") + "&page=" + page + "&per_page=" + 99).pipe(
           switchMap(arr => from(arr)),
-          map((item) => {
+          mergeMap(item => from(this.sha256(JSON.stringify((item as any)))).pipe(map(sha => {
             return {
               name: item.title.rendered as string,
               key: item.acf.key as string,
+              hash: sha
             }
-          }),
+          }))),
         ))
       )),
       catchError((err, caught) => of()),
@@ -83,6 +83,13 @@ export class ApiService {
       map(arr => arr.sort((a, b) => a.name.localeCompare(b.name))),
       shareReplay(1)
     )
+  }
+
+  async sha256(message: string) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
   }
 
   getInfo() {
@@ -134,38 +141,40 @@ export class ApiService {
   }
 
   sync() {
+    let products = 0;
+    let counter: number = 0;
+
     const syncLogs$ = from(this.getDeferredHttpQueue()).pipe(
       concatMap(req => this.Http.post<any>(req.url, req.body).pipe(
         tap(() => this.removeFromDeferredHttpQueue(req.id))
       )),
-      toArray(),
-      tap({next: (arr) => console.log("Synced", arr.length, "requests")})
+      ignoreElements()
     )
 
     const syncProducts$ = this.getAllProducts().pipe(
-      switchMap(products => from(products)),
-      filter(product => {
-        let value = localStorage.getItem("last_sync_prod_" + product.key)
-        if (value !== null) {
-          const last = +value;
-          const now = new Date();
-          return now.getTime() - last > 3600 * 24 * 7 * 1000
-        }
-        return true;
+      tap(arr => products = arr.length),
+      map(arr =>{
+        let ret = arr.filter(product => {
+          let value = localStorage.getItem("last_sync_prod_" + product.key)
+          return value !== product.hash;
+        })
+        counter = arr.length - ret.length;
+        return ret;
       }),
+      switchMap(products => from(products)),
       concatMap(product => this.getProductInfo(product.key).pipe(
         delay(2000),
         tap(() => {
-          console.log("Synced", product.key);
-          const now = new Date();
-          localStorage.setItem("last_sync_prod_" + product.key, "" + now.getTime())
+          counter = counter + 1;
+          localStorage.setItem("last_sync_prod_" + product.key, "" + product.hash)
         }),
+        map(() => counter / products),
         catchError((err => {
+          counter = counter +  1;
           console.log("Error Sync ", product.name)
-          return of();
+          return of(counter / products);
         }))
       )),
-      ignoreElements(),
     )
 
     return concat(

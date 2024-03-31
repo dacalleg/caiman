@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { ComponentStore } from "@ngrx/component-store";
-import { DeviceProduct, Project, Variable, ViewOption } from "../classes/interfaces";
-import { SeramiParserService } from "./serami-parser.service";
-import { first, from, map, switchMap, take } from "rxjs";
-import { Utils } from '../classes/utils';
+import {Injectable} from '@angular/core';
+import {ComponentStore} from "@ngrx/component-store";
+import {DeviceProduct, Project, Variable, ViewOption} from "../classes/interfaces";
+import {SeramiParserService} from "./serami-parser.service";
+import {first, map, take} from "rxjs";
+import {Utils} from '../classes/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -33,31 +33,31 @@ export class StoreService {
 
   setDevice(device: DeviceProduct) {
     this.componentStore.setState((project) => {
-      return { ...project, device: device } as Project;
+      return {...project, device: device} as Project;
     });
   }
 
   setAddressFormat(format: number) {
     this.componentStore.setState((project) => {
-      return { ...project, view: { ...project.view, addressFormat: format } }
+      return {...project, view: {...project.view, addressFormat: format}}
     });
   }
 
   setExtendedView(enable: boolean) {
     this.componentStore.setState((project) => {
-      return { ...project, view: { ...project.view, extendedView: enable } }
+      return {...project, view: {...project.view, extendedView: enable}}
     });
   }
 
   setAddressModbus(modbus: boolean) {
     this.componentStore.setState((project) => {
-      return { ...project, view: { ...project.view, modbus: modbus } }
+      return {...project, view: {...project.view, modbus: modbus}}
     });
   }
 
   setViewOptions(view: ViewOption) {
     this.componentStore.setState((project) => {
-      return { ...project, view: { ...view } }
+      return {...project, view: {...view}}
     });
   }
 
@@ -96,60 +96,63 @@ export class StoreService {
 
   getGroups() {
     return this.componentStore.state$.pipe(map(project => {
-      const tmp = project.variables.map(item => item.group);
-      return tmp.filter((x, i, a) => a.indexOf(x) == i)
-    }));
+        const tmp = project.variables.map(item => item.group);
+        return tmp.filter((x, i, a) => a.indexOf(x) == i)
+      })
+    );
   }
 
   getGroupsByRole(roles: string[]) {
     return this.getVariablesByRoles(roles).pipe(map(variables => {
-      const tmp = variables.map(item => item.group);
-      return tmp.filter((x, i, a) => a.indexOf(x) == i)
-    }));
+        const tmp = variables.map(item => item.group);
+        return tmp.filter((x, i, a) => a.indexOf(x) == i)
+      })
+    );
   }
 
-  loadFromJson(data: Variable[])
-  {
-      this.componentStore.setState((project) => {
-        let overrides = project.device?.info.serami_var_override;
-        if (overrides) {
-          data = data.map(variable => {
-            const override_variable = overrides!.find(ov => ov.id === variable.hash);
-            if (override_variable) {
-              if (override_variable?.title)
-                variable.name = override_variable.title;
-              if (override_variable?.description)
-                variable.description = override_variable.description;
-              if (override_variable?.read_exp) {
-                variable.readExp = override_variable.read_exp;
+  loadFromJson(data: Variable[]) {
+    this.componentStore.setState((project) => {
+      let overrides = project.device?.info.serami_var_override;
+      if (overrides) {
+        data = data.map(variable => {
+          const override_variable = overrides!.find(ov => ov.id === variable.hash);
+          if (override_variable) {
+            if (override_variable?.title)
+              variable.name = override_variable.title;
+            if (override_variable?.description)
+              variable.description = override_variable.description;
+            if (override_variable?.read_exp) {
+              variable.readExp = override_variable.read_exp;
 
-                if (variable.readExp && variable.readExp !== "#") {
-                  var re = new RegExp('#', 'g');
+              if (variable.readExp && variable.readExp !== "#") {
+                var re = new RegExp('#', 'g');
 
-                  try {
-                    variable.min = eval(Utils.sanitizeExp(variable.readExp).replace(re, "" + variable.min))
-                  }
-                  catch (ex) {
-                  }
-                  try {
-                    variable.max = eval(Utils.sanitizeExp(variable.readExp).replace(re, "" + variable.max))
-                  }
-                  catch (ex) {
-                  }
+                try {
+                  variable.min = eval(Utils.sanitizeExp(variable.readExp).replace(re, "" + variable.min))
+                } catch (ex) {
+                }
+                try {
+                  variable.max = eval(Utils.sanitizeExp(variable.readExp).replace(re, "" + variable.max))
+                } catch (ex) {
                 }
               }
-              if (override_variable?.writable !== undefined)
-                variable.readonly = !override_variable.writable;
-              if (override_variable?.options)
-                variable.values = Object.keys(override_variable.options).map(key => {
-                  return [override_variable.options![key], key]
-                })
             }
-            return variable;
-          });
-        }
-        return { ...project, variables: data, view: { addressFormat: 16, modbus: false, modbusEEpromOffset: 4096, extendedView: false } } as Project;
-      })
+            if (override_variable?.writable !== undefined)
+              variable.readonly = !override_variable.writable;
+            if (override_variable?.options)
+              variable.values = Object.keys(override_variable.options).map(key => {
+                return [override_variable.options![key], key]
+              })
+          }
+          return variable;
+        });
+      }
+      return {
+        ...project,
+        variables: data,
+        view: {addressFormat: 16, modbus: false, modbusEEpromOffset: 4096, extendedView: false}
+      } as Project;
+    })
   }
 
   loadFromSnet(xml: string) {
@@ -172,13 +175,11 @@ export class StoreService {
 
                   try {
                     variable.min = eval(Utils.sanitizeExp(variable.readExp).replace(re, "" + variable.min))
-                  }
-                  catch (ex) {
+                  } catch (ex) {
                   }
                   try {
                     variable.max = eval(Utils.sanitizeExp(variable.readExp).replace(re, "" + variable.max))
-                  }
-                  catch (ex) {
+                  } catch (ex) {
                   }
                 }
               }
@@ -192,7 +193,11 @@ export class StoreService {
             return variable;
           });
         }
-        return { ...project, variables: data, view: { addressFormat: 16, modbus: false, modbusEEpromOffset: 4096, extendedView: false } } as Project;
+        return {
+          ...project,
+          variables: data,
+          view: {addressFormat: 16, modbus: false, modbusEEpromOffset: 4096, extendedView: false}
+        } as Project;
       })
     });
   }

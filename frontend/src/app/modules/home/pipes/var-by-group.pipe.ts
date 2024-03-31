@@ -10,7 +10,7 @@ export class VarByGroupPipe implements PipeTransform {
     if (value === null) {
       return [];
     }
-    return value.filter(item => item.group === group);
+    return value.filter(item => item.group === group).sort((a,b) => (a.sort || 0) - (b.sort || 0));
   }
 
 }

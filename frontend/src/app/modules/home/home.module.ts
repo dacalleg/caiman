@@ -17,7 +17,7 @@ import { VarByGroupPipe } from './pipes/var-by-group.pipe';
 import { HomeRoutingModule } from './home-routing.modules';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {BootstrapIconsModule} from "ng-bootstrap-icons";
-import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle} from 'ng-bootstrap-icons/icons';
+import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle, QrCode} from 'ng-bootstrap-icons/icons';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { DeviceSelectComponent } from './components/device-select/device-select.component';
 import { YouTubePlayerModule } from '@angular/youtube-player';
@@ -41,6 +41,7 @@ import { OperationFormComponent } from './components/operation-form/operation-fo
 import { ProfileComponent } from '../profile/components/profile/profile.component';
 import { OperationTitlePipe } from './pipes/operation-title.pipe';
 import { UnescapePipe } from './pipes/unescape.pipe';
+import {SortGroupPipe} from "./pipes/sort-group.pipe";
 
 const icons = {
   Eye,
@@ -51,7 +52,8 @@ const icons = {
   PersonCircle,
   Wifi,
   List,
-  QuestionCircle
+  QuestionCircle,
+  QrCode
 };
 
 @NgModule({
@@ -89,6 +91,7 @@ const icons = {
     ProfileComponent,
     OperationTitlePipe,
     UnescapePipe,
+    SortGroupPipe
   ],
   imports: [
     CommonModule,

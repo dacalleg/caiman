@@ -81,6 +81,23 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.loadDeviceData$ = combineLatest([macAddress$, productKey$, serialNumber$, regCode$]).pipe(
       switchMap(([mac, productKey, serial, regCode]) => {
+        if(mac == "0000" && productKey == null && serial !== null)
+        {
+          const regex = /\w+-[A-Za-z]{0,2}/g;
+          const prefix = serial.match(regex);
+          if(prefix && prefix.length > 0)
+          {
+            return this.Api.getProductInfoByPrefix(prefix[0]).pipe(map(product => {
+              const device = {
+                mac: mac,
+                security_code: regCode,
+                info: product
+              } as DeviceProduct;
+              device.info.serial = serial != null ? serial : device.info.serial;
+              return device;
+            }))
+          }
+        }
         if(productKey != null && regCode != null)
         {
           return this.Api.getProductInfo(productKey).pipe(map(product => {
@@ -93,12 +110,14 @@ export class HomeComponent implements OnInit, OnDestroy {
             return device;
           }))
         }
-        return this.Api.getDeviceInfoFromMac(mac, productKey).pipe(
-          map(device => {
-            device.info.serial = serial != null ? serial : device.info.serial;
-            return device;
-          }),
-        )
+        if(mac && productKey)
+          return this.Api.getDeviceInfoFromMac(mac, productKey).pipe(
+            map(device => {
+              device.info.serial = serial != null ? serial : device.info.serial;
+              return device;
+            }),
+          )
+        return throwError(() => new Error("Device Not Found"))
       }),
       tap(device => this.Store.setDevice(device)),
       shareReplay(1)

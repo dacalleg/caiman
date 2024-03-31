@@ -41,6 +41,7 @@ import { OperationFormComponent } from './components/operation-form/operation-fo
 import { ProfileComponent } from '../profile/components/profile/profile.component';
 import { OperationTitlePipe } from './pipes/operation-title.pipe';
 import { UnescapePipe } from './pipes/unescape.pipe';
+import {SortGroupPipe} from "./pipes/sort-group.pipe";
 
 const icons = {
   Eye,
@@ -90,6 +91,7 @@ const icons = {
     ProfileComponent,
     OperationTitlePipe,
     UnescapePipe,
+    SortGroupPipe
   ],
   imports: [
     CommonModule,

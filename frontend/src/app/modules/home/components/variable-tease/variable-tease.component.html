@@ -30,7 +30,7 @@
             </div>
           </ng-template>
           <div class="d-flex flex-grow-1 align-items-center justify-content-end" *ngIf="writeMode">
-            <input type="number" [min]="variable.min || 0" [max]="variable.max || 9999999999"
+            <input type="number" [min]="variable.min || 0" [max]="variable.max || 9999999999" [step]="variable.step || 1"
               *ngIf="!variable.values || variable.values.length == 0" [ngModel]="newValue"
               (ngModelChange)="write($event)" class="form-control my-1">
             <select class="form-select" *ngIf="variable.values && variable.values.length > 0" [ngModel]="newValue"

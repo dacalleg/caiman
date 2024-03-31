@@ -82,14 +82,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3" *ngIf="variable.pattern !== 'B'">
                             <label for="name" class="form-label">Endianess</label>
-                            <select class="form-select"
-                                [(ngModel)]="variable.pattern">
-                                <option disabled>Open this select menu</option>
-                                <option value="B">Big Endian</option>
-                                <option value="L">Little Endian</option>
-                            </select>
+                            <input type="text" class="form-control" id="endianess" [ngModel]="variable.pattern.includes('>') ? 'Big Endian' : 'Little Endian'" disabled>
                         </div>
                         <div class="row">
                             <div class="col">
@@ -106,6 +101,13 @@
                                         id="max" [(ngModel)]="variable.max">
                                 </div>
                             </div>
+                          <div class="col">
+                            <div class="mb-3">
+                              <label for="max" class="form-label">Step</label>
+                              <input type="number" class="form-control"
+                                     id="step" [(ngModel)]="variable.step">
+                            </div>
+                          </div>
                         </div>
                         <div class="mb-3">
                             <label for="bit" class="form-label">Bit</label>
@@ -122,7 +124,7 @@
                                 <div class="mb-3">
                                     <label for="format"
                                         class="form-label">Formula</label>
-                                    <textarea class="form-control" id="format"
+                                    <textarea class="form-control" id="readexp"
                                         [(ngModel)]="variable.readExp"></textarea>
                                 </div>
                             </div>
@@ -130,7 +132,7 @@
                                 <div class="mb-3">
                                     <label for="format" class="form-label">Inverse
                                         Formula</label>
-                                    <textarea class="form-control" id="format"
+                                    <textarea class="form-control" id="writeexp"
                                         [(ngModel)]="variable.writeExp"></textarea>
                                 </div>
                             </div>
@@ -160,8 +162,8 @@
     <div class="row mt-3">
         <div class="col">
             <div class="mb-3">
-                <label for="ID" class="form-label">Name</label>
-                <input type="text" class="form-control" id="ID" [(ngModel)]="seramiEntry.name">
+                <label for="serami_name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="serami_name" [(ngModel)]="seramiEntry.name">
             </div>
         </div>
     </div>

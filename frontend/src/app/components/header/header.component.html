@@ -5,14 +5,12 @@
         <img [src]="(info$|async)?.logo" style="height: 37px;">
         <h2 class="m-0 fw-bold ms-2">CAIMAN</h2>
       </div>
-      <div class="menu d-block d-md-none">
-        <button class="btn btn-link" (click)="burgerMenuClicked()">
-          <bi name="list"></bi>
-        </button>
-      </div>
     </div>
     <div class="navbar-collapse d-none d-md-block" id="navbarContent">
       <ul class="navbar-nav ms-auto">
+        <li class="nav-item" *ngIf="(isAdmin$|async) === true">
+          <a class="nav-link" target="_blank" [routerLink]="['/config']">Configurations</a>
+        </li>
         <li class="nav-item">
           <a class="nav-link" target="_blank" [routerLink]="['/docs']"><bi name="question-circle"></bi></a>
         </li>

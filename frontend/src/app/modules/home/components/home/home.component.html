@@ -12,7 +12,7 @@
             <option value="4">{{'home.advanced'|translate}}</option>
             <option value="5">{{'home.logs'|translate}}</option>
             <ng-container *ngIf="connected$|async">
-              <option *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [value]="i+6">
+              <option *ngFor="let group of groups$|async|sortGroup;let i = index" (shown)="onGroupSelected(group)" [value]="i+6">
                 {{group|overrideGroupName|async}}
               </option>
             </ng-container>

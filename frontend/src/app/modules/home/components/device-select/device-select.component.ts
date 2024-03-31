@@ -27,7 +27,6 @@ export class DeviceSelectComponent implements OnInit {
     this.regCode = "";
     this.products$ = this.Api.getAllProducts();
     this.info$ = this.Api.getInfo();
-    this.Api.sync().subscribe({complete: () => console.log("Sync Finished")})
     this.selectedOption = 0;
   }
 

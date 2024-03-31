@@ -29,6 +29,7 @@ export interface Variable {
   description?: string
   varKey?: string
   sort?: number
+  step?: number
 }
 
 export interface Project {

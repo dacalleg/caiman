@@ -61,7 +61,10 @@ export class SeramiParserService {
           ret.push(variable);
         }
       });
-      return ret;
+      return ret.sort((a,b) => (a.name + a.description).localeCompare(b.name + b.description)).map((item, index) => {
+        item.sort = index * 10;
+        return item
+      })
     }));
   }
 
@@ -95,6 +98,7 @@ export class SeramiParserService {
     const memory = this.toBoolean(this.nodeChildValue("memory", node));
     const sanitizedName = this.sanitizeString(this.nodeChildValue("label", node)) as string;
     const description = this.nodeChildValue("description", node) as string;
+    const raw_increment = this.nodeChildValue("raw_increment", node) as number;
     let address = parseInt(this.nodeChildValue("startaddress", node), 16) as number;
     let mask = parseInt(this.nodeChildValue("mask", node), 16);
     const varName = this.nodeChildValue("var_name", node) as string;
@@ -121,7 +125,8 @@ export class SeramiParserService {
 
     let min = realmin;
     let max = realmax;
-    
+    let increment = 1;
+
     if (expval && expval !== "#") {
       try {
         min = eval(Utils.sanitizeExp(expval).replace(re, "" + realmin))
@@ -130,6 +135,13 @@ export class SeramiParserService {
       }
       try {
         max =  eval(Utils.sanitizeExp(expval).replace(re, "" + realmax))
+      }
+      catch (ex) {
+      }
+      try {
+        let incrementA =  eval(Utils.sanitizeExp(expval).replace(re, "" + increment))
+        let incrementB =  eval(Utils.sanitizeExp(expval).replace(re, "" + (increment * 2)))
+        increment = incrementB - incrementA;
       }
       catch (ex) {
       }
@@ -166,7 +178,8 @@ export class SeramiParserService {
       bits: this.getChildrens("bitsdescrption", node),
       pattern: this.getPattern(type, bit, reverse, signed),
       signed: signed,
-      formatstring: this.nodeChildValue("formatstring", node)
+      formatstring: this.nodeChildValue("formatstring", node),
+      step: increment
     };
   }
 

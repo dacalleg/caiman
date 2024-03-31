@@ -21,6 +21,7 @@ export class HeaderComponent implements OnInit {
   username$: Observable<any>;
   roles$: Observable<string>;
   info$: Observable<any>;
+  isAdmin$: Observable<boolean>;
 
   constructor(
     private Store: StoreService,
@@ -36,6 +37,7 @@ export class HeaderComponent implements OnInit {
     this.username$ = this.AuthService.getUserName();
     this.roles$ = this.AuthService.getRoles().pipe(map(roles => roles.join(", ")));
     this.info$ = this.Api.getInfo();
+    this.isAdmin$ = this.AuthService.getRoles().pipe(map(roles => roles.includes("administrator")))
   }
 
   ngOnInit(): void {

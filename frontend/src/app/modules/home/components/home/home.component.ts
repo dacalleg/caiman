@@ -110,7 +110,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             return device;
           }))
         }
-        if(mac && productKey)
+        if(mac)
           return this.Api.getDeviceInfoFromMac(mac, productKey).pipe(
             map(device => {
               device.info.serial = serial != null ? serial : device.info.serial;

@@ -548,7 +548,7 @@ export class ApiService {
       serami_var_override: var_override || [],
       serami_group_override: item.acf.serami_group_override || [],
       database: board.database || [],
-      image: item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
+      image: item["_links"]["wp:featuredmedia"] && item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
       faq: item.acf.faq || [],
       prefix: item.acf.prefix,
       variables: variables

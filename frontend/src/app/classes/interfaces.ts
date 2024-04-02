@@ -489,4 +489,5 @@ export interface EnvObj
   registry_enabled: boolean,
   operation_enabled: boolean,
   only_op_enabled: boolean,
+  hide_micronova_ref: boolean,
 }

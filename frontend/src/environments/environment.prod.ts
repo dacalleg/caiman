@@ -8,4 +8,5 @@ export const environment = {
   registry_enabled: false,
   operation_enabled: false,
   only_op_enabled: false,
+  hide_micronova_ref: true,
 } as EnvObj;

@@ -11,7 +11,7 @@ export const environment = {
   tickets_enabled: true,
   registry_enabled: true,
   operation_enabled: true,
-  only_op_enabled: false,
+  only_op_enabled: true,
 } as EnvObj;
 
 /*

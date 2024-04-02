@@ -4,7 +4,7 @@ export const environment = {
   production: true,
   host: window.location.host,
   endpoint: window.location.origin + "/backend",
-  tickets_enabled: true,
+  tickets_enabled: false,
   registry_enabled: true,
   operation_enabled: true,
   only_op_enabled: true,

@@ -6,12 +6,12 @@ import {EnvObj} from "../app/classes/interfaces";
 
 export const environment = {
   production: false,
-  host: "caiman.micronovasrl.com",
-  endpoint: "https://caiman.micronovasrl.com/backend",
-  tickets_enabled: true,
+  host: "caimanweb-klover.agua-iot.com",
+  endpoint: "https://caimanweb-klover.agua-iot.com/backend",
+  tickets_enabled: false,
   registry_enabled: true,
   operation_enabled: true,
-  only_op_enabled: false,
+  only_op_enabled: true,
 } as EnvObj;
 
 /*

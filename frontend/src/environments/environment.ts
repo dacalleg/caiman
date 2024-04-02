@@ -2,11 +2,17 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import {EnvObj} from "../app/classes/interfaces";
+
 export const environment = {
   production: false,
   host: "caiman.micronovasrl.com",
-  endpoint: "https://caiman.micronovasrl.com/backend"
-};
+  endpoint: "https://caiman.micronovasrl.com/backend",
+  tickets_enabled: true,
+  registry_enabled: true,
+  operation_enabled: true,
+  only_op_enabled: false,
+} as EnvObj;
 
 /*
  * For easier debugging in development mode, you can import the following file

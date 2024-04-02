@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { Info, ProductInfo } from 'src/app/classes/interfaces';
+import {EnvObj, Info, ProductInfo} from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
 import {BarcodeService} from "../../../../services/barcode.service";
+import {environment} from "../../../../../environments/environment";
 @Component({
   selector: 'app-device-select',
   templateUrl: './device-select.component.html',
@@ -19,8 +20,10 @@ export class DeviceSelectComponent implements OnInit {
   selectedProduct: string | null;
   regCode: string;
   selectedOption: number;
+  env: EnvObj;
 
   constructor(private Router: Router, private Api: ApiService, private Barcode: BarcodeService) {
+    this.env = environment;
     this.selectedProduct = null;
     this.serialNumber = "";
     this.macAddress = "";

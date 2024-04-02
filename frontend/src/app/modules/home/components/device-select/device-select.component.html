@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-6 mb-3">
+      <div class="col-md-6 mb-3" *ngIf="env.only_op_enabled">
         <div class="card h-100" (click)="selectOption(1)" [ngClass]="{'selected': selectedOption == 1}">
           <div class="card-body d-flex justify-content-between flex-column h-100">
             <h5>Solo intervento</h5>
@@ -35,8 +35,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="row">
       <div class="col-md-6 mb-3">
         <div class="card h-100" (click)="selectOption(3)" [ngClass]="{'selected': selectedOption == 3}">
           <div class="card-body d-flex justify-content-between flex-column h-100">
@@ -166,7 +164,7 @@
               </div>
               <div class="col-md mb-3">
                 <label for="serial" class="form-label">AP Password</label>
-                <input type="text" class="form-control" placeholder="Serial Number"
+                <input type="text" class="form-control" placeholder="AP Password"
                        aria-label="Serial Number" aria-describedby="button-addon2" [(ngModel)]="regCode">
               </div>
               <div class="col-md mb-3">

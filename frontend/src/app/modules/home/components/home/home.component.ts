@@ -6,13 +6,25 @@ import { BehaviorSubject, catchError, combineLatest, concat, concatMap, delay, f
 import { Agua } from 'src/app/classes/agua';
 import { BleChannel } from 'src/app/classes/ble.channel';
 import { BridgeChannel } from 'src/app/classes/bridge.channel';
-import { Database, DeviceProduct, Firmware, LogType, Project, Variable, VariableValue, WifiStation, WifiStatus } from 'src/app/classes/interfaces';
+import {
+  Database,
+  DeviceProduct,
+  EnvObj,
+  Firmware,
+  LogType,
+  Project,
+  Variable,
+  VariableValue,
+  WifiStation,
+  WifiStatus
+} from 'src/app/classes/interfaces';
 import { Utils } from 'src/app/classes/utils';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DeviceService } from 'src/app/services/device.service';
 import { ModalService } from 'src/app/services/modal.service';
 import { StoreService } from 'src/app/services/store.service';
+import {environment} from "../../../../../environments/environment";
 
 
 @Component({
@@ -40,6 +52,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   mobileMenuOpen: boolean;
   destroy$: Subject<void> = new Subject<void>();
+  env: EnvObj;
 
   constructor(
     private Store: StoreService,
@@ -51,6 +64,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private modal: ModalService,
     private Router: Router) {
 
+    this.env = environment;
     this.nav = null;
     this.mobileMenuOpen = false;
     this.search$ = new BehaviorSubject<string>("");

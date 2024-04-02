@@ -4,7 +4,7 @@
       <div class="col text-center">
         <div class="d-flex align-items-center justify-content-center">
           <img [src]="(info$|async)?.logo" width="200px">
-          <div class="text-start d-none">
+          <div class="text-start" *ngIf="!env.hide_micronova_ref">
             <h1 class="fw-bold mb-0">CAIMAN</h1>
             <small>By Micronova Srl</small>
           </div>
@@ -195,4 +195,3 @@
     </div>
   </div>
 </div>
-

@@ -59,6 +59,10 @@ add_filter( 'rest_model_query', function( $args, $request ){
         $args['meta_key'] = 'key';
         $args['meta_value'] = $key;
     }
+    if ( $prefix = $request->get_param( 'prefix' ) ) {
+        $args['meta_key'] = 'prefix';
+        $args['meta_value'] = $prefix;
+    }
     return $args;
 }, 10, 2 );
     

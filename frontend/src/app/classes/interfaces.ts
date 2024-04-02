@@ -478,3 +478,15 @@ export interface Failure
   key: string;
   description: string;
 }
+
+
+export interface EnvObj
+{
+  production: boolean;
+  host: string;
+  endpoint: string;
+  tickets_enabled: boolean,
+  registry_enabled: boolean,
+  operation_enabled: boolean,
+  only_op_enabled: boolean,
+}

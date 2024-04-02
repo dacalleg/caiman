@@ -7,10 +7,11 @@
       <div class="col">
           <select class="form-select form-select-sm" (change)="selectTab($event.target)">
             <option value="0">{{'home.deviceinfo'|translate}}</option>
-            <option value="1">{{'home.registry'|translate}}</option>
-            <option value="2">{{'home.operation'|translate}}</option>
-            <option value="4">{{'home.advanced'|translate}}</option>
-            <option value="5">{{'home.logs'|translate}}</option>
+            <option value="1" *ngIf="env.registry_enabled">{{'home.registry'|translate}}</option>
+            <option value="2" *ngIf="env.operation_enabled">{{'home.operation'|translate}}</option>
+            <option value="3" *ngIf="env.tickets_enabled">{{'home.timeline'|translate}}</option>
+            <option value="4" *ngIf="connected$|async">{{'home.advanced'|translate}}</option>
+            <option value="5"  *ngIf="device?.mac !== '0000'">{{'home.logs'|translate}}</option>
             <ng-container *ngIf="connected$|async">
               <option *ngFor="let group of groups$|async|sortGroup;let i = index" (shown)="onGroupSelected(group)" [value]="i+6">
                 {{group|overrideGroupName|async}}
@@ -42,32 +43,38 @@
                   (onWifiConnect)="wifiConnect()"></app-device-info>
               </ng-template>
             </li>
-            <li ngbNavItem (shown)="unselectGroup()" [id]="1" [domId]="'ngb-nav-' + 1">
+            <li *ngIf="env.registry_enabled" ngbNavItem (shown)="unselectGroup()" [id]="1" [domId]="'ngb-nav-' + 1">
               <a ngbNavLink>{{'home.registry'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-registry></app-registry>
               </ng-template>
             </li>
-            <li ngbNavItem (shown)="unselectGroup()" [id]="1" [domId]="'ngb-nav-' + 2">
+            <li *ngIf="env.operation_enabled" ngbNavItem (shown)="unselectGroup()" [id]="2" [domId]="'ngb-nav-' + 2">
               <a ngbNavLink>{{'home.operation'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-operation></app-operation>
               </ng-template>
             </li>
-            <li ngbNavItem (shown)="unselectGroup()" [id]="3" [domId]="'ngb-nav-' + 4" *ngIf="connected$|async">
+            <li *ngIf="env.tickets_enabled" ngbNavItem (shown)="unselectGroup()" [id]="3" [domId]="'ngb-nav-' + 3">
+              <a ngbNavLink>{{'home.timeline'|translate}}</a>
+              <ng-template ngbNavContent>
+                <app-tickets></app-tickets>
+              </ng-template>
+            </li>
+            <li ngbNavItem (shown)="unselectGroup()" [id]="4" [domId]="'ngb-nav-' + 4" *ngIf="connected$|async">
               <a ngbNavLink>{{'home.advanced'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-advanced [device]="device" (onFirmwareGatewayUpgraded)="disconnect()"></app-advanced>
               </ng-template>
             </li>
-            <li ngbNavItem (shown)="unselectGroup()" [id]="4" [domId]="'ngb-nav-' + 5">
+            <li *ngIf="device?.mac !== '0000'" ngbNavItem (shown)="unselectGroup()" [id]="5" [domId]="'ngb-nav-' + 5">
               <a ngbNavLink>{{'home.logs'|translate}}</a>
               <ng-template ngbNavContent>
                 <app-logs [device]="device"></app-logs>
               </ng-template>
             </li>
             <ng-container *ngIf="connected$|async">
-              <li ngbNavItem *ngFor="let group of groups$|async;let i = index" (shown)="onGroupSelected(group)" [id]="i + 6" [domId]="'ngb-nav-' + (i + 6)">
+              <li ngbNavItem *ngFor="let group of groups$|async|sortGroup;let i = index" (shown)="onGroupSelected(group)" [id]="i + 6" [domId]="'ngb-nav-' + (i + 6)">
                 <a ngbNavLink>{{group|overrideGroupName|async}}</a>
                 <ng-template ngbNavContent>
                   <div class="row">

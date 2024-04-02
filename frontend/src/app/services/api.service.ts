@@ -6,7 +6,7 @@ import {
   combineLatest,
   concat,
   concatMap,
-  delay,
+  delay, filter,
   from,
   ignoreElements,
   map, mergeMap,
@@ -55,7 +55,7 @@ export class ApiService {
 
   private options$: Observable<AguaOptions>;
   private info$: Observable<Info>;
-  private products$: Observable<{ name: string, key: string, hash: string }[]>;
+  private products$: Observable<{ name: string, key: string }[]>;
 
   constructor(
     private Http: HttpClient,
@@ -69,13 +69,12 @@ export class ApiService {
       switchMap((lang) => of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).pipe(
         concatMap(page => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?" + (lang !== "it" ? "lang=" + lang : "") + "&page=" + page + "&per_page=" + 99).pipe(
           switchMap(arr => from(arr)),
-          mergeMap(item => from(this.sha256(JSON.stringify((item as any)))).pipe(map(sha => {
+          map(item => {
             return {
               name: item.title.rendered as string,
               key: item.acf.key as string,
-              hash: sha
             }
-          }))),
+          }),
         ))
       )),
       catchError((err, caught) => of()),
@@ -153,20 +152,22 @@ export class ApiService {
 
     const syncProducts$ = this.getAllProducts().pipe(
       tap(arr => products = arr.length),
-      map(arr =>{
-        let ret = arr.filter(product => {
-          let value = localStorage.getItem("last_sync_prod_" + product.key)
-          return value !== product.hash;
-        })
-        counter = arr.length - ret.length;
-        return ret;
-      }),
       switchMap(products => from(products)),
+      filter(product => {
+        let value = localStorage.getItem("last_sync_prod_" + product.key)
+        if (value !== null) {
+          const last = +value;
+          const now = new Date();
+          return now.getTime() - last > 3600 * 24 * 7 * 1000
+        }
+        return true;
+      }),
       concatMap(product => this.getProductInfo(product.key).pipe(
         delay(2000),
         tap(() => {
           counter = counter + 1;
-          localStorage.setItem("last_sync_prod_" + product.key, "" + product.hash)
+          const now = new Date();
+          localStorage.setItem("last_sync_prod_" + product.key, "" + now.getTime())
         }),
         map(() => counter / products),
         catchError((err => {
@@ -547,7 +548,7 @@ export class ApiService {
       serami_var_override: var_override || [],
       serami_group_override: item.acf.serami_group_override || [],
       database: board.database || [],
-      image: item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
+      image: item["_links"]["wp:featuredmedia"] && item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
       faq: item.acf.faq || [],
       prefix: item.acf.prefix,
       variables: variables

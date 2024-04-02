@@ -1,5 +1,11 @@
+import {EnvObj} from "../app/classes/interfaces";
+
 export const environment = {
   production: true,
   host: window.location.host,
-  endpoint: window.location.origin + "/backend"
-};
+  endpoint: window.location.origin + "/backend",
+  tickets_enabled: false,
+  registry_enabled: false,
+  operation_enabled: false,
+  only_op_enabled: false,
+} as EnvObj;

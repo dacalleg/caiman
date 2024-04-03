@@ -3,7 +3,7 @@
         <ngx-scanner-qrcode #action="scanner" [isBeep]="false"></ngx-scanner-qrcode>
     </div>
     <div class="d-flex justify-content-between w-100 my-2">
-        <ng-container *ngIf="(scanner?.devices|async) as devices">
+        <ng-container *ngIf="devices.length > 1">
             <button class="btn btn-sm btn-primary" (click)="toggleCam()" *ngIf="devices.length > 0">Toggle Cam</button>
         </ng-container>
         <button class="btn btn-sm btn-danger ms-2" (click)="cancel()">Cancel</button>

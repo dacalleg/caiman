@@ -1,5 +1,4 @@
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
-import { Observable } from '@influxdata/influxdb-client';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxScannerQrcodeComponent } from 'ngx-scanner-qrcode';
 import { Subject, filter, take, takeUntil, tap } from 'rxjs';

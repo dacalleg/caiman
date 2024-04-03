@@ -9,7 +9,7 @@ add_filter( 'manage_users_columns', function ( $column ) {
 add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id ) {
     switch ($column_name) {
         case 'business_name':
-            return get_field("business_name", "user_" . $user->ID);
+            return get_field("business_name", "user_" . $user_id);
         case 'status' :
             $user = get_user_by('id', $user_id);
             $roles = $user->roles;

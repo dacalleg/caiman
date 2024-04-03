@@ -156,6 +156,8 @@ export class EditComponent {
     return true;
   }
 
+  
+
   save() {
     this.Api.updateSerami(this.seramiEntry).subscribe(() => {
       this.Router.navigate(["/config/list"]);

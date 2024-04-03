@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxScannerQrcodeComponent } from 'ngx-scanner-qrcode';
-import { filter, take } from 'rxjs';
+import { filter, take, tap } from 'rxjs';
 
 @Component({
   selector: 'app-barcode',
@@ -11,10 +11,12 @@ import { filter, take } from 'rxjs';
 export class BarcodeComponent implements AfterViewInit {
 
   lastDeviceId: string | null;
+  devices: string[];
   @ViewChild("action") scanner: NgxScannerQrcodeComponent | undefined;
 
   constructor(private NgbActiveModal: NgbActiveModal) {
     this.lastDeviceId = localStorage.getItem("lastDeviceId")
+    this.devices = [];
   }
 
   ngAfterViewInit(): void {
@@ -28,11 +30,10 @@ export class BarcodeComponent implements AfterViewInit {
           this.NgbActiveModal.close(data[0].value);
         }
       });
-      this.scanner.devices.pipe(take(1)).subscribe(res => {
+      this.scanner.devices.pipe(tap(() => this.scanner!.start()), filter(arr => arr && arr.length > 0), take(1)).subscribe(res => {
+        this.devices = res.map(item => item.deviceId);
         if (this.scanner && this.lastDeviceId != null)
           this.scanner.playDevice(this.lastDeviceId);
-        if(this.scanner)
-          this.scanner.start();
       });
     }
   }
@@ -46,15 +47,14 @@ export class BarcodeComponent implements AfterViewInit {
 
   toggleCam() {
     if (this.scanner) {
-      this.scanner.devices.pipe(take(1)).subscribe(res => {
+      if (this.devices.length > 0) {
         if (this.scanner) {
-          const index = (this.scanner.deviceIndexActive + 1) % res.length;
-          this.scanner.playDevice(res[index].deviceId);
-          localStorage.setItem("lastDeviceId", res[index].deviceId);
+          const index = (this.scanner.deviceIndexActive + 1) % this.devices.length;
+          this.scanner.playDevice(this.devices[index]);
+          localStorage.setItem("lastDeviceId", this.devices[index]);
         }
-      })
+      }
     }
   }
-
 }
 

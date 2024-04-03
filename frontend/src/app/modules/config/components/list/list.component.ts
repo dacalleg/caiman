@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, from, switchMap } from 'rxjs';
+import { Observable, Subject, concat, from, of, switchMap, tap } from 'rxjs';
 import { SeramiEntry } from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
 import { SeramiParserService } from 'src/app/services/serami-parser.service';
@@ -12,11 +12,13 @@ import { SeramiParserService } from 'src/app/services/serami-parser.service';
 })
 export class ListComponent {
   list$: Observable<SeramiEntry[]>;
+  reloadSerami$: Subject<void>;
   @ViewChild("file") file: ElementRef | null;
 
   constructor(private Api: ApiService, private Router: Router, private Serami: SeramiParserService) {
     this.file = null;
-    this.list$ = this.Api.getSeramiList();
+    this.reloadSerami$ = new Subject<void>();
+    this.list$ = concat(of(void 0), this.reloadSerami$).pipe(switchMap(() => this.Api.getSeramiList()));
   }
 
   openConfig(key: string) {
@@ -47,5 +49,12 @@ export class ListComponent {
   importSnet2() {
     if (this.file)
       this.file.nativeElement.click();
+  }
+
+  deleteEntry(entry: SeramiEntry)
+  {
+    const result = confirm("Vuoi davvero eliminare la configurazione " + entry.name + "?");
+    if(result)
+      this.Api.deleteSerami(entry.key!).subscribe(() => this.reloadSerami$.next())
   }
 }

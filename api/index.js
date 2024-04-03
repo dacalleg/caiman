@@ -184,8 +184,6 @@ async function init() {
             }
         });
 
-
-
         app.get('/registry/get/:serial', UserRequired, async (req, res) => {
             const serial = req.params.serial;
             try {
@@ -269,6 +267,19 @@ async function init() {
                         key: req.body.key,
                     },
                 });
+                res.status(200).send({ status: "OK" });
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.post('/serami/delete', UserRequired, async (req, res) => {
+            try {
+                await Serami.destroy({
+                    where: {
+                        key: req.body.key
+                    }
+                })
                 res.status(200).send({ status: "OK" });
             } catch (ex) {
                 res.status(500).send({ message: ex.message });

@@ -12,7 +12,7 @@ export class SearchPipe implements PipeTransform {
     if(search == null)
       return [];
     return variables.filter(v => {
-      let text = v.hash + v.name;
+      let text = v.hash + v.name + v.description + v.readExp;
       return text.toLowerCase().includes(search.toLowerCase());
     })
   }

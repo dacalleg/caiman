@@ -276,6 +276,10 @@ export class ApiService {
     return this.Http.post<any>(environment.endpoint + "/api/serami/update", data);
   }
 
+  deleteSerami(key: string) {
+    return this.Http.post<any>(environment.endpoint + "/api/serami/delete", {key: key});
+  }
+
   getTickets(serial: string) {
     return this.Http.get<Ticket[]>(environment.endpoint + "/api/ticket/get/" + serial).pipe(map(resp => {
       return resp.map(item => {

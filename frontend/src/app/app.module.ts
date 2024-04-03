@@ -24,7 +24,7 @@ import { TranslationService } from './services/translation.service';
 import { ServiceWorkerModule, SwUpdate } from '@angular/service-worker';
 import { filter, from } from 'rxjs';
 import { HeaderComponent } from './components/header/header.component';
-import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle, QrCode} from 'ng-bootstrap-icons/icons';
+import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle, QrCode, X} from 'ng-bootstrap-icons/icons';
 import { BootstrapIconsModule } from 'ng-bootstrap-icons';
 import { ToastManagerComponent } from './components/toast-manager/toast-manager.component';
 import { ToastService } from './services/toast.service';
@@ -44,7 +44,8 @@ const icons = {
   Wifi,
   List,
   QuestionCircle,
-  QrCode
+  QrCode,
+  X
 };
 
 export function tokenGetter() {

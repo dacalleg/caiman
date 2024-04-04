@@ -41,10 +41,14 @@ export class DeviceSelectComponent implements OnInit {
   }
 
   connectUsingProduct() {
+    localStorage.setItem("defaultMAC", this.macAddress);
     this.Router.navigate(['/dashboard/home', this.macAddress, this.serialNumber, this.selectedProduct]);
   }
 
   connectOffline() {
+    localStorage.setItem("defaultMAC", this.macAddress);
+    localStorage.setItem("defaultRegCode", this.regCode);
+
     this.Router.navigate(['/dashboard/home', this.macAddress, this.serialNumber, this.selectedProduct, this.regCode]);
   }
 
@@ -53,6 +57,11 @@ export class DeviceSelectComponent implements OnInit {
   }
 
   selectOption(n: number) {
+    this.macAddress = "";
+    if(n === 3 || n === 4)
+      this.macAddress = localStorage.getItem("defaultMAC") || "";
+    if(n===4)
+      this.regCode = localStorage.getItem("defaultRegCode") || "";
     this.selectedOption = n;
   }
 

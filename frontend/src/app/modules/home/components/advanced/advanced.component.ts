@@ -59,7 +59,7 @@ export class AdvancedComponent {
         this.modal.upodateAlertModalConfig({
           title: "modal.upgrading",
           progress: false,
-          message: err.message
+          message: this.convertUpgradeErrorMessages(err.message)
         })
       },
       complete: () => {
@@ -71,6 +71,27 @@ export class AdvancedComponent {
         })
       }
     });
+  }
+
+  convertUpgradeErrorMessages(status: number)
+  {
+    switch(status) {
+      case -7:
+        return "Checksum error";
+      case -6:
+        return "Remote error";
+      case -5:
+        return "Path error";
+      case -4:
+        return "File already exists";
+      case -3:
+        return "OTA begin error";
+      case -2:
+        return "Ota partition fail";
+      case -1:
+        return "Upgrade fail";
+    }
+    return "unknown";
   }
 
   upgradeFirmwareBoard() {
@@ -97,7 +118,7 @@ export class AdvancedComponent {
         this.modal.upodateAlertModalConfig({
           title: "modal.upgrading",
           progress: false,
-          message: err.message
+          message: this.convertUpgradeErrorMessages(err.message)
         })
       },
       complete: () => {

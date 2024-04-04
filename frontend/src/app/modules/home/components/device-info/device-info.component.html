@@ -34,39 +34,57 @@
           </div>
       </ng-container>
 
-      <div class="row mb-5">
-        <div class="col">
-          <h3>{{ 'home.deviceinfo.faq' | translate }}</h3>
-          <ngb-accordion #acc="ngbAccordion">
-            <ngb-panel [title]="faq.question" *ngFor="let faq of device?.info?.faq">
-              <ng-template ngbPanelContent>
-                {{faq.response}}
-              </ng-template>
-            </ngb-panel>
-          </ngb-accordion>
+      <ng-container *ngIf="(device?.info?.links|withRole|async) as links">
+        <div class="row my-5" *ngIf="links.length > 0">
+            <div class="col">
+              <h3>{{ 'home.deviceinfo.links' | translate }}</h3>
+              <ul>
+                <li *ngFor="let l of links">
+                  <a [href]="l.link" target="_blank">{{l.name}}</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+      </ng-container>
+
+      <ng-container *ngIf="device?.info?.faq as faqs">
+        <div class="row mb-5" *ngIf="faqs.length > 0">
+          <div class="col">
+            <h3>{{ 'home.deviceinfo.faq' | translate }}</h3>
+            <ngb-accordion #acc="ngbAccordion">
+              <ngb-panel [title]="faq.question" *ngFor="let faq of faqs">
+                <ng-template ngbPanelContent>
+                  {{faq.response}}
+                </ng-template>
+              </ngb-panel>
+            </ngb-accordion>
+          </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <h3>{{ 'home.deviceinfo.video' | translate }}</h3>
-          <ngb-accordion #acc="ngbAccordion">
-            <ngb-panel [title]="video.name" *ngFor="let video of device?.info?.video">
-              <ng-template ngbPanelContent>
-                <div class="d-flex justify-content-center align-items-center flex-column">
-                  <ng-container *ngIf="(video.video|isURL);else youtube">
-                    <div class="w-100">
-                      <app-videojs [options]="{autoplay: false, controls: true, fluid: true, preload: 'auto', sources: [{ src: video.video, type: 'video/mp4' }]}"></app-videojs>
-                    </div>
-                  </ng-container>
-                  <ng-template #youtube>
-                      <youtube-player [videoId]="video.video"></youtube-player>
-                  </ng-template>
-                  <div class="text-center mt-3">{{video.description}}</div>
-                </div>
-              </ng-template>
-            </ngb-panel>
-          </ngb-accordion>
+      </ng-container>
+
+      <ng-container *ngIf="device?.info?.video as videos">
+        <div class="row" *ngIf="videos.length > 0">
+          <div class="col">
+            <h3>{{ 'home.deviceinfo.video' | translate }}</h3>
+            <ngb-accordion #acc="ngbAccordion">
+              <ngb-panel [title]="video.name" *ngFor="let video of videos">
+                <ng-template ngbPanelContent>
+                  <div class="d-flex justify-content-center align-items-center flex-column">
+                    <ng-container *ngIf="(video.video|isURL);else youtube">
+                      <div class="w-100">
+                        <app-videojs [options]="{autoplay: false, controls: true, fluid: true, preload: 'auto', sources: [{ src: video.video, type: 'video/mp4' }]}"></app-videojs>
+                      </div>
+                    </ng-container>
+                    <ng-template #youtube>
+                        <youtube-player [videoId]="video.video"></youtube-player>
+                    </ng-template>
+                    <div class="text-center mt-3">{{video.description}}</div>
+                  </div>
+                </ng-template>
+              </ngb-panel>
+            </ngb-accordion>
+          </div>
         </div>
-      </div>
+      </ng-container>
     </div>
   </div>

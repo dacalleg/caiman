@@ -27,4 +27,13 @@
             </div>
         </div>
     </div>
+    <div class="row mt-5" *ngIf="showDownloadBluefy">
+        <div class="col">
+            <div class="text-center ios-ble" [innerHTML]="'bluefy.message'|translate">
+            </div>
+            <div class="text-center mt-3">
+                <a href="https://apps.apple.com/it/app/bluefy-web-ble-browser/id1492822055" target="_blank"><img src="assets/applestore.png"></a>
+            </div>
+        </div>
+    </div>
 </div>

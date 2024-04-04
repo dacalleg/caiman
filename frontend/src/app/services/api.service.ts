@@ -557,6 +557,7 @@ export class ApiService {
       board_firmware_list: board.firmware_list,
       video: item.acf.video || [],
       documents: item.acf.documents || [],
+      links: item.acf.links || [],
       serami_var_override: var_override || [],
       serami_group_override: item.acf.serami_group_override || [],
       database: board.database || [],

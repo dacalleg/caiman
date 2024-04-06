@@ -13,12 +13,14 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
   lastDeviceId: string | null;
   devices: string[];
   destroy$: Subject<void>;
+  noPermission: boolean;
   @ViewChild("action") scanner: NgxScannerQrcodeComponent | undefined;
 
   constructor(private NgbActiveModal: NgbActiveModal) {
     this.lastDeviceId = localStorage.getItem("lastDeviceId") as string;
     this.devices = [];
     this.destroy$ = new Subject<void>();
+    this.noPermission = false;
   }
 
   ngOnDestroy(): void {
@@ -28,6 +30,7 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    this.checkPermission();
     if (this.scanner) {
       this.scanner.data.pipe(
         filter(results => results.length > 0),
@@ -59,6 +62,19 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
       this.scanner.stop();
     }
     this.NgbActiveModal.dismiss();
+  }
+
+  async checkPermission()
+  {
+    try {
+      // Will try to ask for permission
+      let stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      this.noPermission = false;
+      return true;
+    } catch (err) {
+      this.noPermission = true;
+      return false;
+    }
   }
 
   toggleCam() {

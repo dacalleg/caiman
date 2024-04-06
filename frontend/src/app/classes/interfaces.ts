@@ -192,12 +192,12 @@ export interface Gateway {
   firmware_list: Firmware[];
 }
 
-
 export interface ProductInfo {
   id_product: string;
   id: number;
   name: string;
   documents: Document[];
+  links: Link[];
   image: string | null;
   serami_acl: SeramiACL[];
   faq: SingleFaq[];
@@ -249,6 +249,13 @@ export interface Document extends WithRole {
   name: string;
   file: string;
 }
+
+export interface Link extends WithRole 
+{
+  name: string;
+  link: string;
+}
+
 
 export interface AguaOptions {
   agua_endpoint: string;

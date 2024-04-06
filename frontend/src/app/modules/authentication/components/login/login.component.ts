@@ -16,7 +16,8 @@ export class LoginComponent implements OnInit {
   rememberMe: boolean;
   error: string|null = null;
   info$: Observable<Info>;
-  
+  showDownloadBluefy: boolean;
+
   login() {
     this.Auth.login(this.email, this.password).subscribe({
       next: (response) => {
@@ -28,11 +29,24 @@ export class LoginComponent implements OnInit {
     });
   }
 
+
   constructor(private Auth: AuthService, private Router: Router, private Api: ApiService) {
     this.email = '';
     this.password = '';
     this.rememberMe = false;
     this.info$ = this.Api.getInfo();
+    this.showDownloadBluefy = [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod'
+    ].includes(navigator.platform)
+    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+    
+    if(navigator.userAgent.includes("Bluefy"))
+      this.showDownloadBluefy = false
   }
 
   ngOnInit(): void {

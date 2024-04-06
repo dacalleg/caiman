@@ -53,6 +53,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   mobileMenuOpen: boolean;
   destroy$: Subject<void> = new Subject<void>();
   env: EnvObj;
+  error: string|undefined;
+
 
   constructor(
     private Store: StoreService,
@@ -182,7 +184,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       switchMap(roles => this.Store.getGroupsByRole(roles))
     )
 
-    this.loadDeviceData$.subscribe();
+    this.loadDeviceData$.subscribe(
+      {
+        error: (err) => {
+          this.error = err.message;
+        }
+    });
 
     this.Device.getLogs().pipe(
       takeUntil(this.destroy$),

@@ -101,13 +101,24 @@
     </div>
   </div>
   <ng-template #loader>
-    <div class="d-flex h-100 w-100 justify-content-center align-items-center">
+    <div class="d-flex h-100 w-100 justify-content-center align-items-center my-5">
       <div class="text-center w-50 d-flex">
         <div class="container">
           <div class="row">
             <div class="col p-3">
+              <ng-container *ngIf="!error; else errorDiv">
               <div class="text-center mb-3">{{'loading'|translate}}</div>
               <app-infinite-progress-bar></app-infinite-progress-bar>
+              </ng-container>
+              <ng-template #errorDiv>
+                <p>
+                  Si è verificato un errore con la richiesta, codice errore:<br>
+                  {{error}}
+                </p>
+                <p>
+                  <a routerLink="/dashboard/home/">{{"back"|translate}}</a>
+                </p>
+              </ng-template>
             </div>
           </div>
         </div>

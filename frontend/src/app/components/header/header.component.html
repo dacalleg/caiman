@@ -5,6 +5,11 @@
         <img [src]="(info$|async)?.logo" style="height: 37px;">
         <h2 class="m-0 fw-bold ms-2 d-none">CAIMAN</h2>
       </div>
+      <div class="menu d-block d-md-none">
+        <button class="btn btn-link" (click)="burgerMenuClicked()">
+          <bi name="list"></bi>
+        </button>
+      </div>
     </div>
     <div class="navbar-collapse d-none d-md-block" id="navbarContent">
       <ul class="navbar-nav ms-auto">
@@ -35,5 +40,26 @@
     </div>
   </div>
 </nav>
+<div class="sidemenu py-5 ps-3 pe-2" [ngClass]="{'open': menuOpen}">
+  <div class="d-flex justify-content-between">
+    <img [src]="(info$|async)?.logo" style="height: 37px;">
+    <button class="close" (click)="closeMenu()"><bi name="x" ></bi></button>
+  </div>
+  <div class="my-4">
+    <div class="fw-bold">{{username$|async}}</div>
+    <small class="role">{{roles$|async}}</small>
+  </div>
+  <ul class="list-group mt-4">
+    <li class="ps-0 list-group-item border-0">
+      <a (click)="deviceSelector()">{{'device.selector'|translate}}</a>
+    </li>
+    <li class="ps-0 list-group-item border-0">
+      <a (click)="profile()">{{'profile'|translate}}</a>
+    </li>
+    <li class="ps-0 list-group-item border-0 my-3">
+      <a (click)="logout()">{{'logout'|translate}}</a>
+    </li>
+  </ul>
+</div>
 
 <input #file type="file" (change)="onFileChange($event)" class="d-none">

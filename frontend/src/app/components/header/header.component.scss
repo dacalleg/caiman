@@ -18,3 +18,30 @@ bi {
 {
     text-transform: uppercase;
 }
+
+.sidemenu
+{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 80%;
+  height: 100vh;
+  z-index: 9999;
+  background-color: #FFF;
+  box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+  transform: translateX(-101%);
+  transition: all 0.8s;
+  &.open
+  {
+    transform: translateX(0%);
+  }
+  .close
+  {
+    border: none;
+    background: transparent;
+    bi{
+      width: 40px;
+    }
+  }
+
+}

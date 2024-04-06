@@ -2,11 +2,14 @@
 
 add_filter( 'manage_users_columns', function ( $column ) {
     $column['status'] = 'Login';
+    $column['business_name'] = 'Business Name';
     return $column;
 });
 
 add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id ) {
     switch ($column_name) {
+        case 'business_name':
+            return get_field("business_name", "user_" . $user_id);
         case 'status' :
             $user = get_user_by('id', $user_id);
             $roles = $user->roles;
@@ -32,7 +35,7 @@ add_filter( 'manage_users_custom_column', function( $val, $column_name, $user_id
                     return "Expired";
                 return "Expire on " . $expiration;
             }
-            return "*";            
+            return "*";
     }
     return $val;
 }, 10, 3 );

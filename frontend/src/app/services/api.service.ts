@@ -187,7 +187,11 @@ export class ApiService {
   getProductInfoByPrefix(prefix: string, gateway: string | undefined = undefined) {
     return combineLatest([of(prefix), this.Translation.getCurrentLanguage()]).pipe(
       switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?prefix=" + prefix + (lang !== "it" ? "&lang=" + lang : ""))),
-      switchMap(arr => from(arr)),
+      switchMap(arr => {
+        if(arr.length == 0)
+          return throwError(() => new Error("Product not found"))
+        return from(arr)
+      }),
       switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
       take(1),
       switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
@@ -208,7 +212,11 @@ export class ApiService {
   getProductInfo(product: string, gateway: string | undefined = undefined) {
     return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
       switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
-      switchMap(arr => from(arr)),
+      switchMap(arr => {
+        if(arr.length == 0)
+          return throwError(() => new Error("Product not found"))
+        return from(arr)
+      }),
       switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
       take(1),
       switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
@@ -549,6 +557,7 @@ export class ApiService {
       board_firmware_list: board.firmware_list,
       video: item.acf.video || [],
       documents: item.acf.documents || [],
+      links: item.acf.links || [],
       serami_var_override: var_override || [],
       serami_group_override: item.acf.serami_group_override || [],
       database: board.database || [],

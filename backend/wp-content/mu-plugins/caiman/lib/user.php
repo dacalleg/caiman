@@ -38,14 +38,14 @@ function caiman_confirm_user(WP_REST_Request $request)
     ));
 
     $headers = array('Content-Type: text/html; charset=UTF-8');
-
+    $business_name = get_field("business_name", "user_" . $user->ID);
     foreach($administrators as $admin)
     {
         $admin_email = $admin->user_email;
         $language = get_user_language_code($admin);
         
         $title = get_translation_value("registration.admin.email.title", array(), $language);
-        $message = nl2br(get_translation_value("registration.admin.email.body", array("user_email" => $email), $language));
+        $message = nl2br(get_translation_value("registration.admin.email.body", array("user_email" => $email, "business_name" => $business_name, 'user_id' => $user->ID), $language));
         wp_mail($admin_email, $title, $message, $headers);
     }
 

@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import {Component, ElementRef, EventEmitter, OnInit, Output, signal, ViewChild} from '@angular/core';
 import { StoreService } from "../../services/store.service";
 import { ModalService } from "../../services/modal.service";
 import { map, Observable, take, tap } from "rxjs";
@@ -22,6 +22,7 @@ export class HeaderComponent implements OnInit {
   roles$: Observable<string>;
   info$: Observable<any>;
   isAdmin$: Observable<boolean>;
+  menuOpen: boolean;
 
   constructor(
     private Store: StoreService,
@@ -38,6 +39,7 @@ export class HeaderComponent implements OnInit {
     this.roles$ = this.AuthService.getRoles().pipe(map(roles => roles.join(", ")));
     this.info$ = this.Api.getInfo();
     this.isAdmin$ = this.AuthService.getRoles().pipe(map(roles => roles.includes("administrator")))
+    this.menuOpen = false;
   }
 
   ngOnInit(): void {
@@ -116,16 +118,28 @@ export class HeaderComponent implements OnInit {
   }
 
   logout() {
+    this.menuOpen = false;
     this.AuthService.logout().pipe(
       tap(() => this.Router.navigate(['/auth/login']))
     ).subscribe();
   }
 
   profile() {
+    this.menuOpen = false;
     this.Router.navigate(['/dashboard/profile'])
   }
 
   burgerMenuClicked() {
-    this.onBurgerClicked.emit();
+    this.menuOpen = !this.menuOpen;
+  }
+
+  deviceSelector() {
+    this.menuOpen = false;
+    this.Router.navigate(['/dashboard/home'])
+
+  }
+
+  closeMenu() {
+    this.menuOpen = false;
   }
 }

@@ -1,6 +1,7 @@
 <div class="p-2 d-flex flex-column align-items-center justify-content-center h-100">
     <div class="w-100 h-100">
         <ngx-scanner-qrcode #action="scanner" [isBeep]="false"></ngx-scanner-qrcode>
+        <div class="error text-center" *ngIf="noPermission">You must enable permission to use the camera if you want to scan barcodes!</div>
     </div>
     <div class="d-flex justify-content-between w-100 my-2">
         <ng-container *ngIf="devices.length > 1">

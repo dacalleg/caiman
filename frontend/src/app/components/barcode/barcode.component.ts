@@ -18,7 +18,6 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
   @ViewChild("action") scanner: NgxScannerQrcodeComponent | undefined;
 
   constructor(private NgbActiveModal: NgbActiveModal) {
-    this.selectedDevice = localStorage.getItem("lastDeviceId") as string || undefined;
     this.destroy$ = new Subject<void>();
     this.noPermission = false;
     this.devices$ = of([])
@@ -34,6 +33,7 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
     this.checkPermission();
     if (this.scanner) {
       this.devices$ = this.scanner?.devices.asObservable();
+      this.devices$.pipe(filter(arr => arr.length > 0), take(1), takeUntil(this.destroy$)).subscribe(devices => this.selectedDevice = devices.length > 0 ? devices[0].deviceId : undefined);
       this.scanner.data.pipe(
         filter(results => results.length > 0),
         take(1),
@@ -45,12 +45,7 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
         }
       });
 
-      const playDeviceFacingBack = (devices: any[]) => {
-        const device = devices.find(f => (/back|rear|environment/gi.test(f.label)));
-        this.scanner!.playDevice(device ? device.deviceId : devices[0].deviceId);
-      }
-      
-      this.scanner.start(playDeviceFacingBack).pipe(
+      this.scanner.start().pipe(
         takeUntil(this.destroy$),
       ).subscribe()
     }
@@ -79,7 +74,6 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
     this.selectedDevice = $event;
     if (this.scanner) {
       this.scanner.playDevice(this.selectedDevice);
-      localStorage.setItem("lastDeviceId", this.selectedDevice);
     }
   }
 }

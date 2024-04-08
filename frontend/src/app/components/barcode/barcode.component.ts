@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { NgxScannerQrcodeComponent } from 'ngx-scanner-qrcode';
-import { Subject, filter, take, takeUntil, tap } from 'rxjs';
+import { NgxScannerQrcodeComponent, ScannerQRCodeDevice } from 'ngx-scanner-qrcode';
+import { Observable, Subject, filter, of, take, takeUntil, tap } from 'rxjs';
 
 @Component({
   selector: 'app-barcode',
@@ -10,17 +10,18 @@ import { Subject, filter, take, takeUntil, tap } from 'rxjs';
 })
 export class BarcodeComponent implements AfterViewInit, OnDestroy {
 
-  lastDeviceId: string | null;
-  devices: string[];
+
+  devices$: Observable<ScannerQRCodeDevice[]>;
   destroy$: Subject<void>;
   noPermission: boolean;
+  selectedDevice: string | undefined;
   @ViewChild("action") scanner: NgxScannerQrcodeComponent | undefined;
 
   constructor(private NgbActiveModal: NgbActiveModal) {
-    this.lastDeviceId = localStorage.getItem("lastDeviceId") as string;
-    this.devices = [];
+    this.selectedDevice = localStorage.getItem("lastDeviceId") as string || undefined;
     this.destroy$ = new Subject<void>();
     this.noPermission = false;
+    this.devices$ = of([])
   }
 
   ngOnDestroy(): void {
@@ -32,6 +33,7 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.checkPermission();
     if (this.scanner) {
+      this.devices$ = this.scanner?.devices.asObservable();
       this.scanner.data.pipe(
         filter(results => results.length > 0),
         take(1),
@@ -42,18 +44,13 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
           this.NgbActiveModal.close(data[0].value);
         }
       });
-      this.scanner.devices.pipe(
-        tap(() => this.scanner!.start()), 
-        filter(arr => arr && arr.length > 0), 
-        take(1), 
-        takeUntil(this.destroy$)).subscribe(res => {
-        this.devices = res.map(item => item.deviceId);
-        if (this.scanner && this.lastDeviceId != null)
-          if(this.devices.includes(this.lastDeviceId))
-          {
-            this.scanner.playDevice(this.lastDeviceId);
-          }
-      });
+      this.scanner.start().pipe(
+        tap(() => {
+          if(this.selectedDevice)
+            this.scanner!.playDevice(this.selectedDevice);
+        }),
+        take(1),
+      )
     }
   }
 
@@ -64,8 +61,7 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
     this.NgbActiveModal.dismiss();
   }
 
-  async checkPermission()
-  {
+  async checkPermission() {
     try {
       // Will try to ask for permission
       let stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -77,15 +73,11 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  toggleCam() {
+  changeDevice($event: string) {
+    this.selectedDevice = $event;
     if (this.scanner) {
-      if (this.devices.length > 0) {
-        if (this.scanner) {
-          const index = (this.scanner.deviceIndexActive + 1) % this.devices.length;
-          this.scanner.playDevice(this.devices[index]);
-          localStorage.setItem("lastDeviceId", this.devices[index]);
-        }
-      }
+      this.scanner.playDevice(this.selectedDevice);
+      localStorage.setItem("lastDeviceId", this.selectedDevice);
     }
   }
 }

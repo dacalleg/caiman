@@ -44,17 +44,14 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
           this.NgbActiveModal.close(data[0].value);
         }
       });
+
+      const playDeviceFacingBack = (devices: any[]) => {
+        const device = devices.find(f => (/back|rear|environment/gi.test(f.label)));
+        this.scanner!.playDevice(device ? device.deviceId : devices[0].deviceId);
+      }
       
-      this.scanner.start((devices: ScannerQRCodeDevice[]) => {
-        let found = false;
-        if(this.selectedDevice)
-          if(devices.map(i => i.deviceId).includes(this.selectedDevice))
-            found = true;
-        if(this.scanner)
-          this.scanner.playDevice(found ? this.selectedDevice! : devices[0].deviceId);
-      }).pipe(
+      this.scanner.start(playDeviceFacingBack).pipe(
         takeUntil(this.destroy$),
-        take(1),
       ).subscribe()
     }
   }

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { BehaviorSubject, defer, distinctUntilChanged, filter, interval, map, merge, Observable, of, shareReplay, skip, Subject, switchMap, take, tap } from 'rxjs';
+import { BehaviorSubject, catchError, defer, distinctUntilChanged, filter, from, interval, map, merge, Observable, of, shareReplay, skip, Subject, switchMap, take, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { LoginResponse, User, UserData, UserField } from '../classes/interfaces';
 import { TranslationService } from './translation.service';
@@ -27,10 +27,9 @@ export class AuthService {
     );
 
     this.userData$ = this.tokenChanges$.pipe(
-      filter(token => token !== null && !this.jwtHelper.isTokenExpired(token)),
       switchMap(() => merge(of(void 0), this.updateUserData$)),
       switchMap(() => this.Http.get<UserData>(environment.endpoint + "/wp-json/caiman/v1/me")),
-      shareReplay(1)
+      shareReplay(1, 2000)
     );
 
     this.Translation.getCurrentLanguage().pipe(
@@ -96,7 +95,16 @@ export class AuthService {
   }
 
   isValidToken() {
-    return of(localStorage.getItem('access_token') !== null && !this.jwtHelper.isTokenExpired(localStorage.getItem('access_token')));
+    return of(this.jwtHelper.tokenGetter() as string|null).pipe(
+      switchMap(token => {
+        if(!token || this.jwtHelper.isTokenExpired(token))
+          return throwError(() => new Error("Token Invalid or Expired"))
+        return of(token)
+      }),
+      switchMap(() => this.userData$),
+      map(() => true),
+      catchError(() => of(false))
+    )
   }
 
   getRoles(): Observable<string[]> {

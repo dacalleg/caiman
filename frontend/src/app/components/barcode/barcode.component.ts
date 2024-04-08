@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgxScannerQrcodeComponent, ScannerQRCodeDevice } from 'ngx-scanner-qrcode';
-import { Observable, Subject, filter, of, take, takeUntil, tap } from 'rxjs';
+import { Observable, Subject, filter, of, switchMap, take, takeUntil, tap } from 'rxjs';
 
 @Component({
   selector: 'app-barcode',
@@ -45,10 +45,12 @@ export class BarcodeComponent implements AfterViewInit, OnDestroy {
         }
       });
       this.scanner.start().pipe(
-        tap(() => {
+        switchMap(() => {
           if(this.selectedDevice)
-            this.scanner!.playDevice(this.selectedDevice);
+            return this.scanner!.playDevice(this.selectedDevice);
+          return of(void 0);
         }),
+        takeUntil(this.destroy$),
         take(1),
       )
     }

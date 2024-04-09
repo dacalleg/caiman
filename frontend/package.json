@@ -29,6 +29,7 @@
     "@popperjs/core": "^2.11.6",
     "@stomp/rx-stomp": "^1.2.0",
     "@xmldom/xmldom": "^0.8.2",
+    "@zxing/ngx-scanner": "^17.0.1",
     "bootstrap": "^5.1.3",
     "fmin": "^0.0.2",
     "ng-bootstrap-icons": "^13.1.2-canary.1",

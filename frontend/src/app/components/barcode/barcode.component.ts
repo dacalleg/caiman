@@ -34,7 +34,8 @@ export class BarcodeComponent {
 
   constructor(private NgbActiveModal: NgbActiveModal) {
     this.availableDevices = [];
-    this.permission$ = from(navigator.permissions.query({ name: "geolocation" }));
+    //@ts-ignore
+    this.permission$ = from(navigator.permissions.query({ name: "camera" }));
     this.enabled = false;
   }
 
@@ -90,5 +91,6 @@ export class BarcodeComponent {
   enable() {
     this.enabled = true;
   }
+
 }
 

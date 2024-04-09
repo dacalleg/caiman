@@ -1,12 +1,29 @@
-<div class="p-2 d-flex flex-column align-items-center justify-content-center h-100">
+<div class="p-2 d-flex flex-column align-items-center justify-content-center h-100"
+     *ngIf="permission$|async as permission">
+  <ng-container *ngIf="!enabled && permission.state === 'prompt'">
+    <p class="p-2">In order to be able to read QR codes, camera-related permissions must be enabled.</p>
+    <button class="btn btn-primary mb-2" (click)="enable()">Abilita permessi</button>
+  </ng-container>
+  <ng-container *ngIf="permission.state === 'denied'">
+    <p class="p-2">You must enable permission to use the camera if you want to scan barcodes!</p>
+    <button class="btn btn-sm btn-danger ms-2" (click)="cancel()">{{'cancel'|translate}}</button>
+  </ng-container>
+  <ng-container *ngIf="enabled || permission.state === 'granted'">
+    <div class="mb-2">
+      <select class="form-control" [ngModel]="deviceCurrent" (ngModelChange)="onDeviceChange($event)">
+        <option *ngFor="let device of availableDevices" [ngValue]="device">{{device.label}}</option>
+      </select>
+    </div>
     <div class="w-100 h-100">
-        <ngx-scanner-qrcode #action="scanner" [isBeep]="false"></ngx-scanner-qrcode>
-        <div class="error text-center" *ngIf="noPermission">You must enable permission to use the camera if you want to scan barcodes!</div>
+      <zxing-scanner [torch]="torchEnabled" [device]="deviceCurrent" (deviceChange)="onDeviceChange($event)"
+                     (scanSuccess)="onCodeResult($event)"
+                     [formats]="formatsEnabled" [tryHarder]="tryHarder" (permissionResponse)="onHasPermission($event)"
+                     (camerasFound)="onCamerasFound($event)"
+                     (torchCompatible)="onTorchCompatible($event)"></zxing-scanner>
     </div>
     <div class="d-flex justify-content-between w-100 my-2">
-        <ng-container *ngIf="devices.length > 1">
-            <button class="btn btn-sm btn-primary" (click)="toggleCam()" *ngIf="devices.length > 0">Toggle Cam</button>
-        </ng-container>
-        <button class="btn btn-sm btn-danger ms-2" (click)="cancel()">Cancel</button>
-    </div>
+        <button class="btn btn-sm btn-danger ms-2" (click)="cancel()">{{'cancel'|translate}}</button>
+      </div>
+  </ng-container>
+
 </div>

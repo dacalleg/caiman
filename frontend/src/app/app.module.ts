@@ -30,6 +30,7 @@ import { ToastManagerComponent } from './components/toast-manager/toast-manager.
 import { ToastService } from './services/toast.service';
 import {BarcodeComponent} from "./components/barcode/barcode.component";
 import { NgxScannerQrcodeModule, LOAD_WASM } from 'ngx-scanner-qrcode';
+import {ZXingScannerModule} from "@zxing/ngx-scanner";
 
 LOAD_WASM().subscribe();
 
@@ -85,6 +86,7 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     FormsModule,
     HttpClientModule,
     NgxScannerQrcodeModule,
+    ZXingScannerModule,
     BootstrapIconsModule.pick(icons),
     TranslateModule.forRoot({
       loader: {

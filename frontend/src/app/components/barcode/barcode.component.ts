@@ -1,92 +1,96 @@
-import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
+import { BarcodeFormat } from '@zxing/library';
+import {BehaviorSubject, from, Observable} from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { NgxScannerQrcodeComponent } from 'ngx-scanner-qrcode';
-import { Subject, filter, take, takeUntil, tap } from 'rxjs';
 
 @Component({
   selector: 'app-barcode',
   templateUrl: './barcode.component.html',
   styleUrls: ['./barcode.component.scss']
 })
-export class BarcodeComponent implements AfterViewInit, OnDestroy {
+export class BarcodeComponent {
 
-  lastDeviceId: string | null;
-  devices: string[];
-  destroy$: Subject<void>;
-  noPermission: boolean;
-  @ViewChild("action") scanner: NgxScannerQrcodeComponent | undefined;
+  availableDevices: MediaDeviceInfo[];
+  deviceCurrent: MediaDeviceInfo|undefined;
+  deviceSelected: string|undefined;
+
+  formatsEnabled: BarcodeFormat[] = [
+    BarcodeFormat.CODE_128,
+    BarcodeFormat.DATA_MATRIX,
+    BarcodeFormat.EAN_13,
+    BarcodeFormat.QR_CODE,
+  ];
+
+  hasDevices: boolean|undefined;
+  hasPermission: boolean|undefined;
+
+  qrResultString: string|null|undefined;
+
+  torchEnabled = false;
+  torchAvailable$ = new BehaviorSubject<boolean>(false);
+  tryHarder = false;
+  permission$: Observable<PermissionStatus>;
+  enabled: boolean;
 
   constructor(private NgbActiveModal: NgbActiveModal) {
-    this.lastDeviceId = localStorage.getItem("lastDeviceId") as string;
-    this.devices = [];
-    this.destroy$ = new Subject<void>();
-    this.noPermission = false;
+    this.availableDevices = [];
+    //@ts-ignore
+    this.permission$ = from(navigator.permissions.query({ name: "camera" }));
+    this.enabled = false;
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    if (this.scanner)
-      this.scanner.stop();
+  clearResult(): void {
+    this.qrResultString = null;
   }
 
-  ngAfterViewInit(): void {
-    this.checkPermission();
-    if (this.scanner) {
-      this.scanner.data.pipe(
-        filter(results => results.length > 0),
-        take(1),
-        takeUntil(this.destroy$)
-      ).subscribe(data => {
-        if (this.scanner) {
-          this.scanner.stop();
-          this.NgbActiveModal.close(data[0].value);
-        }
-      });
-      this.scanner.devices.pipe(
-        tap(() => this.scanner!.start()), 
-        filter(arr => arr && arr.length > 0), 
-        take(1), 
-        takeUntil(this.destroy$)).subscribe(res => {
-        this.devices = res.map(item => item.deviceId);
-        if (this.scanner && this.lastDeviceId != null)
-          if(this.devices.includes(this.lastDeviceId))
-          {
-            this.scanner.playDevice(this.lastDeviceId);
-          }
-      });
-    }
+  onCamerasFound(devices: MediaDeviceInfo[]): void {
+    this.availableDevices = devices;
+    this.hasDevices = Boolean(devices && devices.length);
   }
 
-  cancel() {
-    if (this.scanner) {
-      this.scanner.stop();
-    }
+  onCodeResult(resultString: string) {
+    this.NgbActiveModal.close(resultString);
+  }
+
+  onDeviceSelectChange(selected: string) {
+    const selectedStr = selected || '';
+    if (this.deviceSelected === selectedStr) { return; }
+    this.deviceSelected = selectedStr;
+    const device = this.availableDevices.find(x => x.deviceId === selected);
+    this.deviceCurrent = device || undefined;
+  }
+
+  onDeviceChange(device: MediaDeviceInfo) {
+    const selectedStr = device?.deviceId || '';
+    if (this.deviceSelected === selectedStr) { return; }
+    this.deviceSelected = selectedStr;
+    this.deviceCurrent = device || undefined;
+  }
+
+  onHasPermission(has: boolean) {
+    this.hasPermission = has;
+  }
+
+  onTorchCompatible(isCompatible: boolean): void {
+    this.torchAvailable$.next(isCompatible || false);
+  }
+
+  toggleTorch(): void {
+    this.torchEnabled = !this.torchEnabled;
+  }
+
+  toggleTryHarder(): void {
+    this.tryHarder = !this.tryHarder;
+  }
+
+  cancel()
+  {
     this.NgbActiveModal.dismiss();
   }
 
-  async checkPermission()
-  {
-    try {
-      // Will try to ask for permission
-      let stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      this.noPermission = false;
-      return true;
-    } catch (err) {
-      this.noPermission = true;
-      return false;
-    }
+  enable() {
+    this.enabled = true;
   }
 
-  toggleCam() {
-    if (this.scanner) {
-      if (this.devices.length > 0) {
-        if (this.scanner) {
-          const index = (this.scanner.deviceIndexActive + 1) % this.devices.length;
-          this.scanner.playDevice(this.devices[index]);
-          localStorage.setItem("lastDeviceId", this.devices[index]);
-        }
-      }
-    }
-  }
 }
 

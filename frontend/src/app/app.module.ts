@@ -29,11 +29,7 @@ import { BootstrapIconsModule } from 'ng-bootstrap-icons';
 import { ToastManagerComponent } from './components/toast-manager/toast-manager.component';
 import { ToastService } from './services/toast.service';
 import {BarcodeComponent} from "./components/barcode/barcode.component";
-import { NgxScannerQrcodeModule, LOAD_WASM } from 'ngx-scanner-qrcode';
 import {ZXingScannerModule} from "@zxing/ngx-scanner";
-
-LOAD_WASM().subscribe();
-
 
 const icons = {
   Eye,
@@ -85,7 +81,6 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     SharedModule,
     FormsModule,
     HttpClientModule,
-    NgxScannerQrcodeModule,
     ZXingScannerModule,
     BootstrapIconsModule.pick(icons),
     TranslateModule.forRoot({

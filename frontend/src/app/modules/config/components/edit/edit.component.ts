@@ -156,7 +156,7 @@ export class EditComponent {
     return true;
   }
 
-  
+
 
   save() {
     this.Api.updateSerami(this.seramiEntry).subscribe(() => {
@@ -190,7 +190,10 @@ export class EditComponent {
   }
 
   deleteVariable(variable: Variable) {
-    this.seramiEntry.data = this.seramiEntry.data.filter(i => i.sanitizedName !== variable.sanitizedName);
+    let h = (Math.random() + 1).toString(36).substring(7);
+    variable.group = h
+    this.seramiEntry.data = this.seramiEntry.data.filter(item => item.group !== h)
+
     this.refresh$.next();
   }
 

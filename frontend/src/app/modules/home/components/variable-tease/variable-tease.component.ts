@@ -23,6 +23,7 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
   cancelSubject: Subject<void>;
   startCounter: Subject<void>;
   counter$: Observable<number>;
+  writeSubject$: Subject<number>;
 
   constructor(private Store: StoreService, private Device: DeviceService, private Modal: ModalService) {
     this.variable = null;
@@ -34,6 +35,13 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
     this.newValue = 0;
     this.writing = false;
     this.startCounter = new Subject<void>();
+    this.writeSubject$ = new Subject<number>();
+
+    this.subscribeWrite();
+
+    this.cancelSubject.pipe(
+      takeUntil(this.destroy$),
+    ).subscribe(() => this.subscribeWrite());
 
     this.counter$ = concat(of(0), this.startCounter.pipe(
       switchMap(() => concat(timer(0, 1000).pipe(
@@ -58,19 +66,10 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
-    if (this.variable)
-      this.fullmask = 2 ** this.variable.bit - 1;
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-  }
-
-  write(value: number) {
-    const writeSubject = new Subject<number>();
-    this.startCounter.next();
-    writeSubject.pipe(
+  subscribeWrite()
+  {
+    this.writeSubject$.pipe(
+      takeUntil(this.destroy$),
       debounceTime(5000),
       tap(() => {
         this.writeMode = false;
@@ -85,15 +84,28 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
         next: () => {
           this.writing = false;
         },
-        error: () => {
+        error: (err) => {
           this.writing = false;
           this.cancelSubject.next();
         },
         complete: () => {
           this.cancelSubject.next();
         }
-      });
-    writeSubject.next(+value);
+    });
+  }
+
+  ngOnInit(): void {
+    if (this.variable)
+      this.fullmask = 2 ** this.variable.bit - 1;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+  }
+
+  write(value: number) {
+    this.startCounter.next();
+    this.writeSubject$.next(+value);
   }
 
   toggleWrite() {

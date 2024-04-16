@@ -265,7 +265,7 @@ export class ApiService {
   }
 
   getSeramiList() {
-    return this.Http.get<SeramiEntry[]>(environment.endpoint + "/api/serami");
+    return this.Http.get<SeramiEntry[]>(environment.endpoint + "/api/serami").pipe(map(arr => arr.sort((a,b) => a.name.localeCompare(b.name))));
   }
 
   getSerami(key: string) {

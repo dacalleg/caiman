@@ -26,7 +26,7 @@ function updated_disable_comments_post_types_support() {
        }
     }
  }
- add_action('admin_init', 'disable_comments_post_types_support');
+ add_action('admin_init', 'updated_disable_comments_post_types_support');
  
  /* 2. Hide any existing comments on front end */ 
  function disable_comments_hide_existing_comments($comments) {

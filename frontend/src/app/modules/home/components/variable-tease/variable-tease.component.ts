@@ -37,30 +37,11 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
     this.startCounter = new Subject<void>();
     this.writeSubject$ = new Subject<number>();
 
-    this.writeSubject$.pipe(
-      debounceTime(5000),
-      tap(() => {
-        this.writeMode = false;
-        this.writing = true;
-      }),
-      takeUntil(this.cancelSubject),
-      map(value => {
-        return { variable: this.variable, value: value } as VariableValue
-      }),
-      concatMap(value => this.Device.write([value])
-      )).subscribe({
-        next: () => {
-          this.writing = false;
-        },
-        error: (err) => {
-          console.log(err);
-          this.writing = false;
-          this.cancelSubject.next();
-        },
-        complete: () => {
-          this.cancelSubject.next();
-        }
-    });
+    this.subscribeWrite();
+
+    this.cancelSubject.pipe(
+      takeUntil(this.destroy$),
+    ).subscribe(() => this.subscribeWrite());
 
     this.counter$ = concat(of(0), this.startCounter.pipe(
       switchMap(() => concat(timer(0, 1000).pipe(
@@ -82,6 +63,34 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
 
     this.Store.getProject().pipe(takeUntil(this.destroy$), map((prj: Project) => prj.view)).subscribe(option => {
       this.viewOpt = option;
+    });
+  }
+
+  subscribeWrite()
+  {
+    this.writeSubject$.pipe(
+      takeUntil(this.destroy$),
+      debounceTime(5000),
+      tap(() => {
+        this.writeMode = false;
+        this.writing = true;
+      }),
+      takeUntil(this.cancelSubject),
+      map(value => {
+        return { variable: this.variable, value: value } as VariableValue
+      }),
+      concatMap(value => this.Device.write([value])
+      )).subscribe({
+        next: () => {
+          this.writing = false;
+        },
+        error: (err) => {
+          this.writing = false;
+          this.cancelSubject.next();
+        },
+        complete: () => {
+          this.cancelSubject.next();
+        }
     });
   }
 

@@ -30,6 +30,19 @@ export interface Variable {
   varKey?: string
   sort?: number
   step?: number
+  colors?: VariableColor[];
+}
+
+export interface VariableColor
+{
+  condition: Condition;
+  color: string;
+}
+
+export interface Condition
+{
+  value: number;
+  operator: string;
 }
 
 export interface Project {
@@ -250,7 +263,7 @@ export interface Document extends WithRole {
   file: string;
 }
 
-export interface Link extends WithRole 
+export interface Link extends WithRole
 {
   name: string;
   link: string;

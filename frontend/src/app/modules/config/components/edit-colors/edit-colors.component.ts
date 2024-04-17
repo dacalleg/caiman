@@ -15,6 +15,7 @@ export class EditColorsComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    this.list = "";
     if (this.variable && this.variable.colors)
       this.list = this.variable.colors.map(item => item.condition.operator + ":" + item.condition.value + ":" + item.color ).join("\n")
   }
@@ -24,7 +25,11 @@ export class EditColorsComponent implements OnChanges {
     if (this.variable) {
       const lines = $event.split("\n");
       this.variable.colors = lines.map(line => {
+        if(line === "")
+          return null;
         const pieces = line.split(":");
+        if(pieces.length !== 3)
+          return null;
         return {
           condition: {
             operator: pieces[0],
@@ -33,7 +38,7 @@ export class EditColorsComponent implements OnChanges {
           color: pieces[2],
 
         } as VariableColor
-      })
+      }).filter((item => item !== null)).map(item => item!)
     }
   }
 

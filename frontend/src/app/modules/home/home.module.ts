@@ -42,6 +42,7 @@ import { ProfileComponent } from '../profile/components/profile/profile.componen
 import { OperationTitlePipe } from './pipes/operation-title.pipe';
 import { UnescapePipe } from './pipes/unescape.pipe';
 import {SortGroupPipe} from "./pipes/sort-group.pipe";
+import { ColorValuePipe } from './pipes/color-value.pipe';
 
 const icons = {
   Eye,
@@ -91,7 +92,8 @@ const icons = {
     ProfileComponent,
     OperationTitlePipe,
     UnescapePipe,
-    SortGroupPipe
+    SortGroupPipe,
+    ColorValuePipe
   ],
   imports: [
     CommonModule,

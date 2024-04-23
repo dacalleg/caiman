@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { VarByGroupPipe } from './pipes/var-by-group.pipe';
 import { EditOptionsComponent } from './components/edit-options/edit-options.component';
 import { SearchPipe } from './pipes/search.pipe';
+import { EditColorsComponent } from './components/edit-colors/edit-colors.component';
 
 
 @NgModule({
@@ -17,7 +18,8 @@ import { SearchPipe } from './pipes/search.pipe';
     EditComponent,
     VarByGroupPipe,
     EditOptionsComponent,
-    SearchPipe
+    SearchPipe,
+    EditColorsComponent
   ],
   imports: [
     CommonModule,

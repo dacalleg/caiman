@@ -26,7 +26,9 @@ export class EditOptionsComponent implements OnChanges {
     this.list = $event;
     if (this.variable) {
       const lines = $event.split("\n");
-      this.variable.values = lines.map(line => line.split(":"))
+      const items = lines.map(line => line.split(":"));
+
+      this.variable.values = items.filter(i => i.length >= 2).map(arr => [arr[0], arr.slice(1).join(":")])
     }
   }
 
@@ -36,10 +38,21 @@ export class EditOptionsComponent implements OnChanges {
       const min = this.variable?.min || 0;
       const max = this.variable?.max || 0;
       for (let i = min; i <= max; i = i + step) {
-        const name = this.variable.formatstring.replace("{0}", "" + i);
+        let val = this.computeGeneratorFunction(i);
+        const name = this.variable.formatstring.replace("{0}", val);
         this.variable?.values?.push(["" + i, name]);
       }
       this.list = this.variable.values.map(item => item[0] + ":" + item[1]).join("\n")
     }
+  }
+
+  computeGeneratorFunction(value: number)
+  {
+    if(this.variable && this.variable.genFn)
+    {
+      let fn = eval(this.variable.genFn);
+      return "" + fn(value)
+    }
+    return "" + value;
   }
 }

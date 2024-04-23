@@ -31,6 +31,7 @@ export interface Variable {
   sort?: number
   step?: number
   colors?: VariableColor[];
+  genFn?: string
 }
 
 export interface VariableColor

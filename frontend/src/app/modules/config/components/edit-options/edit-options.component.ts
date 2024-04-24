@@ -34,7 +34,7 @@ export class EditOptionsComponent implements OnChanges {
   }
 
   generateAllOptions() {
-    if (this.variable && this.variable.values) {
+    if (this.variable) {
       const step = this.variable?.step || 1;
 
       const min = 0;
@@ -62,10 +62,8 @@ export class EditOptionsComponent implements OnChanges {
         this.list = res;
       else
         this.list += "\n" + res;
-
       this.onListChange(this.list);
     }
-    this.onListChange(this.list);
   }
 
   computeGeneratorFunction(value: number)

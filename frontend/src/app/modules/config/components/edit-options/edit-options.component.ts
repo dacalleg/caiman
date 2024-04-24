@@ -65,6 +65,7 @@ export class EditOptionsComponent implements OnChanges {
 
       this.onListChange(this.list);
     }
+    this.onListChange(this.list);
   }
 
   computeGeneratorFunction(value: number)

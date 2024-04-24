@@ -34,7 +34,7 @@ export class EditOptionsComponent implements OnChanges {
   }
 
   generateAllOptions() {
-    if (this.variable && this.variable.values) {
+    if (this.variable) {
       const step = this.variable?.step || 1;
 
       const min = 0;

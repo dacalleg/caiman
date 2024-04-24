@@ -1,5 +1,5 @@
 <div class="card h-100" *ngIf="variable"
-  [ngClass]="{'eeprom': variable.memory === 'eeprom', 'ram': variable.memory === 'ram' }">
+  [ngStyle]="{'border-left-color': (value$|async)|colorValue}">
   <div class="card-body h-100 px-2 py-1 pb-2">
     <div class="d-flex flex-column justify-content-between h-100">
       <div [title]="variable.name" class="fw-bold name px-1">{{variable.name}}</div>
@@ -9,7 +9,7 @@
           <ng-container *ngIf="(value$|async) as value; else notLoaded">
             <ng-container *ngIf="isNumber(value.value); else notRead">
               <ng-container *ngIf="value.value|variableValueFormatter:value.variable as calculatedValue; else notLoaded">
-                <div class="value flex-grow-1 text-end" [ngStyle]="{'color': value|colorValue}" *ngIf="!writeMode" [title]="calculatedValue">
+                <div class="value flex-grow-1 text-end" *ngIf="!writeMode" [title]="calculatedValue">
                   {{calculatedValue}}</div>
               </ng-container>
             </ng-container>

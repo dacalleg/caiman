@@ -1,5 +1,6 @@
 import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {Variable} from 'src/app/classes/interfaces';
+import { Utils } from 'src/app/classes/utils';
 
 @Component({
   selector: 'app-edit-options',
@@ -35,14 +36,32 @@ export class EditOptionsComponent implements OnChanges {
   generateAllOptions() {
     if (this.variable && this.variable.values) {
       const step = this.variable?.step || 1;
-      const min = this.variable?.min || 0;
-      const max = this.variable?.max || 0;
-      for (let i = min; i <= max; i = i + step) {
+
+      const min = 0;
+      const max = (2 ** this.variable?.bit) - 1;
+
+      const realMin = this.variable.min || min;
+      const realMax = this.variable.max || max;
+      const values = this.getAllMaskNumber(this.variable.mask!)
+
+      let res = values.map(i => {
         let val = this.computeGeneratorFunction(i);
-        const name = this.variable.formatstring.replace("{0}", val);
-        this.variable?.values?.push(["" + i, name]);
-      }
-      this.list = this.variable.values.map(item => item[0] + ":" + item[1]).join("\n")
+        if(!isNaN(+val))
+        {
+          const test = +val;
+          if(test >= realMin && test <= realMax)
+          {
+            const name = this.variable!.formatstring.replace("{0}", val);
+            return ["" + i, name];
+          }
+        }
+        return null;
+      }).filter(i => i !== null).map(item => item![0] + ":" + item![1]).join("\n")
+
+      if(this.list === "")
+        this.list = res;
+      else
+        this.list += "\n" + res;
     }
   }
 
@@ -53,6 +72,23 @@ export class EditOptionsComponent implements OnChanges {
       let fn = eval(this.variable.genFn);
       return "" + fn(value)
     }
+    if(this.variable && this.variable.readExp)
+    {
+      let val = Utils.convertValuesToRead([this.variable], [value])
+      return "" + val;
+    }
     return "" + value;
+  }
+
+  getAllMaskNumber(mask: number)
+  {
+    let ret = [];
+    for(let i=0;i<=mask;i++)
+    {
+      const test = i & mask;
+      if(i === test)
+        ret.push(i)
+    }
+    return ret;
   }
 }

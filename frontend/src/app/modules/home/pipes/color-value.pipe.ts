@@ -8,7 +8,7 @@ export class ColorValuePipe implements PipeTransform {
 
   transform(value: VariableValue|undefined|null): string {
     if(!value)
-      return "#676767";
+      return "rgb(240 240 240)";
     if(value.variable.colors)
     {
       if(value.variable.colors.length > 0)
@@ -42,7 +42,7 @@ export class ColorValuePipe implements PipeTransform {
         }
       }
     }
-    return "#676767";
+    return "rgb(240 240 240)";
   }
 
 }

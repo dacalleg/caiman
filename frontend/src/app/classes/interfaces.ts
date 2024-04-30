@@ -32,6 +32,9 @@ export interface Variable {
   step?: number
   colors?: VariableColor[];
   genFn?: string
+  button?: boolean;
+  caption?: string;
+  buttonValue?: number;
 }
 
 export interface VariableColor

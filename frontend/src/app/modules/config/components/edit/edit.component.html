@@ -86,7 +86,20 @@
                             <label for="name" class="form-label">Endianess</label>
                             <input type="text" class="form-control" id="endianess" [ngModel]="variable.pattern.includes('>') ? 'Big Endian' : 'Little Endian'" disabled>
                         </div>
-                        <div class="row">
+                        <div class="mb-3">
+                            <label for="bit" class="form-label">Bit</label>
+                            <input type="number" class="form-control" id="bit"
+                                [(ngModel)]="variable.bit">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" value=""
+                                id="button" [(ngModel)]="variable.button"
+                                [ngModelOptions]="{standalone: true}" />
+                            <label class="form-check-label" for="button">
+                                Button
+                            </label>
+                        </div>
+                        <div class="row" *ngIf="!variable.button">
                             <div class="col">
                                 <div class="mb-3">
                                     <label for="min" class="form-label">Min</label>
@@ -109,17 +122,13 @@
                             </div>
                           </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="bit" class="form-label">Bit</label>
-                            <input type="number" class="form-control" id="bit"
-                                [(ngModel)]="variable.bit">
-                        </div>
-                        <div class="mb-3">
+
+                        <div class="mb-3" *ngIf="!variable.button">
                             <label for="format" class="form-label">Format</label>
                             <textarea class="form-control" id="format"
                                 [(ngModel)]="variable.formatstring"></textarea>
                         </div>
-                        <div class="row">
+                        <div class="row" *ngIf="!variable.button">
                             <div class="col">
                                 <div class="mb-3">
                                     <label for="format"
@@ -137,7 +146,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-check mb-3">
+                        <div class="form-check mb-3" *ngIf="!variable.button">
                             <input class="form-check-input" type="checkbox" value=""
                                 id="readonly" [(ngModel)]="variable.readonly"
                                 [ngModelOptions]="{standalone: true}" />
@@ -145,8 +154,22 @@
                                 Readonly
                             </label>
                         </div>
-                        <app-edit-options [variable]="variable"></app-edit-options>
-                        <app-edit-colors [variable]="variable"></app-edit-colors>
+
+                        <ng-container *ngIf="variable.button">
+                            <div class="mb-3">
+                                <label for="caption" class="form-label">Caption</label>
+                                <textarea class="form-control" id="caption"
+                                    [(ngModel)]="variable.caption"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="buttonvalue" class="form-label">Button Value</label>
+                                <textarea class="form-control" id="buttonvalue"
+                                    [(ngModel)]="variable.buttonValue"></textarea>
+                            </div>
+                        </ng-container>
+
+                        <app-edit-options *ngIf="!variable.button" [variable]="variable"></app-edit-options>
+                        <app-edit-colors *ngIf="!variable.button" [variable]="variable"></app-edit-colors>
                     </div>
                 </div>
             </ng-template>

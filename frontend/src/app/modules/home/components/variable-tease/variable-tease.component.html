@@ -50,7 +50,7 @@
           <div *ngIf="writing" class="fst-italic">{{'tease.writing'|translate}}</div>
         </div>
         <button *ngIf="counter.value !== null && counter.value > 0" (click)="cancel()" class="cancel">{{'cancel'|translate}}</button>
-        <button class="btn btn-sm btn-link my-2" (click)="toggleWrite()" *ngIf="!writing && !(counter.value !== null && counter.value > 0) && !variable.readonly"><bi name="pen" class="mx-1"></bi></button>
+        <button class="btn btn-sm btn-link my-2" (click)="toggleWrite()" *ngIf="!variable.button && !writing && !(counter.value !== null && counter.value > 0) && !variable.readonly"><bi name="pen" class="mx-1"></bi></button>
       </div>
     </div>
   </div>

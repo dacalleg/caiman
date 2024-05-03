@@ -35,6 +35,8 @@ export interface Variable {
   button?: boolean;
   caption?: string;
   buttonValue?: number;
+  buttonBackgroundColor?: string;
+  buttonTextColor?: string;
 }
 
 export interface VariableColor

@@ -166,6 +166,17 @@
                                 <textarea class="form-control" id="buttonvalue"
                                     [(ngModel)]="variable.buttonValue"></textarea>
                             </div>
+                            <div class="mb-3">
+                                <label for="buttonbackground" class="form-label">Button Background Color</label>
+                                <input class="form-control form-control-color" type="color" id="buttonbackground" name="head" [(ngModel)]="variable.buttonBackgroundColor" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="buttontext" class="form-label">Button Text Color</label>
+                                <input class="form-control form-control-color" type="color" id="buttontext" name="head" [(ngModel)]="variable.buttonTextColor" />
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary" (click)="clearColors(variable)">Clear Colors</button>
+                            </div>
                         </ng-container>
 
                         <app-edit-options *ngIf="!variable.button" [variable]="variable"></app-edit-options>

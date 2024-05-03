@@ -21,6 +21,7 @@ interface CheckLog {
 export class EditComponent {
 
 
+
   @ViewChild("nav") nav: NgbNav | undefined;
   refresh$: Subject<void>;
   seramiEntry: SeramiEntry;
@@ -258,5 +259,10 @@ export class EditComponent {
     this.search = variable.hash;
     if (this.nav)
       this.nav.select(this.groups.length);
+  }
+
+  clearColors(variable: Variable) {
+    variable.buttonTextColor = undefined;
+    variable.buttonBackgroundColor = undefined;
   }
 }

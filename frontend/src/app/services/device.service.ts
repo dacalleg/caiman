@@ -27,7 +27,6 @@ export class DeviceService {
   private monitoredVariables$: BehaviorSubject<Variable[]>;
 
   private logs$: Observable<LogItem>;
-  private allLogs$: Observable<LogItem[]>;
   private logSubject$: Subject<LogItem>;
   private connected$: BehaviorSubject<boolean>;
   private stream$: Subject<VariableValue[]>;
@@ -36,17 +35,11 @@ export class DeviceService {
   constructor() {
     this.logSubject$ = new Subject<LogItem>();
     this.logs$ = this.logSubject$.asObservable();
-    this.allLogs$ = this.logs$.pipe(
-      bufferWhen(() => this.connected$.pipe(filter(connected => connected === false))),
-      shareReplay(1)
-    );
     this.monitoredVariables = [];
     this.connected$ = new BehaviorSubject<boolean>(false);
     this.monitoredVariables$ = new BehaviorSubject<Variable[]>([]);
     this.stream$ = new Subject();
     this.channel$ = new BehaviorSubject<Channel | null>(null);
-
-    this.allLogs$.subscribe();
   }
 
   private getChannel(): Observable<Channel> {
@@ -240,9 +233,5 @@ export class DeviceService {
 
   getLogs() {
     return this.logs$;
-  }
-
-  getAllLogs() {
-    return this.allLogs$;
   }
 }

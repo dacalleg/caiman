@@ -8,6 +8,8 @@ import { IsURLPipe } from './pipes/is-url.pipe';
 import { RouterModule } from '@angular/router';
 import { SafePipe } from './pipes/safe.pipe';
 import { OperationOptionPipe } from './pipes/operation-option.pipe';
+import { LicenseInputComponent } from './components/license-input/license-input.component';
+import { LicenseInfoComponent } from './components/license-info/license-info.component';
 
 
 @NgModule({
@@ -17,7 +19,9 @@ import { OperationOptionPipe } from './pipes/operation-option.pipe';
     VideojsComponent,
     IsURLPipe,
     SafePipe,
-    OperationOptionPipe
+    OperationOptionPipe,
+    LicenseInputComponent,
+    LicenseInfoComponent
   ],
   exports: [
     InfiniteProgressBarComponent,
@@ -25,7 +29,9 @@ import { OperationOptionPipe } from './pipes/operation-option.pipe';
     VideojsComponent,
     IsURLPipe,
     SafePipe,
-    OperationOptionPipe
+    OperationOptionPipe,
+    LicenseInputComponent,
+    LicenseInfoComponent
   ],
   imports: [
     CommonModule,

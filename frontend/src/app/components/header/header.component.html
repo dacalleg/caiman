@@ -13,6 +13,9 @@
     </div>
     <div class="navbar-collapse d-none d-md-block" id="navbarContent">
       <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <app-license-info></app-license-info>
+        </li>
         <li class="nav-item" *ngIf="(isAdmin$|async) === true">
           <a class="nav-link" target="_blank" [routerLink]="['/config']">Configurations</a>
         </li>
@@ -49,6 +52,7 @@
     <div class="fw-bold">{{username$|async}}</div>
     <small class="role">{{roles$|async}}</small>
   </div>
+
   <ul class="list-group mt-4">
     <li class="ps-0 list-group-item border-0">
       <a (click)="deviceSelector()">{{'device.selector'|translate}}</a>

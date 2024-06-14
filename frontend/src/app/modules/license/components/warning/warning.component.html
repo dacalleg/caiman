@@ -1,0 +1,21 @@
+<div class="row mt-5" *ngIf="userData$|async as userData">
+  <div class="col text-center">
+    <h3>Stato Licenza</h3>
+    <strong>
+      <span *ngIf="(expired$|async) === true">Scaduta</span>
+      <span *ngIf="(expired$|async) === false">Attiva</span>
+    </strong>
+    <ng-container *ngIf="userData.fields.flat_license_expiration">
+      <div *ngIf="(flatLicenseExpired$|async)">Licenza scaduta il: {{userData.fields.flat_license_expiration|date:'dd/MM/YYYY'}}</div>
+      <div *ngIf="(flatLicenseExpired$|async) === false">Licenza valida fino al: {{userData.fields.flat_license_expiration|date:'dd/MM/YYYY'}}</div>
+    </ng-container>
+    <div *ngIf="userData.fields.tokens">Token Disponibili: {{userData.fields.tokens}}</div>
+    <div class="container">
+      <div class="row">
+        <div class="col my-5">
+          <app-license-input></app-license-input>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

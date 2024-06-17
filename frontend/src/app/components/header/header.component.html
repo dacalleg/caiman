@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="navbar-collapse d-none d-md-block" id="navbarContent">
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item">
           <app-license-info></app-license-info>
         </li>
@@ -35,8 +35,8 @@
               <small class="role">{{roles$|async}}</small>
             </div>
             <hr class="dropdown-divider">
-            <a class="text-end" ngbDropdownItem (click)="profile()">{{'profile'|translate}}</a>
-            <a class="text-end" ngbDropdownItem (click)="logout()">{{'logout'|translate}}</a>
+            <a class="nav-link text-end" ngbDropdownItem [routerLink]="['/dashboard/profile']">{{'profile'|translate}}</a>
+            <span class="text-end" ngbDropdownItem (click)="logout()">{{'logout'|translate}}</span>
           </div>
         </li>
       </ul>

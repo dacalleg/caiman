@@ -52,7 +52,7 @@ export class AuthService {
     this.userData$ = this.tokenChanges$.pipe(
       switchMap(() => merge(of(void 0), this.updateUserData$)),
       switchMap(() => this.Http.get<UserData>(environment.endpoint + "/wp-json/caiman/v1/me")),
-      shareReplay(1, 2000)
+      shareReplay(1)
     );
 
     this.flatLicenseExpired$ = this.userData$.pipe(map(data => {
@@ -169,6 +169,11 @@ export class AuthService {
   updateUserData(user: User): Observable<User>
   {
     return this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/update-user', user).pipe(tap(() => this.updateUserData$.next()))
+  }
+
+  refreshUserData()
+  {
+    this.updateUserData$.next();
   }
 
   getFlatLicenseExpired()

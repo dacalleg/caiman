@@ -38,6 +38,7 @@ export class AuthService {
   private flatLicenseExpired$: Observable<boolean>;
   private tokensEnded$: Observable<boolean>;
   private expired$: Observable<boolean>;
+  private tokenInUse$: Observable<boolean>;
 
   constructor(private Http: HttpClient, private jwtHelper: JwtHelperService, private Translation: TranslationService) {
     this.tokenChanges$ = new BehaviorSubject<string | null>(localStorage.getItem('access_token'));
@@ -56,22 +57,31 @@ export class AuthService {
     );
 
     this.flatLicenseExpired$ = this.userData$.pipe(map(data => {
-      if(data.fields.flat_license_expiration && data.fields.flat_license_expiration !== "")
-      {
+      if (data.fields.flat_license_expiration && data.fields.flat_license_expiration !== "") {
         const exp = new Date(data.fields.flat_license_expiration);
         const now = new Date();
-        if(now.getTime() > exp.getTime())
+        if (now.getTime() > exp.getTime())
           return true;
       }
       return false;
     }));
+
     this.tokensEnded$ = this.userData$.pipe(map(data => {
-      if(!data.fields.tokens || data.fields.tokens  == "")
+      if (!data.fields.tokens || data.fields.tokens == "")
         return true;
       return !data.fields.tokens || +data.fields.tokens == 0;
     }));
-    this.expired$ = combineLatest([this.flatLicenseExpired$, this.tokensEnded$]).pipe(
-      map(([flatExpired, tokensEnded]) => flatExpired && tokensEnded)
+
+    this.tokenInUse$ = this.userData$.pipe(map(data => {
+      if (!data.fields.last_token_usage)
+        return false;
+      const usage = new Date(data.fields.last_token_usage);
+      const now = new Date();
+      return now.getTime() < (usage.getTime() + 3600 * 24 * 1000)
+    }));
+
+    this.expired$ = combineLatest([this.tokenInUse$, this.flatLicenseExpired$, this.tokensEnded$]).pipe(
+      map(([tokenInUse, flatExpired, tokensEnded]) => !tokenInUse && flatExpired && tokensEnded)
     )
 
 
@@ -113,7 +123,7 @@ export class AuthService {
 
   updateUserLanguage(lang: string) {
     return this.getToken().pipe(
-      switchMap(() => this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/update-language', {language: lang}))
+      switchMap(() => this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/update-language', { language: lang }))
     )
   }
 
@@ -138,9 +148,9 @@ export class AuthService {
   }
 
   isValidToken() {
-    return of(this.jwtHelper.tokenGetter() as string|null).pipe(
+    return of(this.jwtHelper.tokenGetter() as string | null).pipe(
       switchMap(token => {
-        if(!token || this.jwtHelper.isTokenExpired(token))
+        if (!token || this.jwtHelper.isTokenExpired(token))
           return throwError(() => new Error("Token Invalid or Expired"))
         return of(token)
       }),
@@ -166,29 +176,29 @@ export class AuthService {
     return this.userData$;
   }
 
-  updateUserData(user: User): Observable<User>
-  {
+  updateUserData(user: User): Observable<User> {
     return this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/update-user', user).pipe(tap(() => this.updateUserData$.next()))
   }
 
-  refreshUserData()
-  {
+  refreshUserData() {
     this.updateUserData$.next();
   }
 
-  getFlatLicenseExpired()
-  {
+  getFlatLicenseExpired() {
     return this.flatLicenseExpired$;
   }
 
-  getTokensEnded()
-  {
+  getTokensEnded() {
     return this.tokensEnded$;
   }
 
-  getLicenseExpired()
-  {
+  getLicenseExpired() {
     return this.expired$;
   }
 
+
+  getTokenInUse()
+  {
+    return this.tokenInUse$;
+  }
 }

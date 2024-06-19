@@ -14,11 +14,13 @@ export class LicenseInfoComponent {
   expired$: Observable<boolean>;
   flatLicenseExpired$: Observable<boolean>;
   tokensEnded$: Observable<boolean>;
+  tokenInUse$: Observable<boolean>;
 
   constructor(private Auth: AuthService) {
     this.userData$ = this.Auth.getUserData();
     this.flatLicenseExpired$ = this.Auth.getFlatLicenseExpired();
     this.tokensEnded$ = this.Auth.getTokensEnded();
     this.expired$ = this.Auth.getLicenseExpired();
+    this.tokenInUse$ = this.Auth.getTokenInUse();
   }
 }

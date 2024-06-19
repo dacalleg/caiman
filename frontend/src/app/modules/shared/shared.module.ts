@@ -21,7 +21,7 @@ import { LicenseInfoComponent } from './components/license-info/license-info.com
     SafePipe,
     OperationOptionPipe,
     LicenseInputComponent,
-    LicenseInfoComponent
+    LicenseInfoComponent,
   ],
   exports: [
     InfiniteProgressBarComponent,

@@ -4,11 +4,12 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import {IsAuthenticatedGuard} from "./guards/isauthenticated.guard";
 import {IsAdminGuard} from "./guards/isadmin.guard";
 import {LicenseGuard} from "./guards/license.guard";
+import { TokenGuard } from './guards/token.guard';
 
 const routes: Routes = [
   {
     path: 'dashboard', component: DashboardComponent, canActivate: [IsAuthenticatedGuard], children: [
-      { path: 'home', loadChildren: () => import('./modules/home/home.module').then(m => m.HomeModule), canActivate: [LicenseGuard] },
+      { path: 'home', loadChildren: () => import('./modules/home/home.module').then(m => m.HomeModule), canActivate: [LicenseGuard, TokenGuard] },
       { path: 'profile', loadChildren: () => import('./modules/profile/profile.module').then(m => m.ProfileModule) },
       { path: 'license', loadChildren: () => import('./modules/license/license.module').then(m => m.LicenseModule) }
     ]

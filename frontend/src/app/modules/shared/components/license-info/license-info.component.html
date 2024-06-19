@@ -19,6 +19,11 @@
           <div class="info">{{ userData.fields.tokens }}</div>
         </div>
       </ng-container>
+      <ng-container *ngIf="(tokenInUse$|async) === true">
+        <div class="box">
+          <small>1 Token in uso</small><br>
+        </div>
+      </ng-container>
     </ng-container>
   </div>
 </ng-template>

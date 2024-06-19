@@ -73,4 +73,9 @@ export class DeviceSelectComponent implements OnInit {
   scanSerial() {
     this.Barcode.scan().subscribe(result => this.serialNumber = result)
   }
+
+  useToken() {
+    this.Api.useToken().subscribe();
+  }
+    
 }

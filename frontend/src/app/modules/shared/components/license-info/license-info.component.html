@@ -22,6 +22,7 @@
       <ng-container *ngIf="(tokenInUse$|async) === true">
         <div class="box">
           <small>1 Token in uso</small><br>
+          {{tokenExp$|async}}
         </div>
       </ng-container>
     </ng-container>

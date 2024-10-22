@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Observable, combineLatest } from 'rxjs';
+import { Observable, combineLatest, take } from 'rxjs';
 import { Country, Project, User } from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -30,7 +30,7 @@ export class ProfileComponent {
         this.Auth.getUserData(),
         this.Auth.getUserName()
       ]
-    ).subscribe(([ud, username]) => {
+    ).pipe(take(1)).subscribe(([ud, username]) => {
       this.data = ud.fields;
       this.data.email = username;
     })

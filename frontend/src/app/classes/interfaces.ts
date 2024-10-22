@@ -346,6 +346,9 @@ export interface User{
   province: string;
   zip: string;
   country: string;
+  tokens?: string;
+  flat_license_expiration?: string;
+  last_token_usage?: string;
 }
 
 export interface UserField extends User {

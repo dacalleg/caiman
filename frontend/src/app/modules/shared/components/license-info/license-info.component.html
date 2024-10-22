@@ -1,0 +1,30 @@
+<ng-container *ngIf="(expired$|async) as expired; else notExpired">
+  <div class="expired box me-3" *ngIf="expired">
+    Licenza Scaduta, nessun token disponibile
+  </div>
+</ng-container>
+
+<ng-template #notExpired>
+  <div class="d-flex">
+    <ng-container *ngIf="userData$|async as userData">
+      <ng-container *ngIf="(flatLicenseExpired$|async) === false">
+        <div class="box">
+          <small>Licenza valida fino a</small><br>
+          <div class="info">{{ userData.fields.flat_license_expiration|date:"dd/MM/YYYY" }}</div>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="(tokensEnded$|async) === false">
+        <div class="box">
+          <small>Token Disponibili</small><br>
+          <div class="info">{{ userData.fields.tokens }}</div>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="(tokenInUse$|async) === true">
+        <div class="box">
+          <small>1 Token in uso</small><br>
+          {{tokenExp$|async}}
+        </div>
+      </ng-container>
+    </ng-container>
+  </div>
+</ng-template>

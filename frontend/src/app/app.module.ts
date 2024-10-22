@@ -9,7 +9,7 @@ import { ComponentStore } from "@ngrx/component-store";
 import { TranslateLoader, TranslateModule } from "@ngx-translate/core";
 
 import { FormsModule } from "@angular/forms";
-import { HttpClientModule, HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { JwtModule } from '@auth0/angular-jwt';
 import { AlertComponent } from './components/alert/alert.component';
@@ -72,7 +72,7 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     AlertComponent,
     HeaderComponent,
     ToastManagerComponent,
-    BarcodeComponent
+    BarcodeComponent,
   ],
   imports: [
     BrowserModule,

@@ -80,16 +80,17 @@ $table_prefix = 'wp_';
  *
  * @link https://wordpress.org/support/article/debugging-in-wordpress/
  */
-define('WP_DEBUG', getenv("WP_DEBUG") === "true" ? true : false);
+define('WP_DEBUG', false);
+//define('WP_DEBUG', getenv("WP_DEBUG") === "true" ? true : false);
+
 define('JWT_AUTH_SECRET_KEY', getenv("JWT_AUTH_SECRET_KEY") );
 define('JWT_AUTH_CORS_ENABLE', getenv("JWT_AUTH_CORS_ENABLE") === "true" ? true : false);
 
-define( 'WP_HOME', $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_X_FORWARDED_HOST'] . '/backend' );
-define( 'WP_SITEURL', $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_X_FORWARDED_HOST'] . '/backend' );
+define( 'WP_HOME', $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_X_FORWARDED_HOST'] );
+define( 'WP_SITEURL', $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_X_FORWARDED_HOST'] );
 
 /* Add any custom values between this line and the "stop editing" line. */
 
-$_SERVER['REQUEST_URI'] = str_replace("/wp-admin/", "/backend/wp-admin/", $_SERVER['REQUEST_URI']);
 if($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'){
     $_SERVER['HTTPS'] = 'on';
     $_SERVER['SERVER_PORT'] = 443;

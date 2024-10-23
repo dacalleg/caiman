@@ -225,7 +225,7 @@ function caiman_order_detail( WP_REST_Request $request ) {
 
 function caiman_use_token( WP_REST_Request $request ) {
     $user = wp_get_current_user();
-    $tokens = get_field("tokens","user_") ? intval(get_field("tokens","user_" . $user->ID)) : 0;
+    $tokens = get_field("tokens","user_" . $user->ID) ? intval(get_field("tokens","user_" . $user->ID)) : 0;
     if($tokens > 0) {
         update_field("last_token_usage", date('Y-m-d\TH:i:s.000') . 'Z', "user_" . $user->ID);
         update_field("tokens", $tokens - 1, "user_" . $user->ID);

@@ -49,14 +49,19 @@ export class EditOptionsComponent implements OnChanges {
         if(!isNaN(+val))
         {
           const test = +val;
-          if(test >= realMin && test <= realMax)
+          if(test >= realMin && test <= realMax && test % step === 0)
           {
             const name = this.variable!.formatstring.replace("{0}", val);
             return ["" + i, name];
           }
         }
+        else
+        {
+          if(i>=realMin && i<=realMax && i % step === 0)
+            return ["" + i, val];
+        }
         return null;
-      }).filter(i => i !== null).map(item => item![0] + ":" + item![1]).join("\n")
+      }).filter(item => item !== null).map(item => item![0] + ":" + item![1]).join("\n")
 
       if(this.list === "")
         this.list = res;
@@ -88,6 +93,16 @@ export class EditOptionsComponent implements OnChanges {
     {
       const test = i & mask;
       if(i === test)
+        ret.push(i)
+    }
+    return ret;
+  }
+
+  getAllNumberFromMinMax(min: number, max: number)
+  {
+    let ret = [];
+    for(let i=min;i<=max;i++)
+    {
         ret.push(i)
     }
     return ret;

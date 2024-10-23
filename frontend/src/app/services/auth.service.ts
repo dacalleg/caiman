@@ -52,7 +52,8 @@ export class AuthService {
 
     this.userData$ = this.tokenChanges$.pipe(
       switchMap(() => merge(of(void 0), this.updateUserData$)),
-      switchMap(() => this.Http.get<UserData>(environment.endpoint + "/wp-json/caiman/v1/me")),
+      switchMap(() => this.Http.get<UserData|any>(environment.endpoint + "/wp-json/caiman/v1/me")),
+      filter((ret) => ret.success !== false),
       shareReplay(1)
     );
 

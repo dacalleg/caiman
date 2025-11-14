@@ -1,10 +1,10 @@
 <div class="card h-100" *ngIf="variable"
-  [ngClass]="{'eeprom': variable.memory === 'eeprom', 'ram': variable.memory === 'ram' }">
+  [ngStyle]="{'border-left-color': (value$|async)|colorValue}">
   <div class="card-body h-100 px-2 py-1 pb-2">
     <div class="d-flex flex-column justify-content-between h-100">
       <div [title]="variable.name" class="fw-bold name px-1">{{variable.name}}</div>
       <p class="px-1"><small>{{variable.description}}</small></p>
-      <div>
+      <div *ngIf="!variable.button">
         <div class="d-flex align-items-center justify-content-between">
           <ng-container *ngIf="(value$|async) as value; else notLoaded">
             <ng-container *ngIf="isNumber(value.value); else notRead">
@@ -40,6 +40,9 @@
           </div>
         </div>
       </div>
+      <div *ngIf="variable.button && variable.buttonValue">
+        <button class="btn" [ngStyle]="{'background-color': variable.buttonBackgroundColor || '#496356', 'color': variable.buttonTextColor || '#ffffff'}" (click)="write(variable.buttonValue)">{{variable.caption}}</button>
+      </div>
       <div class="d-flex justify-content-between icons" *ngIf="{ value: counter$|async } as counter">
         <div class="d-flex flex-column justify-content-center">
           <span *ngIf="'administrator'|roleInCurrentUser|async">{{variable.hash}}</span>
@@ -47,7 +50,7 @@
           <div *ngIf="writing" class="fst-italic">{{'tease.writing'|translate}}</div>
         </div>
         <button *ngIf="counter.value !== null && counter.value > 0" (click)="cancel()" class="cancel">{{'cancel'|translate}}</button>
-        <button class="btn btn-sm btn-link my-2" (click)="toggleWrite()" *ngIf="!writing && !(counter.value !== null && counter.value > 0) && !variable.readonly"><bi name="pen" class="mx-1"></bi></button>
+        <button class="btn btn-sm btn-link my-2" (click)="toggleWrite()" *ngIf="!variable.button && !writing && !(counter.value !== null && counter.value > 0) && !variable.readonly"><bi name="pen" class="mx-1"></bi></button>
       </div>
     </div>
   </div>

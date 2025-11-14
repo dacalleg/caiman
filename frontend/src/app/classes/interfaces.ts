@@ -30,6 +30,25 @@ export interface Variable {
   varKey?: string
   sort?: number
   step?: number
+  colors?: VariableColor[];
+  genFn?: string
+  button?: boolean;
+  caption?: string;
+  buttonValue?: number;
+  buttonBackgroundColor?: string;
+  buttonTextColor?: string;
+}
+
+export interface VariableColor
+{
+  condition: Condition;
+  color: string;
+}
+
+export interface Condition
+{
+  value: number;
+  operator: string;
 }
 
 export interface Project {
@@ -250,7 +269,7 @@ export interface Document extends WithRole {
   file: string;
 }
 
-export interface Link extends WithRole 
+export interface Link extends WithRole
 {
   name: string;
   link: string;
@@ -327,6 +346,9 @@ export interface User{
   province: string;
   zip: string;
   country: string;
+  tokens?: string;
+  flat_license_expiration?: string;
+  last_token_usage?: string;
 }
 
 export interface UserField extends User {

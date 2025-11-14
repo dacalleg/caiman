@@ -1,0 +1,9 @@
+<ng-container *ngIf="variable">
+  <div class="row mb-3">
+    <div class="col">
+      <label class="form-label">Colors</label>
+      <textarea class="form-control" [ngModel]="list" (ngModelChange)="onListChange($event)" rows="5"></textarea>
+    </div>
+  </div>
+</ng-container>
+

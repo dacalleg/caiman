@@ -21,6 +21,7 @@ interface CheckLog {
 export class EditComponent {
 
 
+
   @ViewChild("nav") nav: NgbNav | undefined;
   refresh$: Subject<void>;
   seramiEntry: SeramiEntry;
@@ -133,26 +134,31 @@ export class EditComponent {
   checkFormula(variable: Variable, target: number) {
     let results;
 
-    if (variable.readonly) {
-      results = Utils.convertValuesToRead([variable], [target])
-      if (Number.isNaN(results[0])) {
-        return false;
+    if(variable.readExp !== "" && variable.readExp !== "#")
+    {
+      if (variable.readonly) {
+        results = Utils.convertValuesToRead([variable], [target])
+        if (Number.isNaN(results[0])) {
+          return false;
+        }
+        return true;
+      } else {
+        results = Utils.convertValuesToWrite([variable], [target], true)
+        const a = results[0];
+        if (Number.isNaN(a)) {
+          return false;
+        }
+        results = Utils.convertValuesToRead([variable], [Math.round(a)])
+        const b = results[0];
+        if (Number.isNaN(b)) {
+          return false;
+        }
+  
+        if (target !== b)
+          return false;
       }
-      return true;
-    } else {
-      results = Utils.convertValuesToWrite([variable], [target], true)
-      const a = results[0];
-      if (Number.isNaN(a)) {
-        return false;
-      }
-      results = Utils.convertValuesToRead([variable], [Math.round(a)])
-      const b = results[0];
-      if (Number.isNaN(b)) {
-        return false;
-      }
-      if (target !== b)
-        return false;
     }
+
     return true;
   }
 
@@ -253,5 +259,10 @@ export class EditComponent {
     this.search = variable.hash;
     if (this.nav)
       this.nav.select(this.groups.length);
+  }
+
+  clearColors(variable: Variable) {
+    variable.buttonTextColor = undefined;
+    variable.buttonBackgroundColor = undefined;
   }
 }

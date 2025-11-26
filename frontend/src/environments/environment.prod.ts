@@ -7,6 +7,6 @@ export const environment = {
   tickets_enabled: true,
   registry_enabled: true,
   operation_enabled: true,
-  only_op_enabled: true,
-  hide_micronova_ref: false,
+  only_op_enabled: false,
+  hide_micronova_ref: true,
 } as EnvObj;

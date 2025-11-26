@@ -147,7 +147,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.aguaChannel$ = this.loadDeviceData$.pipe(
       switchMap(() => combineLatest([this.Auth.getToken(), this.Store.getProject(), this.Api.getAguaEnv()])),
-      switchMap(([token, project, env]) => of(new Agua(this.http, env.agua_endpoint, "" + env.agua_id_brand, project.device!.id_device, project.device!.id_product, token))),
+      switchMap(([token, project, env]) => of(new Agua(this.http, env.agua_endpoint, "" + env.agua_id_brand, project.device!.id_device, project.device!.id_product, token, "" + env.agua_customer_code))),
       tap((agua) => this.Device.setChannel(agua))
     )
 

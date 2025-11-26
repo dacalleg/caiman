@@ -9,8 +9,8 @@ export class Agua implements Channel {
     private protocol: AguaProtocol;
     private bufferVariables: Variable[];
 
-    constructor(http: HttpClient, agua_enpoint: string, agua_id_brand: string, id_device: string, product_id: string, access_token: string) {
-        this.protocol = new AguaProtocol(http, access_token, agua_enpoint, agua_id_brand, id_device, product_id);
+    constructor(http: HttpClient, agua_enpoint: string, agua_id_brand: string, id_device: string, product_id: string, access_token: string, customer_code: string) {
+        this.protocol = new AguaProtocol(http, access_token, agua_enpoint, agua_id_brand, id_device, product_id, customer_code);
         this.close$ = new Subject();
         this.bufferVariables = [];
     }
@@ -92,7 +92,7 @@ class AguaProtocol {
     private getHeaders(token: string | null = null) {
         return new HttpHeaders()
             .set('content-type', 'application/json')
-            .set('customer_code', this.agua_endpoint)
+            .set('customer_code', this.customer_code)
             .set('id_brand', this.agua_id_brand)
             .set('authorization', token || "")
             .set('local', 'false')
@@ -104,7 +104,8 @@ class AguaProtocol {
         private agua_endpoint: string,
         private agua_id_brand: string,
         private id_device: string,
-        private id_product: string) {
+        private id_product: string,
+        private customer_code: string) {
 
         this.token$ = of(this.access_token).pipe(shareReplay(1));
     }

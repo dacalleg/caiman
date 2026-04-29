@@ -1,40 +1,43 @@
-FROM ubuntu:focal
+FROM php:8.2-fpm
 
-ENV PHP_VERSION 8.1
-RUN apt-get update && apt-get install -y software-properties-common curl inetutils-syslogd && \
-    apt-add-repository ppa:nginx/stable -y && \
-    LC_ALL=C.UTF-8 apt-add-repository ppa:ondrej/php -y
 RUN apt-get update && apt-get install -y \
-    php${PHP_VERSION}-fpm \
-    php${PHP_VERSION}-curl \
-    php${PHP_VERSION}-cli \
-    php${PHP_VERSION}-intl \
-    #php${PHP_VERSION}-json \
-    php${PHP_VERSION}-mysql \
-    #php-gettext \
-    php${PHP_VERSION}-xml \
-    php${PHP_VERSION}-bcmath \
-    php${PHP_VERSION}-mbstring \
-    php-ast \
-    php${PHP_VERSION}-zip \
-    php${PHP_VERSION}-sqlite3 \
-    php${PHP_VERSION}-apcu \
+    libicu-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    libsqlite3-dev \
+    nginx \
     zip \
     unzip \
-    nginx && \
-    apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    wget && \
+    docker-php-source extract && \
+    cp /usr/src/php/ext/sqlite3/config0.m4 /usr/src/php/ext/sqlite3/config.m4 && \
+    docker-php-ext-install \
+    intl \
+    pdo_mysql \
+    mysqli \
+    xml \
+    bcmath \
+    mbstring \
+    zip \
+    pdo_sqlite \
+    sqlite3 && \
+    pecl install apcu && \
+    pecl install ast && \
+    docker-php-ext-enable apcu ast && \
+    docker-php-source delete && \
+    cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini && \
     mkdir -p /run/php && chmod -R 755 /run/php && \
-    sed -i 's|.*listen =.*|listen=9000|g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i 's|.*error_log =.*|error_log=/proc/self/fd/2|g' /etc/php/${PHP_VERSION}/fpm/php-fpm.conf && \
-    sed -i 's|.*access.log =.*|access.log=/proc/self/fd/2|g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i 's|.*user =.*|user=root|g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i 's|.*group =.*|group=root|g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i 's#.*variables_order.*#variables_order=EGPCS#g' /etc/php/${PHP_VERSION}/fpm/php.ini && \
-    sed -i 's#.*date.timezone.*#date.timezone=UTC#g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
-    sed -i 's#.*clear_env.*#clear_env=no#g' /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
-
-RUN apt-get update && apt-get install -y wget
+    sed -i 's|.*listen =.*|listen=9000|g' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i 's|.*error_log =.*|error_log=/proc/self/fd/2|g' /usr/local/etc/php-fpm.conf && \
+    sed -i 's|.*access.log =.*|access.log=/proc/self/fd/2|g' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i 's|.*user =.*|user=1000|g' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i 's|.*group =.*|group=1000|g' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i -e "s/;catch_workers_output[[:space:]]*=[[:space:]]*yes/catch_workers_output = yes/g" /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i 's#.*variables_order.*#variables_order=EGPCS#g' /usr/local/etc/php/php.ini && \
+    sed -i 's#.*date.timezone.*#date.timezone=UTC#g' /usr/local/etc/php/php.ini && \
+    sed -i 's#.*clear_env.*#clear_env=no#g' /usr/local/etc/php-fpm.d/www.conf && \
+    apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ARG S6_OVERLAY_VERSION=3.1.3.0
 

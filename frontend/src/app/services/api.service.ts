@@ -568,6 +568,16 @@ export class ApiService {
     } as ProductInfo
   }
 
+  ransomOrder(uuid: string)
+  {
+    return this.Http.post<{status: string}>(environment.endpoint + "/wp-json/caiman/v1/ransom_order", {uuid: uuid});
+  }
+
+  useToken()
+  {
+    return this.Http.post<{status: string}>(environment.endpoint + "/wp-json/caiman/v1/use_token", null);
+  }
+
   private makeid(length = 8) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

@@ -32,10 +32,10 @@ export class OperationFormComponent {
   ) {
     this.submitted = new EventEmitter();
     this.operation = this.Builder.buildOperation();
-    this.Auth.getUserData().subscribe(data => this.operation.data.service = data.fields);
+    this.Auth.getUserData().pipe(take(1)).subscribe(data => this.operation.data.service = data.fields);
     this.project$ = this.Store.getProject();
     this.failures$ = this.Api.getFailures();
-    this.user$ = this.Auth.getUserData().pipe(map(user => user.fields))
+    this.user$ = this.Auth.getUserData().pipe(take(1), map(user => user.fields))
     const serial$ = this.project$.pipe(
       filter(p => p.device?.info.serial != null),
       map(p => p.device!.info.serial!),

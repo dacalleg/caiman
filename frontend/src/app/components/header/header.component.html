@@ -12,7 +12,10 @@
       </div>
     </div>
     <div class="navbar-collapse d-none d-md-block" id="navbarContent">
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item">
+          <app-license-info></app-license-info>
+        </li>
         <li class="nav-item" *ngIf="(isAdmin$|async) === true">
           <a class="nav-link" target="_blank" [routerLink]="['/config']">Configurations</a>
         </li>
@@ -32,8 +35,9 @@
               <small class="role">{{roles$|async}}</small>
             </div>
             <hr class="dropdown-divider">
-            <a class="text-end" ngbDropdownItem (click)="profile()">{{'profile'|translate}}</a>
-            <a class="text-end" ngbDropdownItem (click)="logout()">{{'logout'|translate}}</a>
+            <a class="nav-link text-end" ngbDropdownItem [routerLink]="'/dashboard/profile'">{{'profile'|translate}}</a>
+            <a class="nav-link text-end" ngbDropdownItem [routerLink]="'/dashboard/license'">{{'license'|translate}}</a>
+            <span class="text-end" ngbDropdownItem (click)="logout()">{{'logout'|translate}}</span>
           </div>
         </li>
       </ul>
@@ -49,12 +53,16 @@
     <div class="fw-bold">{{username$|async}}</div>
     <small class="role">{{roles$|async}}</small>
   </div>
+
   <ul class="list-group mt-4">
     <li class="ps-0 list-group-item border-0">
       <a (click)="deviceSelector()">{{'device.selector'|translate}}</a>
     </li>
     <li class="ps-0 list-group-item border-0">
-      <a (click)="profile()">{{'profile'|translate}}</a>
+      <a routerLink="/dashboard/profile">{{'profile'|translate}}</a>
+    </li>
+    <li class="ps-0 list-group-item border-0">
+      <a routerLink="/dashboard/license">{{'license'|translate}}</a>
     </li>
     <li class="ps-0 list-group-item border-0 my-3">
       <a (click)="logout()">{{'logout'|translate}}</a>

@@ -7,7 +7,7 @@ import {EnvObj} from "../app/classes/interfaces";
 export const environment = {
   production: false,
   host: "caimanweb-nordicfire.agua-iot.com",
-  endpoint: "https://caimanweb-nordicfire.agua-iot.com/backend",
+  endpoint: "https://caimanweb-nordicfire.agua-iot.com",
   tickets_enabled: false,
   registry_enabled: true,
   operation_enabled: true,

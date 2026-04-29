@@ -1,33 +1,33 @@
 {
-  "name": "KLab Plus",
-  "short_name": "KLab Plus",
-  "theme_color": "#496356",
+  "name": "Nordic Fire Plus",
+  "short_name": "Nordic Fire Plus",
+  "theme_color": "#ed1639ff",
   "background_color": "#ffffff",
   "display": "standalone",
-  "id": "caimanweb-klover.agua-iot.com",
+  "id": "caimanweb-nordic.agua-iot.com",
   "scope": "./",
   "start_url": "./",
   "icons": [
     {
-      "src": "assets/klover/manifest-icon-192.maskable.png",
+      "src": "assets/nordic/manifest-icon-192.maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/klover/manifest-icon-192.maskable.png",
+      "src": "assets/nordic/manifest-icon-192.maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "assets/klover/manifest-icon-512.maskable.png",
+      "src": "assets/nordic/manifest-icon-512.maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/klover/manifest-icon-512.maskable.png",
+      "src": "assets/nordic/manifest-icon-512.maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

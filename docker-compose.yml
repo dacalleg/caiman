@@ -60,9 +60,9 @@ services:
       JWT_AUTH_SECRET_KEY: "tokenagua"
       JWT_AUTH_CORS_ENABLE: "true"
       AGUA_ID_BRAND: "1"
-      AGUA_CUSTOMER_CODE: "143789"
-      AGUA_HOSTNAME: "klover.agua-iot.com"
-      AGUA_ENDPOINT: "https://klover.agua-iot.com"
+      AGUA_CUSTOMER_CODE: "132678"
+      AGUA_HOSTNAME: "nordicfire.agua-iot.com"
+      AGUA_ENDPOINT: "https://nordicfire.agua-iot.com"
       JWT_SOFTWARE_FIELD: "caiman"
       JWT_ID_FIELD: "464D7C31-0BBD-462D-A7F8-C03913EED030"
       JWT_ISS_FIELD: "caiman.micronovasrl.com"
@@ -99,7 +99,7 @@ services:
      - SERVER_CONTAINER=caiman_reverse_proxy
      - WEBROOT_PATH=/tmp/letsencrypt/www
      - CERTS_PATH=/etc/nginx/certs
-     - DOMAINS=caimanweb-klover.agua-iot.com
+     - DOMAINS=caimanweb-nordicfire.agua-iot.com
      - CHECK_FREQ=7
     restart: always
 
@@ -162,4 +162,4 @@ services:
       environment:
           PMA_HOST: caiman_db
           MYSQL_ROOT_PASSWORD: 01Ul8TrH&Mq8
-          PMA_ABSOLUTE_URI: https://caimanweb-klover.agua-iot.com/phpmyadmin/
+          PMA_ABSOLUTE_URI: https://caimanweb-nordicfire.agua-iot.com/phpmyadmin/

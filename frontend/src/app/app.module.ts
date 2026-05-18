@@ -11,7 +11,7 @@ import { TranslateLoader, TranslateModule } from "@ngx-translate/core";
 import { FormsModule } from "@angular/forms";
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { JwtModule } from '@auth0/angular-jwt';
+import { JwtHelperService, JwtModule } from '@auth0/angular-jwt';
 import { AlertComponent } from './components/alert/alert.component';
 import { SharedModule } from './modules/shared/shared.module';
 import { AuthService } from './services/auth.service';
@@ -45,8 +45,14 @@ const icons = {
   X
 };
 
+const jwtHelper = new JwtHelperService();
+
 export function tokenGetter() {
-  return localStorage.getItem("access_token");
+  const token = localStorage.getItem("access_token");
+  if (!token || jwtHelper.isTokenExpired(token)) {
+    return null;
+  }
+  return token;
 }
 
 export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
@@ -95,11 +101,11 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
         tokenGetter: tokenGetter,
         allowedDomains: [environment.host],
         disallowedRoutes: [
-          /backend\/wp-content\/uploads\/.*/,
-          /backend\/wp-json\/jwt-auth\/v1\/token/,
-          /backend\/wp-json\/wp\/v2\/translation/,
-          /backend\/wp-json\/caiman\/v1\/forgot-password/,
-          /backend\/wp-json\/caiman\/v1\/info/],
+          //wp-content\/uploads\/.*/,
+          /wp-json\/jwt-auth\/v1\/token/,
+          /wp-json\/wp\/v2\/translation/,
+          /wp-json\/caiman\/v1\/forgot-password/,
+          /wp-json\/caiman\/v1\/info/],
       },
     }),
     ServiceWorkerModule.register('ngsw-worker.js', {

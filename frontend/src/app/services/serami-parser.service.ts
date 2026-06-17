@@ -102,21 +102,13 @@ export class SeramiParserService {
     let address = parseInt(this.nodeChildValue("startaddress", node), 16) as number;
     let mask = parseInt(this.nodeChildValue("mask", node), 16);
     const varName = this.nodeChildValue("var_name", node) as string;
-    let expval = this.nodeChildValue("expreval", node)
+    const rawExpreval = this.nodeChildValue("expreval", node);
+    let expval = rawExpreval;
     let signed = false;
-    if (expval && typeof expval === "string") {
-      expval = Utils.sanitizeExp(expval);
-      if (expval.includes("IIF")) {
-        expval = expval.substring(4, expval.length - 1);
-        const pieces = expval.split(",")
-        if (pieces[0].includes("65535/2") || pieces[0].includes("255/2")) {
-          expval = pieces[1];
-          signed = true;
-        }
-        else {
-          expval = pieces[1] + " if " + pieces[0] + " else " + pieces[2];
-        }
-      }
+    if (rawExpreval && typeof rawExpreval === "string") {
+      const upper = rawExpreval.toUpperCase();
+      if (upper.includes("IIF") && (upper.includes("65535/2") || upper.includes("255/2")))
+        signed = true;
     }
     const type = this.nodeChildValue("type", node) as string;
     const reverse = this.toBoolean(this.nodeChildValue("reversebytes", node));

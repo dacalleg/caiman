@@ -41,6 +41,7 @@ import {
 import {AuthService} from './auth.service';
 import {TranslationProviderService} from './translation-provider.service';
 import {TranslationService} from './translation.service';
+import { COUNTRIES } from '../classes/countries';
 
 interface DeferredRequest {
   url: string;
@@ -350,14 +351,14 @@ export class ApiService {
   }
 
   getCountries() {
-    return this.Http.get<any[]>("https://restcountries.com/v3.1/all?fields=name,cca2").pipe(map(countries => {
+    return of(COUNTRIES).pipe(map(countries => {
       return countries.map(c => {
         return {
-          name: c.name.common,
-          code: c.cca2
+          name: c.name,
+          code: c["alpha-2"]
         } as Country
       }).sort((a, b) => a.name.localeCompare(b.name));
-    }))
+    }), shareReplay(1))
   }
 
   getRegistries(serial: string) {

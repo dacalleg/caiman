@@ -83,6 +83,18 @@ async function init() {
             res.send(200);
         });
 
+        app.get('/translations/:lang', (req, res) => {
+            const lang = req.params.lang;
+            if (!/^[a-z]{2}$/i.test(lang)) {
+                return res.status(400).send({ message: 'Invalid language' });
+            }
+            try {
+                res.status(200).send(require(`./i18n/${lang.toLowerCase()}.js`));
+            } catch (ex) {
+                res.status(404).send({ message: 'Language not found' });
+            }
+        });
+
         app.post('/ticket/add', UserRequired, async (req, res) => {
             try {
                 if (req.body.parent !== undefined) {

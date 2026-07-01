@@ -1,0 +1,1748 @@
+---
+alwaysApply: true
+---
+
+# Clean Code Rules
+
+You are an expert software engineer.
+
+Generate, refactor, and review code according to these rules.
+
+## Core Objective
+
+Write code that is:
+
+* easy to read;
+* easy to change;
+* easy to test;
+* hard to misunderstand.
+
+Prefer clarity over cleverness.
+Prefer explicit intent over comments.
+Prefer small focused units over large generic abstractions.
+Prefer maintainability over premature optimization.
+Prefer boring, predictable code over impressive code.
+
+Clean code is not code that looks smart.
+Clean code is code that makes the next change safe.
+
+---
+
+# 1. Meaningful Names
+
+Names are the first form of documentation.
+
+A good name must answer:
+
+* why it exists;
+* what it does;
+* how it is used.
+
+If a name requires a comment to explain it, the name is not good enough.
+
+## Good Practices
+
+Use intention-revealing names.
+
+Bad:
+
+```ts
+const d = 5;
+```
+
+Good:
+
+```ts
+const elapsedTimeInDays = 5;
+```
+
+Use pronounceable names.
+
+Bad:
+
+```ts
+const genymdhms = new Date();
+```
+
+Good:
+
+```ts
+const generationTimestamp = new Date();
+```
+
+Use searchable names.
+
+Bad:
+
+```ts
+if (student.classes.length > 7) {
+  throw new Error("Too many classes");
+}
+```
+
+Good:
+
+```ts
+const MAX_CLASSES_PER_STUDENT = 7;
+
+if (student.classes.length > MAX_CLASSES_PER_STUDENT) {
+  throw new Error("Too many classes");
+}
+```
+
+Use longer names for wider scopes.
+
+Bad:
+
+```ts
+const r = url.toLowerCase();
+```
+
+Good:
+
+```ts
+const lowercaseUrl = url.toLowerCase();
+```
+
+Very short names are acceptable only in tiny, obvious scopes.
+
+Acceptable:
+
+```ts
+for (let i = 0; i < items.length; i++) {
+  processItem(items[i]);
+}
+```
+
+Avoid short names for important concepts.
+
+Bad:
+
+```ts
+const u = await getUser();
+const p = await getPermissions(u);
+```
+
+Good:
+
+```ts
+const user = await getUser();
+const permissions = await getPermissions(user);
+```
+
+Use nouns or noun phrases for classes, objects, and types.
+
+Good:
+
+```ts
+class Customer {}
+class Account {}
+class Payment {}
+class Invoice {}
+```
+
+Avoid vague class names.
+
+Bad:
+
+```ts
+class CustomerManager {}
+class AccountData {}
+class PaymentInfo {}
+```
+
+Use verbs or verb phrases for functions and methods.
+
+Good:
+
+```ts
+postPayment();
+deletePage();
+saveUser();
+calculateInvoiceTotal();
+```
+
+Use one word per concept.
+
+Do not mix different verbs for the same operation unless they mean different things.
+
+Bad:
+
+```ts
+fetchUser();
+retrieveOrder();
+getInvoice();
+```
+
+Good:
+
+```ts
+getUser();
+getOrder();
+getInvoice();
+```
+
+Use solution-domain names when appropriate.
+
+Good:
+
+```ts
+class PaymentFactory {}
+class UserRepository {}
+class AuthenticationStrategy {}
+class InvoiceMapper {}
+```
+
+Use problem-domain names when they are clearer.
+
+Good:
+
+```ts
+class Subscription {}
+class ShippingAddress {}
+class LoyaltyDiscount {}
+class RenewalPolicy {}
+```
+
+## Naming Code Smells
+
+Avoid disinformation.
+
+Do not use names that imply a wrong type, behavior, or abstraction.
+
+Bad:
+
+```ts
+const accountList = new Set<Account>();
+```
+
+Good:
+
+```ts
+const accounts = new Set<Account>();
+```
+
+Avoid meaningless distinctions.
+
+Bad:
+
+```ts
+const productInfo = getProductInfo();
+const productData = getProductData();
+```
+
+Good:
+
+```ts
+const productDetails = getProductDetails();
+const productInventory = getProductInventory();
+```
+
+Avoid numbered names.
+
+Bad:
+
+```ts
+const a1 = getCustomer();
+const a2 = getAdmin();
+```
+
+Good:
+
+```ts
+const customer = getCustomer();
+const admin = getAdmin();
+```
+
+Avoid encodings and prefixes.
+
+Bad:
+
+```ts
+const strName = "Mario";
+const m_userAge = 35;
+```
+
+Good:
+
+```ts
+const name = "Mario";
+const userAge = 35;
+```
+
+Avoid mental mapping.
+
+Bad:
+
+```ts
+const r = url.toLowerCase();
+```
+
+Good:
+
+```ts
+const lowercaseUrl = url.toLowerCase();
+```
+
+Avoid cute, ironic, funny, or slang names.
+
+Bad:
+
+```ts
+function holyHandGrenade(items: Item[]) {
+  deleteItems(items);
+}
+```
+
+Good:
+
+```ts
+function deleteItems(items: Item[]) {
+  // ...
+}
+```
+
+## Naming Blacklist
+
+Avoid vague names unless the existing project convention requires them or there is a strong reason.
+
+Suspicious names:
+
+* `Manager`
+* `Processor`
+* `Handler`
+* `Helper`
+* `Util`
+* `Common`
+* `Data`
+* `Info`
+* `Object`
+* `Thing`
+* `Stuff`
+* `Temp`
+* `Foo`
+* `Bar`
+* `Doer`
+* `Service` when it hides multiple responsibilities
+
+Use a more specific name that describes the responsibility.
+
+Bad:
+
+```ts
+class UserManager {}
+```
+
+Better:
+
+```ts
+class UserRegistration {}
+class UserAuthenticator {}
+class UserPermissionChecker {}
+```
+
+---
+
+# 2. Functions
+
+Functions are the first line of organization in a program.
+
+They must be small, focused, and written at one level of abstraction.
+
+## Good Practices
+
+Keep functions very small.
+
+Rules:
+
+* Prefer functions under 20 lines.
+* If a function becomes hard to scan, split it.
+* A function should rarely require scrolling.
+* A function should be understandable from its name and body without extra explanation.
+
+Do one thing.
+
+A function should do one thing, do it well, and do it only.
+
+If part of a function can be extracted into another function with a meaningful name that is not just a restatement of the implementation, the original function is probably doing more than one thing.
+
+Bad:
+
+```ts
+function registerUser(user: User) {
+  validateUser(user);
+  database.users.insert(user);
+  emailClient.send(user.email, "Welcome");
+  auditLogger.log("User registered");
+}
+```
+
+Good:
+
+```ts
+function registerUser(user: User) {
+  validateUser(user);
+  saveUser(user);
+  sendWelcomeEmail(user);
+  logUserRegistration(user);
+}
+```
+
+Use one level of abstraction per function.
+
+Bad:
+
+```ts
+function renderPage(page: Page) {
+  const html = getPageHtml(page);
+  response.write("<html>");
+  response.write(html);
+  response.write("</html>");
+}
+```
+
+Good:
+
+```ts
+function renderPage(page: Page) {
+  const html = buildPageHtml(page);
+  sendHtmlResponse(html);
+}
+```
+
+Follow the step-down rule.
+
+Code should read top-down like a story:
+
+1. high-level intent first;
+2. lower-level implementation details below;
+3. private helpers after the functions that call them.
+
+Use few arguments.
+
+Preferred order:
+
+1. zero arguments;
+2. one argument;
+3. two arguments;
+4. three arguments only when strongly justified;
+5. more than three arguments almost never.
+
+For many values, prefer an object parameter.
+
+Bad:
+
+```ts
+createUser(name, email, age, country, role, isActive);
+```
+
+Good:
+
+```ts
+createUser({
+  name,
+  email,
+  age,
+  country,
+  role,
+  isActive,
+});
+```
+
+Follow Command-Query Separation.
+
+A function should either:
+
+* perform an action;
+* return information.
+
+It should not do both.
+
+Bad:
+
+```ts
+if (user.setActive(true)) {
+  sendActivationEmail(user);
+}
+```
+
+Good:
+
+```ts
+user.activate();
+
+if (user.isActive()) {
+  sendActivationEmail(user);
+}
+```
+
+Use exceptions or typed errors instead of error codes.
+
+Bad:
+
+```ts
+const result = saveUser(user);
+
+if (result === -1) {
+  showError();
+}
+```
+
+Good:
+
+```ts
+try {
+  saveUser(user);
+} catch (error) {
+  showSaveUserError(error);
+}
+```
+
+Keep error handling separate from business logic.
+
+A function that handles errors should do only error handling.
+
+## Function Code Smells
+
+Avoid side effects.
+
+A function must not secretly do something that its name does not reveal.
+
+Bad:
+
+```ts
+function checkPassword(user: User, password: string) {
+  const isValid = passwordHasher.verify(password, user.passwordHash);
+
+  if (isValid) {
+    session.initialize(user);
+  }
+
+  return isValid;
+}
+```
+
+Good:
+
+```ts
+function isPasswordValid(user: User, password: string) {
+  return passwordHasher.verify(password, user.passwordHash);
+}
+
+function login(user: User, password: string) {
+  if (!isPasswordValid(user, password)) {
+    throw new InvalidCredentialsError();
+  }
+
+  session.initialize(user);
+}
+```
+
+Avoid boolean flag arguments.
+
+Boolean flags usually mean the function does more than one thing.
+
+Bad:
+
+```ts
+renderPage(true);
+```
+
+Good:
+
+```ts
+renderPublicPage();
+renderPrivatePage();
+```
+
+Avoid output arguments.
+
+Readers expect arguments to be inputs, not values that will be mutated.
+
+Bad:
+
+```ts
+function appendFooter(report: Report) {
+  report.sections.push(createFooter());
+}
+```
+
+Good:
+
+```ts
+function withFooter(report: Report) {
+  return {
+    ...report,
+    sections: [...report.sections, createFooter()],
+  };
+}
+```
+
+Avoid duplication.
+
+Duplicated logic is one of the main causes of bugs and design decay.
+
+Bad:
+
+```ts
+function calculateStandardUserPrice(price: number) {
+  return price - price * 0.1;
+}
+
+function calculatePremiumUserPrice(price: number) {
+  return price - price * 0.1;
+}
+```
+
+Good:
+
+```ts
+const LOYALTY_DISCOUNT_RATE = 0.1;
+
+function applyLoyaltyDiscount(price: number) {
+  return price - price * LOYALTY_DISCOUNT_RATE;
+}
+```
+
+Avoid repeated switch or if/else chains.
+
+If the same conditional logic appears in multiple places, use polymorphism, strategy objects, lookup maps, or a factory.
+
+Bad:
+
+```ts
+function calculatePay(employee: Employee) {
+  switch (employee.type) {
+    case "commissioned":
+      return calculateCommissionedPay(employee);
+    case "hourly":
+      return calculateHourlyPay(employee);
+    case "salaried":
+      return calculateSalariedPay(employee);
+  }
+}
+```
+
+Better:
+
+```ts
+interface Employee {
+  calculatePay(): Money;
+}
+
+class CommissionedEmployee implements Employee {
+  calculatePay() {
+    return calculateCommissionedPay(this);
+  }
+}
+
+class HourlyEmployee implements Employee {
+  calculatePay() {
+    return calculateHourlyPay(this);
+  }
+}
+
+class SalariedEmployee implements Employee {
+  calculatePay() {
+    return calculateSalariedPay(this);
+  }
+}
+```
+
+A switch may be acceptable when it is isolated inside a factory, adapter, or boundary layer.
+
+---
+
+# 3. Comments
+
+Comments are a last resort, not a substitute for clear code.
+
+## Rules
+
+First try to make the code explain itself.
+
+Prefer:
+
+* better names;
+* extracted functions;
+* clearer structure;
+* stronger types;
+* named constants;
+* smaller units.
+
+Bad:
+
+```ts
+if (employee.age > 65 && employee.yearsOfService > 10) {
+  // Eligible for full benefits
+}
+```
+
+Good:
+
+```ts
+if (employee.isEligibleForFullBenefits()) {
+  // ...
+}
+```
+
+Remove bad comments:
+
+* redundant comments;
+* comments that repeat the code;
+* historical change logs;
+* commented-out code;
+* stale comments;
+* misleading comments;
+* speculative comments;
+* noise comments.
+
+Acceptable comments explain:
+
+* why a non-obvious decision was made;
+* external constraints;
+* legal implications;
+* security implications;
+* warnings about dangerous behavior;
+* public API contracts when required.
+
+Do not write comments to compensate for bad names or messy structure.
+
+Bad:
+
+```ts
+// Increment index
+i++;
+```
+
+Bad:
+
+```ts
+// TODO: maybe refactor this someday
+```
+
+Better:
+
+```ts
+// Required by the external payment provider: retries must use exponential backoff.
+```
+
+---
+
+# 4. Formatting
+
+Formatting is communication.
+
+## Rules
+
+Organize source files like a newspaper:
+
+1. important concepts at the top;
+2. high-level code first;
+3. details and helpers lower down.
+
+Declare local variables close to where they are used.
+
+Keep related concepts vertically close.
+
+Put calling functions above called functions when possible.
+
+Separate unrelated concepts with blank lines.
+
+Keep lines reasonably short.
+
+* Prefer max 120 characters per line.
+
+Use whitespace to improve readability.
+
+Do not compress complex logic into dense one-liners.
+
+Respect the project formatter.
+
+Do not fight:
+
+* Prettier;
+* ESLint;
+* Biome;
+* Black;
+* gofmt;
+* rustfmt;
+* the formatter already used by the project.
+
+---
+
+# 5. Classes, Objects, and Data Structures
+
+Classes and modules must have one reason to change.
+
+## Rules
+
+Follow the Single Responsibility Principle.
+
+A class, module, component, or service should have one clear responsibility.
+
+Keep classes small.
+
+Keep instance fields few and cohesive.
+
+If only some methods use some fields, split the class.
+
+Avoid feature envy.
+
+If a method uses another object’s data more than its own, move the behavior closer to that data.
+
+Bad:
+
+```ts
+function getCustomerCountryCode(order: Order) {
+  return order.customer.address.country.code;
+}
+```
+
+Good:
+
+```ts
+function getCustomerCountryCode(order: Order) {
+  return order.customerCountryCode();
+}
+```
+
+Follow the Law of Demeter.
+
+Talk to direct collaborators, not deep object chains.
+
+Bad:
+
+```ts
+order.customer.address.country.code;
+```
+
+Good:
+
+```ts
+order.customerCountryCode();
+```
+
+Do not create hybrids between objects and data structures.
+
+Objects:
+
+* hide data;
+* expose behavior.
+
+Data structures:
+
+* expose data;
+* contain little or no behavior.
+
+Do not mix both styles in the same abstraction.
+
+Prefer composition over large inheritance hierarchies.
+
+Keep domain behavior inside domain objects when it clearly belongs there.
+
+Avoid anemic domain models when behavior clearly belongs with the data.
+
+---
+
+# 6. Error Handling and Null
+
+Error handling must not obscure the main logic.
+
+## Rules
+
+Prefer exceptions or typed error results over error codes.
+
+Do not return magic error values:
+
+* `-1`;
+* `false`;
+* `null`;
+* `"ERROR"`;
+* `E_OK`.
+
+Do not return `null`.
+
+Prefer:
+
+* empty collections;
+* Optional/Maybe;
+* Result/Either;
+* Special Case objects;
+* exceptions.
+
+Bad:
+
+```ts
+function getUsers(): User[] | null {
+  return database.users.findMany() ?? null;
+}
+```
+
+Good:
+
+```ts
+function getUsers(): User[] {
+  return database.users.findMany() ?? [];
+}
+```
+
+Do not pass `null`.
+
+Use explicit optional types, overloads, or dedicated functions.
+
+Bad:
+
+```ts
+createUser(name, null);
+```
+
+Good:
+
+```ts
+createUserWithoutReferral(name);
+```
+
+Validate inputs at boundaries.
+
+Fail fast when required data is missing.
+
+Keep try/catch blocks small.
+
+Do not swallow errors silently.
+
+Add context when rethrowing errors.
+
+Bad:
+
+```ts
+try {
+  await saveUser(user);
+} catch {
+  // ignore
+}
+```
+
+Good:
+
+```ts
+try {
+  await saveUser(user);
+} catch (error) {
+  throw new UserSaveError("Failed to save user", { cause: error });
+}
+```
+
+---
+
+# 7. Types and Contracts
+
+Use types to make invalid states impossible.
+
+## Rules
+
+Prefer explicit domain types over primitive obsession.
+
+Do not pass generic strings, numbers, or booleans when a domain type would be clearer.
+
+Avoid:
+
+* `any`;
+* unsafe casts;
+* broad `unknown` without narrowing;
+* optional fields that are not truly optional;
+* untyped external input.
+
+Model states explicitly.
+
+Prefer:
+
+* discriminated unions;
+* enums when appropriate;
+* value objects;
+* branded types;
+* typed IDs;
+* Result/Either types when exceptions are not suitable.
+
+Validate external input at system boundaries.
+
+After validation, internal code should rely on trusted types.
+
+Bad:
+
+```ts
+function payInvoice(invoiceId: string, amount: number, currency: string) {
+  // ...
+}
+```
+
+Good:
+
+```ts
+function payInvoice(invoiceId: InvoiceId, payment: Money) {
+  // ...
+}
+```
+
+Bad:
+
+```ts
+type Order = {
+  status: string;
+};
+```
+
+Good:
+
+```ts
+type OrderStatus = "draft" | "confirmed" | "paid" | "cancelled";
+
+type Order = {
+  status: OrderStatus;
+};
+```
+
+Prefer types that prevent invalid combinations.
+
+Bad:
+
+```ts
+type RequestState = {
+  loading: boolean;
+  error?: Error;
+  data?: User;
+};
+```
+
+Good:
+
+```ts
+type RequestState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "failed"; error: Error }
+  | { status: "succeeded"; data: User };
+```
+
+---
+
+# 8. Avoid Primitive Obsession
+
+Do not represent important domain concepts with raw primitives.
+
+Bad:
+
+```ts
+const email = "user@example.com";
+const price = 100;
+const currency = "EUR";
+```
+
+Good:
+
+```ts
+const email = EmailAddress.create("user@example.com");
+const price = Money.eur(100);
+```
+
+## Rules
+
+Wrap important domain values in named abstractions.
+
+Do not pass related primitives around as loose parameters.
+
+Group related values into meaningful objects.
+
+Put validation close to the domain concept.
+
+Bad:
+
+```ts
+function createSubscription(userId: string, planId: string, startDate: string) {
+  // ...
+}
+```
+
+Good:
+
+```ts
+function createSubscription(command: CreateSubscriptionCommand) {
+  // ...
+}
+```
+
+Better:
+
+```ts
+type CreateSubscriptionCommand = {
+  userId: UserId;
+  planId: PlanId;
+  startDate: SubscriptionStartDate;
+};
+```
+
+---
+
+# 9. Boundaries and Architecture
+
+Keep boundaries clear.
+
+## Rules
+
+Keep domain logic independent from frameworks.
+
+Keep business rules independent from:
+
+* HTTP;
+* database;
+* UI;
+* queues;
+* third-party APIs;
+* file systems;
+* environment variables;
+* framework-specific objects.
+
+Put I/O at the edges of the system.
+
+Convert external data into internal domain types at boundaries.
+
+Do not leak database models, API DTOs, or framework-specific objects into domain logic.
+
+Do not let controllers, routes, jobs, or UI components contain complex business logic.
+
+Bad:
+
+```ts
+app.post("/orders", async (req, res) => {
+  const discount = req.body.total > 100 && req.user.tier === "gold" ? 0.1 : 0;
+  const order = await database.orders.insert({
+    total: req.body.total - req.body.total * discount,
+  });
+
+  res.json(order);
+});
+```
+
+Good:
+
+```ts
+app.post("/orders", async (req, res) => {
+  const command = createOrderCommandSchema.parse(req.body);
+  const result = await createOrder(command);
+
+  res.json(result);
+});
+```
+
+Domain logic should live in domain services, application services, entities, policies, or pure functions.
+
+Framework code should coordinate, not decide.
+
+---
+
+# 10. Testability
+
+Write code that is easy to test.
+
+## Rules
+
+Keep business logic separate from:
+
+* framework code;
+* I/O;
+* database access;
+* network calls;
+* UI rendering;
+* system time;
+* randomness;
+* global state.
+
+Prefer pure functions for calculations and domain logic.
+
+Inject dependencies instead of creating them inside functions or classes.
+
+Avoid hidden global state.
+
+Avoid direct access to time, randomness, environment variables, and external APIs inside core logic unless abstracted.
+
+When behavior changes, add or update tests.
+
+Tests must verify behavior, not implementation details.
+
+Test names should describe expected behavior.
+
+Bad:
+
+```ts
+function calculateDiscount(order: Order) {
+  const today = new Date();
+
+  return isBlackFriday(today) ? order.total * 0.2 : 0;
+}
+```
+
+Good:
+
+```ts
+function calculateDiscount(order: Order, today: Date) {
+  return isBlackFriday(today) ? order.total * 0.2 : 0;
+}
+```
+
+Bad:
+
+```ts
+class UserService {
+  private emailClient = new EmailClient();
+
+  async register(user: User) {
+    await saveUser(user);
+    await this.emailClient.sendWelcomeEmail(user.email);
+  }
+}
+```
+
+Good:
+
+```ts
+class UserService {
+  constructor(private readonly emailClient: EmailClient) {}
+
+  async register(user: User) {
+    await saveUser(user);
+    await this.emailClient.sendWelcomeEmail(user.email);
+  }
+}
+```
+
+---
+
+# 11. Complexity Control
+
+Keep control flow simple.
+
+## Rules
+
+Prefer early returns over deeply nested conditionals.
+
+Avoid more than two levels of nesting.
+
+Extract complex conditions into named predicates.
+
+Replace repeated conditional logic with:
+
+* polymorphism;
+* strategies;
+* lookup maps;
+* factories;
+* domain methods.
+
+Avoid clever boolean expressions.
+
+Prefer guard clauses for invalid or edge cases.
+
+Bad:
+
+```ts
+if (user) {
+  if (user.isActive) {
+    if (user.hasPermission("admin")) {
+      deleteAccount(account);
+    }
+  }
+}
+```
+
+Good:
+
+```ts
+if (!user?.isActive) return;
+if (!user.hasPermission("admin")) return;
+
+deleteAccount(account);
+```
+
+Bad:
+
+```ts
+if ((user.age > 65 && user.yearsOfService > 10) || user.role === "executive") {
+  grantFullBenefits(user);
+}
+```
+
+Good:
+
+```ts
+if (user.isEligibleForFullBenefits()) {
+  grantFullBenefits(user);
+}
+```
+
+---
+
+# 12. Duplication and Code Smells
+
+Duplication is the main enemy of clean design.
+
+## Rules
+
+Remove duplicated code.
+
+Remove duplicated knowledge.
+
+Extract repeated concepts into:
+
+* named constants;
+* functions;
+* classes;
+* modules;
+* strategies;
+* policies;
+* domain objects.
+
+Do not abstract too early.
+
+Wait until the repeated concept is clear.
+
+Watch for these smells:
+
+* unclear names;
+* misleading names;
+* inconsistent vocabulary;
+* meaningless distinctions;
+* mental mapping;
+* long functions;
+* functions doing multiple things;
+* mixed abstraction levels;
+* boolean flag arguments;
+* output arguments;
+* hidden side effects;
+* duplicated logic;
+* repeated switch/if-else chains;
+* feature envy;
+* deep object chains;
+* large classes;
+* low cohesion;
+* primitive obsession;
+* null handling spread everywhere;
+* swallowed errors;
+* commented-out code;
+* redundant comments.
+
+Apply the Boy Scout Rule.
+
+Leave the code cleaner than you found it.
+
+When editing existing code, improve nearby naming, structure, or duplication when safe.
+
+Do not perform large unrelated refactors unless requested.
+
+Prefer small, safe improvements.
+
+---
+
+# 13. Avoid Overengineering
+
+Do not add abstraction before there is a clear need.
+
+## Rules
+
+Prefer simple code over speculative flexibility.
+
+Do not introduce these unless they solve a real problem:
+
+* factories;
+* strategies;
+* managers;
+* services;
+* interfaces;
+* abstract classes;
+* generic utilities;
+* plugin systems;
+* configuration layers;
+* inheritance hierarchies.
+
+Do not abstract code just because two lines look similar.
+
+Wait until duplication reveals a stable concept.
+
+Keep local logic local when extracting it would make the code harder to follow.
+
+Avoid generic utilities when a domain-specific function would be clearer.
+
+Bad:
+
+```ts
+class UserCreationStrategyFactoryProvider {
+  // ...
+}
+```
+
+Good:
+
+```ts
+function createUser(input: CreateUserInput) {
+  // ...
+}
+```
+
+Bad:
+
+```ts
+interface UserNameProvider {
+  getUserName(): string;
+}
+
+class StaticUserNameProvider implements UserNameProvider {
+  getUserName() {
+    return "Mario";
+  }
+}
+```
+
+Good:
+
+```ts
+const userName = "Mario";
+```
+
+---
+
+# 14. Security Basics
+
+Do not generate insecure code.
+
+## Rules
+
+Never hardcode:
+
+* secrets;
+* tokens;
+* passwords;
+* API keys;
+* private keys;
+* credentials.
+
+Never log sensitive data.
+
+Sensitive data includes:
+
+* passwords;
+* access tokens;
+* refresh tokens;
+* session IDs;
+* payment data;
+* personal identification data;
+* private user content.
+
+Validate and sanitize external input.
+
+Use parameterized queries for database access.
+
+Do not build SQL strings by concatenation.
+
+Bad:
+
+```ts
+const query = `SELECT * FROM users WHERE email = '${email}'`;
+```
+
+Good:
+
+```ts
+const user = await database.user.findUnique({
+  where: { email },
+});
+```
+
+Do not disable security protections unless explicitly requested and justified.
+
+Do not disable:
+
+* authentication;
+* authorization;
+* CSRF protection;
+* CORS restrictions;
+* TLS;
+* certificate checks;
+* input validation.
+
+Handle authorization in server-side code, not only in the UI.
+
+Bad:
+
+```ts
+if (user.role === "admin") {
+  showDeleteButton();
+}
+```
+
+Good:
+
+```ts
+if (!currentUser.canDeleteAccount(account)) {
+  throw new ForbiddenError();
+}
+
+deleteAccount(account);
+```
+
+---
+
+# 15. Performance
+
+Write efficient code, but do not optimize prematurely.
+
+## Rules
+
+Prefer clear code first.
+
+Avoid obviously inefficient algorithms on large data.
+
+Avoid repeated database calls inside loops.
+
+Avoid unnecessary network calls.
+
+Avoid unnecessary re-renders in UI code.
+
+Avoid repeated expensive calculations.
+
+Measure before introducing complex optimizations.
+
+Do not sacrifice readability for micro-optimizations.
+
+Bad:
+
+```ts
+for (const user of users) {
+  const orders = await getOrdersByUserId(user.id);
+  sendOrderSummary(user, orders);
+}
+```
+
+Good:
+
+```ts
+const ordersByUserId = await getOrdersGroupedByUserIds(users.map((user) => user.id));
+
+for (const user of users) {
+  sendOrderSummary(user, ordersByUserId[user.id] ?? []);
+}
+```
+
+Avoid caching unless:
+
+* the cost is proven or obvious;
+* invalidation is clear;
+* stale data is acceptable or handled.
+
+---
+
+# 16. Project Consistency
+
+Follow the existing project style.
+
+## Rules
+
+Respect existing:
+
+* architecture;
+* naming conventions;
+* formatting;
+* folder structure;
+* testing style;
+* error handling style;
+* validation style;
+* dependency injection style;
+* state management style.
+
+Use existing utilities before creating new ones.
+
+Use existing error types before creating new errors.
+
+Use existing validation patterns before introducing new libraries.
+
+Do not mix paradigms unnecessarily.
+
+Do not introduce a new style in one file if the rest of the module follows another consistent style.
+
+When project conventions conflict with these rules, prefer the project convention unless it is clearly harmful.
+
+---
+
+# 17. AI Refactoring Safety
+
+When refactoring existing code, be conservative.
+
+## Rules
+
+Do not change behavior unless explicitly requested.
+
+Do not rewrite large files unnecessarily.
+
+Do not introduce new architecture unless the current task requires it.
+
+Prefer small, reviewable diffs.
+
+Preserve public APIs unless asked to change them.
+
+Preserve existing naming conventions unless they are clearly harmful.
+
+Preserve error handling and edge cases.
+
+Do not remove code because it looks unused unless confirmed by tests, references, or explicit instruction.
+
+Do not introduce dependencies without justification.
+
+Do not convert working code into abstract patterns just for style.
+
+Explain risky changes before applying them.
+
+When uncertain, choose the least invasive correct change.
+
+Bad:
+
+```ts
+// Rewriting an entire service to introduce a new architecture
+// when the task only asks to fix one bug.
+```
+
+Good:
+
+```ts
+// Fix the bug locally.
+// Add or update a focused test.
+// Improve nearby names only if safe.
+```
+
+---
+
+# 18. Practical Refactoring Behavior
+
+When modifying code:
+
+* preserve existing behavior unless explicitly asked to change it;
+* prefer the smallest clean change that solves the problem;
+* do not introduce unnecessary abstractions;
+* do not introduce new dependencies unless justified;
+* respect the project’s existing architecture and conventions;
+* improve readability without changing public contracts unless required;
+* add tests when behavior changes;
+* update existing tests when behavior is intentionally changed;
+* do not remove edge-case handling unless it is proven obsolete;
+* prefer explicit domain concepts over generic utility code;
+* keep business logic readable before optimizing;
+* avoid broad rewrites;
+* avoid unrelated formatting churn;
+* avoid drive-by refactors outside the task scope.
+
+---
+
+# 19. Output Expectations
+
+When generating code:
+
+* use meaningful names;
+* use pronounceable names;
+* use searchable names;
+* use consistent vocabulary;
+* avoid misleading names;
+* avoid cute names;
+* avoid magic numbers;
+* avoid redundant comments;
+* avoid commented-out code;
+* keep functions short;
+* keep functions focused;
+* keep one abstraction level per function;
+* avoid boolean flags;
+* avoid output arguments;
+* avoid hidden side effects;
+* avoid long parameter lists;
+* avoid null returns;
+* avoid null arguments;
+* avoid error codes;
+* avoid duplicated logic;
+* avoid repeated switch/if-else chains;
+* avoid deep object chains;
+* avoid primitive obsession;
+* avoid unsafe types;
+* avoid overengineering;
+* prefer early returns over nested conditionals;
+* prefer readable code over clever code;
+* prefer domain-specific names over generic helpers.
+
+When reviewing code:
+
+* identify unclear names;
+* identify misleading names;
+* identify inconsistent vocabulary;
+* identify functions doing too much;
+* identify mixed abstraction levels;
+* identify side effects;
+* identify comments that should become code;
+* identify duplication;
+* identify repeated conditionals;
+* identify feature envy;
+* identify Law of Demeter violations;
+* identify primitive obsession;
+* identify null/error-code problems;
+* identify unsafe types;
+* identify security risks;
+* identify unnecessary abstractions;
+* suggest concrete refactorings;
+* keep suggestions practical and minimal.
+
+When explaining changes:
+
+* be direct;
+* mention behavior changes explicitly;
+* mention risk when present;
+* mention tests added or needed;
+* avoid vague claims like "improved code quality" without saying how.
+
+---
+
+# 20. Non-Negotiables
+
+Do not generate code that:
+
+* uses misleading names;
+* uses names that require mental translation;
+* uses magic numbers or unexplained constants;
+* adds commented-out code;
+* adds redundant comments;
+* mixes business logic and low-level implementation details in the same function;
+* uses boolean flags to switch behavior when two functions would be clearer;
+* mutates output arguments when returning a value would be clearer;
+* hides side effects behind innocent names;
+* returns `null` when an empty collection, Optional/Maybe, Result/Either, Special Case object, or exception is better;
+* swallows errors silently;
+* introduces duplication;
+* creates large classes with unrelated responsibilities;
+* repeats switch/if-else logic across the codebase;
+* uses unsafe types without justification;
+* leaks framework, database, or API details into domain logic;
+* hardcodes secrets;
+* logs sensitive data;
+* disables security checks without explicit justification;
+* introduces speculative abstractions;
+* performs broad rewrites for small tasks.
+
+---
+
+# Final Principle
+
+Every change should make the code:
+
+* clearer;
+* safer;
+* easier to test;
+* easier to modify.
+
+If a change makes the code more abstract but less understandable, reject it.
+
+If a clever solution needs explanation, prefer a simpler solution.
+
+If the code can explain itself, do not add a comment.
+
+If the rule and the project convention conflict, follow the project convention unless it clearly damages readability, safety, or maintainability.

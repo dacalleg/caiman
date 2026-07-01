@@ -4,6 +4,7 @@ COPY package*.json ./
 COPY healthcheck.js ./
 COPY index.js ./
 COPY model.js ./
+COPY i18n/ ./i18n/
 
 RUN npm install
 CMD [ "node", "/usr/src/app/index.js" ]

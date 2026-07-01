@@ -10,6 +10,8 @@ export class WifiTeaseComponent {
 
   @Input() station: WifiStation|null;
   @Input() connected: boolean;
+  @Input() allowConnect: boolean;
+  @Input() allowDisconnect: boolean;
   @Output() onDisconnect: EventEmitter<void>;
   @Output() onConnect: EventEmitter<{station: WifiStation, password: string}>;
   password: string;
@@ -18,6 +20,8 @@ export class WifiTeaseComponent {
   constructor() {
     this.station = null;
     this.connected = false;
+    this.allowConnect = true;
+    this.allowDisconnect = true;
     this.onDisconnect = new EventEmitter();
     this.onConnect = new EventEmitter();
     this.password = "";

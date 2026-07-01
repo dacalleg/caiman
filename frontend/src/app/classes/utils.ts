@@ -1,5 +1,10 @@
 import { Variable } from "./interfaces";
 
+const HASH_PLACEHOLDER = '#';
+const HASH_REGEX = /#/g;
+
+type TextRange = [number, number];
+
 export class Utils {
 
     private static nanDebugLogged = new Set<string>();
@@ -11,19 +16,395 @@ export class Utils {
         console.warn('[variable NaN]', variable.varKey ?? variable.hash, formula);
     }
 
-    //IIF(S_LEN(Math.floor(144/6)) = 1, '0' + Math.floor(144/6), Math.floor(144/6)) + ':' + IIF(S_LEN((144 MOD 6) * 10) = 1, '0' + (144 MOD 6) * 10, (144 MOD 6) * 10)
+    private static coerceNumericBound(value: unknown, fallback: number): number {
+        return typeof value === 'number' && !Number.isNaN(value) ? value : fallback;
+    }
+
+    private static bitMaxFromBitCount(bit: number): number {
+        return (2 ** bit) - 1;
+    }
+
+    private static buildVariableHash(memory: string, address: number, mask: number): string {
+        return [(memory === 'eeprom' ? 'E' : 'R'), String(address), String(mask)].join('_');
+    }
+
+    private static evaluateBoundsFromSanitizedExp(
+        sanitized: string,
+        min: number,
+        max: number,
+        computeStep = false
+    ): { min: number; max: number; step?: number } {
+        const bounds = { min, max } as { min: number; max: number; step?: number };
+        try {
+            bounds.min = eval(sanitized.replace(HASH_REGEX, String(min)));
+        }
+        catch {
+        }
+        try {
+            bounds.max = eval(sanitized.replace(HASH_REGEX, String(max)));
+        }
+        catch {
+        }
+        if (computeStep) {
+            try {
+                const atOne = eval(sanitized.replace(HASH_REGEX, '1'));
+                const atTwo = eval(sanitized.replace(HASH_REGEX, '2'));
+                bounds.step = atTwo - atOne;
+            }
+            catch {
+            }
+        }
+        return bounds;
+    }
+
     public static sanitizeExp(expval: string) {
         expval = expval
-            .replace(/&/g, "+")
-            .replace(/mod/g, "%")
-            .replace(/MOD/g, "%")
-            .replace(/AND/g, "&")
-            .replace(/and/g, "&")
             .replace(/&amp;/g, "+")
-            .replace(/int\(/g, "Math.floor(")
-            .replace(/INT\(/g, "Math.floor(")
+            .replace(/mod/gi, "%")
+            .replace(/AND/gi, "&")
+            .replace(/int\(/gi, "Math.floor(")
             .replace(/\$([0-9a-f]+)/gi, "0x$1");
+        expval = this.replaceSeramiAmpersand(expval);
         return this.normalizeSeramiExp(expval);
+    }
+
+    public static normalizeReadExp(exp: string | null | undefined): string | null | undefined {
+        if (!exp || exp === HASH_PLACEHOLDER)
+            return exp;
+        if (this.parseMaskOnlyFormula(exp) !== null)
+            return null;
+        return this.sanitizeExp(exp);
+    }
+
+    public static parseMaskOnlyFormula(formula: string | null | undefined): number | null {
+        if (!formula || typeof formula !== 'string')
+            return null;
+        const trimmed = formula.trim();
+        const patterns = [
+            /^\(\s*#\s*AND\s*(\d+)\s*\)$/i,
+            /^#\s*AND\s*(\d+)$/i,
+            /^\(\s*#\s*&\s*(\d+)\s*\)$/,
+            /^#\s*&\s*(\d+)$/,
+        ];
+        for (const pattern of patterns) {
+            const match = trimmed.match(pattern);
+            if (match)
+                return parseInt(match[1], 10);
+        }
+        return null;
+    }
+
+    public static isLegacyFakeMaskFormula(formula: string | null | undefined): boolean {
+        if (!formula || typeof formula !== 'string')
+            return false;
+        return /^\(\s*#\s*AND\s*(\d+)\s*\)$/i.test(formula.trim());
+    }
+
+    public static resolveReadExpForBuild(
+        rawReadExp: string | null | undefined,
+        realMin: number,
+        realMax: number,
+        currentMask: number
+    ): { mask: number; readExp: string | null | undefined; min: number; max: number; step: number } {
+        let mask = currentMask;
+        let min = realMin;
+        let max = realMax;
+        let step = 1;
+        let expval = rawReadExp;
+        const maskOnly = this.parseMaskOnlyFormula(rawReadExp);
+
+        if (maskOnly !== null) {
+            mask = maskOnly;
+            expval = null;
+            if (this.isLegacyFakeMaskFormula(rawReadExp)) {
+                min = 0;
+                max = 1;
+            }
+        }
+        else if (expval && expval !== HASH_PLACEHOLDER) {
+            const sanitized = this.sanitizeExp(expval);
+            if (!this.producesStringOutput(sanitized, realMin, realMax)) {
+                const bounds = this.evaluateBoundsFromSanitizedExp(sanitized, realMin, realMax, true);
+                min = bounds.min;
+                max = bounds.max;
+                step = bounds.step ?? step;
+            }
+        }
+
+        const readExp = maskOnly !== null ? null : this.normalizeReadExp(expval);
+        return { mask, readExp, min, max, step };
+    }
+
+    public static applyReadExpOverride(variable: Variable, readExp: string): void {
+        const maskOnly = this.parseMaskOnlyFormula(readExp);
+        if (maskOnly !== null) {
+            variable.mask = maskOnly;
+            variable.readExp = null;
+            variable.hash = this.buildVariableHash(variable.memory, variable.address, maskOnly);
+            if (this.isLegacyFakeMaskFormula(readExp)) {
+                variable.min = 0;
+                variable.max = 1;
+            }
+            return;
+        }
+
+        variable.readExp = this.normalizeReadExp(readExp)!;
+        if (!variable.readExp || variable.readExp === HASH_PLACEHOLDER)
+            return;
+
+        const bitMax = this.bitMaxFromBitCount(variable.bit);
+        const min = variable.min ?? 0;
+        const max = variable.max ?? bitMax;
+        if (!this.producesStringOutput(variable.readExp, min, max)) {
+            const bounds = this.evaluateBoundsFromSanitizedExp(variable.readExp, min, max);
+            variable.min = bounds.min;
+            variable.max = bounds.max;
+        }
+        this.applyStringValueOptionsIfNeeded(variable);
+    }
+
+    public static producesStringOutput(readExp: string, min: unknown = 0, max: unknown = 255): boolean {
+        if (!readExp || readExp === HASH_PLACEHOLDER)
+            return false;
+        const lo = this.coerceNumericBound(min, 0);
+        const hi = this.coerceNumericBound(max, 255);
+        const samples = [lo, hi, Math.floor((lo + hi) / 2), 30, 0, 255];
+        const unique = samples.filter((v, i, a) => a.indexOf(v) === i && v >= lo && v <= hi);
+        for (const raw of unique) {
+            try {
+                const exp = this.sanitizeExp(readExp).replace(HASH_REGEX, String(raw));
+                if (typeof eval(exp) === 'string')
+                    return true;
+            }
+            catch {
+            }
+        }
+        return false;
+    }
+
+    public static getAllMaskValues(mask: number): number[] {
+        const values: number[] = [];
+        for (let i = 0; i <= mask; i++) {
+            if (i === (i & mask))
+                values.push(i);
+        }
+        return values;
+    }
+
+    public static buildStringValueOptions(config: {
+        readExp: string;
+        mask: number;
+        min?: number;
+        max?: number;
+        step?: number;
+        bit: number;
+        type?: string;
+    }): string[][] {
+        const variable = {
+            readExp: config.readExp,
+            mask: config.mask,
+            min: config.min,
+            max: config.max,
+            step: config.step ?? 1,
+            bit: config.bit,
+            type: config.type ?? 'RwmsParameterBase',
+        } as Variable;
+        const bitMax = this.bitMaxFromBitCount(config.bit);
+        const realMin = this.coerceNumericBound(config.min, 0);
+        const realMax = this.coerceNumericBound(config.max, bitMax);
+        const step = typeof config.step === 'number' && config.step > 0 && !Number.isNaN(config.step) ? config.step : 1;
+        const options: string[][] = [];
+        for (const raw of this.getAllMaskValues(config.mask)) {
+            if (raw < realMin || raw > realMax || raw % step !== 0)
+                continue;
+            const [result] = this.convertValuesToRead([variable], [raw]);
+            options.push([String(raw), String(result)]);
+        }
+        return options;
+    }
+
+    public static applyStringValueOptionsIfNeeded(variable: Variable) {
+        if (!variable.readExp || variable.readExp === HASH_PLACEHOLDER)
+            return;
+        const bitMax = this.bitMaxFromBitCount(variable.bit);
+        const probeMin = this.coerceNumericBound(variable.min, 0);
+        const probeMax = this.coerceNumericBound(variable.max, bitMax);
+        if (!this.producesStringOutput(variable.readExp, probeMin, probeMax)
+            && !this.producesStringOutput(variable.readExp, 0, bitMax))
+            return;
+        if (!variable.values?.length) {
+            const options = this.buildStringValueOptions({
+                readExp: variable.readExp,
+                mask: variable.mask!,
+                min: probeMin,
+                max: probeMax,
+                step: 1,
+                bit: variable.bit,
+                type: variable.type,
+            });
+            if (options.length === 0)
+                return;
+            variable.values = options;
+        }
+        variable.readExp = null;
+    }
+
+    public static hasLogicalAnd(exp: string): boolean {
+        if (/\bAND\b/i.test(exp))
+            return true;
+        for (let i = 0; i < exp.length; i++) {
+            if (exp[i] !== '&' || this.isInsideString(exp, i))
+                continue;
+            const left = this.scanSeramiOperandLeft(exp, i);
+            const right = this.scanSeramiOperandRight(exp, i);
+            if (!left || !right)
+                continue;
+            const leftStr = exp.substring(left[0], left[1] + 1);
+            const rightStr = exp.substring(right[0], right[1] + 1);
+            if (!this.isStringLiteralOperand(leftStr) && !this.isStringLiteralOperand(rightStr))
+                return true;
+        }
+        return false;
+    }
+
+    static convertValuesToRead(variables: Variable[], values: (number | null)[]) {
+        const results = [] as (number | string)[];
+        const params = variables.filter(v => v.varKey !== undefined);
+        const hashes = variables.map(v => v.hash);
+
+        for (let i = 0; i < variables.length; i++) {
+            const variable = variables[i];
+            if (values[i] === null) {
+                this.logNaNOnce(variable, variable.readExp ?? '(null raw value)');
+                results.push(NaN);
+                continue;
+            }
+
+            let formula = variable.readExp ?? String(values[i]);
+            try {
+                const maskedValue = values[i]! & variable.mask!;
+
+                if (variable.type === "RwmsParameterBaseBit") {
+                    results.push(maskedValue > 0 ? 1 : 0);
+                    continue;
+                }
+
+                if (!variable.readExp) {
+                    formula = String(maskedValue);
+                    if (Number.isNaN(maskedValue))
+                        this.logNaNOnce(variable, formula);
+                    results.push(maskedValue);
+                    continue;
+                }
+
+                const expval = this.sanitizeExp(variable.readExp);
+                let exp = expval.replace(HASH_REGEX, String(maskedValue));
+                params.forEach(p => exp = exp.replace(new RegExp(p.varKey!, 'g'), String(values[hashes.indexOf(p.hash)])));
+                formula = exp;
+                const result = eval(exp);
+                if (Number.isNaN(result))
+                    this.logNaNOnce(variable, formula);
+                results.push(result);
+            }
+            catch {
+                this.logNaNOnce(variable, formula);
+                results.push(NaN);
+            }
+        }
+        return results;
+    }
+
+    static convertValuesToWrite(variables: Variable[], values: (number | string)[], skipValues = false) {
+        const results = [] as number[];
+
+        for (let i = 0; i < variables.length; i++) {
+            const variable = variables[i];
+            const value = typeof values[i] === 'string' ? parseFloat(values[i] as string) : values[i] as number;
+
+            if (variable.type === "RwmsParameterBaseBit") {
+                results.push(value > 0 ? variable.mask! : 0);
+                continue;
+            }
+
+            if (!skipValues && variable.values && variable.values.length > 0) {
+                const keys = variable.values.map(item => item[0]);
+                if (keys.includes(String(value))) {
+                    results.push(value);
+                    continue;
+                }
+            }
+
+            if (!variable.writeExp) {
+                if (variable.readExp) {
+                    const expval = this.sanitizeExp(variable.readExp);
+                    const fn = (x: number) => eval(expval.replace(HASH_REGEX, String(x)) + " - " + value);
+                    const result = Utils.bisectionAlgorithm(fn, 0, this.bitMaxFromBitCount(variable.bit));
+                    if (result == null)
+                        throw new Error("Bisection Error");
+                    results.push(Math.round(result));
+                }
+                else {
+                    results.push(value);
+                }
+            }
+            else {
+                results.push(eval(variable.writeExp.replace(HASH_REGEX, String(value))));
+            }
+        }
+        return results;
+    }
+
+    static bisectionAlgorithm(
+        f: (x: number) => number,
+        a: number,
+        b: number,
+        tolerance: number = 0.01
+    ): number | null {
+        let left = a;
+        let right = b;
+        let fleft = f(left);
+        let fright = f(right);
+
+        if (fleft === 0)
+            return left;
+
+        if (fright === 0)
+            return right;
+
+        if (fleft * fright >= 0)
+            return null;
+
+        while (Math.abs(right - left) > tolerance) {
+            const mid = (left + right) / 2;
+            const value = f(mid);
+
+            if (Math.abs(value) < tolerance)
+                return mid;
+
+            if (value * f(left) < 0)
+                right = mid;
+            else
+                left = mid;
+        }
+
+        return (left + right) / 2;
+    }
+
+    static newtonRaphson(f: (x: number) => number, x0: number, h: number = 0.0001) {
+        let x1 = x0 - f(x0) / Utils.derivative(f, x0, h);
+        while (Math.abs(x1 - x0) > h) {
+            x0 = x1;
+            x1 = x0 - f(x0) / Utils.derivative(f, x0, h);
+        }
+        return x1;
+    }
+
+    static derivative(f: (x: number) => number, x: number, h: number = 0.0001) {
+        return (f(x + h) - f(x - h)) / (2 * h);
+    }
+
+    static hex2bin(hex: string): string {
+        return parseInt(hex, 16).toString(2).padStart(8, '0');
     }
 
     private static normalizeSeramiExp(expval: string): string {
@@ -34,7 +415,6 @@ export class Utils {
             cur = this.replaceSLen(cur);
             cur = this.replaceIntegerDivision(cur);
             cur = this.convertIIF(cur);
-            cur = this.convertPythonIfElse(cur);
             cur = this.convertEquality(cur);
         }
         return cur;
@@ -135,7 +515,132 @@ export class Utils {
         return exp;
     }
 
-    private static scanOperandLeft(s: string, backslashIdx: number): [number, number] | null {
+    private static isStringLiteralOperand(operand: string): boolean {
+        const trimmed = operand.trim();
+        return (trimmed.startsWith('"') && trimmed.endsWith('"'))
+            || (trimmed.startsWith("'") && trimmed.endsWith("'"));
+    }
+
+    private static scanSeramiOperandLeft(s: string, ampIdx: number): TextRange | null {
+        let i = ampIdx - 1;
+        while (i >= 0 && /\s/.test(s[i]))
+            i--;
+        if (i < 0)
+            return null;
+
+        if (s[i] === '"' || s[i] === "'") {
+            const end = i;
+            const quote = s[i];
+            i--;
+            while (i >= 0) {
+                if (s[i] === quote && s[i - 1] !== '\\')
+                    return [i, end];
+                i--;
+            }
+            return null;
+        }
+
+        if (s[i] === ')') {
+            let depth = 1;
+            const end = i;
+            i--;
+            while (i >= 0) {
+                if (this.isInsideString(s, i)) {
+                    i--;
+                    continue;
+                }
+                if (s[i] === ')')
+                    depth++;
+                else if (s[i] === '(') {
+                    depth--;
+                    if (depth === 0) {
+                        let start = i;
+                        while (start > 0 && /[a-zA-Z0-9_]/.test(s[start - 1]))
+                            start--;
+                        return [start, end];
+                    }
+                }
+                i--;
+            }
+            return null;
+        }
+
+        const end = i;
+        while (i >= 0 && /[0-9.#a-zA-Z_]/.test(s[i]))
+            i--;
+        if (i < end)
+            return [i + 1, end];
+        return null;
+    }
+
+    private static scanSeramiOperandRight(s: string, ampIdx: number): TextRange | null {
+        let i = ampIdx + 1;
+        while (i < s.length && /\s/.test(s[i]))
+            i++;
+        if (i >= s.length)
+            return null;
+
+        if (s[i] === '"' || s[i] === "'") {
+            const start = i;
+            const quote = s[i];
+            i++;
+            while (i < s.length) {
+                if (s[i] === quote && s[i - 1] !== '\\')
+                    return [start, i];
+                i++;
+            }
+            return null;
+        }
+
+        if (s[i] === '(') {
+            const close = this.findMatchingParen(s, i);
+            if (close < 0)
+                return null;
+            return [i, close];
+        }
+
+        if (/[a-zA-Z_]/.test(s[i])) {
+            const start = i;
+            while (i < s.length && /[a-zA-Z0-9_]/.test(s[i]))
+                i++;
+            if (i < s.length && s[i] === '(') {
+                const close = this.findMatchingParen(s, i);
+                if (close >= 0)
+                    return [start, close];
+            }
+            return [start, i - 1];
+        }
+
+        const start = i;
+        while (i < s.length && /[0-9.#]/.test(s[i]))
+            i++;
+        if (i > start)
+            return [start, i - 1];
+        return null;
+    }
+
+    private static replaceSeramiAmpersand(exp: string): string {
+        let result = '';
+        for (let i = 0; i < exp.length; i++) {
+            if (exp[i] === '&' && !this.isInsideString(exp, i)) {
+                const left = this.scanSeramiOperandLeft(exp, i);
+                const right = this.scanSeramiOperandRight(exp, i);
+                if (!left || !right) {
+                    result += exp[i];
+                    continue;
+                }
+                const leftStr = exp.substring(left[0], left[1] + 1);
+                const rightStr = exp.substring(right[0], right[1] + 1);
+                const isConcat = this.isStringLiteralOperand(leftStr) || this.isStringLiteralOperand(rightStr);
+                result += isConcat ? '+' : '&';
+                continue;
+            }
+            result += exp[i];
+        }
+        return result;
+    }
+
+    private static scanOperandLeft(s: string, backslashIdx: number): TextRange | null {
         let i = backslashIdx - 1;
         while (i >= 0 && /\s/.test(s[i]))
             i--;
@@ -170,7 +675,7 @@ export class Utils {
         return null;
     }
 
-    private static scanOperandRight(s: string, backslashIdx: number): [number, number] | null {
+    private static scanOperandRight(s: string, backslashIdx: number): TextRange | null {
         let i = backslashIdx + 1;
         while (i < s.length && /\s/.test(s[i]))
             i++;
@@ -239,96 +744,6 @@ export class Utils {
         return exp;
     }
 
-    private static findTopLevelKeyword(s: string, keyword: string, fromEnd = false): number {
-        const lower = keyword.toLowerCase();
-        const indices: number[] = [];
-        for (let i = 0; i <= s.length - keyword.length; i++) {
-            if (this.isInsideString(s, i))
-                continue;
-            if (s.substring(i, i + keyword.length).toLowerCase() !== lower)
-                continue;
-            let depth = 0;
-            let valid = true;
-            for (let j = 0; j < i; j++) {
-                if (this.isInsideString(s, j))
-                    continue;
-                if (s[j] === '(')
-                    depth++;
-                else if (s[j] === ')')
-                    depth--;
-            }
-            if (depth === 0)
-                indices.push(i);
-        }
-        if (indices.length === 0)
-            return -1;
-        return fromEnd ? indices[indices.length - 1] : indices[0];
-    }
-
-    private static convertPythonIfElse(exp: string): string {
-        let changed = true;
-        while (changed) {
-            changed = false;
-            const elseIdx = this.findTopLevelKeyword(exp, ' else ');
-            if (elseIdx < 0)
-                break;
-            const beforeElse = exp.substring(0, elseIdx);
-            const ifIdx = this.findTopLevelKeyword(beforeElse, ' if ', true);
-            if (ifIdx < 0)
-                break;
-            const trueBranch = beforeElse.substring(0, ifIdx).trim();
-            const cond = beforeElse.substring(ifIdx + 4).trim();
-            let falseBranch = exp.substring(elseIdx + 6).trim();
-            const suffix = this.extractSuffixAfterIfElse(falseBranch);
-            if (suffix) {
-                falseBranch = suffix.branch;
-                exp = `(${cond} ? ${trueBranch} : ${falseBranch})${suffix.suffix}`;
-            } else {
-                falseBranch = this.balanceClosingParens(falseBranch);
-                exp = `(${cond} ? ${trueBranch} : ${falseBranch})`;
-            }
-            changed = true;
-        }
-        return exp;
-    }
-
-    private static extractSuffixAfterIfElse(falseBranch: string): { branch: string; suffix: string } | null {
-        let depth = 0;
-        for (let i = 0; i < falseBranch.length; i++) {
-            if (this.isInsideString(falseBranch, i))
-                continue;
-            if (falseBranch[i] === '(')
-                depth++;
-            else if (falseBranch[i] === ')')
-                depth--;
-            else if (falseBranch[i] === '+' && depth <= 0)
-                return {
-                    branch: this.balanceClosingParens(falseBranch.substring(0, i).trim()),
-                    suffix: falseBranch.substring(i),
-                };
-        }
-        return null;
-    }
-
-    private static balanceClosingParens(s: string): string {
-        let opens = 0;
-        let closes = 0;
-        for (let i = 0; i < s.length; i++) {
-            if (this.isInsideString(s, i))
-                continue;
-            if (s[i] === '(')
-                opens++;
-            else if (s[i] === ')')
-                closes++;
-        }
-        let result = s;
-        while (closes > opens && result.endsWith(')')) {
-            result = result.slice(0, -1).trimEnd();
-            closes--;
-        }
-        return result;
-    }
-
     private static convertEquality(exp: string): string {
         let result = '';
         let inString = false;
@@ -354,155 +769,5 @@ export class Utils {
             result += c;
         }
         return result;
-    }
-
-    static convertValuesToRead(variables: Variable[], values: (number | null)[]) {
-        let ret = [] as number[];
-        const params = variables.filter(v => v.varKey !== undefined);
-        const hashes = variables.map(v => v.hash);
-
-        var re = new RegExp('#', 'g');
-        for (let i = 0; i < variables.length; i++) {
-            const variable = variables[i];
-            if (values[i] !== null) {
-                let formula = variable.readExp ?? String(values[i]);
-                try {
-                    const value = values[i]! & variable.mask!;
-
-                    if (variable.type === "RwmsParameterBaseBit") {
-                        ret.push(value > 0 ? 1 : 0);
-                        continue;
-                    }
-
-                    if (!variable.readExp) {
-                        formula = String(value);
-                        if (Number.isNaN(value))
-                            this.logNaNOnce(variable, formula);
-                        ret.push(value);
-                    } else {
-                        const expval = this.sanitizeExp(variable.readExp);
-                        let exp = expval.replace(re, "" + value);
-                        params.forEach(p => exp = exp.replace(new RegExp(p.varKey!, 'g'), "" + values[hashes.indexOf(p.hash)]));
-                        formula = exp;
-                        const result = eval(exp);
-                        if (Number.isNaN(result))
-                            this.logNaNOnce(variable, formula);
-                        ret.push(result);
-                    }
-                }
-                catch (ex) {
-                    this.logNaNOnce(variable, formula);
-                    ret.push(NaN);
-                }
-            }
-            else {
-                this.logNaNOnce(variable, variable.readExp ?? '(null raw value)');
-                ret.push(NaN);
-            }
-        }
-        return ret;
-    }
-
-    static convertValuesToWrite(variables: Variable[], values: number[], skipValues=false) {
-        let ret = [] as number[];
-
-        var re = new RegExp('#', 'g');
-        for (let i = 0; i < variables.length; i++) {
-            const variable = variables[i];
-            const value = values[i];
-
-            if (variable.type === "RwmsParameterBaseBit") {
-                ret.push(value > 0 ? variable.mask! : 0);
-                continue;
-            }
-
-            if (!skipValues && variable.values && variable.values.length > 0) {
-                const keys = variable.values.map(item => item[0]);
-                if (keys.includes("" + value)) {
-                    ret.push(value);
-                    continue;
-                }
-            }
-
-            if (!variable.writeExp) {
-                if (variable.readExp) {
-                    //Calculate reverse formula
-                    const expval = this.sanitizeExp(variable.readExp);
-                    const fn = (x: number) => {
-                        let exp = expval.replace(re, "" + x) + " - " + value;
-                        //let exp = variable.readExp!.replace(re, "" + x) + " - " + value;
-                        return eval(exp);
-                    }
-                    //const result = Utils.newtonRaphson(fn, 0, 0.1);
-                    const result = Utils.bisectionAlgorithm(fn, 0, (2 ** variable.bit - 1))
-                    if (result == null) {
-                        throw new Error("Bisection Error")
-                    }
-                    ret.push(Math.round(result));
-                }
-                else {
-                    ret.push(value);
-                }
-            } else {
-                ret.push(eval(variable.writeExp.replace(re, "" + value)));
-            }
-        }
-        return ret;
-    }
-
-    static bisectionAlgorithm(
-        f: (x: number) => number,
-        a: number,
-        b: number,
-        tolerance: number = 0.01
-    ): number | null {
-        let left = a;
-        let right = b;
-        let fleft = f(left);
-        let fright = f(right);
-
-        if (fleft === 0)
-            return left;
-
-        if (fright === 0)
-            return right;
-
-        if (fleft * fright >= 0) {
-            return null; // L'algoritmo di bisezione richiede che f(a) * f(b) < 0
-        }
-
-        while (Math.abs(right - left) > tolerance) {
-            const mid = (left + right) / 2;
-            const value = f(mid);
-
-            if (Math.abs(value) < tolerance) {
-                return mid; // L'intervallo è sufficientemente piccolo
-            }
-
-            if (value * f(left) < 0) {
-                right = mid; // Il punto medio cade a sinistra
-            } else {
-                left = mid; // Il punto medio cade a destra
-            }
-        }
-
-        return (left + right) / 2; // Restituisce il valore approssimato
-    }
-
-    static newtonRaphson(f: (x: number) => number, x0: number, h: number = 0.0001) {
-        let x1 = x0 - f(x0) / Utils.derivative(f, x0, h);
-        while (Math.abs(x1 - x0) > h) {
-            x0 = x1;
-            x1 = x0 - f(x0) / Utils.derivative(f, x0, h);
-        }
-        return x1;
-    }
-
-    static derivative(f: (x: number) => number, x: number, h: number = 0.0001) {
-        return (f(x + h) - f(x - h)) / (2 * h);
-    }
-
-    static hex2bin(hex: string): string {
-        return (parseInt(hex, 16).toString(2)).padStart(8, '0');
     }
 }

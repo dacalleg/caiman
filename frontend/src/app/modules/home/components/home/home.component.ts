@@ -133,7 +133,7 @@ export class HomeComponent implements OnInit, OnDestroy {
               return device;
             }),
           )
-        return throwError(() => new Error("Device Not Found"))
+        return throwError(() => new Error('error.device.not_found'))
       }),
       tap(device => this.Store.setDevice(device)),
       shareReplay(1)

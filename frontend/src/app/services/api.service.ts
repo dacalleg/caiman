@@ -101,22 +101,39 @@ export class ApiService {
       this.getAguaHeaders(),
       this.options$,
     ]).pipe(
-      switchMap(([headers, options]) => this.Http.post<DeviceInfoResponse>(options.agua_endpoint + "/deviceInfoFromMac", {mac: mac}, {headers: headers})),
-      map(response => response.device_product[0]),
+      switchMap(([headers, options]) => this.Http.post<DeviceInfoResponse>(
+        options.agua_endpoint + "/deviceInfoFromMac",
+        {mac: mac},
+        {headers: headers}
+      )),
       switchMap(response => {
-        if (productKey)
-          return this.getProductInfo(productKey, response.boards_status?.Type).pipe(
-            map(info => {
-              response.info = info;
-              return response;
-            }));
-        return this.getProductInfo(response.id_product, response.boards_status?.Type).pipe(
+        if (!response.Success)
+          return throwError(() => new Error('error.device.api_failed'));
+        const device = response.device_product?.[0];
+        if (!device)
+          return throwError(() => new Error('error.device.not_found'));
+        const productId = productKey ?? device.id_product;
+        if (!productId)
+          return throwError(() => new Error('error.product.not_found'));
+        return this.getProductInfo(productId, device.boards_status?.Type).pipe(
           map(info => {
-            response.info = info;
-            return response;
-          }))
-      })
+            device.info = info;
+            return device;
+          })
+        );
+      }),
+      catchError(err => throwError(() => this.toDeviceLookupError(err))),
     );
+  }
+
+  private toDeviceLookupError(err: unknown): Error {
+    if (err instanceof Error) {
+      if (err.message === 'Product not found')
+        return new Error('error.product.not_found');
+      if (err.message.startsWith('error.'))
+        return err;
+    }
+    return new Error('error.device.generic');
   }
 
   getFailures() {

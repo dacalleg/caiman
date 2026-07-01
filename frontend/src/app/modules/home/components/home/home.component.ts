@@ -297,6 +297,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         take(1),
         switchMap(() => this.Device.startRead()),
         catchError(err => {
+          this.disconnect();
           return this.modal.openAlertModal({
             title: "error",
             message: err.message,

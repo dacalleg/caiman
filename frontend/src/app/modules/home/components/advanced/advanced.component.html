@@ -52,11 +52,11 @@
         <div class="col">
           <h3 class="mb-3">{{'home.network'|translate}}</h3>
             <div class="text-end" *ngIf="!status.wifi_connected">
-              <button class="btn btn-outline-secondary me-2" type="button" (click)="disconnectWifi()">{{'wifi.deletesettings'|translate}}</button>
+              <button class="btn btn-outline-secondary me-2" type="button" (click)="disconnectWifi()" *ngIf="!(connectedViaWifi$|async)">{{'wifi.deletesettings'|translate}}</button>
               <button class="btn btn-outline-secondary" type="button" (click)="scanWifi()">{{'update'|translate}}</button>
             </div>
             <div class="pt-3">
-              <app-wifi-tease  *ngFor="let station of status.wifi_stations" [connected]="status.wifi_connected" [station]="station" (onDisconnect)="disconnectWifi()" (onConnect)="connectWifi($event)"></app-wifi-tease>
+              <app-wifi-tease  *ngFor="let station of status.wifi_stations" [connected]="status.wifi_connected" [allowConnect]="!(connectedViaWifi$|async)" [allowDisconnect]="!(connectedViaWifi$|async)" [station]="station" (onDisconnect)="disconnectWifi()" (onConnect)="connectWifi($event)"></app-wifi-tease>
             </div>
         </div>
       </div>

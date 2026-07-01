@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { BehaviorSubject, combineLatest, concatMap, delay, filter, from, ignoreElements, map, Observable, of, repeat, retry, switchMap, takeUntil, tap, timeout, toArray } from 'rxjs';
+import { BehaviorSubject, combineLatest, concatMap, delay, filter, from, ignoreElements, map, Observable, of, repeat, retry, switchMap, take, takeUntil, tap, timeout, toArray } from 'rxjs';
 import { Database, DeviceProduct, Firmware, VariableValue, WifiStation, WifiStatus } from 'src/app/classes/interfaces';
 import { Utils } from 'src/app/classes/utils';
 import { ApiService } from 'src/app/services/api.service';
@@ -22,6 +22,7 @@ export class AdvancedComponent {
 
   wifiRefreshSubject$: BehaviorSubject<void>;
   wifiStatus$: Observable<WifiStatus>;
+  connectedViaWifi$: Observable<boolean>;
 
 
   constructor(private modal: ModalService, private Store: StoreService, private Device: DeviceService, private Api: ApiService) {
@@ -32,6 +33,7 @@ export class AdvancedComponent {
     this.wifiStatus$ = this.wifiRefreshSubject$.pipe(
       switchMap(() => this.Device.getWifiStatus())
     );
+    this.connectedViaWifi$ = this.Device.connectedViaWifi();
   }
 
 
@@ -186,21 +188,25 @@ export class AdvancedComponent {
   }
 
   connectWifi($event: { station: WifiStation, password: string }) {
-    this.modal.openAlertModal({
-      title: "modal.wifistation.connection",
-      message: "modal.wifistation.message",
-      progress: true,
-      replaceParams: { ssid: $event.station.ssid }
-    }).pipe(
-      switchMap(() => this.Device.setWifi($event.station.ssid, $event.password).pipe(
-        switchMap(() => of(void 0).pipe(
-          delay(1000),
-          tap(() => this.wifiRefreshSubject$.next()),
-          repeat()
-        )),
-        ignoreElements(),
-        timeout(15000),
-        takeUntil(this.wifiStatus$.pipe(filter(status => status.wifi_connected))),
+    this.connectedViaWifi$.pipe(
+      take(1),
+      filter(connectedViaWifi => !connectedViaWifi),
+      switchMap(() => this.modal.openAlertModal({
+        title: "modal.wifistation.connection",
+        message: "modal.wifistation.message",
+        progress: true,
+        replaceParams: { ssid: $event.station.ssid }
+      }).pipe(
+        switchMap(() => this.Device.setWifi($event.station.ssid, $event.password).pipe(
+          switchMap(() => of(void 0).pipe(
+            delay(1000),
+            tap(() => this.wifiRefreshSubject$.next()),
+            repeat()
+          )),
+          ignoreElements(),
+          timeout(15000),
+          takeUntil(this.wifiStatus$.pipe(filter(status => status.wifi_connected))),
+        ))
       ))
     ).subscribe({
       error: (err) => {
@@ -216,20 +222,24 @@ export class AdvancedComponent {
   }
 
   disconnectWifi() {
-    this.modal.openAlertModal({
-      title: "modal.disconnecting",
-      message: "modal.disconnecting.message",
-      progress: true,
-    }).pipe(
-      switchMap(() => this.Device.disconnectWifi().pipe(
-        switchMap(() => of(void 0).pipe(
-          delay(1000),
-          tap(() => this.wifiRefreshSubject$.next()),
-          repeat()
-        )),
-        ignoreElements(),
-        timeout(15000),
-        takeUntil(this.wifiStatus$.pipe(filter(status => !status.wifi_connected))),
+    this.connectedViaWifi$.pipe(
+      take(1),
+      filter(connectedViaWifi => !connectedViaWifi),
+      switchMap(() => this.modal.openAlertModal({
+        title: "modal.disconnecting",
+        message: "modal.disconnecting.message",
+        progress: true,
+      }).pipe(
+        switchMap(() => this.Device.disconnectWifi().pipe(
+          switchMap(() => of(void 0).pipe(
+            delay(1000),
+            tap(() => this.wifiRefreshSubject$.next()),
+            repeat()
+          )),
+          ignoreElements(),
+          timeout(15000),
+          takeUntil(this.wifiStatus$.pipe(filter(status => !status.wifi_connected))),
+        ))
       ))
     ).subscribe({
       error: (err) => {

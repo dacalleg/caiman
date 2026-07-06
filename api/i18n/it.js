@@ -209,7 +209,7 @@ const values = {
     "registry.update.success": "L'anagrafica è stata salvata correttamente",
     "profile.update.success": "Il Profilo è stato aggiornato con successo",
     "operation.new.email.subject": "[{{software}}] Nuovo intervento tecnico",
-    "operation.new.email.body": "Gentile Cliente,\r\n\r\nE' stato creato un nuovo intervento tecnico relativo al tuo dispositivo,\r\n<a href=\"{{domain_url}}/confirm/operation/{{key}}\">Clicca qui </a> per visualizzarlo e confermarlo\r\n\r\n{{email.signature}}",
+    "operation.new.email.body": "Gentile Cliente,\r\n\r\nE' stato creato un nuovo intervento tecnico relativo al tuo dispositivo,\r\n<a href=\"{{domain_url}}/confirm/operation/{{id}}\">Clicca qui </a> per visualizzarlo e confermarlo\r\n\r\n{{email.signature}}",
     "bluefy.message": "Per utilizzare la connessione BLE tramite<br>\r\ndispositivi iOS è necessario utilizzare<br>\r\nCaiman con il browser Bluefy",
     "cancel": "Annulla",
     "home.deviceselect.by_micronova": "By Micronova Srl",

@@ -53,7 +53,7 @@ export class OperationComponent {
   }
 
   confirmOperation(operation: Operation) {
-    this.Api.confirmOperation(operation.key!).subscribe(() => {
+    this.Api.confirmOperation(operation.id!).subscribe(() => {
       this.Toast.addSuccessToast("op.confirmed");
       this.reloadOperation$.next();
     }

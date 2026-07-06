@@ -22,21 +22,21 @@ import {
 import {environment} from 'src/environments/environment';
 import {
   AguaOptions,
-  Board,
   Country,
+  Database,
   DeviceInfoResponse,
   Failure,
+  Firmware,
   Gateway,
   Info,
   LogItem,
   Operation,
   ProductInfo,
   Registry,
-  SeramiACL,
   SeramiEntry,
   Ticket,
   Variable,
-  VariableInfoOverride
+  BoardData
 } from '../classes/interfaces';
 import {AuthService} from './auth.service';
 import {TranslationProviderService} from './translation-provider.service';
@@ -210,10 +210,10 @@ export class ApiService {
           return throwError(() => new Error("Product not found"))
         return from(arr)
       }),
-      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
+      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null)])),
       take(1),
-      switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
-      map(([item, board, gateway, roles, serami]) => this.buildProductInfo(item, board, roles, gateway, serami.data)),
+      switchMap(([item, board, gateway]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, serami]))),
+      map(([item, board, gateway, serami]) => this.buildProductInfo(item, board, gateway, serami.data)),
       switchMap(item => {
         if (item.image) {
           return this.getMedia(item.image).pipe(map(image => {
@@ -235,10 +235,10 @@ export class ApiService {
           return throwError(() => new Error("Product not found"))
         return from(arr)
       }),
-      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
+      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null)])),
       take(1),
-      switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
-      map(([item, board, gateway, roles, serami]) => this.buildProductInfo(item, board, roles, gateway, serami.data)),
+      switchMap(([item, board, gateway]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, serami]))),
+      map(([item, board, gateway, serami]) => this.buildProductInfo(item, board, gateway, serami.data)),
       switchMap(item => {
         if (item.image) {
           return this.getMedia(item.image).pipe(map(image => {
@@ -286,16 +286,16 @@ export class ApiService {
     return this.Http.get<SeramiEntry[]>(environment.endpoint + "/api/serami").pipe(map(arr => arr.sort((a,b) => a.name.localeCompare(b.name))));
   }
 
-  getSerami(key: string) {
-    return this.Http.get<SeramiEntry>(environment.endpoint + "/api/serami/get/" + key);
+  getSerami(id: string) {
+    return this.Http.get<SeramiEntry>(environment.endpoint + "/api/serami/get/" + id);
   }
 
   updateSerami(data: SeramiEntry) {
     return this.Http.post<any>(environment.endpoint + "/api/serami/update", data);
   }
 
-  deleteSerami(key: string) {
-    return this.Http.post<any>(environment.endpoint + "/api/serami/delete", {key: key});
+  deleteSerami(id: string) {
+    return this.Http.post<any>(environment.endpoint + "/api/serami/delete", { id: id });
   }
 
   getTickets(serial: string) {
@@ -416,13 +416,13 @@ export class ApiService {
     )
   }
 
-  getOperationByKey(key: string) {
-    return this.Http.get<Operation>(environment.endpoint + "/api/operation/key/" + key);
+  getOperationById(id: string) {
+    return this.Http.get<Operation>(environment.endpoint + "/api/operation/id/" + id);
   }
 
-  confirmOperation(key: string, from_email?: string) {
+  confirmOperation(id: string, from_email?: string) {
     return this.Http.post<Operation>(environment.endpoint + "/api/operation/confirm", {
-      key: key,
+      id: id,
       from_email: from_email
     });
   }
@@ -432,7 +432,7 @@ export class ApiService {
   }
 
   updateRegistry(registry: Registry) {
-    return this.Http.post<any>(environment.endpoint + "/api/registry/update", {...registry, key: undefined});
+    return this.Http.post<any>(environment.endpoint + "/api/registry/update", {...registry});
   }
 
   private getAguaHeaders() {
@@ -453,28 +453,11 @@ export class ApiService {
 
   private getBoard(id: string) {
     return this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/board/" + id).pipe(
-      map(item => {
-        let serami_acl = [] as SeramiACL[];
-        if (item.acf.serami_acl) {
-          serami_acl = item.acf.serami_acl.map((item: any) => {
-            return {
-              ...item,
-              hidden_variables: item.hidden_variables ? item.hidden_variables.split("\r\n") : [],
-              hidden_groups: item.hidden_groups ? item.hidden_groups.split("\r\n") : [],
-              only_read_variables: item.only_read_variables ? item.only_read_variables.split("\r\n") : [],
-              writable_variables: item.writable_variables ? item.writable_variables.split("\r\n") : []
-            }
-          })
-        }
-        return {
-          id: item.id,
-          serami_acl: serami_acl,
-          firmware_list: item.acf.firmware || [],
-          database: item.acf.database || [],
-          serami_var_formula_override: item.acf.serami_var_formula_override || [],
-          key: item.acf.key
-        } as Board
-      })
+      map(item => ({
+        firmware_list: item.acf.firmware || [],
+        database: item.acf.database || [],
+        key: item.acf.key
+      } as BoardData))
     )
   }
 
@@ -520,69 +503,21 @@ export class ApiService {
     localStorage.setItem("http_queue", JSON.stringify(queue));
   }
 
-  private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[]) {
-    let serami_var_override = item.acf.serami_var_override as any[] || [];
-    let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
-    let serami_var_formula_override = board.serami_var_formula_override as any[] || [];
-    let writable_variables = board.serami_acl.find(item => roles.includes(item.role) || item.role === 'all')?.writable_variables || [];
-    let only_read_variables = board.serami_acl.find(item => roles.includes(item.role) || item.role === 'all')?.only_read_variables || [];
-
-    let identifiers = [].concat(
-      ...serami_var_override.map(item => item.id),
-      ...serami_var_opt_override.map(item => item.id),
-      ...serami_var_formula_override.map(item => item.id)
-    ).filter((item, pos, arr) => {
-      return arr.indexOf(item) == pos;
-    });
-
-    const var_override = identifiers.map(id => {
-      const info = serami_var_override.find(item => item.id === id);
-      const options = serami_var_opt_override.find(item => item.id === id)?.options.split("\n").reduce((acc: {
-        [key: string]: string
-      }, item: string) => {
-        const [key, value] = item.split(":");
-        acc[value.trim()] = key.trim();
-        return acc;
-      }, {} as { [key: string]: string });
-      const formula = serami_var_formula_override.find(item => item.id === id);
-
-      let is_writable = writable_variables.includes(id);
-      let is_only_readable = only_read_variables.includes(id);
-      let writable = undefined as boolean | undefined;
-      if (is_writable)
-        writable = true;
-      if (is_only_readable)
-        writable = false;
-
-      return {
-        id: id,
-        title: info ? info.title : undefined,
-        description: info ? info.description : undefined,
-        options: options ? options : undefined,
-        read_exp: formula ? formula.read_exp : undefined,
-        write_exp: formula ? formula.write_exp : undefined,
-        writable: writable,
-      } as VariableInfoOverride
-    })
-
+  private buildProductInfo(item: any, board: BoardData, gateway: Gateway | null = null, variables: Variable[]) {
     return {
       id: item.id,
       name: item.title.rendered,
       description: item.excerpt.rendered ? item.excerpt.rendered.replace(/(<([^>]+)>)/gi, "") : "",
       id_product: item.acf.key,
-      serami_acl: board.serami_acl,
       gateway_firmware_list: gateway !== null ? gateway.firmware_list : [],
       board_firmware_list: board.firmware_list,
       video: item.acf.video || [],
       documents: item.acf.documents || [],
       links: item.acf.links || [],
-      serami_var_override: var_override || [],
-      serami_group_override: item.acf.serami_group_override || [],
       database: board.database || [],
       image: item["_links"]["wp:featuredmedia"] && item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
       faq: item.acf.faq || [],
-      prefix: item.acf.prefix,
-      variables: variables
+      variables
     } as ProductInfo
   }
 

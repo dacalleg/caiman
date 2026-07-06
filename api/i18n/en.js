@@ -209,7 +209,7 @@ const values = {
     "registry.update.success": "The registry has been saved successfully.",
     "profile.update.success": "The profile has been updated successfully.",
     "operation.new.email.subject": "[{{software}}] New technical service",
-    "operation.new.email.body": "Dear Customer,\r\n\r\nA new technical service has been created for your device.\r\n<a href=\"{{domain_url}}/confirm/operation/{{key}}\">Click here</a> to view and confirm it.\r\n\r\n{{email.signature}}",
+    "operation.new.email.body": "Dear Customer,\r\n\r\nA new technical service has been created for your device.\r\n<a href=\"{{domain_url}}/confirm/operation/{{id}}\">Click here</a> to view and confirm it.\r\n\r\n{{email.signature}}",
     "bluefy.message": "To use the BLE connection via<br>\r\niOS devices, you need to use<br>\r\nCaiman with the Bluefy browser.",
     "cancel": "Cancel",
     "home.deviceselect.by_micronova": "By Micronova Srl",

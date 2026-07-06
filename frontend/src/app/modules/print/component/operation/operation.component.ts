@@ -16,8 +16,8 @@ export class OperationComponent implements AfterViewInit {
   constructor(private ActivatedRoute: ActivatedRoute, private Api: ApiService)
   {
     this.operation$ = this.ActivatedRoute.params.pipe(
-      filter(params => params["key"] != null),
-      switchMap(params => this.Api.getOperationByKey(params['key']))
+      filter(params => params["id"] != null),
+      switchMap(params => this.Api.getOperationById(params['id']))
     )
   }
 

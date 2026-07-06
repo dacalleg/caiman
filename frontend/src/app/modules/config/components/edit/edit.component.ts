@@ -43,9 +43,9 @@ export class EditComponent {
     this.currentGroup$ = new BehaviorSubject<string>("");
 
     let s$ = this.activatedRoute.params.pipe(
-      filter(params => params["key"] != null),
-      map(params => params["key"]),
-      switchMap(key => this.Api.getSerami(key)),
+      filter(params => params['id'] != null),
+      map(params => params['id']),
+      switchMap(id => this.Api.getSerami(id)),
       tap(s => this.seramiEntry = s)
     )
 

@@ -17,7 +17,7 @@
                     <ng-template ngbPanelContent>
                         <div class="row">
                             <div class="col text-end">
-                                <a class="btn btn-primary my-3" [routerLink]="'/print/operation/' + op.key" target="_blank">{{'op.print'|translate}}</a>
+                                <a class="btn btn-primary my-3" [routerLink]="'/print/operation/' + op.id" target="_blank">{{'op.print'|translate}}</a>
                                 <button class="btn btn-warning m-3" *ngIf="!op.email_confirmed && !op.web_confirmed" (click)="confirmOperation(op)">{{'op.confirm'|translate}}</button>
                             </div>
                         </div>
@@ -43,7 +43,7 @@
                                 <div class="row">
                                     <div class="col-md">
                                         <h3>{{'op.number'|translate}}</h3>
-                                        <p>{{op.key}}</p>
+                                        <p>{{op.id}}</p>
                                     </div>
                                 </div>
                                 <div class="row">

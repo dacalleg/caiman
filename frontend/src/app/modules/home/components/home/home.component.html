@@ -14,7 +14,7 @@
             <option value="5"  *ngIf="device?.mac !== '0000'">{{'home.logs'|translate}}</option>
             <ng-container *ngIf="connected$|async">
               <option *ngFor="let group of groups$|async|sortGroup;let i = index" (shown)="onGroupSelected(group)" [value]="i+6">
-                {{group|overrideGroupName|async}}
+                {{group}}
               </option>
             </ng-container>
           </select>
@@ -75,7 +75,7 @@
             </li>
             <ng-container *ngIf="connected$|async">
               <li ngbNavItem *ngFor="let group of groups$|async|sortGroup;let i = index" (shown)="onGroupSelected(group)" [id]="i + 6" [domId]="'ngb-nav-' + (i + 6)">
-                <a ngbNavLink>{{group|overrideGroupName|async}}</a>
+                <a ngbNavLink>{{group}}</a>
                 <ng-template ngbNavContent>
                   <div class="row">
                     <div class="col my-2">

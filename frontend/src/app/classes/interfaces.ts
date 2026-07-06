@@ -1,7 +1,7 @@
 import { Observable } from "rxjs";
 
 export interface SeramiEntry {
-  key?: string;
+  id?: string;
   name: string;
   data: Variable[];
 }
@@ -163,6 +163,22 @@ export interface BoardsStatus {
   Restart_cnt: number;
 }
 
+export interface Product{
+  id_product: string;
+  id: number;
+  name: string;
+  documents: Document[];
+  links: Link[];
+  image: string | null;
+  faq: SingleFaq[];
+  video: Video[];
+  gateway_firmware_list: Firmware[];
+  board_firmware_list: Firmware[];
+  variables: Variable[];
+  database: Database[];
+  description: string;
+}
+
 
 export interface DeviceProduct {
   id_device: string;
@@ -196,67 +212,21 @@ export interface DeviceInfoResponse {
   device_product: DeviceProduct[] | null;
 }
 
-export interface Board {
-  id: string;
-  serami_acl: SeramiACL[];
-  firmware_list: Firmware[];
-  database: Database[];
-  serami_var_formula_override: any[];
-  key: string;
-}
-
 export interface Gateway {
   type: string;
   board: number;
   firmware_list: Firmware[];
 }
 
-export interface ProductInfo {
-  id_product: string;
-  id: number;
-  name: string;
-  documents: Document[];
-  links: Link[];
-  image: string | null;
-  serami_acl: SeramiACL[];
-  faq: SingleFaq[];
-  video: Video[];
-  serami_var_override: VariableInfoOverride[];
-  serami_group_override: GroupNameOverride[];
-  gateway_firmware_list: Firmware[];
-  board_firmware_list: Firmware[];
-  variables: Variable[];
-  database: Database[];
-  description: string;
-  serial?: string;
-}
-
-export interface GroupNameOverride {
-  name: string;
-  title: string;
-}
-
-export interface VariableInfoOverride {
-  id: string;
-  title?: string;
-  description?: string;
-  options?: { [key: string]: string }
-  read_exp?: string;
-  write_exp?: string;
-  writable?: boolean;
+export interface ProductInfo extends Product {
+  serial: string;
+  serami?: string;
 }
 
 export interface Video {
   name: string;
   description: string;
   video: string;
-}
-
-export interface SeramiACL extends WithRole {
-  hidden_groups: string[];
-  hidden_variables: string[];
-  only_read_variables: string[];
-  writable_variables: string[];
 }
 
 export interface SingleFaq {
@@ -303,7 +273,7 @@ export interface Database extends WithRole {
 }
 
 export interface WithRole {
-  role: string;
+  roles: string[];
 }
 
 export interface DatabaseValue {
@@ -459,7 +429,7 @@ export interface OperationData
 
 export interface Operation
 {
-  key?: string;
+  id?: string;
   serial: string;
   user: string;
   createdAt?: Date;
@@ -471,6 +441,7 @@ export interface Operation
 
 export interface Registry
 {
+  id?: string;
   serial: string;
   fiscal_code: string;
   business_name: string;
@@ -519,4 +490,11 @@ export interface EnvObj
   operation_enabled: boolean,
   only_op_enabled: boolean,
   hide_micronova_ref: boolean,
+}
+
+
+export interface BoardData {
+  firmware_list: Firmware[];
+  database: Database[];
+  key: string;
 }

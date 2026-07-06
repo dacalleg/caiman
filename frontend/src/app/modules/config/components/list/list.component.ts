@@ -55,6 +55,6 @@ export class ListComponent {
   {
     const result = confirm("Vuoi davvero eliminare la configurazione " + entry.name + "?");
     if(result)
-      this.Api.deleteSerami(entry.key!).subscribe(() => this.reloadSerami$.next())
+      this.Api.deleteSerami(entry.id!).subscribe(() => this.reloadSerami$.next())
   }
 }

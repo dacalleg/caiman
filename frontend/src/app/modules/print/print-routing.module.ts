@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { OperationComponent } from './component/operation/operation.component';
 
 const routes: Routes = [
-  {path: 'operation/:key', component: OperationComponent}
+  {path: 'operation/:id', component: OperationComponent}
 ];
 
 @NgModule({

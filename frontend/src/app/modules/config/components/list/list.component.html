@@ -18,9 +18,9 @@
                 <tbody>
                     <tr *ngFor="let entry of list$|async">
                         <td>{{entry.name}}</td>
-                        <td>{{entry.key}}</td>
+                        <td>{{entry.id}}</td>
                         <td class="text-end">
-                            <button class="btn btn-primary" (click)="openConfig(entry.key!)">Modifica</button>
+                            <button class="btn btn-primary" (click)="openConfig(entry.id!)">Modifica</button>
                             <button class="ms-2 btn btn-danger" (click)="deleteEntry(entry)">Elimina</button>
                         </td>
                     </tr>

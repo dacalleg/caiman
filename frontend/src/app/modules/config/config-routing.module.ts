@@ -8,7 +8,7 @@ const routes: Routes = [
     path: "", redirectTo: "/config/list", pathMatch: 'full'
   },
   { path: "list", component: ListComponent },
-  { path: "edit/:key", component: EditComponent },
+  { path: "edit/:id", component: EditComponent },
   { path: "edit", component: EditComponent }
 
 ];

@@ -6,8 +6,8 @@ services:
     image: willfarrell/autoheal
     restart: always
     environment:
-       AUTOHEAL_CONTAINER_LABEL: all
-       AUTOHEAL_INTERVAL: 30
+      AUTOHEAL_CONTAINER_LABEL: ${AUTOHEAL_CONTAINER_LABEL}
+      AUTOHEAL_INTERVAL: ${AUTOHEAL_INTERVAL}
     volumes:
        - /var/run/docker.sock:/var/run/docker.sock
 
@@ -18,18 +18,23 @@ services:
     container_name: caiman_api
     depends_on:
       - caiman_db
+      - caiman_mongo
     volumes:
       - ./volumes/uploads/api:/usr/src/app/uploads
     command: ["node", "index.js"]
     healthcheck:
       interval: 5m
     environment:
-      NODE_ENV: "production"
-      DB_NAME: "api"
-      DB_USER: "root"
-      DB_PASSWORD: "01Ul8TrH&Mq8"
-      DB_HOST: "caiman_db"
-      JWT_AUTH_SECRET_KEY: "tokenagua"
+      NODE_ENV: ${NODE_ENV}
+      DB_NAME: ${API_DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      JWT_AUTH_SECRET_KEY: ${JWT_AUTH_SECRET_KEY}
+      MONGO_HOST: caiman_mongo
+      MONGODB_USER: ${MONGODB_USER}
+      MONGODB_PASS: ${MONGODB_PASS}
+      MONGO_DATABASE: ${MONGO_DATABASE}
 
   caiman_frontend:
     restart: always
@@ -52,24 +57,24 @@ services:
     healthcheck:
       interval: 5m
     environment:
-      DB_NAME: "caiman"
-      DB_USER: "root"
-      DB_PASSWORD: "01Ul8TrH&Mq8"
-      DB_HOST: "caiman_db"
-      WP_DEBUG: "false"
-      JWT_AUTH_SECRET_KEY: "tokenagua"
-      JWT_AUTH_CORS_ENABLE: "true"
-      AGUA_ID_BRAND: "1"
-      AGUA_CUSTOMER_CODE: "999996"
-      AGUA_HOSTNAME: "aguaxxx.agua-iot.com"
-      AGUA_ENDPOINT: "https://aguaxxx.agua-iot.com"
-      JWT_SOFTWARE_FIELD: "caiman"
-      JWT_ID_FIELD: "464D7C31-0BBD-462D-A7F8-C03913EED030"
-      JWT_ISS_FIELD: "caiman.micronovasrl.com"
-      DEFAULT_ROLE: "service"
-      DEFAULT_USER_ACCESS: "locked"
-      DEFAULT_LANGUAGE_CODE: "it"
-      DEFAULT_ADMIN_CODE: "it"
+      DB_NAME: ${BACKEND_DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      WP_DEBUG: ${WP_DEBUG}
+      JWT_AUTH_SECRET_KEY: ${JWT_AUTH_SECRET_KEY}
+      JWT_AUTH_CORS_ENABLE: ${JWT_AUTH_CORS_ENABLE}
+      AGUA_ID_BRAND: ${AGUA_ID_BRAND}
+      AGUA_CUSTOMER_CODE: ${AGUA_CUSTOMER_CODE}
+      AGUA_HOSTNAME: ${AGUA_HOSTNAME}
+      AGUA_ENDPOINT: ${AGUA_ENDPOINT}
+      JWT_SOFTWARE_FIELD: ${JWT_SOFTWARE_FIELD}
+      JWT_ID_FIELD: ${JWT_ID_FIELD}
+      JWT_ISS_FIELD: ${JWT_ISS_FIELD}
+      DEFAULT_ROLE: ${DEFAULT_ROLE}
+      DEFAULT_USER_ACCESS: ${DEFAULT_USER_ACCESS}
+      DEFAULT_LANGUAGE_CODE: ${DEFAULT_LANGUAGE_CODE}
+      DEFAULT_ADMIN_CODE: ${DEFAULT_ADMIN_CODE}
 
   caiman_rabbitmq_auth:
     restart: always
@@ -80,7 +85,7 @@ services:
     healthcheck:
       interval: 5m
     environment:
-      NODE_ENV: "production"
+      NODE_ENV: ${NODE_ENV}
 
   certbot:
     container_name: certbot
@@ -95,12 +100,12 @@ services:
      - ./volumes/letsencrypt/www:/tmp/letsencrypt/www
      - ./volumes/letsencrypt/certs:/etc/nginx/certs
     environment:
-     - EMAIL=info@micronovasrl.com
-     - SERVER_CONTAINER=caiman_reverse_proxy
-     - WEBROOT_PATH=/tmp/letsencrypt/www
-     - CERTS_PATH=/etc/nginx/certs
-     - DOMAINS=caiman.micronovasrl.com
-     - CHECK_FREQ=7
+      EMAIL: ${EMAIL}
+      SERVER_CONTAINER: ${SERVER_CONTAINER}
+      WEBROOT_PATH: ${WEBROOT_PATH}
+      CERTS_PATH: ${CERTS_PATH}
+      DOMAINS: ${DOMAINS}
+      CHECK_FREQ: ${CHECK_FREQ}
     restart: always
 
   caiman_reverse_proxy:
@@ -124,9 +129,9 @@ services:
     image: mariadb
     container_name: caiman_db
     environment:
-      MYSQL_ROOT_PASSWORD: 01Ul8TrH&Mq8
-      MARIADB_AUTO_UPGRADE: "1"
-      MARIADB_INITDB_SKIP_TZINFO: "1"
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_AUTO_UPGRADE: ${MARIADB_AUTO_UPGRADE}
+      MARIADB_INITDB_SKIP_TZINFO: ${MARIADB_INITDB_SKIP_TZINFO}
     volumes:
       - ./volumes/mariadb:/var/lib/mysql
     healthcheck:
@@ -145,7 +150,7 @@ services:
     volumes:
       - ./volumes/rabbitmq:/var/lib/rabbitmq
     environment:
-      RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
     depends_on:
       - caiman_rabbitmq_auth
     ports:
@@ -160,6 +165,49 @@ services:
       depends_on:
         - caiman_db
       environment:
-          PMA_HOST: caiman_db
-          MYSQL_ROOT_PASSWORD: 01Ul8TrH&Mq8
-          PMA_ABSOLUTE_URI: https://caiman.micronovasrl.com/phpmyadmin/
+          PMA_HOST: ${PMA_HOST}
+          MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+          PMA_ABSOLUTE_URI: ${PMA_ABSOLUTE_URI}
+
+  caiman_mongo:
+    restart: always
+    image: caiman_mongo:latest
+    build: ../mongo
+    container_name: caiman_mongo
+    environment:
+      MONGO_DATA_DIR: ${MONGO_DATA_DIR}
+      MONGO_LOG_DIR: ${MONGO_LOG_DIR}
+      MONGODB_USER: ${MONGODB_USER}
+      MONGODB_PASS: ${MONGODB_PASS}
+    volumes:
+      - ./volumes/mongo:/data/db
+    command: mongod --logpath=/dev/null # --quiet
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  micronova_mongoex:
+    image: mongo-express
+    container_name: micronova_mongoex
+    restart: always
+    depends_on:
+      - micronova_mongo
+    environment:
+      ME_CONFIG_SITE_BASEURL: ${ME_CONFIG_SITE_BASEURL}
+      ME_CONFIG_OPTIONS_EDITORTHEME: ${ME_CONFIG_OPTIONS_EDITORTHEME}
+      ME_CONFIG_MONGODB_SERVER: ${ME_CONFIG_MONGODB_SERVER}
+      ME_CONFIG_MONGODB_PORT: ${ME_CONFIG_MONGODB_PORT}
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: ${ME_CONFIG_MONGODB_ENABLE_ADMIN}
+      ME_CONFIG_MONGODB_AUTH_DATABASE: ${ME_CONFIG_MONGODB_AUTH_DATABASE}
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
+    networks:
+      micronova_network:
+        ipv4_address: 172.20.0.10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

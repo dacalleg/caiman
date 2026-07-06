@@ -186,7 +186,7 @@ export interface DeviceProduct {
   email_master: string;
   id_client_master: string;
   security_code: string;
-  info: ProductInfo;
+  info: ProductModel;
 }
 
 export interface DeviceInfoResponse {
@@ -211,7 +211,7 @@ export interface Gateway {
   firmware_list: Firmware[];
 }
 
-export interface ProductInfo {
+export interface ProductModel {
   id_product: string;
   id: number;
   name: string;
@@ -228,7 +228,6 @@ export interface ProductInfo {
   variables: Variable[];
   database: Database[];
   description: string;
-  serial?: string;
 }
 
 export interface GroupNameOverride {

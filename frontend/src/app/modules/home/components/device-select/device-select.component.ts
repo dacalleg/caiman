@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import {EnvObj, Info, ProductInfo} from 'src/app/classes/interfaces';
+import {EnvObj, Info} from 'src/app/classes/interfaces';
 import { ApiService } from 'src/app/services/api.service';
 import {BarcodeService} from "../../../../services/barcode.service";
 import {environment} from "../../../../../environments/environment";

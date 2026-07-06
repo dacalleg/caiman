@@ -30,7 +30,7 @@ import {
   Info,
   LogItem,
   Operation,
-  ProductInfo,
+  ProductModel,
   Registry,
   SeramiACL,
   SeramiEntry,
@@ -202,7 +202,7 @@ export class ApiService {
     )
   }
 
-  getProductInfoByPrefix(prefix: string, gateway: string | undefined = undefined) {
+  getProductInfoByPrefix(prefix: string, gateway: string | undefined = undefined): Observable<ProductModel> {
     return combineLatest([of(prefix), this.Translation.getCurrentLanguage()]).pipe(
       switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?prefix=" + prefix + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => {
@@ -227,7 +227,7 @@ export class ApiService {
     )
   }
 
-  getProductInfo(product: string, gateway: string | undefined = undefined) {
+  getProductInfo(product: string, gateway: string | undefined = undefined): Observable<ProductModel> {
     return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
       switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => {
@@ -520,7 +520,7 @@ export class ApiService {
     localStorage.setItem("http_queue", JSON.stringify(queue));
   }
 
-  private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[]) {
+  private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[]): ProductModel {
     let serami_var_override = item.acf.serami_var_override as any[] || [];
     let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
     let serami_var_formula_override = board.serami_var_formula_override as any[] || [];
@@ -583,7 +583,7 @@ export class ApiService {
       faq: item.acf.faq || [],
       prefix: item.acf.prefix,
       variables: variables
-    } as ProductInfo
+    } as ProductModel
   }
 
   ransomOrder(uuid: string)

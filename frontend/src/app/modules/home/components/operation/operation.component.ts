@@ -24,8 +24,8 @@ export class OperationComponent {
     this.newOperation = false;
     this.project$ = this.Store.getProject();
     const serial$ = this.project$.pipe(
-      filter(p => p.device?.info.serial != null),
-      map(p => p.device!.info.serial!),
+      filter(p => p.device?.serial != null),
+      map(p => p.device!.serial),
       take(1)
     );
 

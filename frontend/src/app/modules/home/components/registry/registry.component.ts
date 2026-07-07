@@ -31,8 +31,8 @@ export class RegistryComponent {
     this.countries$ = this.Api.getCountries();
     this.update$ = new Subject();
     const serial$ = this.project$.pipe(
-      filter(p => p.device?.info.serial != null),
-      map(p => p.device!.info.serial!),
+      filter(p => p.device?.serial != null),
+      map(p => p.device!.serial),
       take(1)
     );
     serial$.subscribe(serial => this.registry.serial = serial);

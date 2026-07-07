@@ -39,8 +39,8 @@ export class TicketsComponent {
     ).pipe(
       switchMap(() => this.Store.getProject().pipe(
         take(1),
-        filter(project => project.device?.info.serial != null),
-        map(project => project.device!.info!.serial!),
+        filter(project => project.device?.serial != null),
+        map(project => project.device!.serial),
         switchMap(serial => this.Api.getTickets(serial)))
       ),
       shareReplay(1)
@@ -60,8 +60,8 @@ export class TicketsComponent {
 
     this.Store.getProject().pipe(
       take(1),
-      filter(project => project.device?.info.serial != null),
-      map(project => project.device?.info.serial!)
+      filter(project => project.device?.serial != null),
+      map(project => project.device!.serial)
     ).subscribe(serial => {
       this.newTicket.serial = serial;
     })
@@ -79,7 +79,7 @@ export class TicketsComponent {
       ])),
       tap(([paths, project, user]) => {
         this.newTicket.assets = paths.map(path => ({ path: path }));
-        this.newTicket.serial = project.device!.info.serial;
+        this.newTicket.serial = project.device!.serial;
         this.newTicket.email = user.email;
       }),
       switchMap(() => this.Api.addTicket(this.newTicket, parent)),

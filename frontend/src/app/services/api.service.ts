@@ -30,7 +30,7 @@ import {
   Info,
   LogItem,
   Operation,
-  ProductInfo,
+  ProductModel,
   Registry,
   SeramiACL,
   SeramiEntry,
@@ -101,22 +101,39 @@ export class ApiService {
       this.getAguaHeaders(),
       this.options$,
     ]).pipe(
-      switchMap(([headers, options]) => this.Http.post<DeviceInfoResponse>(options.agua_endpoint + "/deviceInfoFromMac", {mac: mac}, {headers: headers})),
-      map(response => response.device_product[0]),
+      switchMap(([headers, options]) => this.Http.post<DeviceInfoResponse>(
+        options.agua_endpoint + "/deviceInfoFromMac",
+        {mac: mac},
+        {headers: headers}
+      )),
       switchMap(response => {
-        if (productKey)
-          return this.getProductInfo(productKey, response.boards_status?.Type).pipe(
-            map(info => {
-              response.info = info;
-              return response;
-            }));
-        return this.getProductInfo(response.id_product, response.boards_status?.Type).pipe(
+        if (!response.Success)
+          return throwError(() => new Error('error.device.api_failed'));
+        const device = response.device_product?.[0];
+        if (!device)
+          return throwError(() => new Error('error.device.not_found'));
+        const productId = productKey ?? device.id_product;
+        if (!productId)
+          return throwError(() => new Error('error.product.not_found'));
+        return this.getProductInfo(productId, device.boards_status?.Type).pipe(
           map(info => {
-            response.info = info;
-            return response;
-          }))
-      })
+            device.info = info;
+            return device;
+          })
+        );
+      }),
+      catchError(err => throwError(() => this.toDeviceLookupError(err))),
     );
+  }
+
+  private toDeviceLookupError(err: unknown): Error {
+    if (err instanceof Error) {
+      if (err.message === 'Product not found')
+        return new Error('error.product.not_found');
+      if (err.message.startsWith('error.'))
+        return err;
+    }
+    return new Error('error.device.generic');
   }
 
   getFailures() {
@@ -185,7 +202,7 @@ export class ApiService {
     )
   }
 
-  getProductInfoByPrefix(prefix: string, gateway: string | undefined = undefined) {
+  getProductInfoByPrefix(prefix: string, gateway: string | undefined = undefined): Observable<ProductModel> {
     return combineLatest([of(prefix), this.Translation.getCurrentLanguage()]).pipe(
       switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?prefix=" + prefix + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => {
@@ -210,7 +227,7 @@ export class ApiService {
     )
   }
 
-  getProductInfo(product: string, gateway: string | undefined = undefined) {
+  getProductInfo(product: string, gateway: string | undefined = undefined): Observable<ProductModel> {
     return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
       switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => {
@@ -503,7 +520,7 @@ export class ApiService {
     localStorage.setItem("http_queue", JSON.stringify(queue));
   }
 
-  private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[]) {
+  private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[]): ProductModel {
     let serami_var_override = item.acf.serami_var_override as any[] || [];
     let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
     let serami_var_formula_override = board.serami_var_formula_override as any[] || [];
@@ -566,7 +583,7 @@ export class ApiService {
       faq: item.acf.faq || [],
       prefix: item.acf.prefix,
       variables: variables
-    } as ProductInfo
+    } as ProductModel
   }
 
   ransomOrder(uuid: string)

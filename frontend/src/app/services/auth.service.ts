@@ -113,6 +113,13 @@ export class AuthService {
     return this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/reset-password', { user: username, key: key, password: password });
   }
 
+  changePassword(currentPassword: string, password: string) {
+    return this.Http.post<void>(environment.endpoint + '/wp-json/caiman/v1/change-password', {
+      current_password: currentPassword,
+      password: password,
+    });
+  }
+
   register(user: User) {
     return this.Http.post<any>(environment.endpoint + '/wp-json/caiman/v1/register', user);
   }

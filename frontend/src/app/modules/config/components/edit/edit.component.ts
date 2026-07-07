@@ -127,7 +127,7 @@ export class EditComponent {
   }
 
   check(variable: Variable) {
-    if (variable.readExp?.includes("&"))
+    if (variable.readExp && Utils.hasLogicalAnd(variable.readExp))
       this.addLog({ type: "Warning in Formula", variables: [variable], message: "contains logical operation" })
   }
 

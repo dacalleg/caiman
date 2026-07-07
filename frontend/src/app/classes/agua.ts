@@ -1,4 +1,4 @@
-import { catchError, concat, concatMap, defer, delay, filter, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, takeUntil, takeWhile, tap, throwError, toArray } from "rxjs";
+import { catchError, concat, concatMap, defer, delay, EMPTY, filter, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, takeUntil, takeWhile, tap, throwError, toArray } from "rxjs";
 import { Channel, FirmwareDownloadStatus, Variable, VariableValue, VariableWriteResponse, WifiStation, WifiStatus } from "./interfaces";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Utils } from "./utils";
@@ -115,7 +115,9 @@ class AguaProtocol {
         private customer_code: string) {
 
         this.token$ = of(this.access_token).pipe(shareReplay(1));
-        this.requestQueue$.pipe(concatMap(op => op)).subscribe();
+        this.requestQueue$.pipe(
+            concatMap(op => op.pipe(catchError(() => EMPTY)))
+        ).subscribe();
     }
 
     private schedule<T>(work: () => Observable<T>): Observable<T> {
@@ -220,7 +222,7 @@ class AguaProtocol {
                 switchMap(token => concat(
                     this.executeReadVariables(variables.map(v => v.variable)),
                     this.http.post<any>(this.agua_endpoint + "/deviceRequestWriting", payload, { headers: this.getHeaders(token) }).pipe(
-                        switchMap(response => this.getJobStatus(response.idRequest, true)),
+                        switchMap(response => this.getJobStatus(response.idRequest)),
                         retry({ count: 5 }),
                         delay(2000),
                         switchMap(() => this.executeReadVariables(variables.map(v => v.variable))))
@@ -249,7 +251,7 @@ class AguaProtocol {
             return this.token$.pipe(
                 switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceSetConfigBuffer", payload, { headers: this.getHeaders(token) })
                     .pipe(
-                        switchMap(response => this.getJobStatus(response.idRequest, true)),
+                        switchMap(response => this.getJobStatus(response.idRequest)),
                         switchMap(() => of(void 0))
                     )
                 ),
@@ -284,7 +286,7 @@ class AguaProtocol {
             }
             return this.token$.pipe(
                 switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceStatusWifiStation", payload, { headers: this.getHeaders(token) }).pipe(
-                    switchMap(response => this.getJobStatus(response.idRequest, true)),
+                    switchMap(response => this.getJobStatus(response.idRequest)),
                 )),
                 switchMap(() => of(true)),
                 catchError(() => of(false)),
@@ -341,7 +343,7 @@ class AguaProtocol {
             }
             return this.token$.pipe(
                 switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceDownloadFiles", payload, { headers: this.getHeaders(token) }).pipe(
-                    switchMap(response => this.getJobStatus(response.idRequest, true)),
+                    switchMap(response => this.getJobStatus(response.idRequest)),
                 )),
                 switchMap(() => this.getDownloadStatus().pipe(
                     map(response => {
@@ -379,7 +381,7 @@ class AguaProtocol {
             }
             return this.token$.pipe(
                 switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceDownloadFiles", payload, { headers: this.getHeaders(token) }).pipe(
-                    switchMap(response => this.getJobStatus(response.idRequest, true)),
+                    switchMap(response => this.getJobStatus(response.idRequest)),
                 )),
                 switchMap(() => this.getDownloadStatus().pipe(
                     map(response => {
@@ -405,7 +407,7 @@ class AguaProtocol {
         )
     }
 
-    private getJobStatus(requestId: string, allowEmpty = false) {
+    private getJobStatus(requestId: string) {
         return this.token$.pipe(
             switchMap(token => of(void 0).pipe(
                 delay(1000),
@@ -425,12 +427,6 @@ class AguaProtocol {
                         }
                     }),
                     retry({ count: 10, delay: 1000 }),
-                    switchMap(response => {
-                        if (response === null && !allowEmpty) {
-                            return throwError(() => new Error("Empty Response"));
-                        }
-                        return of(response);
-                    })
                 )
                 ))
             )

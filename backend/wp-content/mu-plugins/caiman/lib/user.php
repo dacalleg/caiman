@@ -156,6 +156,26 @@ function caiman_reset_password(WP_REST_Request $request)
     return new WP_REST_Response(200);
 }
 
+function caiman_change_password(WP_REST_Request $request)
+{
+    $user = wp_get_current_user();
+    if($user->ID == 0)
+        return new WP_REST_Response(array('error_code' => "user_not_found"), 404);
+
+    $body = $request->get_json_params();
+    $current_password = $body["current_password"] ?? "";
+    $password = $body["password"] ?? "";
+
+    if($current_password === "" || $password === "")
+        return new WP_REST_Response(array('error_code' => "invalid_password"), 400);
+
+    if(!wp_check_password($current_password, $user->user_pass, $user->ID))
+        return new WP_REST_Response(array('error_code' => "incorrect_password"), 400);
+
+    wp_set_password($password, $user->ID);
+    return new WP_REST_Response(200);
+}
+
 function caiman_get_user(WP_REST_Request $request)
 {
     $user = wp_get_current_user();
@@ -327,6 +347,15 @@ add_action( 'rest_api_init', function(){
         array(
             'methods' => 'POST',
             'callback' => 'caiman_update_user',
+            'permission_callback' => '__return_true'
+        )
+    );
+    register_rest_route(
+        'caiman/v1',
+        '/change-password',
+        array(
+            'methods' => 'POST',
+            'callback' => 'caiman_change_password',
             'permission_callback' => '__return_true'
         )
     );

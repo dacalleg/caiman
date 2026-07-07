@@ -34,12 +34,13 @@
     {
       "name": "api",
       "urls": [
-        "https://caiman.micronovasrl.com/backend/**"
+        "/wp-json/**",
+        "/api/**"
       ],
       "cacheConfig": {
-        "maxSize": 100,
-        "maxAge": "1d",
-        "strategy": "freshness"
+        "maxSize": 200,
+        "maxAge": "7d",
+        "strategy": "performance"
       }
     },
     {

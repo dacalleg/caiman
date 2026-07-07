@@ -316,6 +316,26 @@ async function init() {
             }
         });
 
+        app.get('/serami/batch', UserRequired, async (req, res) => {
+            try {
+                const keys = (req.query.keys || '')
+                    .split(',')
+                    .map(key => key.trim())
+                    .filter(key => key.length > 0);
+
+                if (keys.length === 0) {
+                    return res.status(200).send([]);
+                }
+
+                const entries = await Serami.findAll({
+                    where: { key: keys }
+                });
+                res.status(200).send(entries);
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
         app.post('/chunkupload', UserRequired, async (req, res) => {
             var upload_dir = "uploads/";
             var filepath = upload_dir + req.body.name + "." + req.body.ext;

@@ -6,10 +6,9 @@ import {
   combineLatest,
   concat,
   concatMap,
-  delay, filter,
   from,
   ignoreElements,
-  map, mergeMap,
+  map,
   Observable,
   of,
   shareReplay,
@@ -39,6 +38,7 @@ import {
   VariableInfoOverride
 } from '../classes/interfaces';
 import {AuthService} from './auth.service';
+import {OfflineCacheService} from './offline-cache.service';
 import {TranslationProviderService} from './translation-provider.service';
 import {TranslationService} from './translation.service';
 import { COUNTRIES } from '../classes/countries';
@@ -55,6 +55,17 @@ interface ProductResponse {
   gateway: Gateway | null;
 }
 
+interface SyncBatchItem {
+  key: string;
+  model: any;
+  board: any;
+}
+
+interface SyncBatchResponse {
+  products: SyncBatchItem[];
+  board_keys: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -67,6 +78,7 @@ export class ApiService {
   constructor(
     private Http: HttpClient,
     private Auth: AuthService,
+    private OfflineCache: OfflineCacheService,
     private TranslationProvider: TranslationProviderService,
     private Translation: TranslationService) {
     this.options$ = this.Http.get<AguaOptions>(environment.endpoint + "/wp-json/caiman/v1/options").pipe(shareReplay(1));
@@ -155,48 +167,93 @@ export class ApiService {
   }
 
   sync() {
-    let products = 0;
-    let counter: number = 0;
-
     const syncLogs$ = from(this.getDeferredHttpQueue()).pipe(
       concatMap(req => this.Http.post<any>(req.url, req.body).pipe(
         tap(() => this.removeFromDeferredHttpQueue(req.id))
       )),
       ignoreElements()
-    )
+    );
 
-    const syncProducts$ = this.getAllProducts().pipe(
-      tap(arr => products = arr.length),
-      switchMap(products => from(products)),
-      filter(product => {
-        let value = localStorage.getItem("last_sync_prod_" + product.key)
-        if (value !== null) {
-          const last = +value;
-          const now = new Date();
-          return now.getTime() - last > 3600 * 24 * 7 * 1000
+    const syncProducts$ = combineLatest([
+      this.Translation.getCurrentLanguage(),
+      this.Auth.getRoles(),
+      this.getAllProducts(),
+    ]).pipe(
+      take(1),
+      switchMap(([lang, roles, allProducts]) => {
+        const productsToSync = allProducts.filter(product => this.shouldSyncProduct(product.key));
+        const total = productsToSync.length;
+
+        if (total === 0) {
+          return of(1);
         }
-        return true;
+
+        const syncUrl = this.buildSyncUrl(lang, productsToSync.map(product => product.key).join(','));
+
+        return this.Http.get<SyncBatchResponse>(syncUrl).pipe(
+          switchMap(batch => {
+            if (batch.board_keys.length === 0) {
+              return of({ batch, seramiEntries: [] as SeramiEntry[] });
+            }
+            const seramiUrl = environment.endpoint + '/api/serami/batch?keys=' + encodeURIComponent(batch.board_keys.join(','));
+            return this.Http.get<SeramiEntry[]>(seramiUrl).pipe(
+              map(seramiEntries => ({ batch, seramiEntries })),
+            );
+          }),
+          switchMap(({ batch, seramiEntries }) => {
+            const seramiByKey = Object.fromEntries(
+              seramiEntries
+                .filter(entry => entry.key)
+                .map(entry => [entry.key!, entry])
+            );
+            let succeeded = 0;
+
+            return from(productsToSync).pipe(
+              concatMap(product => {
+                const item = batch.products.find(entry => entry.key === product.key);
+                if (!item) {
+                  console.log('Error Sync ', product.name, '- product data not found');
+                  return of(succeeded / total);
+                }
+
+                const board = this.parseBoard(item.board);
+                const serami = seramiByKey[board.key];
+                if (!serami) {
+                  console.log('Error Sync ', product.name, '- serami not found');
+                  return of(succeeded / total);
+                }
+
+                const productInfo = this.buildProductInfo(item.model, board, roles, null, serami.data);
+
+                return from(Promise.all([
+                  this.OfflineCache.saveProduct(product.key, lang, productInfo),
+                  this.OfflineCache.saveSerami(board.key, serami),
+                ])).pipe(
+                  tap(() => {
+                    succeeded = succeeded + 1;
+                    localStorage.setItem('last_sync_prod_' + product.key, String(Date.now()));
+                  }),
+                  map(() => succeeded / total),
+                  catchError(() => {
+                    console.log('Error Sync ', product.name);
+                    return of(succeeded / total);
+                  }),
+                );
+              }),
+            );
+          }),
+          catchError(err => {
+            console.log('Sync batch failed', err);
+            return of(0);
+          }),
+        );
       }),
-      concatMap(product => this.getProductInfo(product.key).pipe(
-        delay(2000),
-        tap(() => {
-          counter = counter + 1;
-          const now = new Date();
-          localStorage.setItem("last_sync_prod_" + product.key, "" + now.getTime())
-        }),
-        map(() => counter / products),
-        catchError((err => {
-          counter = counter +  1;
-          console.log("Error Sync ", product.name)
-          return of(counter / products);
-        }))
-      )),
-    )
+    );
 
     return concat(
       syncLogs$,
       syncProducts$
-    )
+    );
   }
 
   getProductInfoByPrefix(prefix: string, gateway: string | undefined = undefined): Observable<ProductModel> {
@@ -219,17 +276,25 @@ export class ApiService {
   getProductInfo(product: string, gateway: string | undefined = undefined): Observable<ProductModel> {
     return combineLatest([this.Translation.getCurrentLanguage(), this.Auth.getRoles()]).pipe(
       take(1),
-      switchMap(([lang, roles]) => this.fetchProduct({ key: product, gateway, lang }).pipe(
-        map(response => ({
-          model: response.model,
-          board: this.parseBoard(response.board),
-          gateway: response.gateway,
-          roles,
-        })),
-      )),
-      switchMap(({ model, board, gateway, roles }) => this.getSerami(board.key).pipe(
-        map(serami => this.buildProductInfo(model, board, roles, gateway, serami.data)),
-      )),
+      switchMap(([lang, roles]) => {
+        if (!navigator.onLine) {
+          return this.loadCachedProduct(product, lang, gateway);
+        }
+
+        return this.fetchProduct({ key: product, gateway, lang }).pipe(
+          map(response => ({
+            model: response.model,
+            board: this.parseBoard(response.board),
+            gateway: response.gateway,
+            roles,
+          })),
+          switchMap(({ model, board, gateway: gw, roles }) => this.getSerami(board.key).pipe(
+            map(serami => this.buildProductInfo(model, board, roles, gw, serami.data)),
+          )),
+          tap(productInfo => this.OfflineCache.saveProduct(product, lang, productInfo)),
+          catchError(err => this.loadCachedProduct(product, lang, gateway, err)),
+        );
+      }),
     );
   }
 
@@ -268,7 +333,12 @@ export class ApiService {
   }
 
   getSerami(key: string) {
-    return this.Http.get<SeramiEntry>(environment.endpoint + "/api/serami/get/" + key);
+    return this.Http.get<SeramiEntry>(environment.endpoint + "/api/serami/get/" + key).pipe(
+      tap(entry => this.OfflineCache.saveSerami(key, entry)),
+      catchError(err => from(this.OfflineCache.getSerami(key)).pipe(
+        switchMap(cached => cached ? of(cached) : throwError(() => err)),
+      )),
+    );
   }
 
   updateSerami(data: SeramiEntry) {
@@ -430,6 +500,34 @@ export class ApiService {
           .set('authorization', token || "")
           .set('local', 'false')
       }))
+  }
+
+  private buildSyncUrl(lang: string, keys: string) {
+    const query = new URLSearchParams();
+    if (lang !== 'it')
+      query.set('lang', lang);
+    query.set('keys', keys);
+    return environment.endpoint + '/wp-json/caiman/v1/sync?' + query.toString();
+  }
+
+  private shouldSyncProduct(key: string) {
+    const value = localStorage.getItem('last_sync_prod_' + key);
+    if (value === null)
+      return true;
+    return Date.now() - Number(value) > 3600 * 24 * 7 * 1000;
+  }
+
+  private loadCachedProduct(productKey: string, lang: string, gateway?: string, originalError?: unknown) {
+    if (gateway) {
+      return throwError(() => originalError ?? new Error('Product not found'));
+    }
+
+    return from(this.OfflineCache.getProduct(productKey, lang)).pipe(
+      switchMap(cached => cached
+        ? of(cached)
+        : throwError(() => originalError ?? new Error('Product not found'))
+      ),
+    );
   }
 
   private fetchProduct(params: { key?: string; prefix?: string; gateway?: string; lang: string }) {

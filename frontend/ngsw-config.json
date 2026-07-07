@@ -44,6 +44,17 @@
       }
     },
     {
+      "name": "media",
+      "urls": [
+        "/wp-content/uploads/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 100,
+        "maxAge": "30d",
+        "strategy": "performance"
+      }
+    },
+    {
       "name": "ytb",
       "urls": [
         "https://www.youtube.com/**"

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { DeviceProduct } from 'src/app/classes/interfaces';
 
 @Component({
@@ -6,7 +6,7 @@ import { DeviceProduct } from 'src/app/classes/interfaces';
   templateUrl: './device-info.component.html',
   styleUrls: ['./device-info.component.scss']
 })
-export class DeviceInfoComponent {
+export class DeviceInfoComponent implements OnInit, OnDestroy {
 
   @Input() device: DeviceProduct | null;
   @Input() connected: boolean | null;
@@ -15,6 +15,16 @@ export class DeviceInfoComponent {
   @Output() onBridgeConnect: EventEmitter<void>;
   @Output() onWifiConnect: EventEmitter<void>;
 
+  isOffline = !navigator.onLine;
+
+  private readonly onlineHandler = () => {
+    this.isOffline = false;
+  };
+
+  private readonly offlineHandler = () => {
+    this.isOffline = true;
+  };
+
   constructor() {
     this.device = null;
     this.connected = false;
@@ -22,6 +32,16 @@ export class DeviceInfoComponent {
     this.onBLEConnect = new EventEmitter();
     this.onBridgeConnect = new EventEmitter();
     this.onWifiConnect = new EventEmitter();
+  }
+
+  ngOnInit(): void {
+    window.addEventListener('online', this.onlineHandler);
+    window.addEventListener('offline', this.offlineHandler);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('online', this.onlineHandler);
+    window.removeEventListener('offline', this.offlineHandler);
   }
 
   disconnect() {

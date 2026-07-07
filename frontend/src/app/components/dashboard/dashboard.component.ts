@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import {ApiService} from "../../services/api.service";
 import {concat, ignoreElements, Observable, of, shareReplay} from "rxjs";
+import {SyncSchedulerService} from "../../services/sync-scheduler.service";
 
 @Component({
   selector: 'app-dashboard',
@@ -11,8 +11,9 @@ export class DashboardComponent implements OnInit {
   sync$: Observable<number>;
   completed$: Observable<boolean>;
 
-  constructor(private Api: ApiService) {
-    this.sync$ = this.Api.sync().pipe(shareReplay(1));
+  constructor(private SyncScheduler: SyncSchedulerService) {
+    this.SyncScheduler.startPeriodicSync();
+    this.sync$ = this.SyncScheduler.runSyncIfOnline().pipe(shareReplay(1));
     this.completed$ = concat(
       of(false),
       this.sync$.pipe(ignoreElements()),

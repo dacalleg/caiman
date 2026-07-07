@@ -228,6 +228,7 @@ export interface ProductModel {
   variables: Variable[];
   database: Database[];
   description: string;
+  prefix?: string;
 }
 
 export interface GroupNameOverride {

@@ -101,7 +101,12 @@ export class ApiService {
     }
 
     return this.Http.get<Info>(environment.endpoint + "/wp-json/caiman/v1/info").pipe(
-      tap(info => this.OfflineCache.saveInfo(info)),
+      tap(info => {
+        this.OfflineCache.saveInfo(info);
+        if (info.logo) {
+          this.cacheImage(info.logo);
+        }
+      }),
       catchError(() => from(this.OfflineCache.getInfo()).pipe(
         map(info => info ?? { logo: '' }),
       )),
@@ -577,6 +582,9 @@ export class ApiService {
 
           const info = await firstValueFrom(this.Http.get<Info>(environment.endpoint + '/wp-json/caiman/v1/info'));
           await this.OfflineCache.saveInfo(info);
+          if (info.logo) {
+            await this.cacheImage(info.logo);
+          }
           reportProgress();
 
           await this.OfflineCache.saveSyncMeta({

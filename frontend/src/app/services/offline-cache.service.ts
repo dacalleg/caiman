@@ -205,10 +205,20 @@ export class OfflineCacheService {
     return this.put('info', { id: INFO_KEY, info });
   }
 
-  getInfo(): Promise<Info | null> {
-    return this.get<InfoRecord>('info', INFO_KEY).then(
-      record => record?.info ?? null
-    );
+  async getInfo(): Promise<Info | null> {
+    const record = await this.get<InfoRecord>('info', INFO_KEY);
+    if (!record?.info) {
+      return null;
+    }
+
+    const info = { ...record.info };
+    if (info.logo) {
+      const blobUrl = await this.getImageBlobUrl(info.logo);
+      if (blobUrl) {
+        info.logo = blobUrl;
+      }
+    }
+    return info;
   }
 
   clearAll(): Promise<void> {

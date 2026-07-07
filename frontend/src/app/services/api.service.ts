@@ -67,19 +67,10 @@ export class ApiService {
     this.info$ = this.Http.get<Info>(environment.endpoint + "/wp-json/caiman/v1/info").pipe(shareReplay(1));
     this.products$ = this.Translation.getCurrentLanguage().pipe(
       take(1),
-      switchMap((lang) => of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).pipe(
-        concatMap(page => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?" + (lang !== "it" ? "lang=" + lang : "") + "&page=" + page + "&per_page=" + 99).pipe(
-          switchMap(arr => from(arr)),
-          map(item => {
-            return {
-              name: item.title.rendered as string,
-              key: item.acf.key as string,
-            }
-          }),
-        ))
+      switchMap((lang) => this.Http.get<{ name: string, key: string }[]>(
+        environment.endpoint + "/wp-json/caiman/v1/model" + (lang !== "it" ? "?lang=" + lang : "")
       )),
-      catchError((err, caught) => of()),
-      toArray(),
+      catchError(() => of([])),
       map(arr => arr.sort((a, b) => a.name.localeCompare(b.name))),
       shareReplay(1)
     )
@@ -204,7 +195,7 @@ export class ApiService {
 
   getProductInfoByPrefix(prefix: string, gateway: string | undefined = undefined): Observable<ProductModel> {
     return combineLatest([of(prefix), this.Translation.getCurrentLanguage()]).pipe(
-      switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?prefix=" + prefix + (lang !== "it" ? "&lang=" + lang : ""))),
+      switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/caiman/v1/model?prefix=" + prefix + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => {
         if(arr.length == 0)
           return throwError(() => new Error("Product not found"))
@@ -214,22 +205,12 @@ export class ApiService {
       take(1),
       switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
       map(([item, board, gateway, roles, serami]) => this.buildProductInfo(item, board, roles, gateway, serami.data)),
-      switchMap(item => {
-        if (item.image) {
-          return this.getMedia(item.image).pipe(map(image => {
-            item.image = image;
-            return item;
-          }))
-        } else {
-          return of(item);
-        }
-      }),
     )
   }
 
   getProductInfo(product: string, gateway: string | undefined = undefined): Observable<ProductModel> {
     return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
-      switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/wp/v2/model/?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
+      switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/caiman/v1/model?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
       switchMap(arr => {
         if(arr.length == 0)
           return throwError(() => new Error("Product not found"))
@@ -239,16 +220,6 @@ export class ApiService {
       take(1),
       switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
       map(([item, board, gateway, roles, serami]) => this.buildProductInfo(item, board, roles, gateway, serami.data)),
-      switchMap(item => {
-        if (item.image) {
-          return this.getMedia(item.image).pipe(map(image => {
-            item.image = image;
-            return item;
-          }))
-        } else {
-          return of(item);
-        }
-      }),
     )
   }
 
@@ -567,8 +538,8 @@ export class ApiService {
 
     return {
       id: item.id,
-      name: item.title.rendered,
-      description: item.excerpt.rendered ? item.excerpt.rendered.replace(/(<([^>]+)>)/gi, "") : "",
+      name: item.name,
+      description: item.description || "",
       id_product: item.acf.key,
       serami_acl: board.serami_acl,
       gateway_firmware_list: gateway !== null ? gateway.firmware_list : [],
@@ -579,7 +550,7 @@ export class ApiService {
       serami_var_override: var_override || [],
       serami_group_override: item.acf.serami_group_override || [],
       database: board.database || [],
-      image: item["_links"]["wp:featuredmedia"] && item["_links"]["wp:featuredmedia"].length > 0 ? item["_links"]["wp:featuredmedia"][0]["href"] : null,
+      image: item.image || null,
       faq: item.acf.faq || [],
       prefix: item.acf.prefix,
       variables: variables

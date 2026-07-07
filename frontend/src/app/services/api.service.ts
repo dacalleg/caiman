@@ -49,6 +49,12 @@ interface DeferredRequest {
   id: string;
 }
 
+interface ProductResponse {
+  model: any;
+  board: any;
+  gateway: Gateway | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -194,33 +200,37 @@ export class ApiService {
   }
 
   getProductInfoByPrefix(prefix: string, gateway: string | undefined = undefined): Observable<ProductModel> {
-    return combineLatest([of(prefix), this.Translation.getCurrentLanguage()]).pipe(
-      switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/caiman/v1/model?prefix=" + prefix + (lang !== "it" ? "&lang=" + lang : ""))),
-      switchMap(arr => {
-        if(arr.length == 0)
-          return throwError(() => new Error("Product not found"))
-        return from(arr)
-      }),
-      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
+    return combineLatest([this.Translation.getCurrentLanguage(), this.Auth.getRoles()]).pipe(
       take(1),
-      switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
-      map(([item, board, gateway, roles, serami]) => this.buildProductInfo(item, board, roles, gateway, serami.data)),
-    )
+      switchMap(([lang, roles]) => this.fetchProduct({ prefix, gateway, lang }).pipe(
+        map(response => ({
+          model: response.model,
+          board: this.parseBoard(response.board),
+          gateway: response.gateway,
+          roles,
+        })),
+      )),
+      switchMap(({ model, board, gateway, roles }) => this.getSerami(board.key).pipe(
+        map(serami => this.buildProductInfo(model, board, roles, gateway, serami.data)),
+      )),
+    );
   }
 
   getProductInfo(product: string, gateway: string | undefined = undefined): Observable<ProductModel> {
-    return combineLatest([of(product), this.Translation.getCurrentLanguage()]).pipe(
-      switchMap(([product, lang]) => this.Http.get<any[]>(environment.endpoint + "/wp-json/caiman/v1/model?key=" + product + (lang !== "it" ? "&lang=" + lang : ""))),
-      switchMap(arr => {
-        if(arr.length == 0)
-          return throwError(() => new Error("Product not found"))
-        return from(arr)
-      }),
-      switchMap(item => combineLatest([of(item), this.getBoard(item.acf.board), gateway ? this.getGateway(gateway, item.acf.board) : of(null), this.Auth.getRoles()])),
+    return combineLatest([this.Translation.getCurrentLanguage(), this.Auth.getRoles()]).pipe(
       take(1),
-      switchMap(([item, board, gateway, roles]) => this.getSerami(board.key).pipe(map(serami => [item, board, gateway, roles, serami]))),
-      map(([item, board, gateway, roles, serami]) => this.buildProductInfo(item, board, roles, gateway, serami.data)),
-    )
+      switchMap(([lang, roles]) => this.fetchProduct({ key: product, gateway, lang }).pipe(
+        map(response => ({
+          model: response.model,
+          board: this.parseBoard(response.board),
+          gateway: response.gateway,
+          roles,
+        })),
+      )),
+      switchMap(({ model, board, gateway, roles }) => this.getSerami(board.key).pipe(
+        map(serami => this.buildProductInfo(model, board, roles, gateway, serami.data)),
+      )),
+    );
   }
 
   getMedia(href: string) {
@@ -422,53 +432,47 @@ export class ApiService {
       }))
   }
 
-  private getBoard(id: string) {
-    return this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/board/" + id).pipe(
-      map(item => {
-        let serami_acl = [] as SeramiACL[];
-        if (item.acf.serami_acl) {
-          serami_acl = item.acf.serami_acl.map((item: any) => {
-            return {
-              ...item,
-              hidden_variables: item.hidden_variables ? item.hidden_variables.split("\r\n") : [],
-              hidden_groups: item.hidden_groups ? item.hidden_groups.split("\r\n") : [],
-              only_read_variables: item.only_read_variables ? item.only_read_variables.split("\r\n") : [],
-              writable_variables: item.writable_variables ? item.writable_variables.split("\r\n") : []
-            }
-          })
-        }
-        return {
-          id: item.id,
-          serami_acl: serami_acl,
-          firmware_list: item.acf.firmware || [],
-          database: item.acf.database || [],
-          serami_var_formula_override: item.acf.serami_var_formula_override || [],
-          key: item.acf.key
-        } as Board
-      })
-    )
+  private fetchProduct(params: { key?: string; prefix?: string; gateway?: string; lang: string }) {
+    const query = new URLSearchParams();
+    if (params.key)
+      query.set('key', params.key);
+    if (params.prefix)
+      query.set('prefix', params.prefix);
+    if (params.gateway)
+      query.set('gateway', params.gateway);
+    if (params.lang !== 'it')
+      query.set('lang', params.lang);
+
+    return this.Http.get<ProductResponse>(environment.endpoint + '/wp-json/caiman/v1/product?' + query.toString()).pipe(
+      catchError(err => {
+        if (err.status === 404)
+          return throwError(() => new Error('Product not found'));
+        return throwError(() => err);
+      }),
+    );
   }
 
-  private getGateway(type: string, board: string) {
-    return this.Http.get<number[]>(environment.endpoint + "/wp-json/caiman/v1/gateway/" + board + "/" + type).pipe(
-      switchMap(ids => {
-        if (ids.length > 0)
-          return of(ids[0]).pipe(
-            switchMap(id => this.Http.get<any>(environment.endpoint + "/wp-json/wp/v2/gateway/" + id)),
-            map(item => {
-              return {
-                id: item.id,
-                board: item.acf.board,
-                type: item.acf.type,
-                firmware_list: item.acf.firmware || [],
-              } as Gateway
-            })
-          )
-        else {
-          return of(null);
+  private parseBoard(item: any): Board {
+    let serami_acl = [] as SeramiACL[];
+    if (item.acf.serami_acl) {
+      serami_acl = item.acf.serami_acl.map((acl: any) => {
+        return {
+          ...acl,
+          hidden_variables: acl.hidden_variables ? acl.hidden_variables.split("\r\n") : [],
+          hidden_groups: acl.hidden_groups ? acl.hidden_groups.split("\r\n") : [],
+          only_read_variables: acl.only_read_variables ? acl.only_read_variables.split("\r\n") : [],
+          writable_variables: acl.writable_variables ? acl.writable_variables.split("\r\n") : []
         }
-      }),
-    )
+      })
+    }
+    return {
+      id: item.id,
+      serami_acl: serami_acl,
+      firmware_list: item.acf.firmware || [],
+      database: item.acf.database || [],
+      serami_var_formula_override: item.acf.serami_var_formula_override || [],
+      key: item.acf.key
+    } as Board
   }
 
   private getDeferredHttpQueue() {

@@ -6,6 +6,8 @@ import {
   combineLatest,
   concat,
   concatMap,
+  defer,
+  firstValueFrom,
   from,
   ignoreElements,
   map,
@@ -39,15 +41,9 @@ import {
 } from '../classes/interfaces';
 import {AuthService} from './auth.service';
 import {OfflineCacheService} from './offline-cache.service';
-import {TranslationProviderService} from './translation-provider.service';
+import {AVAILABLE_LANGUAGES, TranslationProviderService} from './translation-provider.service';
 import {TranslationService} from './translation.service';
 import { COUNTRIES } from '../classes/countries';
-
-interface DeferredRequest {
-  url: string;
-  body: any;
-  id: string;
-}
 
 interface ProductResponse {
   model: any;
@@ -64,6 +60,14 @@ interface SyncBatchItem {
 interface SyncBatchResponse {
   products: SyncBatchItem[];
   board_keys: string[];
+  gateways: GatewayResponse[];
+}
+
+interface GatewayResponse {
+  id: number;
+  board: number;
+  type: string;
+  firmware_list: Gateway['firmware_list'];
 }
 
 @Injectable({
@@ -72,8 +76,6 @@ interface SyncBatchResponse {
 export class ApiService {
 
   private options$: Observable<AguaOptions>;
-  private info$: Observable<Info>;
-  private products$: Observable<{ name: string, key: string }[]>;
 
   constructor(
     private Http: HttpClient,
@@ -82,16 +84,6 @@ export class ApiService {
     private TranslationProvider: TranslationProviderService,
     private Translation: TranslationService) {
     this.options$ = this.Http.get<AguaOptions>(environment.endpoint + "/wp-json/caiman/v1/options").pipe(shareReplay(1));
-    this.info$ = this.Http.get<Info>(environment.endpoint + "/wp-json/caiman/v1/info").pipe(shareReplay(1));
-    this.products$ = this.Translation.getCurrentLanguage().pipe(
-      take(1),
-      switchMap((lang) => this.Http.get<{ name: string, key: string }[]>(
-        environment.endpoint + "/wp-json/caiman/v1/model" + (lang !== "it" ? "?lang=" + lang : "")
-      )),
-      catchError(() => of([])),
-      map(arr => arr.sort((a, b) => a.name.localeCompare(b.name))),
-      shareReplay(1)
-    )
   }
 
   async sha256(message: string) {
@@ -101,8 +93,20 @@ export class ApiService {
     return hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
   }
 
-  getInfo() {
-    return this.info$;
+  getInfo(): Observable<Info> {
+    if (this.isOffline()) {
+      return from(this.OfflineCache.getInfo()).pipe(
+        map(info => info ?? { logo: '' }),
+      );
+    }
+
+    return this.Http.get<Info>(environment.endpoint + "/wp-json/caiman/v1/info").pipe(
+      tap(info => this.OfflineCache.saveInfo(info)),
+      catchError(() => from(this.OfflineCache.getInfo()).pipe(
+        map(info => info ?? { logo: '' }),
+      )),
+      shareReplay(1),
+    );
   }
 
   getDeviceInfoFromMac(mac: string, productKey: string | null = null) {
@@ -162,114 +166,64 @@ export class ApiService {
     )
   }
 
-  getAllProducts() {
-    return this.products$;
-  }
-
-  sync() {
-    const syncLogs$ = from(this.getDeferredHttpQueue()).pipe(
-      concatMap(req => this.Http.post<any>(req.url, req.body).pipe(
-        tap(() => this.removeFromDeferredHttpQueue(req.id))
-      )),
-      ignoreElements()
-    );
-
-    const syncProducts$ = combineLatest([
-      this.Translation.getCurrentLanguage(),
-      this.Auth.getRoles(),
-      this.getAllProducts(),
-    ]).pipe(
+  getAllProducts(): Observable<{ name: string, key: string }[]> {
+    return this.Translation.getCurrentLanguage().pipe(
       take(1),
-      switchMap(([lang, roles, allProducts]) => {
-        const productsToSync = allProducts.filter(product => this.shouldSyncProduct(product.key));
-        const total = productsToSync.length;
-
-        if (total === 0) {
-          return of(1);
+      switchMap((lang) => {
+        if (this.isOffline()) {
+          return from(this.OfflineCache.getModels(lang)).pipe(
+            map(arr => arr.sort((a, b) => a.name.localeCompare(b.name))),
+          );
         }
 
-        const syncUrl = this.buildSyncUrl(lang, productsToSync.map(product => product.key).join(','));
-
-        return this.Http.get<SyncBatchResponse>(syncUrl).pipe(
-          switchMap(batch => {
-            if (batch.board_keys.length === 0) {
-              return of({ batch, seramiEntries: [] as SeramiEntry[] });
-            }
-            const seramiUrl = environment.endpoint + '/api/serami/batch?keys=' + encodeURIComponent(batch.board_keys.join(','));
-            return this.Http.get<SeramiEntry[]>(seramiUrl).pipe(
-              map(seramiEntries => ({ batch, seramiEntries })),
-            );
-          }),
-          switchMap(({ batch, seramiEntries }) => {
-            const seramiByKey = Object.fromEntries(
-              seramiEntries
-                .filter(entry => entry.key)
-                .map(entry => [entry.key!, entry])
-            );
-            let succeeded = 0;
-
-            return from(productsToSync).pipe(
-              concatMap(product => {
-                const item = batch.products.find(entry => entry.key === product.key);
-                if (!item) {
-                  console.log('Error Sync ', product.name, '- product data not found');
-                  return of(succeeded / total);
-                }
-
-                const board = this.parseBoard(item.board);
-                const serami = seramiByKey[board.key];
-                if (!serami) {
-                  console.log('Error Sync ', product.name, '- serami not found');
-                  return of(succeeded / total);
-                }
-
-                const productInfo = this.buildProductInfo(item.model, board, roles, null, serami.data);
-
-                return from(Promise.all([
-                  this.OfflineCache.saveProduct(product.key, lang, productInfo),
-                  this.OfflineCache.saveSerami(board.key, serami),
-                ])).pipe(
-                  tap(() => {
-                    succeeded = succeeded + 1;
-                    localStorage.setItem('last_sync_prod_' + product.key, String(Date.now()));
-                  }),
-                  map(() => succeeded / total),
-                  catchError(() => {
-                    console.log('Error Sync ', product.name);
-                    return of(succeeded / total);
-                  }),
-                );
-              }),
-            );
-          }),
-          catchError(err => {
-            console.log('Sync batch failed', err);
-            return of(0);
-          }),
+        return this.Http.get<{ name: string, key: string }[]>(
+          environment.endpoint + "/wp-json/caiman/v1/model" + (lang !== "it" ? "?lang=" + lang : "")
+        ).pipe(
+          tap(models => this.OfflineCache.saveModels(lang, models)),
+          map(arr => arr.sort((a, b) => a.name.localeCompare(b.name))),
+          catchError(() => from(this.OfflineCache.getModels(lang)).pipe(
+            map(arr => arr.sort((a, b) => a.name.localeCompare(b.name))),
+          )),
         );
       }),
     );
+  }
 
-    return concat(
-      syncLogs$,
-      syncProducts$
+  sync(): Observable<number> {
+    const syncDeferred$ = from(this.flushDeferredQueue()).pipe(ignoreElements());
+    const syncData$ = combineLatest([this.Auth.getRoles()]).pipe(
+      take(1),
+      switchMap(([roles]) => defer(() => this.syncAllEntities(roles))),
+      catchError(err => {
+        console.log('Sync failed', err);
+        return of(0);
+      }),
     );
+
+    return concat(syncDeferred$, syncData$);
   }
 
   getProductInfoByPrefix(prefix: string, gateway: string | undefined = undefined): Observable<ProductModel> {
     return combineLatest([this.Translation.getCurrentLanguage(), this.Auth.getRoles()]).pipe(
       take(1),
-      switchMap(([lang, roles]) => this.fetchProduct({ prefix, gateway, lang }).pipe(
-        map(response => ({
-          model: response.model,
-          board: this.parseBoard(response.board),
-          gateway: response.gateway,
-          roles,
-        })),
-      )),
-      switchMap(({ model, board, gateway, roles }) => this.getSerami(board.key).pipe(
-        map(serami => this.buildProductInfo(model, board, roles, gateway, serami.data)),
-      )),
+      switchMap(([lang, roles]) => {
+        if (this.isOffline()) {
+          return this.loadCachedProductByPrefix(prefix, lang, gateway);
+        }
+
+        return this.fetchProduct({ prefix, gateway, lang }).pipe(
+          map(response => ({
+            model: response.model,
+            board: this.parseBoard(response.board),
+            gateway: response.gateway,
+            roles,
+          })),
+          switchMap(({ model, board, gateway: gatewayDetail, roles: userRoles }) => this.getSerami(board.key).pipe(
+            map(serami => this.buildProductInfo(model, board, userRoles, gatewayDetail, serami.data)),
+          )),
+          catchError(err => this.loadCachedProductByPrefix(prefix, lang, gateway, err)),
+        );
+      }),
     );
   }
 
@@ -277,7 +231,7 @@ export class ApiService {
     return combineLatest([this.Translation.getCurrentLanguage(), this.Auth.getRoles()]).pipe(
       take(1),
       switchMap(([lang, roles]) => {
-        if (!navigator.onLine) {
+        if (this.isOffline()) {
           return this.loadCachedProduct(product, lang, gateway);
         }
 
@@ -288,10 +242,10 @@ export class ApiService {
             gateway: response.gateway,
             roles,
           })),
-          switchMap(({ model, board, gateway: gw, roles }) => this.getSerami(board.key).pipe(
-            map(serami => this.buildProductInfo(model, board, roles, gw, serami.data)),
+          switchMap(({ model, board, gateway: gw, roles: userRoles }) => this.getSerami(board.key).pipe(
+            map(serami => this.buildProductInfo(model, board, userRoles, gw, serami.data)),
           )),
-          tap(productInfo => this.OfflineCache.saveProduct(product, lang, productInfo)),
+          tap(productInfo => this.OfflineCache.saveProduct(product, lang, productInfo, gateway)),
           catchError(err => this.loadCachedProduct(product, lang, gateway, err)),
         );
       }),
@@ -373,9 +327,9 @@ export class ApiService {
           id: this.makeid(),
           url: environment.endpoint + "/api/logs",
           body: {...log, serial: serial, date: log.date.toJSON().slice(0, 19).replace('T', ' ')}
-        }
-        this.addToDeferredHttpQueue(req);
-        return throwError(() => err)
+        };
+        from(this.OfflineCache.saveDeferredRequest(req)).subscribe();
+        return throwError(() => err);
       })
     );
   }
@@ -502,32 +456,232 @@ export class ApiService {
       }))
   }
 
-  private buildSyncUrl(lang: string, keys: string) {
+  private isOffline(): boolean {
+    return !navigator.onLine;
+  }
+
+  private buildSyncUrl(lang: string) {
     const query = new URLSearchParams();
-    if (lang !== 'it')
+    if (lang !== 'it') {
       query.set('lang', lang);
-    query.set('keys', keys);
+    }
     return environment.endpoint + '/wp-json/caiman/v1/sync?' + query.toString();
   }
 
-  private shouldSyncProduct(key: string) {
-    const value = localStorage.getItem('last_sync_prod_' + key);
-    if (value === null)
-      return true;
-    return Date.now() - Number(value) > 3600 * 24 * 7 * 1000;
+  private syncAllEntities(roles: string[]): Observable<number> {
+    return new Observable<number>(subscriber => {
+      (async () => {
+        try {
+          const languages = [...AVAILABLE_LANGUAGES];
+          const seramiList = await firstValueFrom(
+            this.Http.get<SeramiEntry[]>(environment.endpoint + '/api/serami')
+          );
+          const seramiKeys = seramiList
+            .filter(entry => entry.key)
+            .map(entry => entry.key!);
+
+          let seramiEntries: SeramiEntry[] = [];
+          if (seramiKeys.length > 0) {
+            const seramiUrl = environment.endpoint + '/api/serami/batch?keys=' + encodeURIComponent(seramiKeys.join(','));
+            seramiEntries = await firstValueFrom(this.Http.get<SeramiEntry[]>(seramiUrl));
+          }
+
+          const seramiByKey = Object.fromEntries(
+            seramiEntries
+              .filter(entry => entry.key)
+              .map(entry => [entry.key!, entry])
+          );
+
+          const languageBatches = await Promise.all(
+            languages.map(lang => firstValueFrom(
+              this.Http.get<SyncBatchResponse>(this.buildSyncUrl(lang))
+            ))
+          );
+
+          const productCount = languageBatches.reduce((count, batch) => count + batch.products.length, 0);
+          const imageCount = languageBatches.reduce((count, batch) => {
+            return count + batch.products.filter(item => item.model?.image).length;
+          }, 0);
+          const totalSteps = seramiEntries.length + productCount + imageCount + languages.length + 1;
+          let completedSteps = 0;
+
+          const reportProgress = () => {
+            completedSteps = completedSteps + 1;
+            subscriber.next(Math.min(completedSteps / totalSteps, 1));
+          };
+
+          for (const entry of seramiEntries) {
+            await this.OfflineCache.saveSerami(entry.key!, entry);
+            reportProgress();
+          }
+
+          const allBoards = new Map<number, Board>();
+          const allGateways = new Map<string, Gateway>();
+          const cachedImages = new Set<string>();
+
+          for (let index = 0; index < languages.length; index++) {
+            const lang = languages[index];
+            const batch = languageBatches[index];
+            const gatewaysByBoard = this.groupGatewaysByBoard(batch.gateways ?? []);
+
+            for (const item of batch.products) {
+              const board = this.parseBoard(item.board);
+              allBoards.set(Number(item.board.id), board);
+            }
+
+            for (const gateway of batch.gateways ?? []) {
+              const parsedGateway = this.parseGateway(gateway);
+              allGateways.set(`${parsedGateway.board}:${parsedGateway.type}`, parsedGateway);
+            }
+
+            const models = batch.products.map(item => ({
+              name: item.model.name as string,
+              key: item.key,
+            }));
+            await this.OfflineCache.saveModels(lang, models);
+
+            for (const item of batch.products) {
+              const board = this.parseBoard(item.board);
+              const serami = seramiByKey[board.key];
+              if (!serami) {
+                console.log('Error Sync', item.model.name, '- serami not found');
+                reportProgress();
+                continue;
+              }
+
+              const baseProduct = this.buildProductInfo(item.model, board, roles, null, serami.data);
+              await this.OfflineCache.saveProduct(item.key, lang, baseProduct);
+
+              const boardGateways = gatewaysByBoard.get(Number(item.board.id)) ?? [];
+              for (const gateway of boardGateways) {
+                const productWithGateway = this.buildProductInfo(item.model, board, roles, gateway, serami.data);
+                await this.OfflineCache.saveProduct(item.key, lang, productWithGateway, gateway.type);
+              }
+
+              if (item.model.image && !cachedImages.has(item.model.image)) {
+                await this.cacheImage(item.model.image);
+                cachedImages.add(item.model.image);
+                reportProgress();
+              }
+
+              reportProgress();
+            }
+
+            reportProgress();
+          }
+
+          await this.OfflineCache.saveAllBoards(
+            [...allBoards.entries()].map(([id, board]) => ({ id, board }))
+          );
+          await this.OfflineCache.saveAllGateways([...allGateways.values()]);
+
+          const info = await firstValueFrom(this.Http.get<Info>(environment.endpoint + '/wp-json/caiman/v1/info'));
+          await this.OfflineCache.saveInfo(info);
+          reportProgress();
+
+          await this.OfflineCache.saveSyncMeta({
+            lastSyncAt: Date.now(),
+            lastFullSyncAt: Date.now(),
+          });
+
+          subscriber.next(1);
+          subscriber.complete();
+        } catch (error) {
+          subscriber.error(error);
+        }
+      })();
+    });
   }
 
-  private loadCachedProduct(productKey: string, lang: string, gateway?: string, originalError?: unknown) {
-    if (gateway) {
-      return throwError(() => originalError ?? new Error('Product not found'));
+  private groupGatewaysByBoard(gateways: GatewayResponse[]): Map<number, Gateway[]> {
+    const grouped = new Map<number, Gateway[]>();
+
+    for (const gateway of gateways) {
+      const parsedGateway = this.parseGateway(gateway);
+      const boardGateways = grouped.get(parsedGateway.board) ?? [];
+      boardGateways.push(parsedGateway);
+      grouped.set(parsedGateway.board, boardGateways);
     }
 
-    return from(this.OfflineCache.getProduct(productKey, lang)).pipe(
-      switchMap(cached => cached
-        ? of(cached)
+    return grouped;
+  }
+
+  private parseGateway(item: GatewayResponse): Gateway {
+    return {
+      type: item.type,
+      board: item.board,
+      firmware_list: item.firmware_list || [],
+    };
+  }
+
+  private async cacheImage(url: string): Promise<void> {
+    try {
+      const blob = await firstValueFrom(this.Http.get(url, { responseType: 'blob' }));
+      await this.OfflineCache.saveImage(url, blob);
+    } catch (error) {
+      console.log('Error caching image', url, error);
+    }
+  }
+
+  private async flushDeferredQueue(): Promise<void> {
+    const queue = await this.OfflineCache.getDeferredRequests();
+    for (const request of queue) {
+      try {
+        await firstValueFrom(this.Http.post(request.url, request.body));
+        await this.OfflineCache.removeDeferredRequest(request.id);
+      } catch (error) {
+        console.log('Deferred request failed', request.id, error);
+      }
+    }
+  }
+
+  private loadCachedProduct(
+    productKey: string,
+    lang: string,
+    gateway: string | undefined,
+    originalError?: unknown
+  ): Observable<ProductModel> {
+    return from(this.resolveCachedProduct(productKey, lang, gateway)).pipe(
+      switchMap(product => product
+        ? of(product)
         : throwError(() => originalError ?? new Error('Product not found'))
       ),
     );
+  }
+
+  private loadCachedProductByPrefix(
+    prefix: string,
+    lang: string,
+    gateway: string | undefined,
+    originalError?: unknown
+  ): Observable<ProductModel> {
+    return from(this.findCachedProductKeyByPrefix(prefix, lang)).pipe(
+      switchMap(productKey => productKey
+        ? this.loadCachedProduct(productKey, lang, gateway, originalError)
+        : throwError(() => originalError ?? new Error('Product not found'))
+      ),
+    );
+  }
+
+  private async findCachedProductKeyByPrefix(prefix: string, lang: string): Promise<string | null> {
+    const models = await this.OfflineCache.getModels(lang);
+
+    for (const model of models) {
+      const product = await this.OfflineCache.getProduct(model.key, lang);
+      if (product?.prefix === prefix) {
+        return model.key;
+      }
+    }
+
+    return null;
+  }
+
+  private async resolveCachedProduct(
+    productKey: string,
+    lang: string,
+    gateway: string | undefined,
+  ): Promise<ProductModel | null> {
+    return this.OfflineCache.getProduct(productKey, lang, gateway);
   }
 
   private fetchProduct(params: { key?: string; prefix?: string; gateway?: string; lang: string }) {
@@ -571,26 +725,6 @@ export class ApiService {
       serami_var_formula_override: item.acf.serami_var_formula_override || [],
       key: item.acf.key
     } as Board
-  }
-
-  private getDeferredHttpQueue() {
-    const q = localStorage.getItem("http_queue");
-    if (q) {
-      return JSON.parse(q) as DeferredRequest[];
-    }
-    return [] as DeferredRequest[];
-  }
-
-  private removeFromDeferredHttpQueue(id: string) {
-    let queue = this.getDeferredHttpQueue();
-    queue = queue.filter(item => item.id !== id);
-    localStorage.setItem("http_queue", JSON.stringify(queue));
-  }
-
-  private addToDeferredHttpQueue(req: DeferredRequest) {
-    let queue = this.getDeferredHttpQueue();
-    queue = queue.concat(req);
-    localStorage.setItem("http_queue", JSON.stringify(queue));
   }
 
   private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[]): ProductModel {

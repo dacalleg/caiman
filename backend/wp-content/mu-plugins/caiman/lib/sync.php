@@ -44,6 +44,7 @@ function caiman_get_sync_batch( WP_REST_Request $request ) {
 
         $products   = array();
         $board_keys = array();
+        $gateways   = array();
 
         foreach ( $models as $model_post ) {
             $board_id = get_field( 'board', $model_post->ID );
@@ -60,9 +61,17 @@ function caiman_get_sync_batch( WP_REST_Request $request ) {
 
             $board_detail = caiman_format_board_detail( $board_post );
             $board_key    = $board_detail['acf']['key'] ?? null;
+            $board_id     = (int) $board_post->ID;
 
             if ( $board_key ) {
                 $board_keys[ $board_key ] = true;
+            }
+
+            foreach ( caiman_query_gateways_for_board( $board_id ) as $gateway_detail ) {
+                $gateway_key = $board_id . ':' . ( $gateway_detail['type'] ?? '' );
+                if ( ! isset( $gateways[ $gateway_key ] ) ) {
+                    $gateways[ $gateway_key ] = $gateway_detail;
+                }
             }
 
             $products[] = array(
@@ -76,6 +85,7 @@ function caiman_get_sync_batch( WP_REST_Request $request ) {
             array(
                 'products'   => $products,
                 'board_keys' => array_keys( $board_keys ),
+                'gateways'   => array_values( $gateways ),
             ),
             200
         );

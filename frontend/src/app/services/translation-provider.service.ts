@@ -4,7 +4,7 @@ import { catchError, Observable, of, shareReplay, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Translation } from '../classes/interfaces';
 
-export const AVAILABLE_LANGUAGES = ['it', 'en'] as const;
+export const AVAILABLE_LANGUAGES = ['it', 'en', 'fr'] as const;
 
 @Injectable({
   providedIn: 'root'

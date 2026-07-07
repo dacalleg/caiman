@@ -26,6 +26,25 @@ add_action( 'rest_api_init', function () {
     );
 } );
 
+function caiman_query_gateways_for_board( $board_id ) {
+    $posts = get_posts(
+        array(
+            'numberposts' => -1,
+            'post_type'   => 'gateway',
+            'post_status' => 'publish',
+            'meta_query'  => array(
+                array(
+                    'key'     => 'board',
+                    'value'   => $board_id,
+                    'compare' => '=',
+                ),
+            ),
+        )
+    );
+
+    return array_map( 'caiman_format_gateway_detail', $posts );
+}
+
 function caiman_find_gateway_post( $board_id, $type ) {
     $posts = get_posts(
         array(

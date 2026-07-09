@@ -14,8 +14,6 @@
             (click)="wifiConnect()">{{ 'home.deviceinfo.wifi' | translate }}</button></li>
         <li class="nav-item me-2" *ngIf="!connected"><button class="btn btn-lg btn-primary"
             (click)="bleConnect()">{{ 'home.deviceinfo.ble' | translate }}</button></li>
-        <li class="nav-item me-2" *ngIf="!connected && !isOffline"><button class="btn btn-lg btn-primary"
-            (click)="bridgeConnect()">{{ 'home.deviceinfo.bridge' | translate }}</button></li>
 
         <li class="nav-item me-2" *ngIf="connected"><button class="btn btn-lg btn-primary"
             (click)="disconnect()">{{ 'home.deviceinfo.disconnect' | translate }}</button></li>

@@ -234,6 +234,9 @@ const values = {
     "home.deviceselect.ap_password": "Password AP",
     "home.deviceselect.select_product": "Seleziona un prodotto",
     "home.deviceselect.open": "Apri",
+    "home.deviceselect.links": "Link utili",
+    "home.deviceselect.chatbot": "Chatbot",
+    "home.deviceselect.website": "Il nostro sito",
     "home.deviceinfo.links": "Links"
 };
 

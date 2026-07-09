@@ -188,5 +188,18 @@
         </div>
       </div>
     </div>
+    <div class="row mt-5">
+      <div class="col">
+        <h3>{{ 'home.deviceselect.links' | translate }}</h3>
+        <ul>
+          <li *ngIf="env.chatbot_url">
+            <a [href]="env.chatbot_url" target="_blank" rel="noopener noreferrer">{{ 'home.deviceselect.chatbot' | translate }}</a>
+          </li>
+          <li *ngIf="env.website_url">
+            <a [href]="env.website_url" target="_blank" rel="noopener noreferrer">{{ 'home.deviceselect.website' | translate }}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </div>

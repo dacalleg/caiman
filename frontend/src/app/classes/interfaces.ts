@@ -519,4 +519,6 @@ export interface EnvObj
   operation_enabled: boolean,
   only_op_enabled: boolean,
   hide_micronova_ref: boolean,
+  chatbot_url: string,
+  website_url: string,
 }

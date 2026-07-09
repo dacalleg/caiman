@@ -9,4 +9,6 @@ export const environment = {
   operation_enabled: true,
   only_op_enabled: false,
   hide_micronova_ref: true,
+  chatbot_url: 'https://jm-poeles.com/test-chatbot-b2b',
+  website_url: 'https://jolly-mec.it/it/',
 } as EnvObj;

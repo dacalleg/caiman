@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         street_number: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
         phone: {
             type: DataTypes.STRING,
@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         mobile: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
         city: {
             type: DataTypes.STRING,
@@ -56,11 +56,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         province: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
         zip: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
         country: {
             type: DataTypes.STRING,
@@ -68,23 +68,23 @@ module.exports = (sequelize, DataTypes) => {
         },
         purchase_date: {
             type: DataTypes.DATE,
-            allowNull: false
+            allowNull: true
         },
         first_ignition_date:{
             type: DataTypes.DATE,
-            allowNull: false
+            allowNull: true
         },
         dealer: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
         invoice: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
         warranty: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
     },
     {

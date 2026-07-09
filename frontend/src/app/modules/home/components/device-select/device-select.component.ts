@@ -15,6 +15,7 @@ export class DeviceSelectComponent implements OnInit {
 
   macAddress: string;
   serialNumber: string;
+  assistanceCode: string;
   products$: Observable<{ name: string, key: string }[]>;
   info$: Observable<Info>;
   selectedProduct: string | null;
@@ -27,6 +28,7 @@ export class DeviceSelectComponent implements OnInit {
     this.selectedProduct = null;
     this.serialNumber = "";
     this.macAddress = "";
+    this.assistanceCode = "";
     this.regCode = "";
     this.products$ = this.Api.getAllProducts();
     this.info$ = this.Api.getInfo();
@@ -60,7 +62,7 @@ export class DeviceSelectComponent implements OnInit {
     this.macAddress = "";
     if(n === 3 || n === 4)
       this.macAddress = localStorage.getItem("defaultMAC") || "";
-    if(n===4)
+    if(n === 4)
       this.regCode = localStorage.getItem("defaultRegCode") || "";
     this.selectedOption = n;
   }

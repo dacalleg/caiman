@@ -88,12 +88,18 @@
                 </div>
               </div>
               <div class="col-md mb-3">
-                <label for="serial" class="form-label">{{ 'serial' | translate }}</label>
+                <label for="serial-wifi-client" class="form-label">{{ 'serial' | translate }}</label>
                 <div class="input-group mb-3">
                   <button class="btn btn-outline-secondary" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
-                  <input type="text" id="serial" class="form-control" [placeholder]="'serial' | translate"
+                  <input type="text" id="serial-wifi-client" class="form-control" [placeholder]="'serial' | translate"
                          [attr.aria-label]="'serial' | translate" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
                 </div>
+              </div>
+              <div class="col-md mb-3">
+                <label for="assistance-code-wifi-client" class="form-label">{{ 'home.deviceselect.assistance_code' | translate }}</label>
+                <input type="text" class="form-control" id="assistance-code-wifi-client"
+                       [placeholder]="'home.deviceselect.assistance_code' | translate"
+                       [attr.aria-label]="'home.deviceselect.assistance_code' | translate" [(ngModel)]="assistanceCode">
               </div>
             </div>
             <div class="row">
@@ -120,12 +126,18 @@
                 </div>
               </div>
               <div class="col-md mb-3">
-                <label for="serial" class="form-label">{{ 'serial' | translate }}</label>
+                <label for="serial-wifi-own" class="form-label">{{ 'serial' | translate }}</label>
                 <div class="input-group mb-3">
                   <button class="btn btn-outline-secondary" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
-                  <input type="text" id="serial" class="form-control" [placeholder]="'serial' | translate"
+                  <input type="text" id="serial-wifi-own" class="form-control" [placeholder]="'serial' | translate"
                          [attr.aria-label]="'serial' | translate" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
                 </div>
+              </div>
+              <div class="col-md mb-3">
+                <label for="assistance-code-wifi-own" class="form-label">{{ 'home.deviceselect.assistance_code' | translate }}</label>
+                <input type="text" class="form-control" id="assistance-code-wifi-own"
+                       [placeholder]="'home.deviceselect.assistance_code' | translate"
+                       [attr.aria-label]="'home.deviceselect.assistance_code' | translate" [(ngModel)]="assistanceCode">
               </div>
               <div class="col-md mb-3">
                 <label for="productlist" class="form-label">{{ 'home.deviceselect.select_product' | translate }}</label>

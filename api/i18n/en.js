@@ -231,6 +231,7 @@ const values = {
     "home.deviceselect.offline.title": "Offline",
     "home.deviceselect.offline.description": "This mode should only be used when parameter changes are required in remote areas without internet coverage. You can connect to the Wi-Fi module only via Bluetooth.",
     "home.deviceselect.macaddress": "MAC Address",
+    "home.deviceselect.assistance_code": "Assistance code",
     "home.deviceselect.ap_password": "AP Password",
     "home.deviceselect.select_product": "Select a product",
     "home.deviceselect.open": "Open",

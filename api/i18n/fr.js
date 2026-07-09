@@ -231,6 +231,7 @@ const values = {
     "home.deviceselect.offline.title": "Hors ligne",
     "home.deviceselect.offline.description": "Ce mode doit être utilisé uniquement lorsqu'il est nécessaire d'effectuer une modification des paramètres dans des zones reculées non couvertes par le réseau Internet. Il est possible de se connecter au module Wi-Fi uniquement via Bluetooth.",
     "home.deviceselect.macaddress": "Adresse MAC",
+    "home.deviceselect.assistance_code": "Code assistance",
     "home.deviceselect.ap_password": "Mot de passe AP",
     "home.deviceselect.select_product": "Sélectionner un produit",
     "home.deviceselect.open": "Ouvrir",

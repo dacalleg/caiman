@@ -231,6 +231,7 @@ const values = {
     "home.deviceselect.offline.title": "Offline",
     "home.deviceselect.offline.description": "Questa modalità è da utilizzare solo nel caso in cui sia necessario eseguire una modifica dei parametri in zone remote non coperte da rete internet. E' possibile collegarsi al modulo WiFi solo tramite Bluetooth.",
     "home.deviceselect.macaddress": "Indirizzo MAC",
+    "home.deviceselect.assistance_code": "Codice assistenza",
     "home.deviceselect.ap_password": "Password AP",
     "home.deviceselect.select_product": "Seleziona un prodotto",
     "home.deviceselect.open": "Apri",

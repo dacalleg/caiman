@@ -442,7 +442,8 @@ export class ApiService {
   }
 
   updateRegistry(registry: Registry) {
-    return this.Http.post<any>(environment.endpoint + "/api/registry/update", {...registry, key: undefined});
+    const { key, createdAt, updatedAt, ...payload } = registry;
+    return this.Http.post<any>(environment.endpoint + "/api/registry/update", payload);
   }
 
   private getAguaHeaders() {

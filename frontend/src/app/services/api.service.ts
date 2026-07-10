@@ -527,16 +527,10 @@ export class ApiService {
           for (let index = 0; index < languages.length; index++) {
             const lang = languages[index];
             const batch = languageBatches[index];
-            const gatewaysByBoard = this.groupGatewaysByBoard(batch.gateways ?? []);
 
             for (const item of batch.products) {
               const board = this.parseBoard(item.board);
               allBoards.set(Number(item.board.id), board);
-            }
-
-            for (const gateway of batch.gateways ?? []) {
-              const parsedGateway = this.parseGateway(gateway);
-              allGateways.set(`${parsedGateway.board}:${parsedGateway.type}`, parsedGateway);
             }
 
             const models = batch.products.map(item => ({
@@ -557,10 +551,11 @@ export class ApiService {
               const baseProduct = this.buildProductInfo(item.model, board, roles, null, serami.data);
               await this.OfflineCache.saveProduct(item.key, lang, baseProduct);
 
-              const boardGateways = gatewaysByBoard.get(Number(item.board.id)) ?? [];
+              const boardGateways = this.resolveGatewaysForBoard(Number(item.board.id), batch.gateways ?? []);
               for (const gateway of boardGateways) {
                 const productWithGateway = this.buildProductInfo(item.model, board, roles, gateway, serami.data);
                 await this.OfflineCache.saveProduct(item.key, lang, productWithGateway, gateway.type);
+                allGateways.set(`${item.board.id}:${gateway.type}`, gateway);
               }
 
               if (item.model.image && !cachedImages.has(item.model.image)) {
@@ -601,17 +596,15 @@ export class ApiService {
     });
   }
 
-  private groupGatewaysByBoard(gateways: GatewayResponse[]): Map<number, Gateway[]> {
-    const grouped = new Map<number, Gateway[]>();
+  private resolveGatewaysForBoard(boardId: number, gateways: GatewayResponse[]): Gateway[] {
+    const parsedGateways = gateways.map(gateway => this.parseGateway(gateway));
+    const boardSpecific = parsedGateways.filter(gateway => Number(gateway.board) === boardId);
+    const coveredTypes = new Set(boardSpecific.map(gateway => gateway.type));
+    const generic = parsedGateways.filter(
+      gateway => !gateway.board && gateway.type && !coveredTypes.has(gateway.type)
+    );
 
-    for (const gateway of gateways) {
-      const parsedGateway = this.parseGateway(gateway);
-      const boardGateways = grouped.get(parsedGateway.board) ?? [];
-      boardGateways.push(parsedGateway);
-      grouped.set(parsedGateway.board, boardGateways);
-    }
-
-    return grouped;
+    return [...boardSpecific, ...generic];
   }
 
   private parseGateway(item: GatewayResponse): Gateway {

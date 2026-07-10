@@ -471,6 +471,7 @@ export interface Operation
 
 export interface Registry
 {
+  key?: string;
   serial: string;
   fiscal_code: string;
   business_name: string;
@@ -492,6 +493,7 @@ export interface Registry
   warranty: string;
   user: string;
   createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Toast {

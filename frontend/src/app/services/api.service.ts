@@ -722,7 +722,7 @@ export class ApiService {
     return {
       id: item.id,
       serami_acl: serami_acl,
-      firmware_list: item.acf.firmware || [],
+      firmware_list: item.acf.firmware.map((item: any) => ({ revision: item.revision, file: item.file ? item.file.ID : null, role: item.role })) || [],
       database: item.acf.database || [],
       serami_var_formula_override: item.acf.serami_var_formula_override || [],
       key: item.acf.key

@@ -97,12 +97,22 @@ export class AuthService {
   }
 
   login(username: string, password: string) {
-    return this.Http.post<LoginResponse>(environment.endpoint + '/wp-json/jwt-auth/v1/token', { username, password }).pipe(
+    return defer(() => {
+      this.clearStoredSession();
+      return this.requestToken(username, password);
+    }).pipe(
+      catchError((error) => {
+        if (error?.error?.code === 'jwt_auth_obsolete_refresh_token') {
+          this.clearStoredSession();
+          return this.requestToken(username, password);
+        }
+        return throwError(() => error);
+      }),
       tap((response) => {
         localStorage.setItem('access_token', response.data.token);
         this.tokenChanges$.next(response.data.token);
       })
-    )
+    );
   }
 
   requestResetPassword(username: string) {
@@ -174,10 +184,36 @@ export class AuthService {
 
   logout() {
     return defer(() => {
-      localStorage.removeItem('access_token');
-      this.tokenChanges$.next(null);
+      this.clearStoredSession();
       return of(void 0);
-    })
+    });
+  }
+
+  private requestToken(username: string, password: string) {
+    return this.Http.post<LoginResponse>(
+      environment.endpoint + '/wp-json/jwt-auth/v1/token',
+      { username, password },
+      { withCredentials: true }
+    );
+  }
+
+  private clearStoredSession(): void {
+    localStorage.removeItem('access_token');
+    this.tokenChanges$.next(null);
+    this.clearRefreshTokenCookie();
+  }
+
+  private clearRefreshTokenCookie(): void {
+    const expiredCookie = 'refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0';
+    const paths = ['/', '/wp-json', '/wp-json/jwt-auth', '/wp-json/jwt-auth/v1'];
+    const sameSiteVariants = ['; SameSite=Lax', '; SameSite=None; Secure', ''];
+
+    for (const path of paths) {
+      for (const sameSite of sameSiteVariants) {
+        document.cookie = `${expiredCookie}; path=${path}${sameSite}`;
+        document.cookie = `${expiredCookie}; path=${path}; domain=${window.location.hostname}${sameSite}`;
+      }
+    }
   }
 
   getUserData(): Observable<UserData> {

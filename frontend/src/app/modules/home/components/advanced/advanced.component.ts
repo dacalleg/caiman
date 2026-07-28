@@ -75,9 +75,8 @@ export class AdvancedComponent {
     });
   }
 
-  convertUpgradeErrorMessages(status: number)
-  {
-    switch(status) {
+  convertUpgradeErrorMessages(status: string | number): string {
+    switch (Number(status)) {
       case -7:
         return "Checksum error";
       case -6:
@@ -92,8 +91,9 @@ export class AdvancedComponent {
         return "Ota partition fail";
       case -1:
         return "Upgrade fail";
+      default:
+        return "unknown";
     }
-    return "unknown";
   }
 
   upgradeFirmwareBoard() {

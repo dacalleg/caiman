@@ -93,6 +93,10 @@ interface DownloadStatusResponse {
 }
 
 class AguaProtocol {
+    private static readonly JOB_STATUS_MAX_ATTEMPTS = 10;
+    private static readonly FIRMWARE_JOB_STATUS_MAX_ATTEMPTS = 120;
+    private static readonly JOB_STATUS_POLL_MS = 1000;
+
     private token$: Observable<string>;
     private readonly requestQueue$ = new Subject<Observable<unknown>>();
 
@@ -343,9 +347,9 @@ class AguaProtocol {
             }
             return this.token$.pipe(
                 switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceDownloadFiles", payload, { headers: this.getHeaders(token) }).pipe(
-                    switchMap(response => this.getJobStatus(response.idRequest)),
+                    switchMap(response => this.getJobStatus(response.idRequest, AguaProtocol.FIRMWARE_JOB_STATUS_MAX_ATTEMPTS)),
                 )),
-                switchMap(() => this.getDownloadStatus().pipe(
+                switchMap(() => this.getDownloadStatus(AguaProtocol.FIRMWARE_JOB_STATUS_MAX_ATTEMPTS).pipe(
                     map(response => {
                         if (response.StatusCode > 0) {
                             return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus;
@@ -355,7 +359,7 @@ class AguaProtocol {
                         }
                         throw new Error(String(response.StatusCode));
                     }),
-                    repeat({ delay: 1000 }),
+                    repeat({ delay: AguaProtocol.JOB_STATUS_POLL_MS }),
                     takeWhile(response => response.operation < 4, true)
                 )),
             );
@@ -381,36 +385,42 @@ class AguaProtocol {
             }
             return this.token$.pipe(
                 switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceDownloadFiles", payload, { headers: this.getHeaders(token) }).pipe(
-                    switchMap(response => this.getJobStatus(response.idRequest)),
+                    switchMap(response => this.getJobStatus(response.idRequest, AguaProtocol.FIRMWARE_JOB_STATUS_MAX_ATTEMPTS)),
                 )),
-                switchMap(() => this.getDownloadStatus().pipe(
+                switchMap(() => this.getDownloadStatus(AguaProtocol.FIRMWARE_JOB_STATUS_MAX_ATTEMPTS).pipe(
                     map(response => {
-                        return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus
+                        if (response.StatusCode > 0) {
+                            return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus;
+                        }
+                        if (response.StatusCode === 0) {
+                            return { operation: 0, progress: response.Progress ?? 0 } as FirmwareDownloadStatus;
+                        }
+                        throw new Error(String(response.StatusCode));
                     }),
-                    repeat({ delay: 1000 }),
+                    repeat({ delay: AguaProtocol.JOB_STATUS_POLL_MS }),
                     takeWhile(response => response.operation < 2, true)
                 )),
             );
         });
     }
 
-    private getDownloadStatus(): Observable<DownloadStatusResponse> {
+    private getDownloadStatus(maxAttempts = AguaProtocol.JOB_STATUS_MAX_ATTEMPTS): Observable<DownloadStatusResponse> {
         const payload = {
             id_product: this.id_product,
             id_device: this.id_device,
         }
         return this.token$.pipe(
             switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceStatusDwnUpg", payload, { headers: this.getHeaders(token) }).pipe(
-                switchMap(response => this.getJobStatus(response.idRequest)),
+                switchMap(response => this.getJobStatus(response.idRequest, maxAttempts)),
             )),
             map(response => response as DownloadStatusResponse)
         )
     }
 
-    private getJobStatus(requestId: string) {
+    private getJobStatus(requestId: string, maxAttempts = AguaProtocol.JOB_STATUS_MAX_ATTEMPTS) {
         return this.token$.pipe(
             switchMap(token => of(void 0).pipe(
-                delay(1000),
+                delay(AguaProtocol.JOB_STATUS_POLL_MS),
                 switchMap(() => this.http.get<any>(this.agua_endpoint + "/deviceJobStatus/" + requestId, { headers: this.getHeaders(token) }).pipe(
                     switchMap(response => {
                         switch (response.jobAnswerStatus) {
@@ -426,7 +436,7 @@ class AguaProtocol {
                                 return throwError(() => new Error(response.jobAnswerStatus))
                         }
                     }),
-                    retry({ count: 10, delay: 1000 }),
+                    retry({ count: maxAttempts, delay: AguaProtocol.JOB_STATUS_POLL_MS }),
                 )
                 ))
             )

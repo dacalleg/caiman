@@ -156,7 +156,13 @@ export class BleChannel implements Channel {
     return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload })).pipe(
       switchMap(() => this.getDownloadStatus().pipe(
         map(response => {
-          return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus
+          if (response.StatusCode > 0) {
+            return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus;
+          }
+          if (response.StatusCode === 0) {
+            return { operation: 0, progress: response.Progress ?? 0 } as FirmwareDownloadStatus;
+          }
+          throw new Error(String(response.StatusCode));
         }),
         repeat({ delay: 1000 }),
         takeWhile(response => response.operation < 2, true)
@@ -182,9 +188,13 @@ export class BleChannel implements Channel {
     return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload })).pipe(
       switchMap(() => this.getDownloadStatus().pipe(
         map(response => {
-          if(response.StatusCode > 0)
+          if (response.StatusCode > 0) {
             return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus;
-          throw new Error(response.StatusCode);
+          }
+          if (response.StatusCode === 0) {
+            return { operation: 0, progress: response.Progress ?? 0 } as FirmwareDownloadStatus;
+          }
+          throw new Error(String(response.StatusCode));
         }),
         repeat({ delay: 1000 }),
         takeWhile(response => response.operation < 4, true)

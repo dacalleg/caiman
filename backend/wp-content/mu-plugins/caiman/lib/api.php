@@ -65,7 +65,7 @@ function caiman_get_unsecure_file( WP_REST_Request $request ) {
     $md5 = md5_file(get_attached_file($params["attachment"]));
     $url = wp_get_attachment_url($params["attachment"]);
     $parts = parse_url($url);
-    $path = "/files" . str_replace("/backend/wp-content/uploads", "", $parts["path"]);
+    $path = "/files" . str_replace("/wp-content/uploads", "", $parts["path"]);
     $unsecure_url = "http://" . $parts["host"] . $path;
     return new WP_REST_Response(array("md5" => $md5, "url" => $unsecure_url), 200);
 }

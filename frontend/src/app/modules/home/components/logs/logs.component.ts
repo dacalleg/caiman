@@ -18,8 +18,8 @@ export class LogsComponent implements OnInit {
   }
   ngOnInit(): void {
     this.deviceLogs$ = of(this.device).pipe(
-      filter(device => device !== undefined && device?.info.serial !== undefined),
-      map(device => device!.info.serial!),
+      filter(device => device !== undefined && device.serial !== undefined),
+      map(device => device!.serial),
       switchMap(serial => this.Api.getLogsForDevice(serial))
     )
   }

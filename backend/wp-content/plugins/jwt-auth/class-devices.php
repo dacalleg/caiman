@@ -262,6 +262,9 @@ class Devices {
 
 		// Add a hash for the new password.
 		$this->refresh_pass( $user_id );
+
+		delete_user_meta( $user_id, 'jwt_auth_refresh_tokens' );
+		delete_user_meta( $user_id, 'jwt_auth_refresh_tokens_expires_next' );
 	}
 
 	/**

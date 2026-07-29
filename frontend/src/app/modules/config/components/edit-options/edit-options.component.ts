@@ -42,21 +42,26 @@ export class EditOptionsComponent implements OnChanges {
 
       const realMin = this.variable.min || min;
       const realMax = this.variable.max || max;
-      const values = this.getAllMaskNumber(this.variable.mask!)
+      const values = Utils.getAllMaskValues(this.variable.mask!)
 
       let res = values.map(i => {
         let val = this.computeGeneratorFunction(i);
         if(!isNaN(+val))
         {
           const test = +val;
-          if(test >= realMin && test <= realMax)
+          if(test >= realMin && test <= realMax && test % step === 0)
           {
             const name = this.variable!.formatstring.replace("{0}", val);
             return ["" + i, name];
           }
         }
+        else
+        {
+          if(i>=realMin && i<=realMax && i % step === 0)
+            return ["" + i, val];
+        }
         return null;
-      }).filter(i => i !== null).map(item => item![0] + ":" + item![1]).join("\n")
+      }).filter(item => item !== null).map(item => item![0] + ":" + item![1]).join("\n")
 
       if(this.list === "")
         this.list = res;
@@ -75,8 +80,8 @@ export class EditOptionsComponent implements OnChanges {
     }
     if(this.variable && this.variable.readExp)
     {
-      let val = Utils.convertValuesToRead([this.variable], [value])
-      return "" + val;
+      const val = Utils.convertValuesToRead([this.variable], [value])[0];
+      return String(val);
     }
     return "" + value;
   }
@@ -88,6 +93,16 @@ export class EditOptionsComponent implements OnChanges {
     {
       const test = i & mask;
       if(i === test)
+        ret.push(i)
+    }
+    return ret;
+  }
+
+  getAllNumberFromMinMax(min: number, max: number)
+  {
+    let ret = [];
+    for(let i=min;i<=max;i++)
+    {
         ret.push(i)
     }
     return ret;

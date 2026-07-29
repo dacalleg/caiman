@@ -112,8 +112,8 @@
               </ng-container>
               <ng-template #errorDiv>
                 <p>
-                  Si è verificato un errore con la richiesta, codice errore:<br>
-                  {{error}}
+                  {{'error.request'|translate}}<br>
+                  {{(error ?? '')|translate}}
                 </p>
                 <p>
                   <a routerLink="/dashboard/home/">{{"back"|translate}}</a>

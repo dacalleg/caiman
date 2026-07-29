@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
-  bufferWhen,
   catchError,
   combineLatest,
   filter,
-  finalize,
   map,
   Observable,
   of,
@@ -17,6 +15,7 @@ import {
   tap,
   throwError,
 } from "rxjs";
+import { Agua } from "../classes/agua";
 import { Channel, FirmwareDownloadStatus, LogItem, LogType, Variable, VariableValue, VariableWriteResponse } from "../classes/interfaces";
 
 @Injectable({
@@ -27,7 +26,6 @@ export class DeviceService {
   private monitoredVariables$: BehaviorSubject<Variable[]>;
 
   private logs$: Observable<LogItem>;
-  private allLogs$: Observable<LogItem[]>;
   private logSubject$: Subject<LogItem>;
   private connected$: BehaviorSubject<boolean>;
   private stream$: Subject<VariableValue[]>;
@@ -36,17 +34,27 @@ export class DeviceService {
   constructor() {
     this.logSubject$ = new Subject<LogItem>();
     this.logs$ = this.logSubject$.asObservable();
-    this.allLogs$ = this.logs$.pipe(
-      bufferWhen(() => this.connected$.pipe(filter(connected => connected === false))),
-      shareReplay(1)
-    );
     this.monitoredVariables = [];
     this.connected$ = new BehaviorSubject<boolean>(false);
     this.monitoredVariables$ = new BehaviorSubject<Variable[]>([]);
     this.stream$ = new Subject();
     this.channel$ = new BehaviorSubject<Channel | null>(null);
+  }
 
-    this.allLogs$.subscribe();
+  private isAguaChannel(channel: Channel): channel is Agua {
+    return channel instanceof Agua;
+  }
+
+  private rejectAguaWifiOperation(channel: Channel): Observable<void> | null {
+    if (this.isAguaChannel(channel)) {
+      return throwError(() => new Error("Wifi configuration is not supported on cloud connection"));
+    }
+    return null;
+  }
+
+  private rollbackConnection(channel: Channel, err: unknown): Observable<never> {
+    this.connected$.next(false);
+    return channel.disconnect().pipe(switchMap(() => throwError(() => err)));
   }
 
   private getChannel(): Observable<Channel> {
@@ -78,6 +86,8 @@ export class DeviceService {
         switchMap((variables) => channel.setVariableStream(variables)),
         switchMap(() => channel.getStream()),
         tap(data => this.stream$.next(data)),
+      ).pipe(
+        catchError(err => this.rollbackConnection(channel, err))
       )),
       takeUntil(this.connected$.pipe(filter(connected => connected === false))),
     )
@@ -91,6 +101,13 @@ export class DeviceService {
     return this.connected$.asObservable();
   }
 
+  connectedViaWifi() {
+    return combineLatest([this.connected$, this.channel$]).pipe(
+      map(([connected, channel]) => connected && channel instanceof Agua),
+      shareReplay(1),
+    );
+  }
+
   removedMonitoredVariable(variable: Variable) {
     this.monitoredVariables = this.monitoredVariables
       .filter(item => item.hash !== variable.hash)
@@ -102,7 +119,7 @@ export class DeviceService {
 
   addMonitoredVariable(variable: Variable) {
     this.monitoredVariables = this.monitoredVariables
-      .filter(item => item.hash === variable.hash)
+      .filter(item => item.hash !== variable.hash)
       .concat(variable)
       .sort((a, b) => {
         return a.address - b.address;
@@ -169,7 +186,13 @@ export class DeviceService {
 
   setWifi(ssid: string, password: string) {
     return this.getChannel().pipe(
-      switchMap(channel => channel.setWifi(ssid, password)),
+      switchMap(channel => {
+        const rejected = this.rejectAguaWifiOperation(channel);
+        if (rejected) {
+          return rejected;
+        }
+        return channel.setWifi(ssid, password);
+      }),
       take(1)
     );
   }
@@ -177,7 +200,13 @@ export class DeviceService {
 
   disconnectWifi() {
     return this.getChannel().pipe(
-      switchMap(channel => channel.disconnectWifi()),
+      switchMap(channel => {
+        const rejected = this.rejectAguaWifiOperation(channel);
+        if (rejected) {
+          return rejected;
+        }
+        return channel.disconnectWifi();
+      }),
       take(1)
     );
   }
@@ -240,9 +269,5 @@ export class DeviceService {
 
   getLogs() {
     return this.logs$;
-  }
-
-  getAllLogs() {
-    return this.allLogs$;
   }
 }

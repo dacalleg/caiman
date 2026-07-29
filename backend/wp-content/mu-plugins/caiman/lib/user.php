@@ -13,7 +13,9 @@ function get_user_language_code($user)
 function caiman_update_user_language(WP_REST_Request $request)
 {
     $user = wp_get_current_user();
-    update_field("language", get_language_code(), "user_" . $user->ID);
+    $body = $request->get_json_params();
+
+    update_field("language", $body["language"], "user_" . $user->ID);
     return new WP_REST_Response(200);
 }
 
@@ -96,7 +98,9 @@ function caiman_register_user(WP_REST_Request $request)
     ));
 
     $wp_user->set_role( $_ENV["DEFAULT_ROLE"] );
-
+    $month_later = new \DateTime();
+    $month_later->add(new DateInterval("P1M"));
+    
     update_field("user_access", $_ENV["DEFAULT_USER_ACCESS"], "user_" . $wp_user_id);
     update_field("reg_code", $reg_code, "user_" . $wp_user_id);
     update_field("language", get_language_code(), "user_" . $wp_user_id);
@@ -112,7 +116,8 @@ function caiman_register_user(WP_REST_Request $request)
     update_field("province", $body["province"], "user_" . $wp_user_id);
     update_field("zip", $body["zip"], "user_" . $wp_user_id);
     update_field("country", $body["country"], "user_" . $wp_user_id);
-
+    update_field("flat_license_expiration", $month_later->format("ymd"), "user_" . $wp_user_id);
+    update_field("tokens", 0, "user_" . $wp_user_id);
 
     foreach ($body as $key => $value) {
         if($key != "email" && $key != "password" && $key != "name" && $key != "surname")
@@ -148,6 +153,26 @@ function caiman_reset_password(WP_REST_Request $request)
     if(is_wp_error($user))
         return new WP_REST_Response(array('message' => $user->get_error_message()), 404);
     reset_password($user, $password);
+    return new WP_REST_Response(200);
+}
+
+function caiman_change_password(WP_REST_Request $request)
+{
+    $user = wp_get_current_user();
+    if($user->ID == 0)
+        return new WP_REST_Response(array('error_code' => "user_not_found"), 404);
+
+    $body = $request->get_json_params();
+    $current_password = $body["current_password"] ?? "";
+    $password = $body["password"] ?? "";
+
+    if($current_password === "" || $password === "")
+        return new WP_REST_Response(array('error_code' => "invalid_password"), 400);
+
+    if(!wp_check_password($current_password, $user->user_pass, $user->ID))
+        return new WP_REST_Response(array('error_code' => "incorrect_password"), 400);
+
+    wp_set_password($password, $user->ID);
     return new WP_REST_Response(200);
 }
 
@@ -322,6 +347,15 @@ add_action( 'rest_api_init', function(){
         array(
             'methods' => 'POST',
             'callback' => 'caiman_update_user',
+            'permission_callback' => '__return_true'
+        )
+    );
+    register_rest_route(
+        'caiman/v1',
+        '/change-password',
+        array(
+            'methods' => 'POST',
+            'callback' => 'caiman_change_password',
             'permission_callback' => '__return_true'
         )
     );

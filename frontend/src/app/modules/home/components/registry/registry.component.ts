@@ -31,8 +31,8 @@ export class RegistryComponent {
     this.countries$ = this.Api.getCountries();
     this.update$ = new Subject();
     const serial$ = this.project$.pipe(
-      filter(p => p.device?.info.serial != null),
-      map(p => p.device!.info.serial!),
+      filter(p => p.device?.serial != null),
+      map(p => p.device!.serial),
       take(1)
     );
     serial$.subscribe(serial => this.registry.serial = serial);
@@ -41,6 +41,7 @@ export class RegistryComponent {
       switchMap(serial => this.Api.getRegistries(serial)),
       tap(items => {
         this.registry = items.length > 0 ? items[0] : this.registry;
+        this.myForm?.form.markAsPristine();
       }),
       shareReplay(1)
     )

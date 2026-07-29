@@ -18,7 +18,7 @@ export class VariableTeaseComponent implements OnInit, OnDestroy {
   fullmask: number;
   value$: Observable<VariableValue>;
   project$: Observable<Project>;
-  newValue: number;
+  newValue: number | string;
   writing: boolean;
   cancelSubject: Subject<void>;
   startCounter: Subject<void>;

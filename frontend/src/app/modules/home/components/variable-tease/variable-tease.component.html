@@ -41,7 +41,7 @@
         </div>
       </div>
       <div *ngIf="variable.button && variable.buttonValue">
-        <button class="btn btn-primary" (click)="write(variable.buttonValue)">{{variable.caption}}</button>
+        <button class="btn" [ngStyle]="{'background-color': variable.buttonBackgroundColor || '#496356', 'color': variable.buttonTextColor || '#ffffff'}" (click)="write(variable.buttonValue)">{{variable.caption}}</button>
       </div>
       <div class="d-flex justify-content-between icons" *ngIf="{ value: counter$|async } as counter">
         <div class="d-flex flex-column justify-content-center">

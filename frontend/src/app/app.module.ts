@@ -9,9 +9,9 @@ import { ComponentStore } from "@ngrx/component-store";
 import { TranslateLoader, TranslateModule } from "@ngx-translate/core";
 
 import { FormsModule } from "@angular/forms";
-import { HttpClientModule, HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { JwtModule } from '@auth0/angular-jwt';
+import { JwtHelperService, JwtModule } from '@auth0/angular-jwt';
 import { AlertComponent } from './components/alert/alert.component';
 import { SharedModule } from './modules/shared/shared.module';
 import { AuthService } from './services/auth.service';
@@ -21,13 +21,13 @@ import { ApiService } from './services/api.service';
 import { TranslationProviderService } from './services/translation-provider.service';
 import { HeaderInterceptor } from './interceptors/header.interceptor';
 import { TranslationService } from './services/translation.service';
-import { ServiceWorkerModule, SwUpdate } from '@angular/service-worker';
-import { filter, from } from 'rxjs';
+import { ServiceWorkerModule } from '@angular/service-worker';
 import { HeaderComponent } from './components/header/header.component';
 import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle, QrCode, X} from 'ng-bootstrap-icons/icons';
 import { BootstrapIconsModule } from 'ng-bootstrap-icons';
 import { ToastManagerComponent } from './components/toast-manager/toast-manager.component';
 import { ToastService } from './services/toast.service';
+import { AppUpdateService } from './services/app-update.service';
 import {BarcodeComponent} from "./components/barcode/barcode.component";
 import {ZXingScannerModule} from "@zxing/ngx-scanner";
 
@@ -45,23 +45,18 @@ const icons = {
   X
 };
 
+const jwtHelper = new JwtHelperService();
+
 export function tokenGetter() {
-  return localStorage.getItem("access_token");
+  const token = localStorage.getItem("access_token");
+  if (!token || jwtHelper.isTokenExpired(token)) {
+    return null;
+  }
+  return token;
 }
 
-export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
-  return (): Promise<void> =>
-    new Promise((resolve) => {
-      swUpdate.checkForUpdate();
-
-      from(swUpdate.activateUpdate())
-        .pipe(filter(value => value === true))
-        .subscribe(() => {
-          window.location.reload();
-      });
-
-      resolve();
-    });
+export const initializeAppUpdates = (appUpdateService: AppUpdateService): (() => Promise<void>) => {
+  return () => appUpdateService.initialize();
 };
 
 @NgModule({
@@ -72,7 +67,7 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
     AlertComponent,
     HeaderComponent,
     ToastManagerComponent,
-    BarcodeComponent
+    BarcodeComponent,
   ],
   imports: [
     BrowserModule,
@@ -95,18 +90,16 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
         tokenGetter: tokenGetter,
         allowedDomains: [environment.host],
         disallowedRoutes: [
-          /backend\/wp-content\/uploads\/.*/,
-          /backend\/wp-json\/jwt-auth\/v1\/token/,
-          /backend\/wp-json\/wp\/v2\/translation/,
-          /backend\/wp-json\/caiman\/v1\/forgot-password/,
-          /backend\/wp-json\/caiman\/v1\/info/],
+          //wp-content\/uploads\/.*/,
+          /wp-json\/jwt-auth\/v1\/token/,
+          /wp-json\/wp\/v2\/translation/,
+          /wp-json\/caiman\/v1\/forgot-password/,
+          /wp-json\/caiman\/v1\/info/],
       },
     }),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
-      // Register the ServiceWorker as soon as the application is stable
-      // or after 30 seconds (whichever comes first).
-      registrationStrategy: 'registerWhenStable:30000'
+      registrationStrategy: 'registerImmediately',
     }),
 
   ],
@@ -122,7 +115,7 @@ export const checkForUpdates = (swUpdate: SwUpdate): (() => Promise<any>) => {
       useClass: HeaderInterceptor,
       multi: true
     },
-    { provide: APP_INITIALIZER, useFactory: checkForUpdates, multi: true, deps: [SwUpdate] },
+    { provide: APP_INITIALIZER, useFactory: initializeAppUpdates, multi: true, deps: [AppUpdateService] },
   ],
   bootstrap: [AppComponent]
 })

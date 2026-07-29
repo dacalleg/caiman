@@ -12,12 +12,11 @@ import { ApiService } from 'src/app/services/api.service';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent {
 
   @ViewChild("file") file: ElementRef | null;
   @Output() onBurgerClicked = new EventEmitter<void>();
   project$: Observable<Project>;
-  isDeviceConnected$: Observable<boolean>;
   username$: Observable<any>;
   roles$: Observable<string>;
   info$: Observable<any>;
@@ -27,22 +26,17 @@ export class HeaderComponent implements OnInit {
   constructor(
     private Store: StoreService,
     private modalService: ModalService,
-    private Device: DeviceService,
     private AuthService: AuthService,
     private Router: Router,
     private Api: ApiService
   ) {
     this.file = null;
     this.project$ = this.Store.getProject();
-    this.isDeviceConnected$ = this.Device.isConnected();
     this.username$ = this.AuthService.getUserName();
     this.roles$ = this.AuthService.getRoles().pipe(map(roles => roles.join(", ")));
     this.info$ = this.Api.getInfo();
     this.isAdmin$ = this.AuthService.getRoles().pipe(map(roles => roles.includes("administrator")))
     this.menuOpen = false;
-  }
-
-  ngOnInit(): void {
   }
 
   onFileChange($event: Event) {
@@ -142,4 +136,5 @@ export class HeaderComponent implements OnInit {
   closeMenu() {
     this.menuOpen = false;
   }
+
 }

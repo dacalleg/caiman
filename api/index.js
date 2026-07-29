@@ -83,6 +83,18 @@ async function init() {
             res.send(200);
         });
 
+        app.get('/translations/:lang', (req, res) => {
+            const lang = req.params.lang;
+            if (!/^[a-z]{2}$/i.test(lang)) {
+                return res.status(400).send({ message: 'Invalid language' });
+            }
+            try {
+                res.status(200).send(require(`./i18n/${lang.toLowerCase()}.js`));
+            } catch (ex) {
+                res.status(404).send({ message: 'Language not found' });
+            }
+        });
+
         app.post('/ticket/add', UserRequired, async (req, res) => {
             try {
                 if (req.body.parent !== undefined) {
@@ -191,7 +203,8 @@ async function init() {
                     {
                         where: {
                             serial: serial,
-                        }
+                        },
+                        order: [["createdAt", "DESC"]]
                     }
                 ));
             } catch (ex) {
@@ -201,8 +214,9 @@ async function init() {
 
         app.post('/registry/update', UserRequired, async (req, res) => {
             try {
-                const body = { ...req.body, user: req.user.email, createdAt: undefined, updatedAt: undefined };
-                await Registry.upsert(body)
+                const { key, createdAt, updatedAt, ...fields } = req.body;
+                const body = { ...fields, user: req.user.email };
+                await Registry.create(body);
                 res.status(200).send({ status: "OK" });
             } catch (ex) {
                 res.status(500).send({ message: ex.message });
@@ -241,13 +255,17 @@ async function init() {
                     const body = { ...req.body, user: req.user.email, createdAt: undefined, updatedAt: undefined, data: {...req.body.data, registry: registry}};
                     const [op, created] = await Operation.upsert(body);
 
-                    const mail = {
-                        to: registry.email,
-                        subject: "operation.new.email.subject",
-                        body: "operation.new.email.body",
-                        placeholders: {'key': op.dataValues.key}
-                    };
-                    await sendEmail(mail, req.hostname, req.token, language);
+                    try {
+                        const mail = {
+                            to: registry.email,
+                            subject: "operation.new.email.subject",
+                            body: "operation.new.email.body",
+                            placeholders: {'key': op.dataValues.key}
+                        };
+                        await sendEmail(mail, req.hostname, req.token, language);
+                    } catch (emailError) {
+                        console.error('Failed to send operation notification email:', emailError.message);
+                    }
                     res.status(200).send({ status: "OK" });
                 }
                 else
@@ -299,6 +317,26 @@ async function init() {
             const id = req.params.id;
             try {
                 res.status(200).send(await Serami.findByPk(id));
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.get('/serami/batch', UserRequired, async (req, res) => {
+            try {
+                const keys = (req.query.keys || '')
+                    .split(',')
+                    .map(key => key.trim())
+                    .filter(key => key.length > 0);
+
+                if (keys.length === 0) {
+                    return res.status(200).send([]);
+                }
+
+                const entries = await Serami.findAll({
+                    where: { key: keys }
+                });
+                res.status(200).send(entries);
             } catch (ex) {
                 res.status(500).send({ message: ex.message });
             }
@@ -357,10 +395,31 @@ async function makePost(hostname, path, method, data, headers={})
                 ...headers,
             }
         };
-        var req = https.request(opt, (res) => {          
-        
-            res.on('data', (d) => {
-                resolve(JSON.parse(d));
+        const req = https.request(opt, (res) => {
+            const chunks = [];
+
+            res.on('data', (chunk) => {
+                chunks.push(chunk);
+            });
+
+            res.on('end', () => {
+                const body = Buffer.concat(chunks).toString();
+
+                if (res.statusCode < 200 || res.statusCode >= 300) {
+                    reject(new Error(`Request failed with status ${res.statusCode}: ${body.slice(0, 200)}`));
+                    return;
+                }
+
+                if (!body) {
+                    resolve({});
+                    return;
+                }
+
+                try {
+                    resolve(JSON.parse(body));
+                } catch (error) {
+                    reject(new Error(`Invalid JSON response: ${body.slice(0, 200)}`));
+                }
             });
         });
         
@@ -375,7 +434,7 @@ async function makePost(hostname, path, method, data, headers={})
 
 async function sendEmail(data, hostname, token, language=undefined)
 {
-    const path = '/backend/wp-json/caiman/v1/email';
+    const path = '/wp-json/caiman/v1/email';
     const method = 'POST';
     const contentType = 'application/json';
     const headers = {'Content-Type': contentType, 'Authorization': 'Bearer ' + token}

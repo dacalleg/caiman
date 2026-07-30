@@ -1,4 +1,4 @@
-import { catchError, concat, delay, filter, forkJoin, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, take, takeUntil, takeWhile, tap, throwError, toArray } from "rxjs";
+import { catchError, concat, concatMap, defer, delay, EMPTY, filter, map, Observable, of, repeat, retry, shareReplay, Subject, switchMap, takeUntil, takeWhile, tap, throwError, toArray } from "rxjs";
 import { Channel, FirmwareDownloadStatus, Variable, VariableValue, VariableWriteResponse, WifiStation, WifiStatus } from "./interfaces";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Utils } from "./utils";
@@ -16,7 +16,7 @@ export class Agua implements Channel {
     }
 
     disconnectWifi(): Observable<void> {
-        throw new Error("Method not implemented.");
+        return throwError(() => new Error("Wifi configuration is not supported on cloud connection"));
     }
 
     getWifiStatus(): Observable<WifiStatus> {
@@ -24,14 +24,15 @@ export class Agua implements Channel {
     }
 
     setWifi(ssid: string, password: string): Observable<void> {
-        throw new Error("Method not implemented.");
+        return throwError(() => new Error("Wifi configuration is not supported on cloud connection"));
     }
 
     connect(): Observable<any> {
         return of(void 0);
     }
 
-    disconnect(): Observable<any> {
+    disconnect(): Observable<void> {
+        this.close();
         return of(void 0);
     }
 
@@ -86,8 +87,18 @@ interface RequestReadingReponse {
     cmd: string;
 }
 
+interface DownloadStatusResponse {
+    StatusCode: number;
+    Progress: number;
+}
+
 class AguaProtocol {
+    private static readonly JOB_STATUS_MAX_ATTEMPTS = 10;
+    private static readonly FIRMWARE_JOB_STATUS_MAX_ATTEMPTS = 120;
+    private static readonly JOB_STATUS_POLL_MS = 1000;
+
     private token$: Observable<string>;
+    private readonly requestQueue$ = new Subject<Observable<unknown>>();
 
     private getHeaders(token: string | null = null) {
         return new HttpHeaders()
@@ -108,6 +119,55 @@ class AguaProtocol {
         private customer_code: string) {
 
         this.token$ = of(this.access_token).pipe(shareReplay(1));
+        this.requestQueue$.pipe(
+            concatMap(op => op.pipe(catchError(() => EMPTY)))
+        ).subscribe();
+    }
+
+    private schedule<T>(work: () => Observable<T>): Observable<T> {
+        return new Observable<T>(subscriber => {
+            this.requestQueue$.next(
+                defer(work).pipe(
+                    tap({
+                        next: (value) => subscriber.next(value),
+                        error: (err) => subscriber.error(err),
+                        complete: () => subscriber.complete(),
+                    })
+                )
+            );
+        });
+    }
+
+    private parseJobAnswerData(data: unknown): unknown {
+        if (data === null || data === undefined || data === "") {
+            return null;
+        }
+        if (typeof data === "string") {
+            try {
+                return JSON.parse(data);
+            } catch {
+                return data;
+            }
+        }
+        return data;
+    }
+
+    private mapReadingResponse(variables: Variable[], response: unknown): VariableValue[] {
+        const r = response as RequestReadingReponse;
+        const values = variables.map(v => {
+            const addr = v.memory === "eeprom" ? v.address + 0x8000 : v.address;
+            const index = r.Items.indexOf(addr);
+            if (index >= 0) {
+                return r.Values[index];
+            }
+            return null;
+        });
+        const calculated = Utils.convertValuesToRead(variables, values);
+        const ret = [] as VariableValue[];
+        for (let i = 0; i < variables.length; i++) {
+            ret.push({ variable: variables[i], value: calculated[i] });
+        }
+        return ret;
     }
 
     private getToken() {
@@ -123,7 +183,7 @@ class AguaProtocol {
         }, { headers: headers }).pipe(map(response => response.token as string));
     }
 
-    readVariables(variables: Variable[]) {
+    private executeReadVariables(variables: Variable[]) {
         const payload = {
             "id_product": this.id_product,
             "id_device": this.id_device,
@@ -138,244 +198,245 @@ class AguaProtocol {
             switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceRequestReading", payload, { headers: this.getHeaders(token) })
                 .pipe(
                     switchMap(response => this.getJobStatus(response.idRequest)),
-                    map(response => {
-                        let r = response as RequestReadingReponse;
-                        const values = variables.map(v => {
-                            const addr = v.memory === "eeprom" ? v.address + 0x8000 : v.address;
-                            const index = r.Items.indexOf(addr);
-                            if (index >= 0) {
-                                return r.Values[index];
-                            }
-                            return null;
-                        })
-                        const calculated = Utils.convertValuesToRead(variables, values);
-                        const ret = [] as VariableValue[];
-                        for (let i = 0; i < variables.length; i++) {
-                            ret.push({ variable: variables[i], value: calculated[i] });
-                        }
-                        return ret;
-                    }))
-            ),
-            retry({ count: 5 })
-        )
-    }
-
-    writeVariables(variables: VariableValue[]) {
-        const payload = {
-            "id_product": this.id_product,
-            "id_device": this.id_device,
-            "Freq": 0,
-            "Protocol": "RWMSmaster",
-            "BitData": variables.map(item => item.variable.bit),
-            "Endianess": variables.map(item => item.variable.pattern.includes(">") ? 'B' : 'L'),
-            "Items": variables.map(item => item.variable.memory === "eeprom" ? item.variable.address + 0x8000 : item.variable.address),
-            "Masks": variables.map(item => item.variable.mask),
-            "Values": Utils.convertValuesToWrite(variables.map(v => v.variable), variables.map(v => v.value))
-        }
-        return this.token$.pipe(
-            switchMap(token => concat(
-                this.readVariables(variables.map(v => v.variable)),
-                this.http.post<any>(this.agua_endpoint + "/deviceRequestWriting", payload, { headers: this.getHeaders(token) }).pipe(
-                    switchMap(response => this.getJobStatus(response.idRequest)),
-                    retry({ count: 5 }),
-                    delay(2000),
-                    switchMap(() => this.readVariables(variables.map(v => v.variable))))
-            )),
-            toArray(),
-            map(response => {
-                return { from: response[0], set: variables, written: response[1] } as VariableWriteResponse
-            })
-        )
-    }
-
-    setBuffer(variables: Variable[], bufferId: number = 3) {
-        const payload = {
-            "id_product": this.id_product,
-            "id_device": this.id_device,
-            "BufferId": bufferId,
-            "Freq": 1,
-            "Protocol": "RWMSmaster",
-            "BitData": variables.map(item => item.bit),
-            "Endianess": variables.map(item => item.pattern.includes(">") ? 'B' : 'L'),
-            "Items": variables.map(item => item.memory === "eeprom" ? item.address + 0x8000 : item.address),
-            "Masks": variables.map(item => item.mask)
-        }
-        return this.token$.pipe(
-            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceSetConfigBuffer", payload, { headers: this.getHeaders(token) })
-                .pipe(
-                    switchMap(response => this.getJobStatus(response.idRequest)),
-                    switchMap(() => of(void 0))
+                    map(response => this.mapReadingResponse(variables, response))
                 )
             ),
             retry({ count: 5 })
-        )
+        );
+    }
+
+    readVariables(variables: Variable[]) {
+        return this.schedule(() => this.executeReadVariables(variables));
+    }
+
+    writeVariables(variables: VariableValue[]) {
+        return this.schedule(() => {
+            const payload = {
+                "id_product": this.id_product,
+                "id_device": this.id_device,
+                "Freq": 0,
+                "Protocol": "RWMSmaster",
+                "BitData": variables.map(item => item.variable.bit),
+                "Endianess": variables.map(item => item.variable.pattern.includes(">") ? 'B' : 'L'),
+                "Items": variables.map(item => item.variable.memory === "eeprom" ? item.variable.address + 0x8000 : item.variable.address),
+                "Masks": variables.map(item => item.variable.mask),
+                "Values": Utils.convertValuesToWrite(variables.map(v => v.variable), variables.map(v => v.value))
+            }
+            return this.token$.pipe(
+                switchMap(token => concat(
+                    this.executeReadVariables(variables.map(v => v.variable)),
+                    this.http.post<any>(this.agua_endpoint + "/deviceRequestWriting", payload, { headers: this.getHeaders(token) }).pipe(
+                        switchMap(response => this.getJobStatus(response.idRequest)),
+                        retry({ count: 5 }),
+                        delay(2000),
+                        switchMap(() => this.executeReadVariables(variables.map(v => v.variable))))
+                )),
+                toArray(),
+                map(response => {
+                    return { from: response[0], set: variables, written: response[1] } as VariableWriteResponse
+                })
+            );
+        });
+    }
+
+    setBuffer(variables: Variable[], bufferId: number = 3) {
+        return this.schedule(() => {
+            const payload = {
+                "id_product": this.id_product,
+                "id_device": this.id_device,
+                "BufferId": bufferId,
+                "Freq": 1,
+                "Protocol": "RWMSmaster",
+                "BitData": variables.map(item => item.bit),
+                "Endianess": variables.map(item => item.pattern.includes(">") ? 'B' : 'L'),
+                "Items": variables.map(item => item.memory === "eeprom" ? item.address + 0x8000 : item.address),
+                "Masks": variables.map(item => item.mask)
+            }
+            return this.token$.pipe(
+                switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceSetConfigBuffer", payload, { headers: this.getHeaders(token) })
+                    .pipe(
+                        switchMap(response => this.getJobStatus(response.idRequest)),
+                        switchMap(() => of(void 0))
+                    )
+                ),
+                retry({ count: 5 })
+            );
+        });
     }
 
     readBuffer(variables: Variable[], bufferId: number = 3) {
-        const payload = {
-            "id_product": this.id_product,
-            "id_device": this.id_device,
-            "BufferId": bufferId
-        }
-        return this.token$.pipe(
-            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceGetBufferReading", payload, { headers: this.getHeaders(token) })
-                .pipe(
-                    switchMap(response => this.getJobStatus(response.idRequest)),
-                    map(response => {
-                        let r = response as RequestReadingReponse;
-                        const values = variables.map(v => {
-                            const addr = v.memory === "eeprom" ? v.address + 0x8000 : v.address;
-                            const index = r.Items.indexOf(addr);
-                            if (index >= 0) {
-                                return r.Values[index];
-                            }
-                            return null;
-                        })
-                        const calculated = Utils.convertValuesToRead(variables, values);
-                        const ret = [] as VariableValue[];
-                        for (let i = 0; i < variables.length; i++) {
-                            ret.push({ variable: variables[i], value: calculated[i] });
-                        }
-                        return ret;
-                    }),
-                    retry({ count: 5 })
-                ))
-        )
+        return this.schedule(() => {
+            const payload = {
+                "id_product": this.id_product,
+                "id_device": this.id_device,
+                "BufferId": bufferId
+            }
+            return this.token$.pipe(
+                switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceGetBufferReading", payload, { headers: this.getHeaders(token) })
+                    .pipe(
+                        switchMap(response => this.getJobStatus(response.idRequest)),
+                        map(response => this.mapReadingResponse(variables, response)),
+                        retry({ count: 5 })
+                    ))
+            );
+        });
     }
 
     isOnline() {
-        const payload = {
-            "id_product": this.id_product,
-            "id_device": this.id_device
-        }
-        return this.token$.pipe(
-            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceStatusWifiStation", payload, { headers: this.getHeaders(token) }).pipe(
-                switchMap(response => this.getJobStatus(response.idRequest)),
-            )),
-            switchMap(() => of(true)),
-            catchError(err => of(false)),
-        )
+        return this.schedule(() => {
+            const payload = {
+                "id_product": this.id_product,
+                "id_device": this.id_device
+            }
+            return this.token$.pipe(
+                switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceStatusWifiStation", payload, { headers: this.getHeaders(token) }).pipe(
+                    switchMap(response => this.getJobStatus(response.idRequest)),
+                )),
+                switchMap(() => of(true)),
+                catchError(() => of(false)),
+            );
+        });
     }
 
     getWifiStatus() {
-        const payload = {
-            "id_product": this.id_product,
-            "id_device": this.id_device
-        }
+        return this.schedule(() => {
+            const payload = {
+                "id_product": this.id_product,
+                "id_device": this.id_device
+            }
 
-        return this.token$.pipe(
-            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceStatusWifiStation", payload, { headers: this.getHeaders(token) }).pipe(
-                switchMap(response => this.getJobStatus(response.idRequest)),
-            )),
-            map((resp: any) => {
-                return {
-                    wifi_connected: resp.ConnSta === "Connected",
-                    cloud_connected: resp.ConnServer === "Connected",
-                    wifi_stations: resp.Aps.map((item: any) => {
-                        return {
-                            ssid: item.ssid,
-                            channel: item.channel,
-                            rssi: item.rssi,
-                            bssid: item.bssid
-                        } as WifiStation
-                    })
-                } as WifiStatus
-            })
-        )
+            return this.token$.pipe(
+                switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceStatusWifiStation", payload, { headers: this.getHeaders(token) }).pipe(
+                    switchMap(response => this.getJobStatus(response.idRequest)),
+                )),
+                map((resp: any) => {
+                    return {
+                        wifi_connected: resp.ConnSta === "Connected",
+                        cloud_connected: resp.ConnServer === "Connected",
+                        wifi_stations: (resp.Aps ?? []).map((item: any) => {
+                            return {
+                                ssid: item.ssid,
+                                channel: item.channel,
+                                rssi: item.rssi,
+                                bssid: item.bssid
+                            } as WifiStation
+                        })
+                    } as WifiStatus
+                })
+            );
+        });
     }
 
     loadPowerBoardFirmware(url: string, md5: string): Observable<FirmwareDownloadStatus> {
-        const urlData = new URL(url);
-        const protocol = urlData.protocol.replace(":", "");
-        const path = urlData.pathname.split("/").slice(0, -1).join("/");
-        const filename = urlData.pathname.split("/").slice(-1).join("/");
-        const payload = {
-            id_product: this.id_product,
-            id_device: this.id_device,
-            RemoteHost: urlData.host,
-            RemotePath: path,
-            Protocol: protocol.toUpperCase(),
-            LocalPath: "fw",
-            Flags: ["OVER_WRITE", "CREATE_DIR", "AUTO_UPG"],
-            Type: "FW",
-            FileNames: filename,
-            MD5: md5.toUpperCase()
-        }
-        return this.token$.pipe(
-            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceDownloadFiles", payload, { headers: this.getHeaders(token) }).pipe(
-                switchMap(response => this.getJobStatus(response.idRequest)),
-            )),
-            switchMap(() => this.getDownloadStatus().pipe(
-                map(response => {
-                    if (response.StatusCode > 0)
-                        return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus;
-                    throw new Error(response.StatusCode);
-                }),
-                repeat({ delay: 1000 }),
-                takeWhile(response => response.operation < 4)
-            )),
-        )
+        return this.schedule(() => {
+            const urlData = new URL(url);
+            const protocol = urlData.protocol.replace(":", "");
+            const path = urlData.pathname.split("/").slice(0, -1).join("/");
+            const filename = urlData.pathname.split("/").slice(-1).join("/");
+            const payload = {
+                id_product: this.id_product,
+                id_device: this.id_device,
+                RemoteHost: urlData.host,
+                RemotePath: path,
+                Protocol: protocol.toUpperCase(),
+                LocalPath: "fw",
+                Flags: ["OVER_WRITE", "CREATE_DIR", "AUTO_UPG"],
+                Type: "FW",
+                FileNames: filename,
+                MD5: md5.toUpperCase()
+            }
+            return this.token$.pipe(
+                switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceDownloadFiles", payload, { headers: this.getHeaders(token) }).pipe(
+                    switchMap(response => this.getJobStatus(response.idRequest, AguaProtocol.FIRMWARE_JOB_STATUS_MAX_ATTEMPTS)),
+                )),
+                switchMap(() => this.getDownloadStatus(AguaProtocol.FIRMWARE_JOB_STATUS_MAX_ATTEMPTS).pipe(
+                    map(response => {
+                        if (response.StatusCode > 0) {
+                            return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus;
+                        }
+                        if (response.StatusCode === 0) {
+                            return { operation: 0, progress: response.Progress ?? 0 } as FirmwareDownloadStatus;
+                        }
+                        throw new Error(String(response.StatusCode));
+                    }),
+                    repeat({ delay: AguaProtocol.JOB_STATUS_POLL_MS }),
+                    takeWhile(response => response.operation < 4, true)
+                )),
+            );
+        });
     }
 
     loadGatewayFirmware(url: string, md5: string) {
-        const urlData = new URL(url);
-        const path = urlData.pathname.split("/").slice(0, -1).join("/");
-        const filename = urlData.pathname.split("/").slice(-1).join("/");
-        const payload = {
-            id_product: this.id_product,
-            id_device: this.id_device,
-            RemoteHost: urlData.host,
-            RemotePath: path,
-            LocalPath: "",
-            Protocol: "HTTP",
-            Flags: ["OVER_WRITE", "AUTO_UPG"],
-            Type: "OTA",
-            FileNames: filename,
-            MD5: md5.toUpperCase()
-        }
-        return this.token$.pipe(
-            switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceDownloadFiles", payload, { headers: this.getHeaders(token) }).pipe(
-                switchMap(response => this.getJobStatus(response.idRequest)),
-            )),
-            switchMap(() => this.getDownloadStatus().pipe(
-                map(response => {
-                    return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus
-                }),
-                repeat({ delay: 1000 }),
-                takeWhile(response => response.operation < 2)
-            )),
-        )
+        return this.schedule(() => {
+            const urlData = new URL(url);
+            const path = urlData.pathname.split("/").slice(0, -1).join("/");
+            const filename = urlData.pathname.split("/").slice(-1).join("/");
+            const payload = {
+                id_product: this.id_product,
+                id_device: this.id_device,
+                RemoteHost: urlData.host,
+                RemotePath: path,
+                LocalPath: "",
+                Protocol: "HTTP",
+                Flags: ["OVER_WRITE", "AUTO_UPG"],
+                Type: "OTA",
+                FileNames: filename,
+                MD5: md5.toUpperCase()
+            }
+            return this.token$.pipe(
+                switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceDownloadFiles", payload, { headers: this.getHeaders(token) }).pipe(
+                    switchMap(response => this.getJobStatus(response.idRequest, AguaProtocol.FIRMWARE_JOB_STATUS_MAX_ATTEMPTS)),
+                )),
+                switchMap(() => this.getDownloadStatus(AguaProtocol.FIRMWARE_JOB_STATUS_MAX_ATTEMPTS).pipe(
+                    map(response => {
+                        if (response.StatusCode > 0) {
+                            return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus;
+                        }
+                        if (response.StatusCode === 0) {
+                            return { operation: 0, progress: response.Progress ?? 0 } as FirmwareDownloadStatus;
+                        }
+                        throw new Error(String(response.StatusCode));
+                    }),
+                    repeat({ delay: AguaProtocol.JOB_STATUS_POLL_MS }),
+                    takeWhile(response => response.operation < 2, true)
+                )),
+            );
+        });
     }
 
-    private getDownloadStatus() {
+    private getDownloadStatus(maxAttempts = AguaProtocol.JOB_STATUS_MAX_ATTEMPTS): Observable<DownloadStatusResponse> {
         const payload = {
             id_product: this.id_product,
             id_device: this.id_device,
         }
         return this.token$.pipe(
             switchMap(token => this.http.post<any>(this.agua_endpoint + "/deviceStatusDwnUpg", payload, { headers: this.getHeaders(token) }).pipe(
-                switchMap(response => this.getJobStatus(response.idRequest)),
-            ))
+                switchMap(response => this.getJobStatus(response.idRequest, maxAttempts)),
+            )),
+            map(response => response as DownloadStatusResponse)
         )
     }
 
-    private getJobStatus(requestId: string) {
+    private getJobStatus(requestId: string, maxAttempts = AguaProtocol.JOB_STATUS_MAX_ATTEMPTS) {
         return this.token$.pipe(
             switchMap(token => of(void 0).pipe(
-                delay(1000),
+                delay(AguaProtocol.JOB_STATUS_POLL_MS),
                 switchMap(() => this.http.get<any>(this.agua_endpoint + "/deviceJobStatus/" + requestId, { headers: this.getHeaders(token) }).pipe(
                     switchMap(response => {
                         switch (response.jobAnswerStatus) {
                             case "terminated":
                             case "completed":
-                                return of(response.jobAnswerData === "" ? null : response.jobAnswerData);
+                                return of(this.parseJobAnswerData(response.jobAnswerData));
+
+                            case "failed":
+                            case "error":
+                                return throwError(() => new Error(response.jobAnswerStatus));
 
                             default:
                                 return throwError(() => new Error(response.jobAnswerStatus))
                         }
                     }),
-                    retry({ count: 10, delay: 1000 }),
-                    switchMap(response => response === null ? throwError(() => new Error("Empty Response")) : of(response))
+                    retry({ count: maxAttempts, delay: AguaProtocol.JOB_STATUS_POLL_MS }),
                 )
                 ))
             )

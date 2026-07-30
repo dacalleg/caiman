@@ -6,9 +6,12 @@ import { Variable, VariableValue } from 'src/app/classes/interfaces';
 })
 export class VariableValueFormatterPipe implements PipeTransform {
 
-  transform(value: number, variable: Variable): string | number | boolean | null {
+  transform(value: number | string, variable: Variable): string | number | boolean | null {
     if (value === null)
       return null;
+
+    if (typeof value === 'string')
+      return value;
 
     let calculated = value;
 

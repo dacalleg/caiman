@@ -34,11 +34,23 @@
     {
       "name": "api",
       "urls": [
-        "https://caiman.micronovasrl.com/backend/**"
+        "/wp-json/**",
+        "/api/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 200,
+        "maxAge": "7d",
+        "strategy": "freshness"
+      }
+    },
+    {
+      "name": "media",
+      "urls": [
+        "/wp-content/uploads/**"
       ],
       "cacheConfig": {
         "maxSize": 100,
-        "maxAge": "1d",
+        "maxAge": "30d",
         "strategy": "freshness"
       }
     },
@@ -50,7 +62,7 @@
       "cacheConfig": {
         "maxSize": 100,
         "maxAge": "1d",
-        "strategy": "performance",
+        "strategy": "freshness",
         "cacheOpaqueResponses": true
       }
     }

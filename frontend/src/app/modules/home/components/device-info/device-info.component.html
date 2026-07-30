@@ -5,16 +5,16 @@
     <div class="col-md order-2 order-md-1">
       <h1 class="fw-bold" [innerHTML]="device?.info?.name"></h1>
       <div class="fw-bold" *ngIf="device?.mac !== '0000'">{{device?.mac}}</div>
-      <div class="fw-bold" *ngIf="device?.mac === '0000'">{{device?.info?.serial}}</div>
+      <div class="fw-bold" *ngIf="device?.mac === '0000'">{{device?.serial}}</div>
       <p class="my-5" [innerHTML]="device?.info?.description"></p>
 
       <ul class="nav pb-5" *ngIf="device?.mac !== '0000'">
 
-        <li class="nav-item me-2" *ngIf="!connected"><button class="btn btn-lg btn-primary"
+        <li class="nav-item me-2" *ngIf="!connected && !isOffline"><button class="btn btn-lg btn-primary"
             (click)="wifiConnect()">{{ 'home.deviceinfo.wifi' | translate }}</button></li>
         <li class="nav-item me-2" *ngIf="!connected"><button class="btn btn-lg btn-primary"
             (click)="bleConnect()">{{ 'home.deviceinfo.ble' | translate }}</button></li>
-        <li class="nav-item me-2" *ngIf="!connected"><button class="btn btn-lg btn-primary"
+        <li class="nav-item me-2" *ngIf="!connected && !isOffline"><button class="btn btn-lg btn-primary"
             (click)="bridgeConnect()">{{ 'home.deviceinfo.bridge' | translate }}</button></li>
 
         <li class="nav-item me-2" *ngIf="connected"><button class="btn btn-lg btn-primary"

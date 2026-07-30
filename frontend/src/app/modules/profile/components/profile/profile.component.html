@@ -5,6 +5,9 @@
                 <div class="col-md my-2">
                     <h1 class="fw-bold">{{'profile'|translate}}</h1>
                 </div>
+                <div class="col-md my-2 text-md-end">
+                    <a routerLink="/dashboard/profile/change-password" class="btn btn-link">{{ 'profile.change_password.link' | translate }}</a>
+                </div>
             </div>
                         <form (ngSubmit)="onSubmit()" #myForm="ngForm">
                 <div class="row">

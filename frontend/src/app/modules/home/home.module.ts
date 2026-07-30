@@ -38,7 +38,6 @@ import { FilterLogPipe } from './pipes/filter-log.pipe';
 import { RegistryComponent } from './components/registry/registry.component';
 import { OperationComponent } from './components/operation/operation.component';
 import { OperationFormComponent } from './components/operation-form/operation-form.component';
-import { ProfileComponent } from '../profile/components/profile/profile.component';
 import { OperationTitlePipe } from './pipes/operation-title.pipe';
 import { UnescapePipe } from './pipes/unescape.pipe';
 import {SortGroupPipe} from "./pipes/sort-group.pipe";
@@ -89,7 +88,6 @@ const icons = {
     RegistryComponent,
     OperationComponent,
     OperationFormComponent,
-    ProfileComponent,
     OperationTitlePipe,
     UnescapePipe,
     SortGroupPipe,

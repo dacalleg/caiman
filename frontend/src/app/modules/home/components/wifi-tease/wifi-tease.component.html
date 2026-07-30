@@ -11,7 +11,7 @@
             <small>{{station.bssid}}</small>
         </div>
     </div>
-    <ng-container *ngIf="showPasswordInput">
+    <ng-container *ngIf="showPasswordInput && allowConnect">
         <div class="flex-grow-1 px-3">
             <input type="password" class="form-control" id="wifipassword" [(ngModel)]="password" [placeholder]="'wifi.password.placeholder' | translate">
         </div>
@@ -20,11 +20,11 @@
         </div>
     </ng-container>
     <ng-container *ngIf="!showPasswordInput">
-        <div *ngIf="!connected; else disconnectTemplate">
+        <div *ngIf="!connected && allowConnect; else disconnectTemplate">
             <button class="btn btn-outline-secondary" type="button" (click)="showPassword()">{{ 'wifi.insertpassword' | translate }}</button>
         </div>
         <ng-template #disconnectTemplate>
-            <button class="btn btn-outline-secondary" type="button" (click)="disconnect()">{{ 'wifi.disconnect' | translate }}</button>
+            <button class="btn btn-outline-secondary" type="button" (click)="disconnect()" *ngIf="allowDisconnect">{{ 'wifi.disconnect' | translate }}</button>
         </ng-template>
     </ng-container>
 

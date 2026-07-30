@@ -109,7 +109,7 @@ export class HomeComponent implements OnInit, OnDestroy {
                 security_code: regCode,
                 info: product
               } as DeviceProduct;
-              device.info.serial = serial != null ? serial : device.info.serial;
+              device.serial = serial ?? device.serial;
               return device;
             }))
           }
@@ -122,18 +122,18 @@ export class HomeComponent implements OnInit, OnDestroy {
               security_code: regCode,
               info: product
             } as DeviceProduct;
-            device.info.serial = serial != null ? serial : device.info.serial;
+            device.serial = serial ?? device.serial;
             return device;
           }))
         }
         if(mac)
           return this.Api.getDeviceInfoFromMac(mac, productKey).pipe(
             map(device => {
-              device.info.serial = serial != null ? serial : device.info.serial;
+              device.serial = serial ?? device.serial;
               return device;
             }),
           )
-        return throwError(() => new Error("Device Not Found"))
+        return throwError(() => new Error('error.device.not_found'))
       }),
       tap(device => this.Store.setDevice(device)),
       shareReplay(1)
@@ -194,8 +194,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.Device.getLogs().pipe(
       takeUntil(this.destroy$),
       switchMap(log => this.loadDeviceData$.pipe(
-        filter(device => device.info.serial != null),
-        switchMap(device => this.Api.createLogForDevice(device.info.serial!, log)),
+        filter(device => device.serial != null),
+        switchMap(device => this.Api.createLogForDevice(device.serial, log)),
         catchError(err => of(null))
       )),
     ).subscribe();
@@ -297,6 +297,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         take(1),
         switchMap(() => this.Device.startRead()),
         catchError(err => {
+          this.disconnect();
           return this.modal.openAlertModal({
             title: "error",
             message: err.message,

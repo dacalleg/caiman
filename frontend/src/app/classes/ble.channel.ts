@@ -6,7 +6,6 @@ import {
   combineLatest,
   concatMap,
   defer,
-  delay,
   filter,
   forkJoin,
   from,
@@ -23,12 +22,14 @@ import {
   takeWhile,
   tap,
   throwError,
-  timeout,
   toArray
 } from "rxjs";
 import { Channel, FirmwareDownloadStatus, Variable, VariableValue, VariableWriteResponse, WifiStation, WifiStatus } from "./interfaces";
 
 export class BleChannel implements Channel {
+  private static readonly MAX_RECONNECT_ATTEMPTS = 5;
+  private static readonly RECONNECT_DELAY_MS = 1000;
+
   private connection$: Observable<{ device: any, server: any, service: any, characteristic: any }>;
   private stream$: Observable<VariableValue[]>;
   private charatteristics$: BehaviorSubject<any | null>;
@@ -46,6 +47,7 @@ export class BleChannel implements Channel {
     this.sendCommand$ = new Subject();
 
     this.reconnect$ = this.BLEDevice$.pipe(
+      filter((device): device is NonNullable<typeof device> => device !== null),
       take(1),
       switchMap((device) => {
         const bledata = async () => {
@@ -58,7 +60,7 @@ export class BleChannel implements Channel {
       }),
       tap((data) => this.charatteristics$.next(data.characteristic)),
       switchMap(() => this.sendIdentity(mac, security).pipe(map(() => void 0))),
-      tap(() => this.responses$.subscribe()));
+    );
 
     //@ts-ignore
     this.connection$ = from(navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e'] })).pipe(
@@ -67,7 +69,12 @@ export class BleChannel implements Channel {
       shareReplay(1),
     )
 
-    this.close$.pipe(switchMap(() => this.BLEDevice$)).subscribe((device) => device.gatt.disconnect());
+    this.close$.pipe(
+      switchMap(() => this.BLEDevice$.pipe(
+        filter((device): device is NonNullable<typeof device> => device !== null),
+        take(1),
+      )),
+    ).subscribe((device) => device.gatt.disconnect());
 
     this.bufferVariables$ = new BehaviorSubject<Variable[]>([]);
 
@@ -88,7 +95,7 @@ export class BleChannel implements Channel {
           switchMap(() => throwError(() => err))
         )
       }),
-      retry(),
+      retry({ count: BleChannel.MAX_RECONNECT_ATTEMPTS, delay: BleChannel.RECONNECT_DELAY_MS }),
       takeUntil(this.close$),
       shareReplay(1)
     );
@@ -103,6 +110,7 @@ export class BleChannel implements Channel {
       shareReplay(1),
     );
 
+    this.responses$.subscribe();
   }
 
   write(variables: VariableValue[]): Observable<VariableWriteResponse> {
@@ -112,7 +120,7 @@ export class BleChannel implements Channel {
           switchMap(() => throwError(() => err))
         )
       }),
-      retry(),
+      retry({ count: BleChannel.MAX_RECONNECT_ATTEMPTS, delay: BleChannel.RECONNECT_DELAY_MS }),
     )
   }
 
@@ -124,7 +132,7 @@ export class BleChannel implements Channel {
           switchMap(() => throwError(() => err))
         )
       }),
-      retry(),
+      retry({ count: BleChannel.MAX_RECONNECT_ATTEMPTS, delay: BleChannel.RECONNECT_DELAY_MS }),
     )
   }
 
@@ -148,10 +156,16 @@ export class BleChannel implements Channel {
     return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload })).pipe(
       switchMap(() => this.getDownloadStatus().pipe(
         map(response => {
-          return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus
+          if (response.StatusCode > 0) {
+            return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus;
+          }
+          if (response.StatusCode === 0) {
+            return { operation: 0, progress: response.Progress ?? 0 } as FirmwareDownloadStatus;
+          }
+          throw new Error(String(response.StatusCode));
         }),
         repeat({ delay: 1000 }),
-        takeWhile(response => response.operation < 2)
+        takeWhile(response => response.operation < 2, true)
       ))
     )
   }
@@ -174,12 +188,16 @@ export class BleChannel implements Channel {
     return this.sendCommand(this.generateJsonEnvelope({ Cmd: "DownloadFiles", ...payload })).pipe(
       switchMap(() => this.getDownloadStatus().pipe(
         map(response => {
-          if(response.StatusCode > 0)
+          if (response.StatusCode > 0) {
             return { operation: response.StatusCode, progress: response.Progress } as FirmwareDownloadStatus;
-          throw new Error(response.StatusCode);
+          }
+          if (response.StatusCode === 0) {
+            return { operation: 0, progress: response.Progress ?? 0 } as FirmwareDownloadStatus;
+          }
+          throw new Error(String(response.StatusCode));
         }),
         repeat({ delay: 1000 }),
-        takeWhile(response => response.operation < 4)
+        takeWhile(response => response.operation < 4, true)
       ))
     )
   }
@@ -262,9 +280,9 @@ export class BleChannel implements Channel {
   private sendIdentity(mac: string, security: string) {
     const payload = this.generateJsonEnvelope({ Cmd: "Identity", Security: security, Id: mac });
     return this.charatteristics$.pipe(
+      filter((characteristic): characteristic is NonNullable<typeof characteristic> => characteristic !== null),
       take(1),
-      filter(item => item !== null),
-      switchMap((charatteristics) => this.sendData(charatteristics, { data: payload, chunkSize: 200, id: 0 })),
+      switchMap((characteristic) => this.sendData(characteristic, { data: payload, chunkSize: 200, id: 0 })),
     )
   }
 
@@ -274,7 +292,7 @@ export class BleChannel implements Channel {
         return {
           wifi_connected: resp.ConnSta === "Connected",
           cloud_connected: resp.ConnServer === "Connected",
-          wifi_stations: resp.Aps.map((item: any) => {
+          wifi_stations: (resp.Aps ?? []).map((item: any) => {
             return {
               ssid: item.ssid,
               channel: item.channel,

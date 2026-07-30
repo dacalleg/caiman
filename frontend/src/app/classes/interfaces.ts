@@ -95,7 +95,7 @@ export interface BLESerialDevice {
 
 export interface VariableValue {
   variable: Variable;
-  value: number;
+  value: number | string;
 }
 
 export interface VariableWriteResponse {
@@ -186,14 +186,14 @@ export interface DeviceProduct {
   email_master: string;
   id_client_master: string;
   security_code: string;
-  info: ProductInfo;
+  info: ProductModel;
 }
 
 export interface DeviceInfoResponse {
   Success: boolean;
   Text: string;
   Value: boolean;
-  device_product: DeviceProduct[];
+  device_product: DeviceProduct[] | null;
 }
 
 export interface Board {
@@ -211,7 +211,7 @@ export interface Gateway {
   firmware_list: Firmware[];
 }
 
-export interface ProductInfo {
+export interface ProductModel {
   id_product: string;
   id: number;
   name: string;
@@ -228,7 +228,7 @@ export interface ProductInfo {
   variables: Variable[];
   database: Database[];
   description: string;
-  serial?: string;
+  prefix?: string;
 }
 
 export interface GroupNameOverride {
@@ -398,9 +398,9 @@ export interface LogItem {
   date: Date;
   type: LogType;
   data?: string | number | boolean;
-  from?: number;
-  set?: number;
-  written?: number;
+  from?: number | string;
+  set?: number | string;
+  written?: number | string;
   variable?: string;
   user?: string
 }
@@ -471,6 +471,7 @@ export interface Operation
 
 export interface Registry
 {
+  key?: string;
   serial: string;
   fiscal_code: string;
   business_name: string;
@@ -492,6 +493,7 @@ export interface Registry
   warranty: string;
   user: string;
   createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Toast {

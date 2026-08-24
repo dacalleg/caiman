@@ -312,7 +312,8 @@ export class EditComponent {
         bits: null,
         pattern: "B",
         signed: false,
-        formatstring: "{0}"
+        formatstring: "{0}",
+        acl: [],
       })
     this.rebuildVariablesForGroup(group);
   }
@@ -326,5 +327,20 @@ export class EditComponent {
   clearColors(variable: Variable) {
     variable.buttonTextColor = undefined;
     variable.buttonBackgroundColor = undefined;
+  }
+
+  toggleAclRole(variable: Variable, role: string, event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    if (!variable.acl) {
+      variable.acl = [];
+    }
+
+    if (checkbox.checked) {
+      if (!variable.acl.includes(role)) {
+        variable.acl.push(role);
+      }
+    } else {
+      variable.acl = variable.acl.filter(aclRole => aclRole !== role);
+    }
   }
 }

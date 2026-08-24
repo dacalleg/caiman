@@ -243,14 +243,24 @@ export class HomeComponent implements OnInit, OnDestroy {
         progress: true
       })),
       switchMap(() => this.Device.connect()),
+      switchMap(() => this.Device.verifyDeviceConnection()),
+      switchMap(verified => {
+        if (!verified) {
+          return throwError(() => new Error("error.device.not_reachable"));
+        }
+        return of(verified);
+      }),
       switchMap(() => this.loadSnet$),
       tap(() => this.modal.dismissAll()),
       take(1),
       switchMap(() => this.Device.startRead()),
-      catchError(err => this.modal.openAlertModal({
-        title: "error",
-        message: err.message,
-      }))
+      catchError(err => {
+        this.disconnect();
+        return this.modal.openAlertModal({
+          title: "error",
+          message: err.message,
+        });
+      })
     ).subscribe();
   }
 
@@ -263,6 +273,13 @@ export class HomeComponent implements OnInit, OnDestroy {
         message: "modal.ble.connection",
         progress: true
       })),
+      switchMap(() => this.Device.verifyDeviceConnection()),
+      switchMap(verified => {
+        if (!verified) {
+          return throwError(() => new Error("error.device.not_reachable"));
+        }
+        return of(verified);
+      }),
       switchMap(() => this.loadSnet$),
       tap(() => this.modal.dismissAll()),
       take(1),
@@ -292,6 +309,13 @@ export class HomeComponent implements OnInit, OnDestroy {
             return throwError(() => new Error("modal.wifi.connectionerror"));
         }),
         switchMap(() => this.Device.connect()),
+        switchMap(() => this.Device.verifyDeviceConnection()),
+        switchMap(verified => {
+          if (!verified) {
+            return throwError(() => new Error("error.device.not_reachable"));
+          }
+          return of(verified);
+        }),
         switchMap(() => this.loadSnet$),
         tap(() => this.modal.dismissAll()),
         take(1),

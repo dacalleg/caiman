@@ -83,6 +83,8 @@ const values = {
     "error.device.not_found": "Appareil introuvable pour l'adresse MAC indiquée.",
     "error.device.api_failed": "Impossible de récupérer les informations de l'appareil.",
     "error.device.generic": "Une erreur s'est produite lors de la récupération de l'appareil.",
+    "error.device.not_reachable": "Produit non connecté/non joignable. Vérifiez qu'il est alimenté et que le module Wi-Fi est joignable.",
+    "error.device.connection_timeout": "Délai d'attente dépassé lors de la vérification de la connexion.",
     "error.product.not_found": "Produit introuvable.",
     "modal.ble.connection": "Connexion Bluetooth en cours...",
     "modal.wifi.connection": "Connexion via Wi-Fi en cours...",

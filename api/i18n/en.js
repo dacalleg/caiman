@@ -83,6 +83,8 @@ const values = {
     "error.device.not_found": "No device found for the specified MAC address.",
     "error.device.api_failed": "Unable to retrieve device information.",
     "error.device.generic": "An error occurred while retrieving the device.",
+    "error.device.not_reachable": "Product not connected/not reachable. Check that it is powered on and that the Wi-Fi module is reachable.",
+    "error.device.connection_timeout": "Timeout while verifying the connection.",
     "error.product.not_found": "Product not found.",
     "modal.ble.connection": "Bluetooth connection in progress...",
     "modal.wifi.connection": "Connecting via Wi-Fi...",

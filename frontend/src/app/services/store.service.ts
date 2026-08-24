@@ -82,17 +82,22 @@ export class StoreService {
   }
 
   getVariablesByRoles(roles: string[]) {
-    const expandedRoles = roles.concat('all');
+    const isAdmin = roles.includes('administrator');
+
     return this.componentStore.state$.pipe(
       map(state => {
         if (!state.device?.info)
           return [];
-        const acl = state.device.info.serami_acl.find(entry => expandedRoles.includes(entry.role));
-        const hiddenGroups = acl?.hidden_groups ?? [];
-        const hiddenVariables = acl?.hidden_variables ?? [];
-        return state.variables.filter(
-          variable => !hiddenGroups.includes(variable.group) && !hiddenVariables.includes(variable.hash)
-        );
+
+        return state.variables.filter(variable => {
+          if (isAdmin)
+            return true;
+
+          if (!variable.acl || variable.acl.length === 0)
+            return true;
+
+          return variable.acl.some(aclRole => roles.includes(aclRole));
+        });
       })
     );
   }

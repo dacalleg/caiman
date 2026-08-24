@@ -83,6 +83,8 @@ const values = {
     "error.device.not_found": "Dispositivo non trovato per l'indirizzo MAC indicato.",
     "error.device.api_failed": "Impossibile recuperare le informazioni del dispositivo.",
     "error.device.generic": "Si è verificato un errore durante il recupero del dispositivo.",
+    "error.device.not_reachable": "Prodotto non connesso/non raggiungibile. Verificare che sia alimentato e che il modulo Wi-Fi sia raggiungibile.",
+    "error.device.connection_timeout": "Timeout durante la verifica della connessione.",
     "error.product.not_found": "Prodotto non trovato.",
     "modal.ble.connection": "Connessione Bluetooth in corso...",
     "modal.wifi.connection": "Connessione tramite Wifi in corso...",

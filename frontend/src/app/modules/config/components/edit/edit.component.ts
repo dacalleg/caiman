@@ -203,6 +203,14 @@ export class EditComponent {
     this.refresh$.next();
   }
 
+  duplicateVariable(variable: Variable) {
+    const copy: Variable = structuredClone(variable);
+    copy.name = `${variable.name} (copia)`;
+
+    this.seramiEntry.data.push(copy);
+    this.refresh$.next();
+  }
+
   checkDuplicates(variables: Variable[]) {
     variables.map(i => i.hash)
       .filter((item, index, arr) => arr.indexOf(item) !== index)

@@ -43,6 +43,7 @@ export interface Variable {
   buttonValue?: number;
   buttonBackgroundColor?: string;
   buttonTextColor?: string;
+  acl: string[];
 }
 
 export interface VariableColor

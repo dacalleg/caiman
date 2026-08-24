@@ -141,7 +141,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.loadSnet$ = this.loadDeviceData$.pipe(
       tap((device) => console.log(device.info)),
-      tap((device) => this.Store.loadFromJson(device.info.variables)),
+      tap((device) => this.Store.loadFromJson(device.info.variables, device.info.groups)),
       shareReplay(1)
     )
 

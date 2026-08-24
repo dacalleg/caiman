@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
 import { DeviceProduct, Project, Variable, VariableInfoOverride, ViewOption } from '../classes/interfaces';
+import { sortGroupNames, uniqueGroupNames } from '../classes/serami-groups';
 import { SeramiParserService } from './serami-parser.service';
-import { first, map, take } from 'rxjs';
+import { combineLatest, first, map, take } from 'rxjs';
 import { Utils } from '../classes/utils';
 
 const DEFAULT_VIEW: ViewOption = {
@@ -98,24 +99,24 @@ export class StoreService {
 
   getGroups() {
     return this.componentStore.state$.pipe(
-      map(project => {
-        const groups = project.variables.map(item => item.group);
-        return groups.filter((group, index, all) => all.indexOf(group) === index);
-      })
+      map(project => sortGroupNames(uniqueGroupNames(project.variables), project.groups))
     );
   }
 
   getGroupsByRole(roles: string[]) {
-    return this.getVariablesByRoles(roles).pipe(
-      map(variables => {
-        const groups = variables.map(item => item.group);
-        return groups.filter((group, index, all) => all.indexOf(group) === index);
-      })
+    return combineLatest([
+      this.getVariablesByRoles(roles),
+      this.componentStore.state$.pipe(map(project => project.groups)),
+    ]).pipe(
+      map(([variables, groups]) => sortGroupNames(uniqueGroupNames(variables), groups))
     );
   }
 
-  loadFromJson(data: Variable[]) {
-    this.componentStore.setState(project => this.buildProjectWithVariables(project, data));
+  loadFromJson(data: Variable[], groups?: Project['groups']) {
+    this.componentStore.setState(project => ({
+      ...this.buildProjectWithVariables(project, data),
+      groups: groups ?? undefined,
+    }));
   }
 
   loadFromSnet(xml: string) {

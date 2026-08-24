@@ -224,7 +224,7 @@ export class ApiService {
             roles,
           })),
           switchMap(({ model, board, gateway: gatewayDetail, roles: userRoles }) => this.getSerami(board.key).pipe(
-            map(serami => this.buildProductInfo(model, board, userRoles, gatewayDetail, serami.data)),
+            map(serami => this.buildProductInfo(model, board, userRoles, gatewayDetail, serami.data, serami.groups)),
           )),
           catchError(err => this.loadCachedProductByPrefix(prefix, lang, gateway, err)),
         );
@@ -248,7 +248,7 @@ export class ApiService {
             roles,
           })),
           switchMap(({ model, board, gateway: gw, roles: userRoles }) => this.getSerami(board.key).pipe(
-            map(serami => this.buildProductInfo(model, board, userRoles, gw, serami.data)),
+            map(serami => this.buildProductInfo(model, board, userRoles, gw, serami.data, serami.groups)),
           )),
           tap(productInfo => this.OfflineCache.saveProduct(product, lang, productInfo, gateway)),
           catchError(err => this.loadCachedProduct(product, lang, gateway, err)),
@@ -549,12 +549,12 @@ export class ApiService {
                 continue;
               }
 
-              const baseProduct = this.buildProductInfo(item.model, board, roles, null, serami.data);
+              const baseProduct = this.buildProductInfo(item.model, board, roles, null, serami.data, serami.groups);
               await this.OfflineCache.saveProduct(item.key, lang, baseProduct);
 
               const boardGateways = this.resolveGatewaysForBoard(Number(item.board.id), batch.gateways ?? []);
               for (const gateway of boardGateways) {
-                const productWithGateway = this.buildProductInfo(item.model, board, roles, gateway, serami.data);
+                const productWithGateway = this.buildProductInfo(item.model, board, roles, gateway, serami.data, serami.groups);
                 await this.OfflineCache.saveProduct(item.key, lang, productWithGateway, gateway.type);
                 allGateways.set(`${item.board.id}:${gateway.type}`, gateway);
               }
@@ -729,7 +729,7 @@ export class ApiService {
     } as Board
   }
 
-  private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[]): ProductModel {
+  private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[], groups?: ProductModel['groups']): ProductModel {
     let serami_var_override = item.acf.serami_var_override as any[] || [];
     let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
     let serami_var_formula_override = board.serami_var_formula_override as any[] || [];
@@ -791,7 +791,8 @@ export class ApiService {
       image: item.image || null,
       faq: item.acf.faq || [],
       prefix: item.acf.prefix,
-      variables: variables
+      variables: variables,
+      groups: groups ?? undefined,
     } as ProductModel
   }
 

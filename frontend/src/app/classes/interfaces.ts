@@ -1,9 +1,15 @@
 import { Observable } from "rxjs";
 
+export interface SeramiGroup {
+  name: string;
+  sort?: number;
+}
+
 export interface SeramiEntry {
   key?: string;
   name: string;
   data: Variable[];
+  groups?: SeramiGroup[];
 }
 
 export interface Variable {
@@ -55,6 +61,7 @@ export interface Project {
   variables: Variable[];
   view: ViewOption;
   device?: DeviceProduct;
+  groups?: SeramiGroup[];
 }
 
 export interface ViewOption {
@@ -226,6 +233,7 @@ export interface ProductModel {
   gateway_firmware_list: Firmware[];
   board_firmware_list: Firmware[];
   variables: Variable[];
+  groups?: SeramiGroup[];
   database: Database[];
   description: string;
   prefix?: string;

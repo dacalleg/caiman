@@ -157,8 +157,6 @@ export class StoreService {
         variable.description = override.description;
       if (override.read_exp)
         Utils.applyReadExpOverride(variable, override.read_exp);
-      if (override.writable !== undefined)
-        variable.readonly = !override.writable;
       if (override.options)
         variable.values = Object.keys(override.options).map(key => [override.options![key], key]);
 

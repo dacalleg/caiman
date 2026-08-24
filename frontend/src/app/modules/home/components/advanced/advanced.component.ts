@@ -7,12 +7,25 @@ import { DeviceService } from 'src/app/services/device.service';
 import { ModalService } from 'src/app/services/modal.service';
 import { StoreService } from 'src/app/services/store.service';
 
+class WriteDbError extends Error {
+  constructor(
+    message: string,
+    readonly replaceParams: Record<string, string> = {},
+  ) {
+    super(message);
+  }
+}
+
 @Component({
   selector: 'app-advanced',
   templateUrl: './advanced.component.html',
   styleUrls: ['./advanced.component.scss']
 })
 export class AdvancedComponent {
+  private static readonly WRITE_DB_TIMEOUT_MS = 120_000;
+  private static readonly WRITE_DB_MAX_RETRIES = 5;
+  private static readonly WRITE_DB_RETRY_DELAY_MS = 3_000;
+
   @Input() device: DeviceProduct | undefined;
   @Output() onFirmwareGatewayUpgraded = new EventEmitter<void>();
   databaseSelected: Database | null;
@@ -136,6 +149,7 @@ export class AdvancedComponent {
   loadDatabase() {
     if (this.databaseSelected) {
       let i = 0;
+      let currentVarName = '';
       let count = this.databaseSelected.values.length;
       combineLatest([
         of(this.databaseSelected),
@@ -150,19 +164,25 @@ export class AdvancedComponent {
         concatMap((dbvalue) => combineLatest([of(dbvalue), this.Store.getVariableByHash(dbvalue.id)]).pipe(
           map(([dbvalue, variable]) => {
             if (variable == null)
-              throw new Error("modal.writedb.error.varnotfound");
+              throw new WriteDbError("modal.writedb.error.varnotfound", { varid: dbvalue.id });
             return { variable: variable, value: Utils.convertValuesToWrite([variable], [+dbvalue.value])[0] } as VariableValue
           }),
-          tap((value) => this.modal.upodateAlertModalConfig({
-            title: "modal.writedb.title",
-            progress: true, progressValue: (i / count) * 100,
-            message: "modal.writedb.message",
-            replaceParams: { dbname: this.databaseSelected!.name, varname: value.variable.name }
-          })),
+          tap((value) => {
+            currentVarName = value.variable.name;
+            this.modal.upodateAlertModalConfig({
+              title: "modal.writedb.title",
+              progress: true, progressValue: (i / count) * 100,
+              message: "modal.writedb.message",
+              replaceParams: { dbname: this.databaseSelected!.name, varname: currentVarName }
+            });
+          }),
           switchMap((value) => this.Device.write([value])),
+          timeout(AdvancedComponent.WRITE_DB_TIMEOUT_MS),
+          retry({
+            count: AdvancedComponent.WRITE_DB_MAX_RETRIES,
+            delay: AdvancedComponent.WRITE_DB_RETRY_DELAY_MS,
+          }),
           tap(() => i++),
-          timeout(30000),
-          //retry(5)
         )),
         toArray(),
         tap(() => this.modal.dismissAll()),
@@ -173,12 +193,25 @@ export class AdvancedComponent {
         }))
       ).subscribe({
         error: (err) => {
+          const isTimeout = err?.name === 'TimeoutError';
+          const message = err instanceof WriteDbError
+            ? err.message
+            : isTimeout
+              ? 'modal.writedb.error.timeout'
+              : 'modal.writedb.error.write';
+
+          const replaceParams = {
+            dbname: this.databaseSelected!.name,
+            varname: currentVarName,
+            ...(err instanceof WriteDbError ? err.replaceParams : {}),
+          };
+
           this.modal.upodateAlertModalConfig({
             title: "modal.writedb.title",
             progress: false,
-            message: err.message,
-            replaceParams: { dbname: this.databaseSelected!.name }
-          })
+            message,
+            replaceParams,
+          });
         },
         complete: () => {
 

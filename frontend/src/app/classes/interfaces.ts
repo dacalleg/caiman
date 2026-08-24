@@ -206,7 +206,6 @@ export interface DeviceInfoResponse {
 
 export interface Board {
   id: string;
-  serami_acl: SeramiACL[];
   firmware_list: Firmware[];
   database: Database[];
   serami_var_formula_override: any[];
@@ -226,7 +225,6 @@ export interface ProductModel {
   documents: Document[];
   links: Link[];
   image: string | null;
-  serami_acl: SeramiACL[];
   faq: SingleFaq[];
   video: Video[];
   serami_var_override: VariableInfoOverride[];
@@ -252,20 +250,12 @@ export interface VariableInfoOverride {
   options?: { [key: string]: string }
   read_exp?: string;
   write_exp?: string;
-  writable?: boolean;
 }
 
 export interface Video {
   name: string;
   description: string;
   video: string;
-}
-
-export interface SeramiACL extends WithRole {
-  hidden_groups: string[];
-  hidden_variables: string[];
-  only_read_variables: string[];
-  writable_variables: string[];
 }
 
 export interface SingleFaq {

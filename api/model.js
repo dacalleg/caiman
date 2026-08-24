@@ -171,6 +171,22 @@ module.exports = (sequelize, DataTypes) => {
             set: function (data) {
                 this.setDataValue('data', JSON.stringify(data));
             }
+        },
+        groups: {
+            type: DataTypes.TEXT('long'),
+            get: function () {
+                const groups = this.getDataValue('groups');
+                if (groups)
+                    return JSON.parse(groups);
+                return null;
+            },
+            set: function (groups) {
+                if (groups)
+                    this.setDataValue('groups', JSON.stringify(groups));
+                else
+                    this.setDataValue('groups', null);
+            },
+            allowNull: true
         }
     });
     const Log = sequelize.define('logs', {

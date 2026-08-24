@@ -3,7 +3,7 @@ import { Variable } from 'src/app/classes/interfaces';
 
 @Pipe({
   name: 'varByGroup',
-  pure: false
+  pure: true
 })
 export class VarByGroupPipe implements PipeTransform {
 

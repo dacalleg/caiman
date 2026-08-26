@@ -44,6 +44,8 @@ export interface Variable {
   buttonBackgroundColor?: string;
   buttonTextColor?: string;
   acl: string[];
+  translatedName?: { [key: string]: string };
+  translatedDescription?: { [key: string]: string };
 }
 
 export interface VariableColor

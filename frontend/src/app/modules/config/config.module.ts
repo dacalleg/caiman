@@ -10,6 +10,7 @@ import { VarByGroupPipe } from './pipes/var-by-group.pipe';
 import { EditOptionsComponent } from './components/edit-options/edit-options.component';
 import { SearchPipe } from './pipes/search.pipe';
 import { EditColorsComponent } from './components/edit-colors/edit-colors.component';
+import { EditTranslationsComponent } from './components/edit-translations/edit-translations.component';
 
 
 @NgModule({
@@ -19,7 +20,8 @@ import { EditColorsComponent } from './components/edit-colors/edit-colors.compon
     VarByGroupPipe,
     EditOptionsComponent,
     SearchPipe,
-    EditColorsComponent
+    EditColorsComponent,
+    EditTranslationsComponent
   ],
   imports: [
     CommonModule,

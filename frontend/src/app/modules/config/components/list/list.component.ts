@@ -68,4 +68,44 @@ export class ListComponent {
     if(result)
       this.Api.deleteSerami(entry.key!).subscribe(() => this.reloadSerami$.next())
   }
+
+  exportTranslations(entry: SeramiEntry) {
+    if (!entry.key) {
+      return;
+    }
+
+    this.Api.exportSeramiTranslations(entry.key).subscribe(response => {
+      const blob = response.body;
+      if (!blob) {
+        return;
+      }
+
+      const filename = this.resolveExportFilename(response.headers.get('Content-Disposition'), entry.name);
+      this.downloadBlob(filename, blob);
+    });
+  }
+
+  private resolveExportFilename(contentDisposition: string | null, fallbackName: string): string {
+    if (contentDisposition) {
+      const match = /filename=\"([^\"]+)\"/i.exec(contentDisposition);
+      if (match?.[1]) {
+        return match[1];
+      }
+    }
+
+    const safeName = fallbackName.trim().replace(/[^\w\-]+/g, '_').replace(/_+/g, '_') || 'serami';
+    return `${safeName}_translations.csv`;
+  }
+
+  private downloadBlob(filename: string, blob: Blob) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
 }

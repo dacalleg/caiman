@@ -307,6 +307,13 @@ export class ApiService {
     return this.Http.post<any>(environment.endpoint + "/api/serami/delete", {key: key});
   }
 
+  exportSeramiTranslations(key: string) {
+    return this.Http.get(environment.endpoint + "/api/serami/export-translations/" + key, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
   getTickets(serial: string) {
     return this.Http.get<Ticket[]>(environment.endpoint + "/api/ticket/get/" + serial).pipe(map(resp => {
       return resp.map(item => {

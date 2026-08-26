@@ -342,6 +342,24 @@ async function init() {
             }
         });
 
+        app.get('/serami/export-translations/:id', UserRequired, async (req, res) => {
+            const { buildSeramiTranslationsCsv, buildExportFilename } = require('./serami-translations-export');
+            try {
+                const entry = await Serami.findByPk(req.params.id);
+                if (!entry) {
+                    return res.status(404).send({ message: 'Serami configuration not found' });
+                }
+
+                const csv = buildSeramiTranslationsCsv(entry);
+                const filename = buildExportFilename(entry);
+                res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+                res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+                res.status(200).send(csv);
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
         app.post('/chunkupload', UserRequired, async (req, res) => {
             var upload_dir = "uploads/";
             var filepath = upload_dir + req.body.name + "." + req.body.ext;

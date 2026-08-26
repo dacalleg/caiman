@@ -373,12 +373,12 @@ async function init() {
                 }
 
                 const importResult = importSeramiTranslationsFromCsv(source.get({ plain: true }), csv);
-                const created = await Serami.create(importResult.entry);
+                await Serami.upsert(importResult.entry);
 
                 res.status(200).send({
                     status: 'OK',
-                    key: created.key,
-                    name: created.name,
+                    key: importResult.entry.key,
+                    name: importResult.entry.name,
                     matched: importResult.matched,
                     totalCsvRows: importResult.totalCsvRows,
                     skippedCsvRows: importResult.skippedCsvRows,

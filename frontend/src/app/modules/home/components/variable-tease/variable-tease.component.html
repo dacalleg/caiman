@@ -2,8 +2,8 @@
   [ngStyle]="{'border-left-color': (value$|async)|colorValue}">
   <div class="card-body h-100 px-2 py-1 pb-2">
     <div class="d-flex flex-column justify-content-between h-100">
-      <div [title]="variable.name" class="fw-bold name px-1">{{variable.name}}</div>
-      <p class="px-1"><small>{{variable.description}}</small></p>
+      <div [title]="variable | variableTranslation:'name' | async" class="fw-bold name px-1">{{variable | variableTranslation:'name' | async}}</div>
+      <p class="px-1"><small>{{variable | variableTranslation:'description' | async}}</small></p>
       <div *ngIf="!variable.button">
         <div class="d-flex align-items-center justify-content-between">
           <ng-container *ngIf="(value$|async) as value; else notLoaded">

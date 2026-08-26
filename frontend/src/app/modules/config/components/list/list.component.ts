@@ -51,6 +51,17 @@ export class ListComponent {
       this.file.nativeElement.click();
   }
 
+  duplicateEntry(entry: SeramiEntry) {
+    this.Api.getSerami(entry.key!).pipe(
+      switchMap(source => {
+        const copy: SeramiEntry = structuredClone(source);
+        delete copy.key;
+        copy.name = `${source.name} (copia)`;
+        return this.Api.updateSerami(copy);
+      })
+    ).subscribe(() => this.reloadSerami$.next());
+  }
+
   deleteEntry(entry: SeramiEntry)
   {
     const result = confirm("Vuoi davvero eliminare la configurazione " + entry.name + "?");

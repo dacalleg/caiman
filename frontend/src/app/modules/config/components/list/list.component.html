@@ -21,6 +21,7 @@
                         <td>{{entry.key}}</td>
                         <td class="text-end">
                             <button class="btn btn-primary" (click)="openConfig(entry.key!)">Modifica</button>
+                            <button class="ms-2 btn btn-secondary" (click)="duplicateEntry(entry)">Duplica</button>
                             <button class="ms-2 btn btn-danger" (click)="deleteEntry(entry)">Elimina</button>
                         </td>
                     </tr>

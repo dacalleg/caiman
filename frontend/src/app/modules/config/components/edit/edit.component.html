@@ -1,6 +1,6 @@
-<ng-template let-data="data" #variablesAccordion>
-    <ngb-accordion #acc="ngbAccordion" activeIds="0">
-        <ngb-panel *ngFor="let variable of data">
+<ng-template let-data="data" let-activeIds="activeIds" #variablesAccordion>
+    <ngb-accordion #acc="ngbAccordion" [activeIds]="activeIds">
+        <ngb-panel *ngFor="let variable of data; trackBy: trackVariable" [id]="variablePanelId(variable)">
             <ng-template ngbPanelHeader let-opened="opened">
                 <button ngbPanelToggle class="accordion-button" *ngIf="variable.name && variable.name.trim() !== '';else descr">{{variable.name}}<br>{{variable.hash}}</button>
                 <ng-template #descr>
@@ -17,10 +17,12 @@
                                 Move to
                             </button>
                             <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-                                <button ngbDropdownItem *ngFor="let group of groups"
-                                    (click)="moveToGroup(variable, group)">{{ group }}</button>
+                                <button ngbDropdownItem *ngFor="let group of groupTabs"
+                                    (click)="moveToGroup(variable, group.name)">{{ group.name }}</button>
                             </div>
                         </div>
+                        <button class="btn btn-sm btn-secondary ms-2"
+                            (click)="duplicateVariable(variable)">Duplicate</button>
                         <button class="btn btn-sm btn-danger ms-2"
                             (click)="deleteVariable(variable)">Delete</button>
                     </div>
@@ -33,8 +35,8 @@
                                 [(ngModel)]="variable.hash" disabled>
                         </div>
                         <div class="mb-3">
-                            <label for="sort" class="form-label">Order</label>
-                            <input type="text" class="form-control" id="sort"
+                            <label [attr.for]="'sort-' + variablePanelId(variable)" class="form-label">Order</label>
+                            <input type="number" class="form-control" [attr.id]="'sort-' + variablePanelId(variable)"
                                 [(ngModel)]="variable.sort">
                         </div>
                         <div class="mb-3">
@@ -155,6 +157,38 @@
                             </label>
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label">Visibilità (ACL)</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="administrator"
+                                    [id]="'acl-administrator-' + variablePanelId(variable)"
+                                    [checked]="variable.acl?.includes('administrator')"
+                                    (change)="toggleAclRole(variable, 'administrator', $event)">
+                                <label class="form-check-label" [for]="'acl-administrator-' + variablePanelId(variable)">
+                                    Administrator
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="service"
+                                    [id]="'acl-service-' + variablePanelId(variable)"
+                                    [checked]="variable.acl?.includes('service')"
+                                    (change)="toggleAclRole(variable, 'service', $event)">
+                                <label class="form-check-label" [for]="'acl-service-' + variablePanelId(variable)">
+                                    Service
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="technician"
+                                    [id]="'acl-technician-' + variablePanelId(variable)"
+                                    [checked]="variable.acl?.includes('technician')"
+                                    (change)="toggleAclRole(variable, 'technician', $event)">
+                                <label class="form-check-label" [for]="'acl-technician-' + variablePanelId(variable)">
+                                    Technician
+                                </label>
+                            </div>
+                            <div class="form-text">Nessuna selezione = visibile a tutti i ruoli.</div>
+                        </div>
+
                         <ng-container *ngIf="variable.button">
                             <div class="mb-3">
                                 <label for="caption" class="form-label">Caption</label>
@@ -210,8 +244,8 @@
     <div class="row mt-3">
         <div class="col">
             <ul ngbNav #nav="ngbNav" class="nav-pills">
-                <li *ngFor="let group of groups;let i=index" [ngbNavItem]="i" (shown)="changeGroup(group)">
-                    <a ngbNavLink>{{group}}</a>
+                <li *ngFor="let group of groupTabs; trackBy: trackGroupTab" [ngbNavItem]="group.name" (shown)="onGroupTabShown(group)">
+                    <a ngbNavLink>{{group.name}}</a>
                     <ng-template ngbNavContent>
                         <div class="row">
                             <div class="col px-5 mt-5">
@@ -220,13 +254,19 @@
                                         <div class="mb-3">
                                             <label for="groupname" class="form-label">Group Name</label>
                                             <input type="text" class="form-control" id="groupname"
-                                                (change)="changeGroupName($event, group)" [value]="group">
+                                                (change)="changeGroupName($event, group.name)" [value]="group.name">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label [attr.for]="'groupsort-' + group.name" class="form-label">Order</label>
+                                            <input type="number" class="form-control" [attr.id]="'groupsort-' + group.name"
+                                                [(ngModel)]="group.sort"
+                                                (change)="onGroupSortChange(group)">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row mb-5">
                                     <div class="col text-end">
-                                        <button class="btn btn-primary ms-2" (click)="newVariable(group)">New
+                                        <button class="btn btn-primary ms-2" (click)="newVariable(group.name)">New
                                             Variable</button>
                                     </div>
                                 </div>
@@ -237,14 +277,14 @@
                                 </div>
                                 <div class="row">
                                     <div class="col">
-                                        <ng-container *ngTemplateOutlet="variablesAccordion; context: {data: (seramiEntry$|async)?.data|varByGroup:group}"></ng-container>
+                                        <ng-container *ngTemplateOutlet="variablesAccordion; context: {data: variablesByGroup[group.name] || [], activeIds: expandedVariablePanelId ?? ''}"></ng-container>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </ng-template>
                 </li>
-                <li [ngbNavItem]="groups.length">
+                <li [ngbNavItem]="'__search__'">
                     <a ngbNavLink>Search</a>
                     <ng-template ngbNavContent>
                         <div class="row">
@@ -260,14 +300,14 @@
                                 </div>
                                 <div class="row">
                                     <div class="col">
-                                        <ng-container *ngTemplateOutlet="variablesAccordion; context: {data: (seramiEntry$|async)?.data|search:search}"></ng-container>
+                                        <ng-container *ngTemplateOutlet="variablesAccordion; context: {data: seramiEntry.data|search:search, activeIds: expandedVariablePanelId ?? ''}"></ng-container>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </ng-template>
                 </li>
-                <li [ngbNavItem]="groups.length + 1">
+                <li [ngbNavItem]="'__check__'">
                     <a ngbNavLink>Check</a>
                     <ng-template ngbNavContent>
                         <div class="row">

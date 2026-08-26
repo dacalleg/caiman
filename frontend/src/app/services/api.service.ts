@@ -33,7 +33,6 @@ import {
   Operation,
   ProductModel,
   Registry,
-  SeramiACL,
   SeramiEntry,
   Ticket,
   Variable,
@@ -224,7 +223,7 @@ export class ApiService {
             roles,
           })),
           switchMap(({ model, board, gateway: gatewayDetail, roles: userRoles }) => this.getSerami(board.key).pipe(
-            map(serami => this.buildProductInfo(model, board, userRoles, gatewayDetail, serami.data)),
+            map(serami => this.buildProductInfo(model, board, userRoles, gatewayDetail, serami.data, serami.groups)),
           )),
           catchError(err => this.loadCachedProductByPrefix(prefix, lang, gateway, err)),
         );
@@ -248,7 +247,7 @@ export class ApiService {
             roles,
           })),
           switchMap(({ model, board, gateway: gw, roles: userRoles }) => this.getSerami(board.key).pipe(
-            map(serami => this.buildProductInfo(model, board, userRoles, gw, serami.data)),
+            map(serami => this.buildProductInfo(model, board, userRoles, gw, serami.data, serami.groups)),
           )),
           tap(productInfo => this.OfflineCache.saveProduct(product, lang, productInfo, gateway)),
           catchError(err => this.loadCachedProduct(product, lang, gateway, err)),
@@ -549,12 +548,12 @@ export class ApiService {
                 continue;
               }
 
-              const baseProduct = this.buildProductInfo(item.model, board, roles, null, serami.data);
+              const baseProduct = this.buildProductInfo(item.model, board, roles, null, serami.data, serami.groups);
               await this.OfflineCache.saveProduct(item.key, lang, baseProduct);
 
               const boardGateways = this.resolveGatewaysForBoard(Number(item.board.id), batch.gateways ?? []);
               for (const gateway of boardGateways) {
-                const productWithGateway = this.buildProductInfo(item.model, board, roles, gateway, serami.data);
+                const productWithGateway = this.buildProductInfo(item.model, board, roles, gateway, serami.data, serami.groups);
                 await this.OfflineCache.saveProduct(item.key, lang, productWithGateway, gateway.type);
                 allGateways.set(`${item.board.id}:${gateway.type}`, gateway);
               }
@@ -707,21 +706,8 @@ export class ApiService {
   }
 
   private parseBoard(item: any): Board {
-    let serami_acl = [] as SeramiACL[];
-    if (item.acf.serami_acl) {
-      serami_acl = item.acf.serami_acl.map((acl: any) => {
-        return {
-          ...acl,
-          hidden_variables: acl.hidden_variables ? acl.hidden_variables.split("\r\n") : [],
-          hidden_groups: acl.hidden_groups ? acl.hidden_groups.split("\r\n") : [],
-          only_read_variables: acl.only_read_variables ? acl.only_read_variables.split("\r\n") : [],
-          writable_variables: acl.writable_variables ? acl.writable_variables.split("\r\n") : []
-        }
-      })
-    }
     return {
       id: item.id,
-      serami_acl: serami_acl,
       firmware_list: item.acf.firmware.map((item: any) => ({ revision: item.revision, file: item.file ? item.file.ID : null, role: item.role })) || [],
       database: item.acf.database || [],
       serami_var_formula_override: item.acf.serami_var_formula_override || [],
@@ -729,12 +715,10 @@ export class ApiService {
     } as Board
   }
 
-  private buildProductInfo(item: any, board: Board, roles: string[], gateway: Gateway | null = null, variables: Variable[]): ProductModel {
+  private buildProductInfo(item: any, board: Board, _roles: string[], gateway: Gateway | null = null, variables: Variable[], groups?: ProductModel['groups']): ProductModel {
     let serami_var_override = item.acf.serami_var_override as any[] || [];
     let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
     let serami_var_formula_override = board.serami_var_formula_override as any[] || [];
-    let writable_variables = board.serami_acl.find(item => roles.includes(item.role) || item.role === 'all')?.writable_variables || [];
-    let only_read_variables = board.serami_acl.find(item => roles.includes(item.role) || item.role === 'all')?.only_read_variables || [];
 
     let identifiers = [].concat(
       ...serami_var_override.map(item => item.id),
@@ -755,14 +739,6 @@ export class ApiService {
       }, {} as { [key: string]: string });
       const formula = serami_var_formula_override.find(item => item.id === id);
 
-      let is_writable = writable_variables.includes(id);
-      let is_only_readable = only_read_variables.includes(id);
-      let writable = undefined as boolean | undefined;
-      if (is_writable)
-        writable = true;
-      if (is_only_readable)
-        writable = false;
-
       return {
         id: id,
         title: info ? info.title : undefined,
@@ -770,7 +746,6 @@ export class ApiService {
         options: options ? options : undefined,
         read_exp: formula ? formula.read_exp : undefined,
         write_exp: formula ? formula.write_exp : undefined,
-        writable: writable,
       } as VariableInfoOverride
     })
 
@@ -779,7 +754,6 @@ export class ApiService {
       name: item.name,
       description: item.description || "",
       id_product: item.acf.key,
-      serami_acl: board.serami_acl,
       gateway_firmware_list: gateway !== null ? gateway.firmware_list : [],
       board_firmware_list: board.firmware_list,
       video: item.acf.video || [],
@@ -791,7 +765,8 @@ export class ApiService {
       image: item.image || null,
       faq: item.acf.faq || [],
       prefix: item.acf.prefix,
-      variables: variables
+      variables: variables,
+      groups: groups ?? undefined,
     } as ProductModel
   }
 

@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
 import { DeviceProduct, Project, Variable, VariableInfoOverride, ViewOption } from '../classes/interfaces';
+import { sortGroupNames, uniqueGroupNames } from '../classes/serami-groups';
 import { SeramiParserService } from './serami-parser.service';
-import { first, map, take } from 'rxjs';
+import { combineLatest, first, map, take } from 'rxjs';
 import { Utils } from '../classes/utils';
 
 const DEFAULT_VIEW: ViewOption = {
@@ -81,41 +82,46 @@ export class StoreService {
   }
 
   getVariablesByRoles(roles: string[]) {
-    const expandedRoles = roles.concat('all');
+    const isAdmin = roles.includes('administrator');
+
     return this.componentStore.state$.pipe(
       map(state => {
         if (!state.device?.info)
           return [];
-        const acl = state.device.info.serami_acl.find(entry => expandedRoles.includes(entry.role));
-        const hiddenGroups = acl?.hidden_groups ?? [];
-        const hiddenVariables = acl?.hidden_variables ?? [];
-        return state.variables.filter(
-          variable => !hiddenGroups.includes(variable.group) && !hiddenVariables.includes(variable.hash)
-        );
+
+        return state.variables.filter(variable => {
+          if (isAdmin)
+            return true;
+
+          if (!variable.acl || variable.acl.length === 0)
+            return true;
+
+          return variable.acl.some(aclRole => roles.includes(aclRole));
+        });
       })
     );
   }
 
   getGroups() {
     return this.componentStore.state$.pipe(
-      map(project => {
-        const groups = project.variables.map(item => item.group);
-        return groups.filter((group, index, all) => all.indexOf(group) === index);
-      })
+      map(project => sortGroupNames(uniqueGroupNames(project.variables), project.groups))
     );
   }
 
   getGroupsByRole(roles: string[]) {
-    return this.getVariablesByRoles(roles).pipe(
-      map(variables => {
-        const groups = variables.map(item => item.group);
-        return groups.filter((group, index, all) => all.indexOf(group) === index);
-      })
+    return combineLatest([
+      this.getVariablesByRoles(roles),
+      this.componentStore.state$.pipe(map(project => project.groups)),
+    ]).pipe(
+      map(([variables, groups]) => sortGroupNames(uniqueGroupNames(variables), groups))
     );
   }
 
-  loadFromJson(data: Variable[]) {
-    this.componentStore.setState(project => this.buildProjectWithVariables(project, data));
+  loadFromJson(data: Variable[], groups?: Project['groups']) {
+    this.componentStore.setState(project => ({
+      ...this.buildProjectWithVariables(project, data),
+      groups: groups ?? undefined,
+    }));
   }
 
   loadFromSnet(xml: string) {
@@ -151,8 +157,6 @@ export class StoreService {
         variable.description = override.description;
       if (override.read_exp)
         Utils.applyReadExpOverride(variable, override.read_exp);
-      if (override.writable !== undefined)
-        variable.readonly = !override.writable;
       if (override.options)
         variable.values = Object.keys(override.options).map(key => [override.options![key], key]);
 

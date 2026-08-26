@@ -27,13 +27,28 @@ require_once __DIR__ . '/lib/sync.php';
 add_action( 'rest_api_init', function(){
     remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
     add_filter( 'rest_pre_serve_request', function( $value ) {
-        $http_origin = $_SERVER['HTTP_ORIGIN'];
-        if ($http_origin == "http://localhost:4200" || $http_origin == get_site_url())
-            header("Access-Control-Allow-Origin: $http_origin");
-        header( 'Access-Control-Allow-Headers: *' );
-        header( 'Access-Control-Allow-Methods: GET, POST, OPTIONS' );
+        $http_origin = isset( $_SERVER['HTTP_ORIGIN'] ) ? $_SERVER['HTTP_ORIGIN'] : '';
+        $allowed_origins = array(
+            'http://localhost:4200',
+            get_site_url(),
+        );
+
+        if ( in_array( $http_origin, $allowed_origins, true ) ) {
+            header( 'Access-Control-Allow-Origin: ' . $http_origin );
+            header( 'Vary: Origin' );
+        }
+
+        // Explicit headers are required for credentialed CORS (Allow-Headers: * is ignored).
+        header( 'Access-Control-Allow-Headers: Authorization, Content-Type, Accept, Origin, X-Requested-With, Cookie, language' );
+        header( 'Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS' );
         header( 'Access-Control-Allow-Credentials: true' );
         header( 'Access-Control-Expose-Headers: Link', false );
+
+        if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'OPTIONS' === $_SERVER['REQUEST_METHOD'] ) {
+            status_header( 204 );
+            exit;
+        }
+
         return $value;
     });
     register_rest_route(

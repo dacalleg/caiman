@@ -123,7 +123,7 @@ export class ListComponent {
 
   private showImportResult(result: SeramiTranslationsImportResult) {
     const skippedCount = result.skippedCsvRows.length;
-    let message = `Configurazione "${result.name}" creata.\nTraduzioni applicate: ${result.matched}/${result.totalCsvRows}.`;
+    let message = `Configurazione "${result.name}" aggiornata.\nTraduzioni applicate: ${result.matched}/${result.totalCsvRows}.`;
     if (skippedCount > 0) {
       message += `\nRighe CSV ignorate: ${skippedCount}.`;
     }

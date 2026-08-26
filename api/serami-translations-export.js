@@ -169,20 +169,17 @@ function applyImportedVariableFields(variable, row) {
     variable.translatedDescription = translations.translatedDescription;
 }
 
-function cloneSeramiEntry(sourceEntry) {
-    return {
-        name: `${sourceEntry.name} (traduzioni importate)`,
+function importSeramiTranslationsFromCsv(sourceEntry, csvContent) {
+    const csvRows = parseCsvContent(csvContent);
+    const entry = {
+        key: sourceEntry.key,
+        name: sourceEntry.name,
         data: JSON.parse(JSON.stringify(sourceEntry.data || [])),
         groups: sourceEntry.groups ? JSON.parse(JSON.stringify(sourceEntry.groups)) : null,
     };
-}
-
-function importSeramiTranslationsFromCsv(sourceEntry, csvContent) {
-    const csvRows = parseCsvContent(csvContent);
-    const copy = cloneSeramiEntry(sourceEntry);
     const variablesBySanitizedName = new Map();
 
-    for (const variable of copy.data) {
+    for (const variable of entry.data) {
         if (variable.sanitizedName) {
             variablesBySanitizedName.set(variable.sanitizedName, variable);
         }
@@ -209,7 +206,7 @@ function importSeramiTranslationsFromCsv(sourceEntry, csvContent) {
     }
 
     return {
-        entry: copy,
+        entry,
         matched,
         skippedCsvRows,
         totalCsvRows: csvRows.length,

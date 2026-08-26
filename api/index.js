@@ -16,6 +16,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
 });
 
 const { Ticket, Asset, Log, Serami, Registry, Operation } = require('./model')(sequelize, DataTypes);
+const { buildSeramiTranslationsCsv, buildExportFilename } = require('./serami-translations-export');
 const express = require('express');
 var cors = require('cors')
 const fs = require('fs');
@@ -343,7 +344,6 @@ async function init() {
         });
 
         app.get('/serami/export-translations/:id', UserRequired, async (req, res) => {
-            const { buildSeramiTranslationsCsv, buildExportFilename } = require('./serami-translations-export');
             try {
                 const entry = await Serami.findByPk(req.params.id);
                 if (!entry) {

@@ -16,7 +16,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
 });
 
 const { Ticket, Asset, Log, Serami, Registry, Operation } = require('./model')(sequelize, DataTypes);
-const { buildSeramiTranslationsCsv, buildExportFilename } = require('./serami-translations-export');
+const { buildSeramiTranslationsCsv, buildExportFilename, importSeramiTranslationsFromCsv } = require('./serami-translations-export');
 const express = require('express');
 var cors = require('cors')
 const fs = require('fs');
@@ -355,6 +355,34 @@ async function init() {
                 res.setHeader('Content-Type', 'text/csv; charset=utf-8');
                 res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
                 res.status(200).send(csv);
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.post('/serami/import-translations/:id', UserRequired, async (req, res) => {
+            try {
+                const source = await Serami.findByPk(req.params.id);
+                if (!source) {
+                    return res.status(404).send({ message: 'Serami configuration not found' });
+                }
+
+                const csv = req.body?.csv;
+                if (!csv || typeof csv !== 'string') {
+                    return res.status(400).send({ message: 'CSV content is required' });
+                }
+
+                const importResult = importSeramiTranslationsFromCsv(source.get({ plain: true }), csv);
+                const created = await Serami.create(importResult.entry);
+
+                res.status(200).send({
+                    status: 'OK',
+                    key: created.key,
+                    name: created.name,
+                    matched: importResult.matched,
+                    totalCsvRows: importResult.totalCsvRows,
+                    skippedCsvRows: importResult.skippedCsvRows,
+                });
             } catch (ex) {
                 res.status(500).send({ message: ex.message });
             }

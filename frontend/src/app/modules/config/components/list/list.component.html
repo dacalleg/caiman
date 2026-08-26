@@ -1,4 +1,5 @@
 <input #file type="file" (change)="onFileChange($event)" class="d-none">
+<input #translationsFile type="file" accept=".csv,text/csv" (change)="onTranslationsFileChange($event)" class="d-none">
 <div class="container p-5">
     <div class="row">
         <div class="col text-end">
@@ -22,6 +23,7 @@
                         <td class="text-end">
                             <button class="btn btn-primary" (click)="openConfig(entry.key!)">Modifica</button>
                             <button class="ms-2 btn btn-outline-secondary" (click)="exportTranslations(entry)">Esporta traduzioni</button>
+                            <button class="ms-2 btn btn-outline-secondary" (click)="importTranslations(entry)">Importa traduzioni</button>
                             <button class="ms-2 btn btn-secondary" (click)="duplicateEntry(entry)">Duplica</button>
                             <button class="ms-2 btn btn-danger" (click)="deleteEntry(entry)">Elimina</button>
                         </td>

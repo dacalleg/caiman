@@ -34,6 +34,7 @@ import {
   ProductModel,
   Registry,
   SeramiEntry,
+  SeramiTranslationsImportResult,
   Ticket,
   Variable,
   VariableInfoOverride
@@ -312,6 +313,13 @@ export class ApiService {
       responseType: 'blob',
       observe: 'response',
     });
+  }
+
+  importSeramiTranslations(key: string, csv: string) {
+    return this.Http.post<SeramiTranslationsImportResult>(
+      environment.endpoint + "/api/serami/import-translations/" + key,
+      { csv }
+    );
   }
 
   getTickets(serial: string) {

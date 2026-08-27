@@ -3,6 +3,7 @@ import { Observable } from "rxjs";
 export interface SeramiGroup {
   name: string;
   sort?: number;
+  translations?: { [key: string]: string };
 }
 
 export interface SeramiEntry {
@@ -239,7 +240,6 @@ export interface ProductModel {
   faq: SingleFaq[];
   video: Video[];
   serami_var_override: VariableInfoOverride[];
-  serami_group_override: GroupNameOverride[];
   gateway_firmware_list: Firmware[];
   board_firmware_list: Firmware[];
   variables: Variable[];
@@ -247,11 +247,6 @@ export interface ProductModel {
   database: Database[];
   description: string;
   prefix?: string;
-}
-
-export interface GroupNameOverride {
-  name: string;
-  title: string;
 }
 
 export interface VariableInfoOverride {

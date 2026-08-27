@@ -1,6 +1,7 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Variable } from 'src/app/classes/interfaces';
-import { AVAILABLE_LANGUAGES } from 'src/app/services/translation-provider.service';
+import { TranslationProviderService } from 'src/app/services/translation-provider.service';
 
 interface NameTranslationRow {
   lang: string;
@@ -17,19 +18,35 @@ interface DescriptionTranslationRow {
   templateUrl: './edit-translations.component.html',
   styleUrls: ['./edit-translations.component.scss']
 })
-export class EditTranslationsComponent implements OnChanges {
+export class EditTranslationsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() variable: Variable | null = null;
 
   nameTranslationRows: NameTranslationRow[] = [];
   descriptionTranslationRows: DescriptionTranslationRow[] = [];
   availableNameLanguages: string[] = [];
   availableDescriptionLanguages: string[] = [];
+  private configuredLanguages: string[] = [];
+  private languagesSubscription: Subscription | null = null;
+
+  constructor(private translationProvider: TranslationProviderService) {}
+
+  ngOnInit(): void {
+    this.languagesSubscription = this.translationProvider.getAvailableLanguages().subscribe(languages => {
+      this.configuredLanguages = languages;
+      this.syncNameRowsFromVariable();
+      this.syncDescriptionRowsFromVariable();
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['variable']) {
       this.syncNameRowsFromVariable();
       this.syncDescriptionRowsFromVariable();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.languagesSubscription?.unsubscribe();
   }
 
   addNameTranslation(lang: string): void {
@@ -117,7 +134,7 @@ export class EditTranslationsComponent implements OnChanges {
       value: map[lang] ?? '',
     }));
     const used = new Set(this.nameTranslationRows.map(row => row.lang));
-    this.availableNameLanguages = AVAILABLE_LANGUAGES.filter(lang => !used.has(lang));
+    this.availableNameLanguages = this.configuredLanguages.filter(lang => !used.has(lang));
   }
 
   private syncDescriptionRowsFromVariable(): void {
@@ -127,13 +144,13 @@ export class EditTranslationsComponent implements OnChanges {
       value: map[lang] ?? '',
     }));
     const used = new Set(this.descriptionTranslationRows.map(row => row.lang));
-    this.availableDescriptionLanguages = AVAILABLE_LANGUAGES.filter(lang => !used.has(lang));
+    this.availableDescriptionLanguages = this.configuredLanguages.filter(lang => !used.has(lang));
   }
 
   private orderedLangKeys(map: { [key: string]: string }): string[] {
-    const known = AVAILABLE_LANGUAGES.filter(lang => lang in map);
+    const known = this.configuredLanguages.filter(lang => lang in map);
     const extra = Object.keys(map).filter(
-      lang => !AVAILABLE_LANGUAGES.includes(lang as typeof AVAILABLE_LANGUAGES[number])
+      lang => !this.configuredLanguages.includes(lang)
     );
     return [...known, ...extra];
   }

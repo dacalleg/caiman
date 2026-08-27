@@ -17,6 +17,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
 
 const { Ticket, Asset, Log, Serami, Registry, Operation } = require('./model')(sequelize, DataTypes);
 const { buildSeramiTranslationsCsv, buildExportFilename, importSeramiTranslationsFromCsv } = require('./serami-translations-export');
+const { getAvailableLanguages } = require('./available-languages');
 const express = require('express');
 var cors = require('cors')
 const fs = require('fs');
@@ -84,13 +85,21 @@ async function init() {
             res.send(200);
         });
 
+        app.get('/translations', (req, res) => {
+            res.status(200).send(getAvailableLanguages());
+        });
+
         app.get('/translations/:lang', (req, res) => {
             const lang = req.params.lang;
             if (!/^[a-z]{2}$/i.test(lang)) {
                 return res.status(400).send({ message: 'Invalid language' });
             }
+            const normalizedLang = lang.toLowerCase();
+            if (!getAvailableLanguages().includes(normalizedLang)) {
+                return res.status(404).send({ message: 'Language not found' });
+            }
             try {
-                res.status(200).send(require(`./i18n/${lang.toLowerCase()}.js`));
+                res.status(200).send(require(`./i18n/${normalizedLang}.js`));
             } catch (ex) {
                 res.status(404).send({ message: 'Language not found' });
             }

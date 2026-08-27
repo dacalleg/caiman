@@ -34,6 +34,7 @@ import {
   ProductModel,
   Registry,
   SeramiEntry,
+  SeramiTranslationsImportResult,
   Ticket,
   Variable,
   VariableInfoOverride
@@ -305,6 +306,20 @@ export class ApiService {
 
   deleteSerami(key: string) {
     return this.Http.post<any>(environment.endpoint + "/api/serami/delete", {key: key});
+  }
+
+  exportSeramiTranslations(key: string) {
+    return this.Http.get(environment.endpoint + "/api/serami/export-translations/" + key, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
+  importSeramiTranslations(key: string, csv: string) {
+    return this.Http.post<SeramiTranslationsImportResult>(
+      environment.endpoint + "/api/serami/import-translations/" + key,
+      { csv }
+    );
   }
 
   getTickets(serial: string) {

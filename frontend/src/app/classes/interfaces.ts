@@ -12,6 +12,15 @@ export interface SeramiEntry {
   groups?: SeramiGroup[];
 }
 
+export interface SeramiTranslationsImportResult {
+  status: string;
+  key: string;
+  name: string;
+  matched: number;
+  totalCsvRows: number;
+  skippedCsvRows: { sanitizedName: string; reason: string }[];
+}
+
 export interface Variable {
   address: number
   bit: number
@@ -44,6 +53,8 @@ export interface Variable {
   buttonBackgroundColor?: string;
   buttonTextColor?: string;
   acl: string[];
+  translatedName?: { [key: string]: string };
+  translatedDescription?: { [key: string]: string };
 }
 
 export interface VariableColor

@@ -56,16 +56,41 @@
 
   <ul class="list-group mt-4">
     <li class="ps-0 list-group-item border-0">
-      <a (click)="deviceSelector()">{{'device.selector'|translate}}</a>
+      <a
+        class="nav-link sidemenu-link"
+        routerLink="/dashboard/home"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeMenu()"
+      >{{'home.deviceselect.title'|translate}}</a>
     </li>
     <li class="ps-0 list-group-item border-0">
-      <a routerLink="/dashboard/profile">{{'profile'|translate}}</a>
+      <a
+        class="nav-link sidemenu-link"
+        routerLink="/dashboard/profile"
+        routerLinkActive="active"
+        (click)="closeMenu()"
+      >{{'profile'|translate}}</a>
     </li>
     <li class="ps-0 list-group-item border-0">
-      <a routerLink="/dashboard/license">{{'license'|translate}}</a>
+      <a
+        class="nav-link sidemenu-link"
+        routerLink="/dashboard/license"
+        routerLinkActive="active"
+        (click)="closeMenu()"
+      >{{'license'|translate}}</a>
     </li>
+    <ng-container *ngIf="{ languages: languages$ | async, currentLanguage: currentLanguage$ | async } as languageMenu">
+      <li class="ps-0 list-group-item border-0" *ngFor="let language of languageMenu.languages">
+        <a
+          class="nav-link sidemenu-link"
+          [class.active]="languageMenu.currentLanguage === language"
+          (click)="changeLanguage(language)"
+        >{{ language | uppercase }}</a>
+      </li>
+    </ng-container>
     <li class="ps-0 list-group-item border-0 my-3">
-      <a (click)="logout()">{{'logout'|translate}}</a>
+      <a class="nav-link sidemenu-link" (click)="logout()">{{'logout'|translate}}</a>
     </li>
   </ul>
 </div>

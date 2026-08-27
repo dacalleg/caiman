@@ -42,6 +42,7 @@ import { OperationTitlePipe } from './pipes/operation-title.pipe';
 import { UnescapePipe } from './pipes/unescape.pipe';
 import {SortGroupPipe} from "./pipes/sort-group.pipe";
 import { ColorValuePipe } from './pipes/color-value.pipe';
+import { VariableTranslationPipe } from './pipes/variable-translation.pipe';
 
 const icons = {
   Eye,
@@ -91,7 +92,8 @@ const icons = {
     OperationTitlePipe,
     UnescapePipe,
     SortGroupPipe,
-    ColorValuePipe
+    ColorValuePipe,
+    VariableTranslationPipe
   ],
   imports: [
     CommonModule,

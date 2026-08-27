@@ -16,6 +16,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
 });
 
 const { Ticket, Asset, Log, Serami, Registry, Operation } = require('./model')(sequelize, DataTypes);
+const { buildSeramiTranslationsCsv, buildExportFilename, importSeramiTranslationsFromCsv } = require('./serami-translations-export');
 const express = require('express');
 var cors = require('cors')
 const fs = require('fs');
@@ -337,6 +338,51 @@ async function init() {
                     where: { key: keys }
                 });
                 res.status(200).send(entries);
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.get('/serami/export-translations/:id', UserRequired, async (req, res) => {
+            try {
+                const entry = await Serami.findByPk(req.params.id);
+                if (!entry) {
+                    return res.status(404).send({ message: 'Serami configuration not found' });
+                }
+
+                const csv = buildSeramiTranslationsCsv(entry);
+                const filename = buildExportFilename(entry);
+                res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+                res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+                res.status(200).send(csv);
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.post('/serami/import-translations/:id', UserRequired, async (req, res) => {
+            try {
+                const source = await Serami.findByPk(req.params.id);
+                if (!source) {
+                    return res.status(404).send({ message: 'Serami configuration not found' });
+                }
+
+                const csv = req.body?.csv;
+                if (!csv || typeof csv !== 'string') {
+                    return res.status(400).send({ message: 'CSV content is required' });
+                }
+
+                const importResult = importSeramiTranslationsFromCsv(source.get({ plain: true }), csv);
+                await Serami.upsert(importResult.entry);
+
+                res.status(200).send({
+                    status: 'OK',
+                    key: importResult.entry.key,
+                    name: importResult.entry.name,
+                    matched: importResult.matched,
+                    totalCsvRows: importResult.totalCsvRows,
+                    skippedCsvRows: importResult.skippedCsvRows,
+                });
             } catch (ex) {
                 res.status(500).send({ message: ex.message });
             }

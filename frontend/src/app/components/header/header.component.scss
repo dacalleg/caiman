@@ -44,4 +44,16 @@ bi {
     }
   }
 
+  .sidemenu-link {
+    padding: 0;
+    cursor: pointer;
+
+    &.active {
+      background-color: transparent;
+      color: var(--black);
+      font-weight: bold;
+      letter-spacing: .2ch;
+    }
+  }
+
 }

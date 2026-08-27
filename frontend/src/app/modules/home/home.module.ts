@@ -22,7 +22,7 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { DeviceSelectComponent } from './components/device-select/device-select.component';
 import { YouTubePlayerModule } from '@angular/youtube-player';
 import { SharedModule } from '../shared/shared.module';
-import { OverrideGroupNamePipe } from './pipes/override-group-name.pipe';
+import { GroupTranslationPipe } from './pipes/group-translation.pipe';
 import { AttachmentUrlPipe } from './pipes/attachment-url.pipe';
 import { RoleInCurrentUserPipe } from './pipes/role-in-current-user.pipe';
 import { DeviceInfoComponent } from './components/device-info/device-info.component';
@@ -74,7 +74,7 @@ const icons = {
     ExportToModbusNavelPipe,
     OptimizationComponent,
     DeviceSelectComponent,
-    OverrideGroupNamePipe,
+    GroupTranslationPipe,
     AttachmentUrlPipe,
     RoleInCurrentUserPipe,
     DeviceInfoComponent,

@@ -775,7 +775,6 @@ export class ApiService {
       documents: item.acf.documents || [],
       links: item.acf.links || [],
       serami_var_override: var_override || [],
-      serami_group_override: item.acf.serami_group_override || [],
       database: board.database || [],
       image: item.image || null,
       faq: item.acf.faq || [],

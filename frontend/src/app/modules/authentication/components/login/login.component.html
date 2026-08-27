@@ -6,7 +6,10 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <h3 class="card-title">{{'auth.login'|translate}}</h3>
+                    <div class="login-card-header">
+                        <h3 class="card-title mb-0">{{'auth.login'|translate}}</h3>
+                        <app-language-switcher></app-language-switcher>
+                    </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">{{'auth.email'|translate}}</label>
                         <input type="email" class="form-control" id="email" [(ngModel)]="email" (keyup.enter)="login()" />

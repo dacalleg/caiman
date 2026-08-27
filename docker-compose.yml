@@ -30,6 +30,7 @@ services:
       DB_PASSWORD: "01Ul8TrH&Mq8"
       DB_HOST: "caiman_db"
       JWT_AUTH_SECRET_KEY: "tokenagua"
+      AVAILABLE_LANGUAGES: "it,en,fr"
 
   caiman_frontend:
     restart: always

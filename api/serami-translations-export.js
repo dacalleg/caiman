@@ -1,4 +1,4 @@
-const AVAILABLE_LANGUAGES = ['it', 'en', 'fr'];
+const { getAvailableLanguages } = require('./available-languages');
 const CSV_SEPARATOR = ';';
 const REQUIRED_COLUMNS = ['sanitizedName'];
 
@@ -18,16 +18,18 @@ function getTranslationValue(map, lang) {
 }
 
 function buildHeaderRow() {
-    const nameColumns = AVAILABLE_LANGUAGES.map(lang => `name_${lang}`);
-    const descriptionColumns = AVAILABLE_LANGUAGES.map(lang => `description_${lang}`);
+    const languages = getAvailableLanguages();
+    const nameColumns = languages.map(lang => `name_${lang}`);
+    const descriptionColumns = languages.map(lang => `description_${lang}`);
     return ['hash', 'sanitizedName', 'name', 'description', ...nameColumns, ...descriptionColumns];
 }
 
 function buildVariableRow(variable) {
-    const translatedNames = AVAILABLE_LANGUAGES.map(lang =>
+    const languages = getAvailableLanguages();
+    const translatedNames = languages.map(lang =>
         getTranslationValue(variable.translatedName, lang)
     );
-    const translatedDescriptions = AVAILABLE_LANGUAGES.map(lang =>
+    const translatedDescriptions = languages.map(lang =>
         getTranslationValue(variable.translatedDescription, lang)
     );
 
@@ -143,7 +145,7 @@ function buildTranslationMaps(row) {
     const translatedName = {};
     const translatedDescription = {};
 
-    for (const lang of AVAILABLE_LANGUAGES) {
+    for (const lang of getAvailableLanguages()) {
         const nameValue = (row[`name_${lang}`] || '').trim();
         const descriptionValue = (row[`description_${lang}`] || '').trim();
         if (nameValue) {
@@ -214,7 +216,6 @@ function importSeramiTranslationsFromCsv(sourceEntry, csvContent) {
 }
 
 module.exports = {
-    AVAILABLE_LANGUAGES,
     buildSeramiTranslationsCsv,
     buildExportFilename,
     importSeramiTranslationsFromCsv,

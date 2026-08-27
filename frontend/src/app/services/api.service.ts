@@ -41,7 +41,7 @@ import {
 } from '../classes/interfaces';
 import {AuthService} from './auth.service';
 import {OfflineCacheService} from './offline-cache.service';
-import {AVAILABLE_LANGUAGES, TranslationProviderService} from './translation-provider.service';
+import {TranslationProviderService} from './translation-provider.service';
 import {TranslationService} from './translation.service';
 import { COUNTRIES } from '../classes/countries';
 
@@ -492,7 +492,12 @@ export class ApiService {
     return new Observable<number>(subscriber => {
       (async () => {
         try {
-          const languages = [...AVAILABLE_LANGUAGES];
+          const configuredLanguages = await firstValueFrom(
+            this.TranslationProvider.getAvailableLanguages()
+          );
+          const languages = configuredLanguages.length > 0
+            ? configuredLanguages
+            : ['it'];
           const seramiList = await firstValueFrom(
             this.Http.get<SeramiEntry[]>(environment.endpoint + '/api/serami')
           );

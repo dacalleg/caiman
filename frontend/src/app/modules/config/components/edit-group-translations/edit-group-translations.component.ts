@@ -1,6 +1,7 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { SeramiGroup } from 'src/app/classes/interfaces';
-import { AVAILABLE_LANGUAGES } from 'src/app/services/translation-provider.service';
+import { TranslationProviderService } from 'src/app/services/translation-provider.service';
 
 interface TranslationRow {
   lang: string;
@@ -12,16 +13,31 @@ interface TranslationRow {
   templateUrl: './edit-group-translations.component.html',
   styleUrls: ['./edit-group-translations.component.scss']
 })
-export class EditGroupTranslationsComponent implements OnChanges {
+export class EditGroupTranslationsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() group: SeramiGroup | null = null;
 
   translationRows: TranslationRow[] = [];
   availableLanguages: string[] = [];
+  private configuredLanguages: string[] = [];
+  private languagesSubscription: Subscription | null = null;
+
+  constructor(private translationProvider: TranslationProviderService) {}
+
+  ngOnInit(): void {
+    this.languagesSubscription = this.translationProvider.getAvailableLanguages().subscribe(languages => {
+      this.configuredLanguages = languages;
+      this.syncRowsFromGroup();
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['group']) {
       this.syncRowsFromGroup();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.languagesSubscription?.unsubscribe();
   }
 
   addTranslation(lang: string): void {
@@ -70,13 +86,13 @@ export class EditGroupTranslationsComponent implements OnChanges {
       value: map[lang] ?? '',
     }));
     const used = new Set(this.translationRows.map(row => row.lang));
-    this.availableLanguages = AVAILABLE_LANGUAGES.filter(lang => !used.has(lang));
+    this.availableLanguages = this.configuredLanguages.filter(lang => !used.has(lang));
   }
 
   private orderedLangKeys(map: { [key: string]: string }): string[] {
-    const known = AVAILABLE_LANGUAGES.filter(lang => lang in map);
+    const known = this.configuredLanguages.filter(lang => lang in map);
     const extra = Object.keys(map).filter(
-      lang => !AVAILABLE_LANGUAGES.includes(lang as typeof AVAILABLE_LANGUAGES[number])
+      lang => !this.configuredLanguages.includes(lang)
     );
     return [...known, ...extra];
   }

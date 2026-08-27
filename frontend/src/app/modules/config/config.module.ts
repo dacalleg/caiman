@@ -11,6 +11,7 @@ import { EditOptionsComponent } from './components/edit-options/edit-options.com
 import { SearchPipe } from './pipes/search.pipe';
 import { EditColorsComponent } from './components/edit-colors/edit-colors.component';
 import { EditTranslationsComponent } from './components/edit-translations/edit-translations.component';
+import { EditGroupTranslationsComponent } from './components/edit-group-translations/edit-group-translations.component';
 
 
 @NgModule({
@@ -21,7 +22,8 @@ import { EditTranslationsComponent } from './components/edit-translations/edit-t
     EditOptionsComponent,
     SearchPipe,
     EditColorsComponent,
-    EditTranslationsComponent
+    EditTranslationsComponent,
+    EditGroupTranslationsComponent
   ],
   imports: [
     CommonModule,

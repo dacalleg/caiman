@@ -36,7 +36,7 @@
             </div>
             <hr class="dropdown-divider">
             <a class="nav-link text-end" ngbDropdownItem [routerLink]="'/dashboard/profile'">{{'profile'|translate}}</a>
-            <a class="nav-link text-end" ngbDropdownItem [routerLink]="'/dashboard/license'">{{'license'|translate}}</a>
+            <a class="nav-link text-end" ngbDropdownItem [routerLink]="'/dashboard/license'" *ngIf="false">{{'license'|translate}}</a>
             <span class="text-end" ngbDropdownItem (click)="logout()">{{'logout'|translate}}</span>
           </div>
         </li>

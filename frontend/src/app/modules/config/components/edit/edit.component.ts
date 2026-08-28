@@ -189,6 +189,39 @@ export class EditComponent {
     });
   }
 
+  exit(): void {
+    this.Router.navigate(['/config/list']);
+  }
+
+  isGroupEmpty(groupName: string): boolean {
+    return (this.variablesByGroup[groupName] ?? []).length === 0;
+  }
+
+  deleteGroup(groupName: string): void {
+    if (!this.isGroupEmpty(groupName)) {
+      return;
+    }
+
+    const confirmed = confirm(`Vuoi davvero eliminare il gruppo ${groupName}?`);
+    if (!confirmed) {
+      return;
+    }
+
+    const wasActive = this.currentGroup$.value === groupName;
+    this.seramiEntry.groups = (this.seramiEntry.groups ?? []).filter(group => group.name !== groupName);
+    delete this.variablesByGroup[groupName];
+    this.syncGroups();
+
+    if (wasActive) {
+      if (this.groupTabs.length > 0) {
+        this.nav?.select(this.groupTabs[0].name);
+        this.changeGroup(this.groupTabs[0].name);
+      } else {
+        this.changeGroup('');
+      }
+    }
+  }
+
   updateHash(v: Variable) {
     v.hash = [v.memory == "eeprom" ? "E" : "R", "" + v.address, "" + v.mask].join("_")
   }

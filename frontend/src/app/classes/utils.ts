@@ -326,6 +326,11 @@ export class Utils {
                 continue;
             }
 
+            if (variable.button) {
+                results.push(value);
+                continue;
+            }
+
             if (!skipValues && variable.values && variable.values.length > 0) {
                 const keys = variable.values.map(item => item[0]);
                 if (keys.includes(String(value))) {

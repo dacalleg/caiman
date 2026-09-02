@@ -24,10 +24,6 @@ export class Utils {
         return (2 ** bit) - 1;
     }
 
-    private static buildVariableHash(memory: string, address: number, mask: number): string {
-        return [(memory === 'eeprom' ? 'E' : 'R'), String(address), String(mask)].join('_');
-    }
-
     private static evaluateBoundsFromSanitizedExp(
         sanitized: string,
         min: number,
@@ -133,34 +129,6 @@ export class Utils {
 
         const readExp = maskOnly !== null ? null : this.normalizeReadExp(expval);
         return { mask, readExp, min, max, step };
-    }
-
-    public static applyReadExpOverride(variable: Variable, readExp: string): void {
-        const maskOnly = this.parseMaskOnlyFormula(readExp);
-        if (maskOnly !== null) {
-            variable.mask = maskOnly;
-            variable.readExp = null;
-            variable.hash = this.buildVariableHash(variable.memory, variable.address, maskOnly);
-            if (this.isLegacyFakeMaskFormula(readExp)) {
-                variable.min = 0;
-                variable.max = 1;
-            }
-            return;
-        }
-
-        variable.readExp = this.normalizeReadExp(readExp)!;
-        if (!variable.readExp || variable.readExp === HASH_PLACEHOLDER)
-            return;
-
-        const bitMax = this.bitMaxFromBitCount(variable.bit);
-        const min = variable.min ?? 0;
-        const max = variable.max ?? bitMax;
-        if (!this.producesStringOutput(variable.readExp, min, max)) {
-            const bounds = this.evaluateBoundsFromSanitizedExp(variable.readExp, min, max);
-            variable.min = bounds.min;
-            variable.max = bounds.max;
-        }
-        this.applyStringValueOptionsIfNeeded(variable);
     }
 
     public static producesStringOutput(readExp: string, min: unknown = 0, max: unknown = 255): boolean {

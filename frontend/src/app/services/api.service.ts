@@ -36,8 +36,7 @@ import {
   SeramiEntry,
   SeramiTranslationsImportResult,
   Ticket,
-  Variable,
-  VariableInfoOverride
+  Variable
 } from '../classes/interfaces';
 import {AuthService} from './auth.service';
 import {OfflineCacheService} from './offline-cache.service';
@@ -730,45 +729,11 @@ export class ApiService {
       id: item.id,
       firmware_list: item.acf.firmware.map((item: any) => ({ revision: item.revision, file: item.file ? item.file.ID : null, role: item.role })) || [],
       database: item.acf.database || [],
-      serami_var_formula_override: item.acf.serami_var_formula_override || [],
       key: item.acf.key
     } as Board
   }
 
   private buildProductInfo(item: any, board: Board, _roles: string[], gateway: Gateway | null = null, variables: Variable[], groups?: ProductModel['groups']): ProductModel {
-    let serami_var_override = item.acf.serami_var_override as any[] || [];
-    let serami_var_opt_override = item.acf.serami_var_opt_override as any[] || [];
-    let serami_var_formula_override = board.serami_var_formula_override as any[] || [];
-
-    let identifiers = [].concat(
-      ...serami_var_override.map(item => item.id),
-      ...serami_var_opt_override.map(item => item.id),
-      ...serami_var_formula_override.map(item => item.id)
-    ).filter((item, pos, arr) => {
-      return arr.indexOf(item) == pos;
-    });
-
-    const var_override = identifiers.map(id => {
-      const info = serami_var_override.find(item => item.id === id);
-      const options = serami_var_opt_override.find(item => item.id === id)?.options.split("\n").reduce((acc: {
-        [key: string]: string
-      }, item: string) => {
-        const [key, value] = item.split(":");
-        acc[value.trim()] = key.trim();
-        return acc;
-      }, {} as { [key: string]: string });
-      const formula = serami_var_formula_override.find(item => item.id === id);
-
-      return {
-        id: id,
-        title: info ? info.title : undefined,
-        description: info ? info.description : undefined,
-        options: options ? options : undefined,
-        read_exp: formula ? formula.read_exp : undefined,
-        write_exp: formula ? formula.write_exp : undefined,
-      } as VariableInfoOverride
-    })
-
     return {
       id: item.id,
       name: item.name,
@@ -779,7 +744,6 @@ export class ApiService {
       video: item.acf.video || [],
       documents: item.acf.documents || [],
       links: item.acf.links || [],
-      serami_var_override: var_override || [],
       database: board.database || [],
       image: item.image || null,
       faq: item.acf.faq || [],

@@ -42,7 +42,8 @@
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
                             <input type="text" class="form-control" id="name"
-                                [(ngModel)]="variable.name">
+                                [(ngModel)]="variable.name"
+                                (ngModelChange)="updateSanitizedNameFromName(variable)">
                         </div>
                         <div class="mb-3">
                             <label for="description"

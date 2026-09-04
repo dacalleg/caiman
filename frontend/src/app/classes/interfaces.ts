@@ -22,6 +22,17 @@ export interface SeramiTranslationsImportResult {
   skippedCsvRows: { sanitizedName: string; reason: string }[];
 }
 
+export interface SeramiImportResult {
+  status: string;
+  key: string;
+  name: string;
+}
+
+export interface SeramiImportModalResult {
+  config: SeramiEntry;
+  keepUuid: boolean;
+}
+
 export interface Variable {
   address: number
   bit: number

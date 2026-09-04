@@ -27,16 +27,7 @@ export class SeramiParserService {
   }
 
   sanitizeString(str: string): string {
-    return str.trim().toLowerCase()
-      .normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, ' ')
-      .replace(/ /g, '_')
-      .replace(/\//g, '_')
-      .replace(/-/g, '_')
-      .replace(/\./g, '_')
-      .replace(/\(/g, '')
-      .replace(/\)/g, '')
-      .replace(/(_)\1+/g, '$1')
-      .replace(/(\w+)_$/gm, '$1');
+    return Utils.sanitizeString(str);
   }
 
   getPattern(type: string, bit: number, reverse: boolean, signed: boolean = false): string {

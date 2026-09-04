@@ -183,6 +183,7 @@ export class EditComponent {
 
 
   save() {
+    this.normalizeSanitizedNamesBeforeSave();
     this.syncGroups();
     this.Api.updateSerami(this.seramiEntry).subscribe(() => {
       this.Router.navigate(["/config/list"]);
@@ -262,6 +263,7 @@ export class EditComponent {
   duplicateVariable(variable: Variable) {
     const copy: Variable = structuredClone(variable);
     copy.name = `${variable.name} (copia)`;
+    copy.sanitizedName = Utils.sanitizeString(copy.name);
     copy.varKey = undefined;
 
     const groupVariables = this.seramiEntry.data
@@ -322,16 +324,34 @@ export class EditComponent {
       })
   }
 
+  updateSanitizedNameFromName(variable: Variable): void {
+    variable.sanitizedName = Utils.sanitizeString(variable.name ?? '');
+  }
+
+  private needsSanitizedNameFromName(variable: Variable): boolean {
+    const sanitizedName = variable.sanitizedName?.trim() ?? '';
+    return sanitizedName === '' || sanitizedName === 'new_variable';
+  }
+
+  private normalizeSanitizedNamesBeforeSave(): void {
+    this.seramiEntry.data.forEach(variable => {
+      if (this.needsSanitizedNameFromName(variable)) {
+        this.updateSanitizedNameFromName(variable);
+      }
+    });
+  }
+
   newVariable(group: string) {
+    const name = 'New Variable';
     this.seramiEntry.data.push(
       {
         type: "RwmsParameterBase",
         description: "",
         varKey: undefined,
         group: group,
-        name: "New Variable",
+        name,
         hash: "R_0_255",
-        sanitizedName: "new_variable",
+        sanitizedName: Utils.sanitizeString(name),
         address: 0,
         min: 0,
         max: 1,

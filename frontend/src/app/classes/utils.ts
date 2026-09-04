@@ -7,6 +7,19 @@ type TextRange = [number, number];
 
 export class Utils {
 
+    public static sanitizeString(str: string): string {
+        return str.trim().toLowerCase()
+            .normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, ' ')
+            .replace(/ /g, '_')
+            .replace(/\//g, '_')
+            .replace(/-/g, '_')
+            .replace(/\./g, '_')
+            .replace(/\(/g, '')
+            .replace(/\)/g, '')
+            .replace(/(_)\1+/g, '$1')
+            .replace(/(\w+)_$/gm, '$1');
+    }
+
     private static nanDebugLogged = new Set<string>();
 
     private static logNaNOnce(variable: Variable, formula: string) {

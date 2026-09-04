@@ -34,6 +34,7 @@ import {
   ProductModel,
   Registry,
   SeramiEntry,
+  SeramiImportResult,
   SeramiTranslationsImportResult,
   Ticket,
   Variable
@@ -318,6 +319,20 @@ export class ApiService {
     return this.Http.post<SeramiTranslationsImportResult>(
       environment.endpoint + "/api/serami/import-translations/" + key,
       { csv }
+    );
+  }
+
+  exportSeramiConfig(key: string) {
+    return this.Http.get(environment.endpoint + "/api/serami/export-json/" + key, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
+  importSeramiConfig(config: SeramiEntry, keepUuid: boolean) {
+    return this.Http.post<SeramiImportResult>(
+      environment.endpoint + "/api/serami/import-json",
+      { config, keepUuid }
     );
   }
 

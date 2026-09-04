@@ -12,6 +12,7 @@ import { SearchPipe } from './pipes/search.pipe';
 import { EditColorsComponent } from './components/edit-colors/edit-colors.component';
 import { EditTranslationsComponent } from './components/edit-translations/edit-translations.component';
 import { EditGroupTranslationsComponent } from './components/edit-group-translations/edit-group-translations.component';
+import { ImportConfigModalComponent } from './components/import-config-modal/import-config-modal.component';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { EditGroupTranslationsComponent } from './components/edit-group-translat
     SearchPipe,
     EditColorsComponent,
     EditTranslationsComponent,
-    EditGroupTranslationsComponent
+    EditGroupTranslationsComponent,
+    ImportConfigModalComponent
   ],
   imports: [
     CommonModule,

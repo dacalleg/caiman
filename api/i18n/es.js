@@ -239,7 +239,19 @@ const values = {
     "home.deviceselect.ap_password": "Contraseña AP",
     "home.deviceselect.select_product": "Seleccionar un producto",
     "home.deviceselect.open": "Abrir",
-    "home.deviceinfo.links": "Enlaces"
+    "home.deviceinfo.links": "Enlaces",
+    "config.actions": "Acciones",
+    "config.export": "Exportar configuración",
+    "config.import": "Importar configuración",
+    "config.import.title": "Importar configuración",
+    "config.import.name": "Nombre",
+    "config.import.uuid": "UUID",
+    "config.import.uuid.generated": "Se generará automáticamente",
+    "config.import.keepuuid": "Mantener UUID original",
+    "config.import.uuid.exists": "Advertencia: este UUID ya existe en el sistema",
+    "config.import.success": "Configuración importada correctamente",
+    "config.import.error": "Error durante la importación",
+    "config.import.invalid_json": "El archivo seleccionado no contiene una configuración válida"
 };
 
 module.exports = values;

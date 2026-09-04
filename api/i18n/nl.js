@@ -239,7 +239,19 @@ const values = {
     "home.deviceselect.ap_password": "AP-wachtwoord",
     "home.deviceselect.select_product": "Selecteer een product",
     "home.deviceselect.open": "Openen",
-    "home.deviceinfo.links": "Links"
+    "home.deviceinfo.links": "Links",
+    "config.actions": "Acties",
+    "config.export": "Configuratie exporteren",
+    "config.import": "Configuratie importeren",
+    "config.import.title": "Configuratie importeren",
+    "config.import.name": "Naam",
+    "config.import.uuid": "UUID",
+    "config.import.uuid.generated": "Wordt automatisch gegenereerd",
+    "config.import.keepuuid": "Originele UUID behouden",
+    "config.import.uuid.exists": "Waarschuwing: deze UUID bestaat al in het systeem",
+    "config.import.success": "Configuratie succesvol geïmporteerd",
+    "config.import.error": "Fout tijdens import",
+    "config.import.invalid_json": "Het geselecteerde bestand bevat geen geldige configuratie"
 };
 
 module.exports = values;

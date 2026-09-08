@@ -33,6 +33,12 @@ export interface SeramiImportModalResult {
   keepUuid: boolean;
 }
 
+export interface VariableTemplate extends Partial<Variable> {
+  templateId: string;
+  templateName: string;
+  templateDescription: string;
+}
+
 export interface Variable {
   address: number
   bit: number

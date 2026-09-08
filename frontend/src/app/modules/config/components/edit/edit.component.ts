@@ -2,9 +2,10 @@ import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, filter, map, switchMap, take, tap } from 'rxjs';
-import { SeramiEntry, SeramiGroup, Variable } from 'src/app/classes/interfaces';
+import { SeramiEntry, SeramiGroup, Variable, VariableTemplate } from 'src/app/classes/interfaces';
 import { buildGroupTabs, renameGroup } from 'src/app/classes/serami-groups';
 import { Utils } from 'src/app/classes/utils';
+import { TemplateService } from '../../services/template.service';
 import { ApiService } from 'src/app/services/api.service';
 
 interface CheckLog {
@@ -30,17 +31,25 @@ export class EditComponent {
   logs: CheckLog[];
   search: string | undefined;
   expandedVariablePanelId: string | null = null;
+  readonly variableTemplates: VariableTemplate[];
+  variableSectionRefreshKeys: Record<string, number> = {};
   private readonly variablePanelKeys = new WeakMap<Variable, string>();
   private nextVariablePanelKey = 0;
 
   private static readonly SEARCH_TAB_ID = '__search__';
   private static readonly CHECK_TAB_ID = '__check__';
 
-  constructor(private activatedRoute: ActivatedRoute, private Api: ApiService, private Router: Router) {
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private Api: ApiService,
+    private Router: Router,
+    private templateService: TemplateService,
+  ) {
     this.logs = [];
     this.seramiEntry = { data: [], name: "" };
     this.groupTabs = [];
     this.currentGroup$ = new BehaviorSubject<string>("");
+    this.variableTemplates = this.templateService.getTemplates();
 
     this.activatedRoute.params.pipe(
       filter(params => params["key"] != null),
@@ -226,6 +235,14 @@ export class EditComponent {
   updateHash(v: Variable) {
     v.hash = [v.memory == "eeprom" ? "E" : "R", "" + v.address, "" + v.mask].join("_")
   }
+
+  applyVariableTemplate(variable: Variable, templateId: string): void {
+    this.templateService.applyTemplate(variable, templateId);
+    const panelId = this.variablePanelId(variable);
+    this.variableSectionRefreshKeys[panelId] = (this.variableSectionRefreshKeys[panelId] ?? 0) + 1;
+  }
+
+  trackVariableSectionRefresh = (_index: number, refreshKey: number): number => refreshKey;
 
   moveToGroup(variable: Variable, group: string) {
     const previousGroup = variable.group;

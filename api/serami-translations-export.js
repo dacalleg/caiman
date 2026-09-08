@@ -1,6 +1,7 @@
 const { getAvailableLanguages } = require('./available-languages');
 const CSV_SEPARATOR = ';';
 const REQUIRED_COLUMNS = ['sanitizedName'];
+const GROUP_ROW_HASH = 'group';
 
 function escapeCsvField(value) {
     const text = value == null ? '' : String(value);
@@ -43,9 +44,58 @@ function buildVariableRow(variable) {
     ];
 }
 
+function buildGroupRow(group) {
+    const languages = getAvailableLanguages();
+    const translatedNames = languages.map(lang =>
+        getTranslationValue(group.translations, lang)
+    );
+    const emptyDescriptions = languages.map(() => '');
+
+    return [
+        GROUP_ROW_HASH,
+        group.name ?? '',
+        group.name ?? '',
+        '',
+        ...translatedNames,
+        ...emptyDescriptions,
+    ];
+}
+
+function collectExportGroups(seramiEntry) {
+    const metadata = Array.isArray(seramiEntry?.groups) ? seramiEntry.groups : [];
+    const variables = Array.isArray(seramiEntry?.data) ? seramiEntry.data : [];
+    const groupsByName = new Map();
+
+    for (const group of metadata) {
+        if (group?.name) {
+            groupsByName.set(group.name, group);
+        }
+    }
+
+    for (const variable of variables) {
+        const groupName = variable?.group;
+        if (groupName && !groupsByName.has(groupName)) {
+            groupsByName.set(groupName, { name: groupName });
+        }
+    }
+
+    return [...groupsByName.values()].sort((left, right) => {
+        const sortDiff = (left.sort ?? 0) - (right.sort ?? 0);
+        if (sortDiff !== 0) {
+            return sortDiff;
+        }
+        return String(left.name).localeCompare(String(right.name));
+    });
+}
+
 function buildSeramiTranslationsCsv(seramiEntry) {
     const variables = Array.isArray(seramiEntry?.data) ? seramiEntry.data : [];
-    const rows = [buildHeaderRow(), ...variables.map(buildVariableRow)];
+    const groups = collectExportGroups(seramiEntry);
+    const rows = [
+        buildHeaderRow(),
+        ...variables.map(buildVariableRow),
+        ...groups.map(buildGroupRow),
+    ];
     const body = rows
         .map(row => row.map(escapeCsvField).join(CSV_SEPARATOR))
         .join('\r\n');
@@ -171,6 +221,57 @@ function applyImportedVariableFields(variable, row) {
     variable.translatedDescription = translations.translatedDescription;
 }
 
+function isGroupRow(row) {
+    return (row.hash || '').trim() === GROUP_ROW_HASH;
+}
+
+function collectKnownGroupNames(entry) {
+    const names = new Set();
+
+    for (const group of entry.groups ?? []) {
+        if (group?.name) {
+            names.add(group.name);
+        }
+    }
+
+    for (const variable of entry.data ?? []) {
+        if (variable?.group) {
+            names.add(variable.group);
+        }
+    }
+
+    return names;
+}
+
+function findOrCreateGroup(entry, groupName) {
+    if (!Array.isArray(entry.groups)) {
+        entry.groups = [];
+    }
+
+    const existing = entry.groups.find(group => group.name === groupName);
+    if (existing) {
+        return existing;
+    }
+
+    const nextSort = Math.max(0, ...entry.groups.map(group => group.sort ?? 0)) + 10;
+    const group = { name: groupName, sort: nextSort };
+    entry.groups.push(group);
+    return group;
+}
+
+function applyImportedGroupFields(group, row) {
+    const translations = {};
+
+    for (const lang of getAvailableLanguages()) {
+        const nameValue = (row[`name_${lang}`] || '').trim();
+        if (nameValue) {
+            translations[lang] = nameValue;
+        }
+    }
+
+    group.translations = Object.keys(translations).length > 0 ? translations : undefined;
+}
+
 function importSeramiTranslationsFromCsv(sourceEntry, csvContent) {
     const csvRows = parseCsvContent(csvContent);
     const entry = {
@@ -180,6 +281,7 @@ function importSeramiTranslationsFromCsv(sourceEntry, csvContent) {
         groups: sourceEntry.groups ? JSON.parse(JSON.stringify(sourceEntry.groups)) : null,
     };
     const variablesBySanitizedName = new Map();
+    const knownGroupNames = collectKnownGroupNames(entry);
 
     for (const variable of entry.data) {
         if (variable.sanitizedName) {
@@ -191,6 +293,24 @@ function importSeramiTranslationsFromCsv(sourceEntry, csvContent) {
     let matched = 0;
 
     for (const row of csvRows) {
+        if (isGroupRow(row)) {
+            const groupName = (row.sanitizedName || row.name || '').trim();
+            if (!groupName) {
+                skippedCsvRows.push({ sanitizedName: '', reason: 'Missing group name' });
+                continue;
+            }
+
+            if (!knownGroupNames.has(groupName)) {
+                skippedCsvRows.push({ sanitizedName: groupName, reason: 'Group not found in configuration' });
+                continue;
+            }
+
+            const group = findOrCreateGroup(entry, groupName);
+            applyImportedGroupFields(group, row);
+            matched++;
+            continue;
+        }
+
         const sanitizedName = (row.sanitizedName || '').trim();
         if (!sanitizedName) {
             skippedCsvRows.push({ sanitizedName: '', reason: 'Missing sanitizedName' });

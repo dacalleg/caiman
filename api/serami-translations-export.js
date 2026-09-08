@@ -1,5 +1,6 @@
 const { getAvailableLanguages } = require('./available-languages');
-const CSV_SEPARATOR = ';';
+const DEFAULT_CSV_SEPARATOR = ';';
+const SUPPORTED_CSV_SEPARATORS = [';', ','];
 const REQUIRED_COLUMNS = ['sanitizedName'];
 const GROUP_ROW_HASH = 'group';
 
@@ -97,7 +98,7 @@ function buildSeramiTranslationsCsv(seramiEntry) {
         ...groups.map(buildGroupRow),
     ];
     const body = rows
-        .map(row => row.map(escapeCsvField).join(CSV_SEPARATOR))
+        .map(row => row.map(escapeCsvField).join(DEFAULT_CSV_SEPARATOR))
         .join('\r\n');
     return `\ufeff${body}`;
 }
@@ -111,8 +112,16 @@ function buildExportFilename(seramiEntry) {
     return `${baseName}_translations.csv`;
 }
 
-function parseCsvContent(content) {
-    const normalized = String(content).replace(/^\ufeff/, '');
+function normalizeCsvContent(content) {
+    return String(content).replace(/^\ufeff/, '');
+}
+
+function hasRequiredHeaders(headers) {
+    const trimmedHeaders = headers.map(header => header.trim());
+    return REQUIRED_COLUMNS.every(column => trimmedHeaders.includes(column));
+}
+
+function parseCsvRows(normalized, separator, maxRows = Infinity) {
     const rows = [];
     let row = [];
     let field = '';
@@ -140,7 +149,7 @@ function parseCsvContent(content) {
             continue;
         }
 
-        if (char === CSV_SEPARATOR) {
+        if (char === separator) {
             row.push(field);
             field = '';
             continue;
@@ -150,6 +159,9 @@ function parseCsvContent(content) {
             row.push(field);
             if (row.some(cell => cell.length > 0)) {
                 rows.push(row);
+                if (rows.length >= maxRows) {
+                    return rows;
+                }
             }
             row = [];
             field = '';
@@ -171,16 +183,35 @@ function parseCsvContent(content) {
         rows.push(row);
     }
 
+    return rows;
+}
+
+function detectCsvSeparator(normalized) {
+    for (const separator of SUPPORTED_CSV_SEPARATORS) {
+        const [headerRow] = parseCsvRows(normalized, separator, 1);
+        if (headerRow && hasRequiredHeaders(headerRow)) {
+            return separator;
+        }
+    }
+
+    return null;
+}
+
+function parseCsvContent(content) {
+    const normalized = normalizeCsvContent(content);
+    const separator = detectCsvSeparator(normalized);
+
+    if (!separator) {
+        throw new Error(`Missing required CSV column: ${REQUIRED_COLUMNS[0]}`);
+    }
+
+    const rows = parseCsvRows(normalized, separator);
+
     if (rows.length === 0) {
         throw new Error('CSV file is empty');
     }
 
     const headers = rows[0].map(header => header.trim());
-    for (const column of REQUIRED_COLUMNS) {
-        if (!headers.includes(column)) {
-            throw new Error(`Missing required CSV column: ${column}`);
-        }
-    }
 
     return rows.slice(1).map(cells => {
         const record = {};

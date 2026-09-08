@@ -13,12 +13,26 @@
                         <div ngbDropdown class="d-inline-block">
                             <button type="button"
                                 class="btn btn-sm btn-secondary md-2"
-                                id="dropdownBasic1" ngbDropdownToggle>
+                                [id]="'move-dropdown-' + variablePanelId(variable)" ngbDropdownToggle>
                                 Move to
                             </button>
-                            <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                            <div ngbDropdownMenu [attr.aria-labelledby]="'move-dropdown-' + variablePanelId(variable)">
                                 <button ngbDropdownItem *ngFor="let group of groupTabs"
                                     (click)="moveToGroup(variable, group.name)">{{ group.name }}</button>
+                            </div>
+                        </div>
+                        <div ngbDropdown class="d-inline-block ms-2" *ngIf="variableTemplates.length > 0">
+                            <button type="button"
+                                class="btn btn-sm btn-secondary"
+                                [id]="'template-dropdown-' + variablePanelId(variable)" ngbDropdownToggle>
+                                Template
+                            </button>
+                            <div ngbDropdownMenu [attr.aria-labelledby]="'template-dropdown-' + variablePanelId(variable)">
+                                <button ngbDropdownItem *ngFor="let template of variableTemplates"
+                                    [title]="template.templateDescription"
+                                    (click)="applyVariableTemplate(variable, template.templateId)">
+                                    {{ template.templateName }}
+                                </button>
                             </div>
                         </div>
                         <button class="btn btn-sm btn-secondary ms-2"
@@ -218,8 +232,12 @@
                             </div>
                         </ng-container>
 
-                        <app-edit-options *ngIf="!variable.button" [variable]="variable"></app-edit-options>
-                        <app-edit-colors *ngIf="!variable.button" [variable]="variable"></app-edit-colors>
+                        <ng-container *ngIf="!variable.button">
+                            <ng-container *ngFor="let refreshKey of [variableSectionRefreshKeys[variablePanelId(variable)] ?? 0]; trackBy: trackVariableSectionRefresh">
+                                <app-edit-options [variable]="variable"></app-edit-options>
+                                <app-edit-colors [variable]="variable"></app-edit-colors>
+                            </ng-container>
+                        </ng-container>
                     </div>
                 </div>
             </ng-template>

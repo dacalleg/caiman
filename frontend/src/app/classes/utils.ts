@@ -7,6 +7,19 @@ type TextRange = [number, number];
 
 export class Utils {
 
+    public static sanitizeString(str: string): string {
+        return str.trim().toLowerCase()
+            .normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, ' ')
+            .replace(/ /g, '_')
+            .replace(/\//g, '_')
+            .replace(/-/g, '_')
+            .replace(/\./g, '_')
+            .replace(/\(/g, '')
+            .replace(/\)/g, '')
+            .replace(/(_)\1+/g, '$1')
+            .replace(/(\w+)_$/gm, '$1');
+    }
+
     private static nanDebugLogged = new Set<string>();
 
     private static logNaNOnce(variable: Variable, formula: string) {
@@ -22,10 +35,6 @@ export class Utils {
 
     private static bitMaxFromBitCount(bit: number): number {
         return (2 ** bit) - 1;
-    }
-
-    private static buildVariableHash(memory: string, address: number, mask: number): string {
-        return [(memory === 'eeprom' ? 'E' : 'R'), String(address), String(mask)].join('_');
     }
 
     private static evaluateBoundsFromSanitizedExp(
@@ -133,34 +142,6 @@ export class Utils {
 
         const readExp = maskOnly !== null ? null : this.normalizeReadExp(expval);
         return { mask, readExp, min, max, step };
-    }
-
-    public static applyReadExpOverride(variable: Variable, readExp: string): void {
-        const maskOnly = this.parseMaskOnlyFormula(readExp);
-        if (maskOnly !== null) {
-            variable.mask = maskOnly;
-            variable.readExp = null;
-            variable.hash = this.buildVariableHash(variable.memory, variable.address, maskOnly);
-            if (this.isLegacyFakeMaskFormula(readExp)) {
-                variable.min = 0;
-                variable.max = 1;
-            }
-            return;
-        }
-
-        variable.readExp = this.normalizeReadExp(readExp)!;
-        if (!variable.readExp || variable.readExp === HASH_PLACEHOLDER)
-            return;
-
-        const bitMax = this.bitMaxFromBitCount(variable.bit);
-        const min = variable.min ?? 0;
-        const max = variable.max ?? bitMax;
-        if (!this.producesStringOutput(variable.readExp, min, max)) {
-            const bounds = this.evaluateBoundsFromSanitizedExp(variable.readExp, min, max);
-            variable.min = bounds.min;
-            variable.max = bounds.max;
-        }
-        this.applyStringValueOptionsIfNeeded(variable);
     }
 
     public static producesStringOutput(readExp: string, min: unknown = 0, max: unknown = 255): boolean {
@@ -323,6 +304,11 @@ export class Utils {
 
             if (variable.type === "RwmsParameterBaseBit") {
                 results.push(value > 0 ? variable.mask! : 0);
+                continue;
+            }
+
+            if (variable.button) {
+                results.push(value);
                 continue;
             }
 

@@ -397,6 +397,68 @@ async function init() {
             }
         });
 
+        app.get('/serami/export-json/:id', UserRequired, async (req, res) => {
+            try {
+                const entry = await Serami.findByPk(req.params.id);
+                if (!entry) {
+                    return res.status(404).send({ message: 'Serami configuration not found' });
+                }
+
+                const payload = entry.get({ plain: true });
+                const filename = buildSeramiJsonExportFilename(payload);
+                res.setHeader('Content-Type', 'application/json; charset=utf-8');
+                res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+                res.status(200).send(JSON.stringify(payload, null, 2));
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
+        app.post('/serami/import-json', UserRequired, async (req, res) => {
+            try {
+                const config = req.body?.config;
+                const keepUuid = req.body?.keepUuid === true;
+
+                if (!config || typeof config !== 'object') {
+                    return res.status(400).send({ message: 'Configuration payload is required' });
+                }
+                if (!config.name || typeof config.name !== 'string') {
+                    return res.status(400).send({ message: 'Configuration name is required' });
+                }
+                if (!Array.isArray(config.data)) {
+                    return res.status(400).send({ message: 'Configuration data must be an array' });
+                }
+
+                const entry = {
+                    name: config.name,
+                    data: config.data,
+                    groups: config.groups ?? null,
+                };
+
+                if (keepUuid) {
+                    if (!config.key || typeof config.key !== 'string') {
+                        return res.status(400).send({ message: 'Configuration key is required when keeping the original UUID' });
+                    }
+
+                    const existing = await Serami.findByPk(config.key);
+                    if (existing) {
+                        return res.status(409).send({ message: 'A configuration with this UUID already exists' });
+                    }
+
+                    entry.key = config.key;
+                }
+
+                const [savedEntry] = await Serami.upsert(entry);
+                res.status(200).send({
+                    status: 'OK',
+                    key: savedEntry.key,
+                    name: savedEntry.name,
+                });
+            } catch (ex) {
+                res.status(500).send({ message: ex.message });
+            }
+        });
+
         app.post('/chunkupload', UserRequired, async (req, res) => {
             var upload_dir = "uploads/";
             var filepath = upload_dir + req.body.name + "." + req.body.ext;
@@ -424,6 +486,15 @@ async function init() {
 }
 
 init().then(() => console.log("INIT DONE"));
+
+function buildSeramiJsonExportFilename(seramiEntry) {
+    const baseName = (seramiEntry?.name || 'serami')
+        .trim()
+        .replace(/[^\w\-]+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '') || 'serami';
+    return `${baseName}.json`;
+}
 
 async function getLastRegistry(serial)
 {

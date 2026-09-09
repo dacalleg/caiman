@@ -2,9 +2,10 @@ import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, filter, map, switchMap, take, tap } from 'rxjs';
-import { SeramiEntry, SeramiGroup, Variable } from 'src/app/classes/interfaces';
+import { SeramiEntry, SeramiGroup, Variable, VariableTemplate } from 'src/app/classes/interfaces';
 import { buildGroupTabs, renameGroup } from 'src/app/classes/serami-groups';
 import { Utils } from 'src/app/classes/utils';
+import { TemplateService } from '../../services/template.service';
 import { ApiService } from 'src/app/services/api.service';
 
 interface CheckLog {
@@ -30,17 +31,25 @@ export class EditComponent {
   logs: CheckLog[];
   search: string | undefined;
   expandedVariablePanelId: string | null = null;
+  readonly variableTemplates: VariableTemplate[];
+  variableSectionRefreshKeys: Record<string, number> = {};
   private readonly variablePanelKeys = new WeakMap<Variable, string>();
   private nextVariablePanelKey = 0;
 
   private static readonly SEARCH_TAB_ID = '__search__';
   private static readonly CHECK_TAB_ID = '__check__';
 
-  constructor(private activatedRoute: ActivatedRoute, private Api: ApiService, private Router: Router) {
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private Api: ApiService,
+    private Router: Router,
+    private templateService: TemplateService,
+  ) {
     this.logs = [];
     this.seramiEntry = { data: [], name: "" };
     this.groupTabs = [];
     this.currentGroup$ = new BehaviorSubject<string>("");
+    this.variableTemplates = this.templateService.getTemplates();
 
     this.activatedRoute.params.pipe(
       filter(params => params["key"] != null),
@@ -183,15 +192,57 @@ export class EditComponent {
 
 
   save() {
+    this.normalizeSanitizedNamesBeforeSave();
     this.syncGroups();
     this.Api.updateSerami(this.seramiEntry).subscribe(() => {
       this.Router.navigate(["/config/list"]);
     });
   }
 
+  exit(): void {
+    this.Router.navigate(['/config/list']);
+  }
+
+  isGroupEmpty(groupName: string): boolean {
+    return (this.variablesByGroup[groupName] ?? []).length === 0;
+  }
+
+  deleteGroup(groupName: string): void {
+    if (!this.isGroupEmpty(groupName)) {
+      return;
+    }
+
+    const confirmed = confirm(`Vuoi davvero eliminare il gruppo ${groupName}?`);
+    if (!confirmed) {
+      return;
+    }
+
+    const wasActive = this.currentGroup$.value === groupName;
+    this.seramiEntry.groups = (this.seramiEntry.groups ?? []).filter(group => group.name !== groupName);
+    delete this.variablesByGroup[groupName];
+    this.syncGroups();
+
+    if (wasActive) {
+      if (this.groupTabs.length > 0) {
+        this.nav?.select(this.groupTabs[0].name);
+        this.changeGroup(this.groupTabs[0].name);
+      } else {
+        this.changeGroup('');
+      }
+    }
+  }
+
   updateHash(v: Variable) {
     v.hash = [v.memory == "eeprom" ? "E" : "R", "" + v.address, "" + v.mask].join("_")
   }
+
+  applyVariableTemplate(variable: Variable, templateId: string): void {
+    this.templateService.applyTemplate(variable, templateId);
+    const panelId = this.variablePanelId(variable);
+    this.variableSectionRefreshKeys[panelId] = (this.variableSectionRefreshKeys[panelId] ?? 0) + 1;
+  }
+
+  trackVariableSectionRefresh = (_index: number, refreshKey: number): number => refreshKey;
 
   moveToGroup(variable: Variable, group: string) {
     const previousGroup = variable.group;
@@ -229,6 +280,7 @@ export class EditComponent {
   duplicateVariable(variable: Variable) {
     const copy: Variable = structuredClone(variable);
     copy.name = `${variable.name} (copia)`;
+    copy.sanitizedName = Utils.sanitizeString(copy.name);
     copy.varKey = undefined;
 
     const groupVariables = this.seramiEntry.data
@@ -289,16 +341,34 @@ export class EditComponent {
       })
   }
 
+  updateSanitizedNameFromName(variable: Variable): void {
+    variable.sanitizedName = Utils.sanitizeString(variable.name ?? '');
+  }
+
+  private needsSanitizedNameFromName(variable: Variable): boolean {
+    const sanitizedName = variable.sanitizedName?.trim() ?? '';
+    return sanitizedName === '' || sanitizedName === 'new_variable';
+  }
+
+  private normalizeSanitizedNamesBeforeSave(): void {
+    this.seramiEntry.data.forEach(variable => {
+      if (this.needsSanitizedNameFromName(variable)) {
+        this.updateSanitizedNameFromName(variable);
+      }
+    });
+  }
+
   newVariable(group: string) {
+    const name = 'New Variable';
     this.seramiEntry.data.push(
       {
         type: "RwmsParameterBase",
         description: "",
         varKey: undefined,
         group: group,
-        name: "New Variable",
+        name,
         hash: "R_0_255",
-        sanitizedName: "new_variable",
+        sanitizedName: Utils.sanitizeString(name),
         address: 0,
         min: 0,
         max: 1,

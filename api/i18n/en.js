@@ -242,7 +242,19 @@ const values = {
     "home.deviceselect.links": "Useful links",
     "home.deviceselect.chatbot": "Chatbot",
     "home.deviceselect.website": "Our website",
-    "home.deviceinfo.links": "Links"
+    "home.deviceinfo.links": "Links",
+    "config.actions": "Actions",
+    "config.export": "Export configuration",
+    "config.import": "Import configuration",
+    "config.import.title": "Import Configuration",
+    "config.import.name": "Name",
+    "config.import.uuid": "UUID",
+    "config.import.uuid.generated": "Will be generated automatically",
+    "config.import.keepuuid": "Keep original UUID",
+    "config.import.uuid.exists": "Warning: this UUID already exists in the system",
+    "config.import.success": "Configuration imported successfully",
+    "config.import.error": "Error during import",
+    "config.import.invalid_json": "The selected file does not contain a valid configuration"
 };
 
 module.exports = values;

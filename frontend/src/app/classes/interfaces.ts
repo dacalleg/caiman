@@ -22,6 +22,23 @@ export interface SeramiTranslationsImportResult {
   skippedCsvRows: { sanitizedName: string; reason: string }[];
 }
 
+export interface SeramiImportResult {
+  status: string;
+  key: string;
+  name: string;
+}
+
+export interface SeramiImportModalResult {
+  config: SeramiEntry;
+  keepUuid: boolean;
+}
+
+export interface VariableTemplate extends Partial<Variable> {
+  templateId: string;
+  templateName: string;
+  templateDescription: string;
+}
+
 export interface Variable {
   address: number
   bit: number
@@ -220,7 +237,6 @@ export interface Board {
   id: string;
   firmware_list: Firmware[];
   database: Database[];
-  serami_var_formula_override: any[];
   key: string;
 }
 
@@ -239,7 +255,6 @@ export interface ProductModel {
   image: string | null;
   faq: SingleFaq[];
   video: Video[];
-  serami_var_override: VariableInfoOverride[];
   gateway_firmware_list: Firmware[];
   board_firmware_list: Firmware[];
   variables: Variable[];
@@ -247,15 +262,6 @@ export interface ProductModel {
   database: Database[];
   description: string;
   prefix?: string;
-}
-
-export interface VariableInfoOverride {
-  id: string;
-  title?: string;
-  description?: string;
-  options?: { [key: string]: string }
-  read_exp?: string;
-  write_exp?: string;
 }
 
 export interface Video {

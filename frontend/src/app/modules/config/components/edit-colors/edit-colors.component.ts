@@ -24,23 +24,37 @@ export class EditColorsComponent implements OnChanges {
     this.list = $event;
     if (this.variable) {
       const lines = $event.split("\n");
-      this.variable.colors = lines.map(line => {
-        if(line === "")
-          return null;
-        const pieces = line.split(":");
-        if(pieces.length !== 3)
-          return null;
-        return {
-          condition: {
-            operator: pieces[0],
-            value: +pieces[1]
-          },
-          color: pieces[2],
-
-        } as VariableColor
-      }).filter((item => item !== null)).map(item => item!)
+      this.variable.colors = lines
+        .map(line => this.parseColorLine(line))
+        .filter((item): item is VariableColor => item !== null);
     }
   }
 
+  private parseColorLine(line: string): VariableColor | null {
+    if (line === "")
+      return null;
+
+    const pieces = line.split(":");
+    if (pieces.length === 2) {
+      return {
+        condition: {
+          operator: "=",
+          value: +pieces[0],
+        },
+        color: pieces[1],
+      };
+    }
+
+    if (pieces.length !== 3)
+      return null;
+
+    return {
+      condition: {
+        operator: pieces[0],
+        value: +pieces[1],
+      },
+      color: pieces[2],
+    };
+  }
 
 }

@@ -242,7 +242,19 @@ const values = {
     "home.deviceselect.links": "Liens utiles",
     "home.deviceselect.chatbot": "Chatbot",
     "home.deviceselect.website": "Notre site",
-    "home.deviceinfo.links": "Liens"
+    "home.deviceinfo.links": "Liens",
+    "config.actions": "Actions",
+    "config.export": "Exporter la configuration",
+    "config.import": "Importer la configuration",
+    "config.import.title": "Importer la configuration",
+    "config.import.name": "Nom",
+    "config.import.uuid": "UUID",
+    "config.import.uuid.generated": "Sera généré automatiquement",
+    "config.import.keepuuid": "Conserver l'UUID original",
+    "config.import.uuid.exists": "Attention : cet UUID existe déjà dans le système",
+    "config.import.success": "Configuration importée avec succès",
+    "config.import.error": "Erreur lors de l'importation",
+    "config.import.invalid_json": "Le fichier sélectionné ne contient pas une configuration valide"
 };
 
 module.exports = values;

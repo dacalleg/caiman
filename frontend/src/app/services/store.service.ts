@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import { DeviceProduct, Project, Variable, VariableInfoOverride, ViewOption } from '../classes/interfaces';
+import { DeviceProduct, Project, Variable, ViewOption } from '../classes/interfaces';
 import { sortGroupNames, uniqueGroupNames } from '../classes/serami-groups';
 import { SeramiParserService } from './serami-parser.service';
 import { combineLatest, first, map, take } from 'rxjs';
-import { Utils } from '../classes/utils';
 
 const DEFAULT_VIEW: ViewOption = {
   addressFormat: 16,
@@ -137,31 +136,9 @@ export class StoreService {
   private buildProjectWithVariables(project: Project, variables: Variable[]): Project {
     return {
       ...project,
-      variables: this.applySeramiVarOverrides(variables, project.device?.info.serami_var_override),
+      variables,
       view: DEFAULT_VIEW,
     } as Project;
-  }
-
-  private applySeramiVarOverrides(variables: Variable[], overrides?: VariableInfoOverride[]): Variable[] {
-    if (!overrides)
-      return variables;
-
-    return variables.map(variable => {
-      const override = overrides.find(entry => entry.id === variable.hash);
-      if (!override)
-        return variable;
-
-      if (override.title)
-        variable.name = override.title;
-      if (override.description)
-        variable.description = override.description;
-      if (override.read_exp)
-        Utils.applyReadExpOverride(variable, override.read_exp);
-      if (override.options)
-        variable.values = Object.keys(override.options).map(key => [override.options![key], key]);
-
-      return variable;
-    });
   }
 
   private getEmptyProject(): Project {

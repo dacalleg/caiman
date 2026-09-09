@@ -1,9 +1,18 @@
 <input #file type="file" (change)="onFileChange($event)" class="d-none">
 <input #translationsFile type="file" accept=".csv,text/csv" (change)="onTranslationsFileChange($event)" class="d-none">
+<input #configFile type="file" accept=".json,application/json" (change)="onConfigFileChange($event)" class="d-none">
 <div class="container p-5">
     <div class="row">
         <div class="col text-end">
-            <button class="btn btn-primary" (click)="importSnet2()">Importa nuova configurazione</button>
+            <div ngbDropdown class="d-inline-block">
+                <button class="btn btn-primary" ngbDropdownToggle>
+                    Importa
+                </button>
+                <div ngbDropdownMenu class="dropdown-menu-end">
+                    <button ngbDropdownItem (click)="importSnet2()">Importa da SNET2 (XML)</button>
+                    <button ngbDropdownItem (click)="importConfig()">Importa configurazione (JSON)</button>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row mt-3">
@@ -21,11 +30,22 @@
                         <td>{{entry.name}}</td>
                         <td>{{entry.key}}</td>
                         <td class="text-end">
-                            <button class="btn btn-primary" (click)="openConfig(entry.key!)">Modifica</button>
-                            <button class="ms-2 btn btn-outline-secondary" (click)="exportTranslations(entry)">Esporta traduzioni</button>
-                            <button class="ms-2 btn btn-outline-secondary" (click)="importTranslations(entry)">Importa traduzioni</button>
-                            <button class="ms-2 btn btn-secondary" (click)="duplicateEntry(entry)">Duplica</button>
-                            <button class="ms-2 btn btn-danger" (click)="deleteEntry(entry)">Elimina</button>
+                            <div ngbDropdown class="d-inline-block">
+                                <button class="btn btn-primary" ngbDropdownToggle>
+                                    Azioni
+                                </button>
+                                <div ngbDropdownMenu class="dropdown-menu-end">
+                                    <button ngbDropdownItem (click)="openConfig(entry.key!)">Modifica</button>
+                                    <button ngbDropdownItem (click)="exportConfig(entry)">Esporta configurazione</button>
+                                    <button ngbDropdownItem (click)="importConfig()">Importa configurazione</button>
+                                    <div class="dropdown-divider"></div>
+                                    <button ngbDropdownItem (click)="exportTranslations(entry)">Esporta traduzioni</button>
+                                    <button ngbDropdownItem (click)="importTranslations(entry)">Importa traduzioni</button>
+                                    <div class="dropdown-divider"></div>
+                                    <button ngbDropdownItem (click)="duplicateEntry(entry)">Duplica</button>
+                                    <button ngbDropdownItem class="text-danger" (click)="deleteEntry(entry)">Elimina</button>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

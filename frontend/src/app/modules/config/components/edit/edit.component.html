@@ -13,12 +13,26 @@
                         <div ngbDropdown class="d-inline-block">
                             <button type="button"
                                 class="btn btn-sm btn-secondary md-2"
-                                id="dropdownBasic1" ngbDropdownToggle>
+                                [id]="'move-dropdown-' + variablePanelId(variable)" ngbDropdownToggle>
                                 Move to
                             </button>
-                            <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                            <div ngbDropdownMenu [attr.aria-labelledby]="'move-dropdown-' + variablePanelId(variable)">
                                 <button ngbDropdownItem *ngFor="let group of groupTabs"
                                     (click)="moveToGroup(variable, group.name)">{{ group.name }}</button>
+                            </div>
+                        </div>
+                        <div ngbDropdown class="d-inline-block ms-2" *ngIf="variableTemplates.length > 0">
+                            <button type="button"
+                                class="btn btn-sm btn-secondary"
+                                [id]="'template-dropdown-' + variablePanelId(variable)" ngbDropdownToggle>
+                                Template
+                            </button>
+                            <div ngbDropdownMenu [attr.aria-labelledby]="'template-dropdown-' + variablePanelId(variable)">
+                                <button ngbDropdownItem *ngFor="let template of variableTemplates"
+                                    [title]="template.templateDescription"
+                                    (click)="applyVariableTemplate(variable, template.templateId)">
+                                    {{ template.templateName }}
+                                </button>
                             </div>
                         </div>
                         <button class="btn btn-sm btn-secondary ms-2"
@@ -42,7 +56,8 @@
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
                             <input type="text" class="form-control" id="name"
-                                [(ngModel)]="variable.name">
+                                [(ngModel)]="variable.name"
+                                (ngModelChange)="updateSanitizedNameFromName(variable)">
                         </div>
                         <div class="mb-3">
                             <label for="description"
@@ -217,8 +232,12 @@
                             </div>
                         </ng-container>
 
-                        <app-edit-options *ngIf="!variable.button" [variable]="variable"></app-edit-options>
-                        <app-edit-colors *ngIf="!variable.button" [variable]="variable"></app-edit-colors>
+                        <ng-container *ngIf="!variable.button">
+                            <ng-container *ngFor="let refreshKey of [variableSectionRefreshKeys[variablePanelId(variable)] ?? 0]; trackBy: trackVariableSectionRefresh">
+                                <app-edit-options [variable]="variable"></app-edit-options>
+                                <app-edit-colors [variable]="variable"></app-edit-colors>
+                            </ng-container>
+                        </ng-container>
                     </div>
                 </div>
             </ng-template>
@@ -230,6 +249,7 @@
         <div class="col">
             <button class="btn btn-secondary" (click)="beforeSave()">Check</button>
             <button class="btn btn-primary ms-2" (click)="save()">Save</button>
+            <button class="btn btn-outline-secondary ms-2" (click)="exit()">Exit</button>
         </div>
     </div>
     <div class="row mt-3">
@@ -265,6 +285,12 @@
                                             <input type="number" class="form-control" [attr.id]="'groupsort-' + group.name"
                                                 [(ngModel)]="group.sort"
                                                 (change)="onGroupSortChange(group)">
+                                        </div>
+                                        <div class="mb-3">
+                                            <button class="btn btn-danger"
+                                                [disabled]="!isGroupEmpty(group.name)"
+                                                [title]="isGroupEmpty(group.name) ? '' : 'Il gruppo contiene variabili'"
+                                                (click)="deleteGroup(group.name)">Delete</button>
                                         </div>
                                         <app-edit-group-translations [group]="group"></app-edit-group-translations>
                                     </div>

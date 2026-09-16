@@ -1,0 +1,57 @@
+<ng-container *ngIf="variable">
+  <div class="mb-3">
+    <label class="form-label">Nomi tradotti</label>
+    <div class="row mb-2 align-items-end" *ngFor="let row of nameTranslationRows">
+      <div class="col-auto">
+        <span class="badge bg-secondary text-uppercase">{{ row.lang }}</span>
+      </div>
+      <div class="col">
+        <input type="text" class="form-control"
+          [ngModel]="row.value"
+          (ngModelChange)="onNameTranslationChange(row.lang, $event)"
+          [attr.aria-label]="'Nome tradotto ' + row.lang">
+      </div>
+      <div class="col-auto">
+        <button type="button" class="btn btn-sm btn-outline-danger"
+          (click)="removeNameTranslation(row.lang)">Rimuovi</button>
+      </div>
+    </div>
+    <div class="dropdown" *ngIf="availableNameLanguages.length > 0" ngbDropdown>
+      <button type="button" class="btn btn-sm btn-secondary" ngbDropdownToggle>
+        Aggiungi traduzione nome
+      </button>
+      <div ngbDropdownMenu>
+        <button type="button" ngbDropdownItem class="text-uppercase" *ngFor="let lang of availableNameLanguages"
+          (click)="addNameTranslation(lang)">{{ lang }}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Descrizioni tradotte</label>
+    <div class="row mb-2 align-items-start" *ngFor="let row of descriptionTranslationRows">
+      <div class="col-auto pt-2">
+        <span class="badge bg-secondary text-uppercase">{{ row.lang }}</span>
+      </div>
+      <div class="col">
+        <textarea class="form-control" rows="2"
+          [ngModel]="row.value"
+          (ngModelChange)="onDescriptionTranslationChange(row.lang, $event)"
+          [attr.aria-label]="'Descrizione tradotta ' + row.lang"></textarea>
+      </div>
+      <div class="col-auto pt-2">
+        <button type="button" class="btn btn-sm btn-outline-danger"
+          (click)="removeDescriptionTranslation(row.lang)">Rimuovi</button>
+      </div>
+    </div>
+    <div class="dropdown" *ngIf="availableDescriptionLanguages.length > 0" ngbDropdown>
+      <button type="button" class="btn btn-sm btn-secondary" ngbDropdownToggle>
+        Aggiungi traduzione descrizione
+      </button>
+      <div ngbDropdownMenu>
+        <button type="button" ngbDropdownItem class="text-uppercase" *ngFor="let lang of availableDescriptionLanguages"
+          (click)="addDescriptionTranslation(lang)">{{ lang }}</button>
+      </div>
+    </div>
+  </div>
+</ng-container>

@@ -4,6 +4,8 @@ COPY package*.json ./
 COPY healthcheck.js ./
 COPY index.js ./
 COPY model.js ./
+COPY serami-translations-export.js ./
+COPY available-languages.js ./
 COPY i18n/ ./i18n/
 
 RUN npm install

@@ -1,9 +1,42 @@
 import { Observable } from "rxjs";
 
+export interface SeramiGroup {
+  name: string;
+  sort?: number;
+  translations?: { [key: string]: string };
+}
+
 export interface SeramiEntry {
   key?: string;
   name: string;
   data: Variable[];
+  groups?: SeramiGroup[];
+}
+
+export interface SeramiTranslationsImportResult {
+  status: string;
+  key: string;
+  name: string;
+  matched: number;
+  totalCsvRows: number;
+  skippedCsvRows: { sanitizedName: string; reason: string }[];
+}
+
+export interface SeramiImportResult {
+  status: string;
+  key: string;
+  name: string;
+}
+
+export interface SeramiImportModalResult {
+  config: SeramiEntry;
+  keepUuid: boolean;
+}
+
+export interface VariableTemplate extends Partial<Variable> {
+  templateId: string;
+  templateName: string;
+  templateDescription: string;
 }
 
 export interface Variable {
@@ -37,6 +70,9 @@ export interface Variable {
   buttonValue?: number;
   buttonBackgroundColor?: string;
   buttonTextColor?: string;
+  acl: string[];
+  translatedName?: { [key: string]: string };
+  translatedDescription?: { [key: string]: string };
 }
 
 export interface VariableColor
@@ -55,6 +91,7 @@ export interface Project {
   variables: Variable[];
   view: ViewOption;
   device?: DeviceProduct;
+  groups?: SeramiGroup[];
 }
 
 export interface ViewOption {
@@ -198,10 +235,8 @@ export interface DeviceInfoResponse {
 
 export interface Board {
   id: string;
-  serami_acl: SeramiACL[];
   firmware_list: Firmware[];
   database: Database[];
-  serami_var_formula_override: any[];
   key: string;
 }
 
@@ -218,45 +253,21 @@ export interface ProductModel {
   documents: Document[];
   links: Link[];
   image: string | null;
-  serami_acl: SeramiACL[];
   faq: SingleFaq[];
   video: Video[];
-  serami_var_override: VariableInfoOverride[];
-  serami_group_override: GroupNameOverride[];
   gateway_firmware_list: Firmware[];
   board_firmware_list: Firmware[];
   variables: Variable[];
+  groups?: SeramiGroup[];
   database: Database[];
   description: string;
   prefix?: string;
-}
-
-export interface GroupNameOverride {
-  name: string;
-  title: string;
-}
-
-export interface VariableInfoOverride {
-  id: string;
-  title?: string;
-  description?: string;
-  options?: { [key: string]: string }
-  read_exp?: string;
-  write_exp?: string;
-  writable?: boolean;
 }
 
 export interface Video {
   name: string;
   description: string;
   video: string;
-}
-
-export interface SeramiACL extends WithRole {
-  hidden_groups: string[];
-  hidden_variables: string[];
-  only_read_variables: string[];
-  writable_variables: string[];
 }
 
 export interface SingleFaq {

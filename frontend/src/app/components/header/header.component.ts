@@ -7,6 +7,7 @@ import { DeviceService } from "../../services/device.service";
 import { AuthService } from 'src/app/services/auth.service';
 import { Router } from '@angular/router'
 import { ApiService } from 'src/app/services/api.service';
+import { TranslationService } from 'src/app/services/translation.service';
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -21,6 +22,8 @@ export class HeaderComponent {
   roles$: Observable<string>;
   info$: Observable<any>;
   isAdmin$: Observable<boolean>;
+  languages$: Observable<string[]>;
+  currentLanguage$: Observable<string>;
   menuOpen: boolean;
 
   constructor(
@@ -28,7 +31,8 @@ export class HeaderComponent {
     private modalService: ModalService,
     private AuthService: AuthService,
     private Router: Router,
-    private Api: ApiService
+    private Api: ApiService,
+    private Translation: TranslationService
   ) {
     this.file = null;
     this.project$ = this.Store.getProject();
@@ -36,6 +40,8 @@ export class HeaderComponent {
     this.roles$ = this.AuthService.getRoles().pipe(map(roles => roles.join(", ")));
     this.info$ = this.Api.getInfo();
     this.isAdmin$ = this.AuthService.getRoles().pipe(map(roles => roles.includes("administrator")))
+    this.languages$ = this.Api.getTranslations().pipe(map(translations => translations.map(translation => translation.lang)));
+    this.currentLanguage$ = this.Translation.getCurrentLanguage();
     this.menuOpen = false;
   }
 
@@ -118,23 +124,17 @@ export class HeaderComponent {
     ).subscribe();
   }
 
-  profile() {
-    this.menuOpen = false;
-    this.Router.navigate(['/dashboard/profile'])
-  }
-
   burgerMenuClicked() {
     this.menuOpen = !this.menuOpen;
   }
 
-  deviceSelector() {
-    this.menuOpen = false;
-    this.Router.navigate(['/dashboard/home'])
-
-  }
-
   closeMenu() {
     this.menuOpen = false;
+  }
+
+  changeLanguage(language: string) {
+    this.menuOpen = false;
+    this.Translation.changeLanguage(language);
   }
 
 }

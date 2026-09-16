@@ -1,0 +1,45 @@
+<div class="modal-header">
+  <h4 class="modal-title">Importa Configurazione</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="mb-3">
+    <label class="form-label">Nome</label>
+    <input type="text" class="form-control" [value]="config.name" readonly>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">UUID</label>
+    <input
+      type="text"
+      class="form-control"
+      [value]="hasUuid ? uuidLabel : 'Sarà generato automaticamente'"
+      readonly>
+  </div>
+
+  <div class="form-check mb-3" *ngIf="hasUuid">
+    <input
+      class="form-check-input"
+      type="checkbox"
+      id="keepUuid"
+      [(ngModel)]="keepUuid"
+      (ngModelChange)="onKeepUuidChange()">
+    <label class="form-check-label" for="keepUuid">
+      Mantieni UUID originale
+    </label>
+  </div>
+
+  <div class="alert alert-warning mb-0" *ngIf="hasUuid && keepUuid && uuidExists">
+    Attenzione: questo UUID esiste già nel sistema. Deseleziona l'opzione per generare un nuovo UUID.
+  </div>
+
+  <div class="text-muted" *ngIf="isCheckingUuid">
+    Verifica UUID in corso...
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="cancel()">Annulla</button>
+  <button type="button" class="btn btn-primary" [disabled]="!canConfirm" (click)="confirm()">Importa</button>
+</div>

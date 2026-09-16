@@ -1,0 +1,29 @@
+<ng-container *ngIf="group">
+  <div class="mb-3">
+    <label class="form-label">Nomi tradotti</label>
+    <div class="row mb-2 align-items-end" *ngFor="let row of translationRows">
+      <div class="col-auto">
+        <span class="badge bg-secondary text-uppercase">{{ row.lang }}</span>
+      </div>
+      <div class="col">
+        <input type="text" class="form-control"
+          [ngModel]="row.value"
+          (ngModelChange)="onTranslationChange(row.lang, $event)"
+          [attr.aria-label]="'Nome tradotto ' + row.lang">
+      </div>
+      <div class="col-auto">
+        <button type="button" class="btn btn-sm btn-outline-danger"
+          (click)="removeTranslation(row.lang)">Rimuovi</button>
+      </div>
+    </div>
+    <div class="dropdown" *ngIf="availableLanguages.length > 0" ngbDropdown>
+      <button type="button" class="btn btn-sm btn-secondary" ngbDropdownToggle>
+        Aggiungi traduzione nome
+      </button>
+      <div ngbDropdownMenu>
+        <button type="button" ngbDropdownItem class="text-uppercase" *ngFor="let lang of availableLanguages"
+          (click)="addTranslation(lang)">{{ lang }}</button>
+      </div>
+    </div>
+  </div>
+</ng-container>

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, debounceTime } from 'rxjs';
-import { AVAILABLE_LANGUAGES } from './translation-provider.service';
+
+const UI_FALLBACK_LANGUAGE = 'it';
 
 @Injectable({
   providedIn: 'root'
@@ -9,19 +10,35 @@ import { AVAILABLE_LANGUAGES } from './translation-provider.service';
 export class TranslationService {
 
   private languageSubject$: BehaviorSubject<string>;
+  private availableLanguages: string[] = [];
+  private initialized = false;
 
   constructor(private translation: TranslateService) {
+    this.languageSubject$ = new BehaviorSubject<string>(UI_FALLBACK_LANGUAGE);
+  }
+
+  initialize(availableLanguages: string[]): void {
+    this.availableLanguages = availableLanguages;
+    this.initialized = true;
+
+    if (availableLanguages.length === 0) {
+      this.translation.setDefaultLang(UI_FALLBACK_LANGUAGE);
+      this.translation.use(UI_FALLBACK_LANGUAGE);
+      localStorage.setItem('language', UI_FALLBACK_LANGUAGE);
+      this.languageSubject$.next(UI_FALLBACK_LANGUAGE);
+      return;
+    }
+
+    const defaultLanguage = availableLanguages[0];
     const savedLanguage = localStorage.getItem('language');
-    const defaultLanguage = 'it';
-    const language = savedLanguage && AVAILABLE_LANGUAGES.includes(savedLanguage as typeof AVAILABLE_LANGUAGES[number])
+    const language = savedLanguage && availableLanguages.includes(savedLanguage)
       ? savedLanguage
       : defaultLanguage;
 
     this.translation.setDefaultLang(defaultLanguage);
     this.translation.use(language);
     localStorage.setItem('language', language);
-
-    this.languageSubject$ = new BehaviorSubject<string>(this.translation.currentLang);
+    this.languageSubject$.next(language);
   }
 
   getCurrentLanguage() {
@@ -29,7 +46,7 @@ export class TranslationService {
   }
 
   changeLanguage(language: string) {
-    if (!AVAILABLE_LANGUAGES.includes(language as typeof AVAILABLE_LANGUAGES[number])) {
+    if (!this.initialized || !this.availableLanguages.includes(language)) {
       return;
     }
     localStorage.setItem('language', language);

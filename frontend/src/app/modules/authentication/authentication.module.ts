@@ -8,6 +8,7 @@ import { ResetComponent } from './components/reset/reset.component';
 import { RecoverComponent } from './components/recover/recover.component';
 import { RegisterComponent } from './components/register/register.component';
 import { ConfirmComponent } from './components/confirm/confirm.component';
+import { SharedModule } from '../shared/shared.module';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { ConfirmComponent } from './components/confirm/confirm.component';
     CommonModule,
     FormsModule,
     AuthenticationRoutingModule,
-    TranslateModule.forChild()
+    TranslateModule.forChild(),
+    SharedModule
   ]
 })
 export class AuthenticationModule { }

@@ -14,6 +14,7 @@ import {
   takeUntil,
   tap,
   throwError,
+  timeout,
 } from "rxjs";
 import { Agua } from "../classes/agua";
 import { Channel, FirmwareDownloadStatus, LogItem, LogType, Variable, VariableValue, VariableWriteResponse } from "../classes/interfaces";
@@ -182,6 +183,15 @@ export class DeviceService {
       switchMap(channel => channel.ping()),
       take(1)
     )
+  }
+
+  verifyDeviceConnection(): Observable<boolean> {
+    return this.getChannel().pipe(
+      switchMap(channel => channel.getWifiStatus()),
+      map(() => true),
+      timeout(10000),
+      catchError(() => of(false))
+    );
   }
 
   setWifi(ssid: string, password: string) {

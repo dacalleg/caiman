@@ -8,17 +8,27 @@
       <div class="fw-bold" *ngIf="device?.mac === '0000'">{{device?.serial}}</div>
       <p class="my-5" [innerHTML]="device?.info?.description"></p>
 
-      <ul class="nav pb-5" *ngIf="device?.mac !== '0000'">
-
-        <li class="nav-item me-2" *ngIf="!connected && !isOffline"><button class="btn btn-lg btn-primary"
-            (click)="wifiConnect()">{{ 'home.deviceinfo.wifi' | translate }}</button></li>
-        <li class="nav-item me-2" *ngIf="!connected"><button class="btn btn-lg btn-primary"
-            (click)="bleConnect()">{{ 'home.deviceinfo.ble' | translate }}</button></li>
-        <li class="nav-item me-2" *ngIf="!connected && !isOffline"><button class="btn btn-lg btn-primary"
-            (click)="bridgeConnect()">{{ 'home.deviceinfo.bridge' | translate }}</button></li>
-
-        <li class="nav-item me-2" *ngIf="connected"><button class="btn btn-lg btn-primary"
-            (click)="disconnect()">{{ 'home.deviceinfo.disconnect' | translate }}</button></li>
+      <ul class="nav device-info-actions pb-5" *ngIf="device?.mac !== '0000'">
+        <li class="nav-item" *ngIf="!connected && !isOffline">
+          <button class="btn btn-lg btn-primary" (click)="wifiConnect()">
+            {{ 'home.deviceinfo.wifi' | translate }}
+          </button>
+        </li>
+        <li class="nav-item" *ngIf="!connected">
+          <button class="btn btn-lg btn-primary" (click)="bleConnect()">
+            {{ 'home.deviceinfo.ble' | translate }}
+          </button>
+        </li>
+        <li class="nav-item" *ngIf="!connected && !isOffline">
+          <button class="btn btn-lg btn-primary" (click)="bridgeConnect()">
+            {{ 'home.deviceinfo.bridge' | translate }}
+          </button>
+        </li>
+        <li class="nav-item" *ngIf="connected">
+          <button class="btn btn-lg btn-primary" (click)="disconnect()">
+            {{ 'home.deviceinfo.disconnect' | translate }}
+          </button>
+        </li>
       </ul>
 
       <ng-container *ngIf="(device?.info?.documents|withRole|async) as documents">

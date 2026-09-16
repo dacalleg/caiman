@@ -83,12 +83,16 @@ const values = {
     "error.device.not_found": "Dispositivo non trovato per l'indirizzo MAC indicato.",
     "error.device.api_failed": "Impossibile recuperare le informazioni del dispositivo.",
     "error.device.generic": "Si è verificato un errore durante il recupero del dispositivo.",
+    "error.device.not_reachable": "Prodotto non connesso/non raggiungibile. Verificare che sia alimentato e che il modulo Wi-Fi sia raggiungibile.",
+    "error.device.connection_timeout": "Timeout durante la verifica della connessione.",
     "error.product.not_found": "Prodotto non trovato.",
     "modal.ble.connection": "Connessione Bluetooth in corso...",
     "modal.wifi.connection": "Connessione tramite Wifi in corso...",
     "modal.wifi.connectionerror": "Il dispositivo non sembra essere connesso ad una rete Wifi",
     "modal.writedb.title": "Scrittura database {{dbname}}",
-    "modal.writedb.error.varnotfound": "Variabile non trovata",
+    "modal.writedb.error.varnotfound": "Variabile non trovata: {{varid}}",
+    "modal.writedb.error.timeout": "Timeout durante la scrittura di {{varname}}",
+    "modal.writedb.error.write": "Errore durante la scrittura di {{varname}}",
     "modal.writedb.message": "Scrittura di {{varname}}",
     "modal.writedb.success": "Il database è stato scritto correttamente",
     "modal.disconnecting": "Disconnessione",
@@ -235,7 +239,19 @@ const values = {
     "home.deviceselect.ap_password": "Password AP",
     "home.deviceselect.select_product": "Seleziona un prodotto",
     "home.deviceselect.open": "Apri",
-    "home.deviceinfo.links": "Links"
+    "home.deviceinfo.links": "Links",
+    "config.actions": "Azioni",
+    "config.export": "Esporta configurazione",
+    "config.import": "Importa configurazione",
+    "config.import.title": "Importa Configurazione",
+    "config.import.name": "Nome",
+    "config.import.uuid": "UUID",
+    "config.import.uuid.generated": "Sarà generato automaticamente",
+    "config.import.keepuuid": "Mantieni UUID originale",
+    "config.import.uuid.exists": "Attenzione: questo UUID esiste già nel sistema",
+    "config.import.success": "Configurazione importata con successo",
+    "config.import.error": "Errore durante l'importazione",
+    "config.import.invalid_json": "Il file selezionato non contiene una configurazione valida"
 };
 
 module.exports = values;

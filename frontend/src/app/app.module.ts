@@ -30,6 +30,7 @@ import { ToastService } from './services/toast.service';
 import { AppUpdateService } from './services/app-update.service';
 import {BarcodeComponent} from "./components/barcode/barcode.component";
 import {ZXingScannerModule} from "@zxing/ngx-scanner";
+import { firstValueFrom, tap } from 'rxjs';
 
 const icons = {
   Eye,
@@ -57,6 +58,17 @@ export function tokenGetter() {
 
 export const initializeAppUpdates = (appUpdateService: AppUpdateService): (() => Promise<void>) => {
   return () => appUpdateService.initialize();
+};
+
+export const initializeTranslations = (
+  provider: TranslationProviderService,
+  translation: TranslationService
+): (() => Promise<void>) => {
+  return () => firstValueFrom(
+    provider.getAvailableLanguages().pipe(
+      tap(languages => translation.initialize(languages))
+    )
+  ).then(() => undefined);
 };
 
 @NgModule({
@@ -116,6 +128,12 @@ export const initializeAppUpdates = (appUpdateService: AppUpdateService): (() =>
       multi: true
     },
     { provide: APP_INITIALIZER, useFactory: initializeAppUpdates, multi: true, deps: [AppUpdateService] },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeTranslations,
+      multi: true,
+      deps: [TranslationProviderService, TranslationService]
+    },
   ],
   bootstrap: [AppComponent]
 })

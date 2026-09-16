@@ -83,12 +83,16 @@ const values = {
     "error.device.not_found": "No device found for the specified MAC address.",
     "error.device.api_failed": "Unable to retrieve device information.",
     "error.device.generic": "An error occurred while retrieving the device.",
+    "error.device.not_reachable": "Product not connected/not reachable. Check that it is powered on and that the Wi-Fi module is reachable.",
+    "error.device.connection_timeout": "Timeout while verifying the connection.",
     "error.product.not_found": "Product not found.",
     "modal.ble.connection": "Bluetooth connection in progress...",
     "modal.wifi.connection": "Connecting via Wi-Fi...",
     "modal.wifi.connectionerror": "The device does not appear to be connected to a Wi-Fi network.",
     "modal.writedb.title": "Writing {{dbname}} database",
-    "modal.writedb.error.varnotfound": "Variable not found",
+    "modal.writedb.error.varnotfound": "Variable not found: {{varid}}",
+    "modal.writedb.error.timeout": "Timeout while writing {{varname}}",
+    "modal.writedb.error.write": "Error while writing {{varname}}",
     "modal.writedb.message": "Writing {{varname}}",
     "modal.writedb.success": "The database has been written successfully.",
     "modal.disconnecting": "Disconnecting",
@@ -235,7 +239,19 @@ const values = {
     "home.deviceselect.ap_password": "AP Password",
     "home.deviceselect.select_product": "Select a product",
     "home.deviceselect.open": "Open",
-    "home.deviceinfo.links": "Links"
+    "home.deviceinfo.links": "Links",
+    "config.actions": "Actions",
+    "config.export": "Export configuration",
+    "config.import": "Import configuration",
+    "config.import.title": "Import Configuration",
+    "config.import.name": "Name",
+    "config.import.uuid": "UUID",
+    "config.import.uuid.generated": "Will be generated automatically",
+    "config.import.keepuuid": "Keep original UUID",
+    "config.import.uuid.exists": "Warning: this UUID already exists in the system",
+    "config.import.success": "Configuration imported successfully",
+    "config.import.error": "Error during import",
+    "config.import.invalid_json": "The selected file does not contain a valid configuration"
 };
 
 module.exports = values;

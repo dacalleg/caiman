@@ -12,15 +12,11 @@ export class AppUpdateService {
   constructor(private swUpdate: SwUpdate) {}
 
   async initialize(): Promise<void> {
-    if (!('serviceWorker' in navigator)) {
+    if (!('serviceWorker' in navigator) || !this.swUpdate.isEnabled) {
       return;
     }
 
     await navigator.serviceWorker.ready;
-
-    if (!this.swUpdate.isEnabled) {
-      return;
-    }
 
     const updateReady = firstValueFrom(
       this.swUpdate.versionUpdates.pipe(

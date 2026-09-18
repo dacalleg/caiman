@@ -21,13 +21,8 @@ export class StoreService {
     private readonly componentStore: ComponentStore<Project>,
     private readonly seramiParser: SeramiParserService
   ) {
+    localStorage.removeItem('serami_current_project');
     this.componentStore.setState(this.getEmptyProject());
-    this.componentStore.state$.subscribe(project => {
-      if (project.variables.length > 0)
-        localStorage.setItem('serami_current_project', JSON.stringify(project));
-      else
-        localStorage.removeItem('serami_current_project');
-    });
   }
 
   getProject() {

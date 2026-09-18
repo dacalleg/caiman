@@ -740,12 +740,34 @@ export class ApiService {
   }
 
   private parseBoard(item: any): Board {
+    const acf = item?.acf ?? {};
     return {
       id: item.id,
-      firmware_list: item.acf.firmware.map((item: any) => ({ revision: item.revision, file: item.file ? item.file.ID : null, role: item.role })) || [],
-      database: item.acf.database || [],
-      key: item.acf.key
+      firmware_list: this.parseFirmwareList(acf.firmware),
+      database: acf.database || [],
+      key: acf.key
     } as Board
+  }
+
+  private parseFirmwareList(firmware: unknown) {
+    return this.normalizeAcfRepeater(firmware).map((entry: any) => ({
+      revision: entry.revision,
+      file: entry.file ? entry.file.ID : null,
+      role: entry.role,
+    }));
+  }
+
+  private normalizeAcfRepeater(value: unknown): any[] {
+    if (value == null || value === false) {
+      return [];
+    }
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (typeof value === 'object') {
+      return [value];
+    }
+    return [];
   }
 
   private buildProductInfo(item: any, board: Board, _roles: string[], gateway: Gateway | null = null, variables: Variable[], groups?: ProductModel['groups']): ProductModel {

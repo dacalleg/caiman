@@ -32,18 +32,6 @@
   ],
   "dataGroups": [
     {
-      "name": "api",
-      "urls": [
-        "/wp-json/**",
-        "/api/**"
-      ],
-      "cacheConfig": {
-        "maxSize": 200,
-        "maxAge": "7d",
-        "strategy": "freshness"
-      }
-    },
-    {
       "name": "media",
       "urls": [
         "/wp-content/uploads/**"

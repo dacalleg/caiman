@@ -11,24 +11,68 @@ import { Info } from 'src/app/classes/interfaces';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
+  private static readonly INVALID_CREDENTIAL_CODES = ['invalid_email', 'incorrect_password'] as const;
+
   email: string;
   password: string;
   rememberMe: boolean;
   error: string|null = null;
+  credentialsInvalid = false;
+  credentialsShake = false;
   info$: Observable<Info>;
   showDownloadBluefy: boolean;
 
   login() {
     this.Auth.login(this.email, this.password).subscribe({
-      next: (response) => {
+      next: () => {
+        this.credentialsInvalid = false;
+        this.credentialsShake = false;
         this.Router.navigate(['/']);
       },
       error: (error) => {
-        this.error = error.error.code;
+        const code = error.error.code as string;
+        this.error = code;
+
+        if (this.isInvalidCredentialCode(code)) {
+          this.credentialsInvalid = true;
+          this.triggerCredentialsShake();
+          return;
+        }
+
+        if (code === 'account_expired' || code === 'account_locked') {
+          this.credentialsInvalid = false;
+          this.credentialsShake = false;
+        }
       }
     });
   }
 
+  onCredentialsFieldChange(): void {
+    this.credentialsInvalid = false;
+    this.credentialsShake = false;
+    if (this.error !== null && this.isInvalidCredentialCode(this.error)) {
+      this.error = null;
+    }
+  }
+
+  onCredentialsShakeEnd(): void {
+    this.credentialsShake = false;
+  }
+
+  private isInvalidCredentialCode(code: string): boolean {
+    return (LoginComponent.INVALID_CREDENTIAL_CODES as readonly string[]).includes(code);
+  }
+
+  private triggerCredentialsShake(): void {
+    if (this.credentialsShake) {
+      this.credentialsShake = false;
+      queueMicrotask(() => {
+        this.credentialsShake = true;
+      });
+      return;
+    }
+    this.credentialsShake = true;
+  }
 
   constructor(private Auth: AuthService, private Router: Router, private Api: ApiService) {
     this.email = '';

@@ -1,7 +1,7 @@
 const values = {
     "email.signature": "Saludos cordiales,\r\nel equipo\r\n\r\n{{company}}",
     "software": "Caiman",
-    "company": "Jolly-Mec",
+    "company": "Klover",
     "reset.email.title": "[{{software}}] Restablecimiento de contraseña",
     "reset.email.body": "Estimado/a {{user}},\r\n\r\nSe ha solicitado un restablecimiento de contraseña para su cuenta. Haga clic en el siguiente enlace:\r\n\r\n<a href=\"{{domain_url}}/app/auth/recover?key={{key}}&user={{user}}\">Enlace para restablecer la contraseña</a>\r\n\r\npara proceder con el cambio de contraseña.\r\nSi no ha solicitado este restablecimiento, ignore este correo electrónico.\r\n\r\n{{email.signature}}",
     "passwordchange.email.title": "[{{software}}] Contraseña modificada",

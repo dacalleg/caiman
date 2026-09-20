@@ -1,7 +1,7 @@
 const values = {
     "email.signature": "Cordialement,\r\nl'équipe\r\n\r\n{{company}}",
     "software": "Caiman",
-    "company": "Jolly-Mec",
+    "company": "Klover",
     "reset.email.title": "[{{software}}] Réinitialisation du mot de passe",
     "reset.email.body": "Bonjour {{user}},\r\n\r\nune réinitialisation du mot de passe a été demandée pour votre compte. Cliquez sur le lien suivant :\r\n\r\n<a href=\"{{domain_url}}/app/auth/recover?key={{key}}&user={{user}}\">Lien de réinitialisation du mot de passe</a>\r\n\r\npour procéder au changement du mot de passe.\r\nSi vous n'avez pas demandé cette réinitialisation, ignorez cet e-mail.\r\n\r\n{{email.signature}}",
     "passwordchange.email.title": "[{{software}}] Mot de passe modifié",

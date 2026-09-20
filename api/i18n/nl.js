@@ -1,7 +1,7 @@
 const values = {
     "email.signature": "Met vriendelijke groet,\r\nhet Team\r\n\r\n{{company}}",
     "software": "Caiman",
-    "company": "Jolly-Mec",
+    "company": "Klover",
     "reset.email.title": "[{{software}}] Wachtwoord resetten",
     "reset.email.body": "Beste {{user}},\r\n\r\nEr is een verzoek ingediend om het wachtwoord van uw account te resetten. Klik op de volgende link:\r\n\r\n<a href=\"{{domain_url}}/app/auth/recover?key={{key}}&user={{user}}\">Link voor wachtwoord resetten</a>\r\n\r\nom uw wachtwoord te wijzigen.\r\nAls u dit verzoek niet heeft ingediend, negeer dan deze e-mail.\r\n\r\n{{email.signature}}",
     "passwordchange.email.title": "[{{software}}] Wachtwoord gewijzigd",

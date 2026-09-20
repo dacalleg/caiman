@@ -1,7 +1,7 @@
 const values = {
     "email.signature": "Saluti,\r\nil Team\r\n\r\n{{company}}",
     "software": "Caiman",
-    "company": "Jolly-Mec",
+    "company": "Klover",
     "reset.email.title": "[{{software}}] Reset Password",
     "reset.email.body": "Gentile {{user}},\r\n\r\nè stato richiesto il reset della password per il tuo account, clicca sul seguente link:\r\n\r\n<a href=\"{{domain_url}}/app/auth/recover?key={{key}}&user={{user}}\">Link per il reset della password</a>\r\n\r\nper procedere al cambio della password.\r\nSe non hai richiesto tu il reset ignora questa E-mail,\r\n\r\n{{email.signature}}",
     "passwordchange.email.title": "[{{software}}] Password cambiata",

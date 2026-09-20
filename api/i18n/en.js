@@ -1,7 +1,7 @@
 const values = {
     "email.signature": "Regards,\r\nthe Team\r\n\r\n{{company}}",
     "software": "Caiman",
-    "company": "Jolly-Mec",
+    "company": "Klover",
     "reset.email.title": "[{{software}}] Password Reset",
     "reset.email.body": "Dear {{user}},\r\n\r\nA password reset has been requested for your account. Click the following link:\r\n\r\n<a href=\"{{domain_url}}/app/auth/recover?key={{key}}&user={{user}}\">Password reset link</a>\r\n\r\nto proceed with changing your password.\r\nIf you did not request this reset, please ignore this email.\r\n\r\n{{email.signature}}",
     "passwordchange.email.title": "[{{software}}] Password Changed",

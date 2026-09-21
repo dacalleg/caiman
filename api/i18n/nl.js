@@ -86,6 +86,8 @@ const values = {
     "error.device.not_reachable": "Product niet verbonden/niet bereikbaar. Controleer of het is ingeschakeld en of de Wi-Fi-module bereikbaar is.",
     "error.device.connection_timeout": "Time-out bij het controleren van de verbinding.",
     "error.product.not_found": "Product niet gevonden.",
+    "error.assistance.invalid": "Ongeldige assistentiecode.",
+    "error.assistance.required": "Assistentiecode is verplicht.",
     "modal.ble.connection": "Bluetooth-verbinding wordt tot stand gebracht...",
     "modal.wifi.connection": "Verbinden via Wi-Fi...",
     "modal.wifi.connectionerror": "Het apparaat lijkt niet verbonden te zijn met een Wi-Fi-netwerk.",

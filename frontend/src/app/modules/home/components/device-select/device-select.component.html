@@ -97,14 +97,14 @@
               </div>
               <div class="col-md mb-3">
                 <label for="assistance-code-wifi-client" class="form-label">{{ 'home.deviceselect.assistance_code' | translate }}</label>
-                <input type="text" class="form-control" id="assistance-code-wifi-client"
+                <input type="text" class="form-control" id="assistance-code-wifi-client" required
                        [placeholder]="'home.deviceselect.assistance_code' | translate"
                        [attr.aria-label]="'home.deviceselect.assistance_code' | translate" [(ngModel)]="assistanceCode">
               </div>
             </div>
             <div class="row">
               <div class="col text-end">
-                <button class="btn btn-primary" (click)="connectUsingMAC()">{{ 'home.deviceselect.open' | translate }}</button>
+                <button class="btn btn-primary" (click)="connectUsingMAC()" [disabled]="!assistanceCode.trim()">{{ 'home.deviceselect.open' | translate }}</button>
               </div>
             </div>
           </div>
@@ -135,7 +135,7 @@
               </div>
               <div class="col-md mb-3">
                 <label for="assistance-code-wifi-own" class="form-label">{{ 'home.deviceselect.assistance_code' | translate }}</label>
-                <input type="text" class="form-control" id="assistance-code-wifi-own"
+                <input type="text" class="form-control" id="assistance-code-wifi-own" required
                        [placeholder]="'home.deviceselect.assistance_code' | translate"
                        [attr.aria-label]="'home.deviceselect.assistance_code' | translate" [(ngModel)]="assistanceCode">
               </div>
@@ -149,7 +149,7 @@
               </div>
             </div>
             <div class="text-end">
-              <button class="btn btn-primary" (click)="connectUsingProduct()">{{ 'home.deviceselect.open' | translate }}</button>
+              <button class="btn btn-primary" (click)="connectUsingProduct()" [disabled]="!assistanceCode.trim()">{{ 'home.deviceselect.open' | translate }}</button>
             </div>
           </div>
         </div>

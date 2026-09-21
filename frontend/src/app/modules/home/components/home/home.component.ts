@@ -95,8 +95,19 @@ export class HomeComponent implements OnInit, OnDestroy {
       shareReplay(1)
     );
 
-    this.loadDeviceData$ = combineLatest([macAddress$, productKey$, serialNumber$, regCode$]).pipe(
-      switchMap(([mac, productKey, serial, regCode]) => {
+    const assistanceCode$ = this.ActivatedRoute.queryParamMap.pipe(
+      map((params) => params.get('assistanceCode')?.trim() ?? ''),
+      shareReplay(1)
+    );
+
+    this.loadDeviceData$ = combineLatest([
+      macAddress$,
+      productKey$,
+      serialNumber$,
+      regCode$,
+      assistanceCode$,
+    ]).pipe(
+      switchMap(([mac, productKey, serial, regCode, assistanceCode]) => {
         if(mac == "0000" && productKey == null && serial !== null)
         {
           const regex = /\w+-[A-Za-z]{0,2}/g;
@@ -126,13 +137,14 @@ export class HomeComponent implements OnInit, OnDestroy {
             return device;
           }))
         }
-        if(mac)
-          return this.Api.getDeviceInfoFromMac(mac, productKey).pipe(
+        if(mac) {
+          return this.Api.getDeviceInfoFromMac(mac, productKey, assistanceCode).pipe(
             map(device => {
               device.serial = serial ?? device.serial;
               return device;
             }),
-          )
+          );
+        }
         return throwError(() => new Error('error.device.not_found'))
       }),
       tap(device => this.Store.setDevice(device)),

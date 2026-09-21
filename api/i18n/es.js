@@ -86,6 +86,8 @@ const values = {
     "error.device.not_reachable": "Producto no conectado/no accesible. Compruebe que está encendido y que el módulo Wi-Fi es accesible.",
     "error.device.connection_timeout": "Tiempo de espera agotado al verificar la conexión.",
     "error.product.not_found": "Producto no encontrado.",
+    "error.assistance.invalid": "Código de asistencia no válido.",
+    "error.assistance.required": "El código de asistencia es obligatorio.",
     "modal.ble.connection": "Conexión Bluetooth en curso...",
     "modal.wifi.connection": "Conectando vía Wi-Fi...",
     "modal.wifi.connectionerror": "El dispositivo no parece estar conectado a una red Wi-Fi.",

@@ -86,6 +86,8 @@ const values = {
     "error.device.not_reachable": "Produit non connecté/non joignable. Vérifiez qu'il est alimenté et que le module Wi-Fi est joignable.",
     "error.device.connection_timeout": "Délai d'attente dépassé lors de la vérification de la connexion.",
     "error.product.not_found": "Produit introuvable.",
+    "error.assistance.invalid": "Code assistance non valide.",
+    "error.assistance.required": "Le code assistance est obligatoire.",
     "modal.ble.connection": "Connexion Bluetooth en cours...",
     "modal.wifi.connection": "Connexion via Wi-Fi en cours...",
     "modal.wifi.connectionerror": "L'appareil ne semble pas être connecté à un réseau Wi-Fi",

@@ -39,19 +39,35 @@ export class DeviceSelectComponent implements OnInit {
   }
 
   connectUsingMAC() {
-    this.Router.navigate(['/dashboard/home', this.macAddress, this.serialNumber]);
+    if (!this.assistanceCode.trim())
+      return;
+    this.Router.navigate(
+      ['/dashboard/home', this.macAddress, this.serialNumber],
+      { queryParams: { assistanceCode: this.assistanceCode.trim() } },
+    );
   }
 
   connectUsingProduct() {
-    localStorage.setItem("defaultMAC", this.macAddress);
-    this.Router.navigate(['/dashboard/home', this.macAddress, this.serialNumber, this.selectedProduct]);
+    if (!this.assistanceCode.trim())
+      return;
+    localStorage.setItem('defaultMAC', this.macAddress);
+    this.Router.navigate(
+      ['/dashboard/home', this.macAddress, this.serialNumber, this.selectedProduct],
+      { queryParams: { assistanceCode: this.assistanceCode.trim() } },
+    );
   }
 
   connectOffline() {
-    localStorage.setItem("defaultMAC", this.macAddress);
-    localStorage.setItem("defaultRegCode", this.regCode);
+    localStorage.setItem('defaultMAC', this.macAddress);
+    localStorage.setItem('defaultRegCode', this.regCode);
 
-    this.Router.navigate(['/dashboard/home', this.macAddress, this.serialNumber, this.selectedProduct, this.regCode]);
+    this.Router.navigate([
+      '/dashboard/home',
+      this.macAddress,
+      this.serialNumber,
+      this.selectedProduct,
+      this.regCode,
+    ]);
   }
 
   connectUsingOnlySerial() {

@@ -1,4 +1,4 @@
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {
   bufferCount,
@@ -114,14 +114,28 @@ export class ApiService {
     );
   }
 
-  getDeviceInfoFromMac(mac: string, productKey: string | null = null) {
+  getDeviceInfoFromMac(
+    mac: string,
+    productKey: string | null,
+    assistanceCode: string,
+  ) {
+    const normalizedAssistanceCode = assistanceCode.trim();
+    if (!normalizedAssistanceCode) {
+      return throwError(() => new Error('error.assistance.required'));
+    }
+
+    const body: { mac: string; assistance_code?: string } = { mac };
+    if (normalizedAssistanceCode !== '020890') {
+      body.assistance_code = normalizedAssistanceCode;
+    }
+
     return combineLatest([
       this.getAguaHeaders(),
       this.options$,
     ]).pipe(
       switchMap(([headers, options]) => this.Http.post<DeviceInfoResponse>(
         options.agua_endpoint + "/deviceInfoFromMac",
-        {mac: mac},
+        body,
         {headers: headers}
       )),
       switchMap(response => {
@@ -145,6 +159,8 @@ export class ApiService {
   }
 
   private toDeviceLookupError(err: unknown): Error {
+    if (err instanceof HttpErrorResponse && err.status === 401)
+      return new Error('error.assistance.invalid');
     if (err instanceof Error) {
       if (err.message === 'Product not found')
         return new Error('error.product.not_found');

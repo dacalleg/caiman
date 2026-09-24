@@ -16,3 +16,30 @@
   font-size: 13px;
   line-height: 1.1;
 }
+
+@keyframes login-input-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-8px);
+  }
+
+  40% {
+    transform: translateX(8px);
+  }
+
+  60% {
+    transform: translateX(-6px);
+  }
+
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+.login-input-shake {
+  animation: login-input-shake 0.45s ease-in-out;
+}

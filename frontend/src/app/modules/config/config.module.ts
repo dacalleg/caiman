@@ -13,6 +13,7 @@ import { EditColorsComponent } from './components/edit-colors/edit-colors.compon
 import { EditTranslationsComponent } from './components/edit-translations/edit-translations.component';
 import { EditGroupTranslationsComponent } from './components/edit-group-translations/edit-group-translations.component';
 import { ImportConfigModalComponent } from './components/import-config-modal/import-config-modal.component';
+import { PasteVariableModalComponent } from './components/paste-variable-modal/paste-variable-modal.component';
 
 
 @NgModule({
@@ -25,7 +26,8 @@ import { ImportConfigModalComponent } from './components/import-config-modal/imp
     EditColorsComponent,
     EditTranslationsComponent,
     EditGroupTranslationsComponent,
-    ImportConfigModalComponent
+    ImportConfigModalComponent,
+    PasteVariableModalComponent
   ],
   imports: [
     CommonModule,

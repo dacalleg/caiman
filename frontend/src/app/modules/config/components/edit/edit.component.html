@@ -36,6 +36,14 @@
                             </div>
                         </div>
                         <button class="btn btn-sm btn-secondary ms-2"
+                            (click)="copyVariableJson(variable)">
+                            <ng-container *ngIf="copiedVariablePanelId === variablePanelId(variable); else copyJsonLabel">Copied</ng-container>
+                            <ng-template #copyJsonLabel>
+                                <ng-container *ngIf="copyFailedVariablePanelId === variablePanelId(variable); else copyJsonDefault">Copy failed</ng-container>
+                                <ng-template #copyJsonDefault>Copy JSON</ng-template>
+                            </ng-template>
+                        </button>
+                        <button class="btn btn-sm btn-secondary ms-2"
                             (click)="duplicateVariable(variable)">Duplicate</button>
                         <button class="btn btn-sm btn-danger ms-2"
                             (click)="deleteVariable(variable)">Delete</button>
@@ -298,6 +306,8 @@
                                 <div class="row mb-5">
                                     <div class="col text-end">
                                         <button class="btn btn-primary ms-2" (click)="newVariable(group.name)">New
+                                            Variable</button>
+                                        <button class="btn btn-secondary ms-2" (click)="pasteVariable(group.name)">Paste
                                             Variable</button>
                                     </div>
                                 </div>

@@ -36,7 +36,7 @@
             </div>
             <hr class="dropdown-divider">
             <a class="dropdown-item text-end" ngbDropdownItem [routerLink]="'/dashboard/profile'">{{'profile'|translate}}</a>
-            <a class="dropdown-item text-end" ngbDropdownItem [routerLink]="'/dashboard/license'">{{'license'|translate}}</a>
+            <a class="dropdown-item text-end license-menu-entry" ngbDropdownItem [routerLink]="'/dashboard/license'">{{'license'|translate}}</a>
             <button type="button" class="dropdown-item text-end" ngbDropdownItem (click)="logout()">{{'logout'|translate}}</button>
           </div>
         </li>
@@ -79,7 +79,7 @@
         (click)="closeMenu()"
       >{{'profile'|translate}}</a>
     </li>
-    <li class="ps-0 list-group-item border-0">
+    <li class="ps-0 list-group-item border-0 license-menu-entry">
       <a
         class="nav-link sidemenu-link"
         routerLink="/dashboard/license"

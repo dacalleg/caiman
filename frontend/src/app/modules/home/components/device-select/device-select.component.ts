@@ -75,11 +75,17 @@ export class DeviceSelectComponent implements OnInit {
   }
 
   selectOption(n: number) {
-    this.macAddress = "";
-    if(n === 3 || n === 4)
-      this.macAddress = localStorage.getItem("defaultMAC") || "";
-    if(n === 4)
-      this.regCode = localStorage.getItem("defaultRegCode") || "";
+    this.macAddress = '';
+    this.serialNumber = '';
+    this.assistanceCode = '';
+    this.selectedProduct = null;
+    this.regCode = '';
+    if (n === 3 || n === 4) {
+      this.macAddress = localStorage.getItem('defaultMAC') || '';
+    }
+    if (n === 4) {
+      this.regCode = localStorage.getItem('defaultRegCode') || '';
+    }
     this.selectedOption = n;
   }
 
@@ -90,5 +96,30 @@ export class DeviceSelectComponent implements OnInit {
 
   scanSerial() {
     this.Barcode.scan().subscribe(result => this.serialNumber = result)
-  }    
+  }
+
+  isOnlyOpReady(): boolean {
+    return this.serialNumber.trim().length > 0;
+  }
+
+  isWifiClientReady(): boolean {
+    return (
+      this.macAddress.trim().length > 0
+      && this.serialNumber.trim().length > 0
+      && this.assistanceCode.trim().length > 0
+    );
+  }
+
+  isWifiOwnReady(): boolean {
+    return this.isWifiClientReady() && this.selectedProduct !== null;
+  }
+
+  isOfflineReady(): boolean {
+    return (
+      this.macAddress.trim().length > 0
+      && this.regCode.trim().length > 0
+      && this.serialNumber.trim().length > 0
+      && this.selectedProduct !== null
+    );
+  }
 }

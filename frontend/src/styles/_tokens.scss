@@ -1,0 +1,39 @@
+:root {
+  --theme-accent: #{$theme-accent};
+  --theme-accent-subtle: #{$theme-accent-subtle};
+  --theme-ink: #{$theme-ink};
+  --theme-ink-muted: #{$theme-ink-muted};
+  --theme-line: #{$theme-line};
+  --theme-surface: #{$theme-surface};
+  --theme-on-ink: #{$theme-on-ink};
+  --theme-window-bar: #{$theme-window-bar};
+  --theme-header-bg: #{$theme-header-bg};
+  --theme-header-text: #{$theme-header-text};
+  --theme-header-title: #{$theme-header-title};
+  --theme-header-border-top-width: #{$theme-header-border-top-width};
+  --theme-header-border-bottom-width: #{$theme-header-border-bottom-width};
+  --theme-sidebar-bg: #{$theme-sidebar-bg};
+  --theme-sidebar-link: #{$theme-sidebar-link};
+  --theme-sidebar-link-active: #{$theme-sidebar-link-active};
+
+  --theme-font-weight-heading: #{$theme-font-weight-heading};
+  --theme-font-size-page-title: #{$theme-font-size-page-title};
+  --theme-font-size-eyebrow: #{$theme-font-size-eyebrow};
+  --theme-radius-card: #{$theme-radius-card};
+  --theme-radius-control: #{$theme-radius-control};
+  --theme-header-height: #{$theme-header-height};
+  --theme-header-logo-filter: #{$theme-header-logo-filter};
+  --theme-header-app-name-display: #{if($theme-header-show-app-name, block, none)};
+  --theme-content-max-width: #{$theme-content-max-width};
+  --theme-sidebar-width: #{$theme-sidebar-width};
+
+  --primary: var(--theme-accent);
+  --black: var(--theme-ink);
+  --gray: var(--theme-ink-muted);
+  --white: var(--theme-surface);
+  --gray-300: var(--theme-line);
+
+  @each $key, $file in $theme-mode-icons {
+    --theme-mode-icon-#{$key}: url('../themes/icons/#{$file}');
+  }
+}

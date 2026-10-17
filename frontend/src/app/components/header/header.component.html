@@ -1,9 +1,9 @@
-<nav class="navbar navbar-expand-md navbar-light bg-light">
+<nav class="navbar navbar-expand-md app-header">
   <div class="container-fluid">
     <div class="d-flex align-items-center justify-content-between w-100">
       <div class="d-flex align-items-center justify-content-center">
-        <img [src]="(info$|async)?.logo" style="height: 37px;">
-        <h2 class="m-0 fw-bold ms-2">CAIMAN</h2>
+        <img [src]="(info$|async)?.logo" class="header-logo" alt="">
+        <h2 class="m-0 fw-bold ms-2 header-app-name">CAIMAN</h2>
       </div>
       <div class="menu d-block d-md-none">
         <button class="btn btn-link" (click)="burgerMenuClicked()">
@@ -17,27 +17,27 @@
           <app-license-info></app-license-info>
         </li>
         <li class="nav-item" *ngIf="(isAdmin$|async) === true">
-          <a class="nav-link" target="_blank" [routerLink]="['/config']">Configurations</a>
+          <a class="nav-link header-config-link" target="_blank" [routerLink]="['/config']">Configurations</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" target="_blank" [routerLink]="['/docs']"><bi name="question-circle"></bi></a>
+          <a class="nav-link header-icon-btn" target="_blank" [routerLink]="['/docs']"><bi name="question-circle"></bi></a>
         </li>
         <li class="nav-item d-flex align-items-center ms-md-3">
           <app-language-switcher></app-language-switcher>
         </li>
         <li class="nav-item ms-md-3" ngbDropdown>
-          <a class="nav-link" tabindex="0" ngbDropdownToggle id="navbarDropdown1" role="button">
+          <a class="nav-link header-account" tabindex="0" ngbDropdownToggle id="navbarDropdown1" role="button">
             <bi name="person-circle" class="mx-1"></bi>
           </a>
-          <div ngbDropdownMenu aria-labelledby="navbarDropdown1" class="dropdown-menu dropdown-menu-end foreground">
+          <div ngbDropdownMenu aria-labelledby="navbarDropdown1" class="dropdown-menu dropdown-menu-end foreground header-dropdown">
             <div class="dropdown-header text-end">
               <div>{{username$|async}}</div>
               <small class="role">{{roles$|async}}</small>
             </div>
             <hr class="dropdown-divider">
-            <a class="nav-link text-end" ngbDropdownItem [routerLink]="'/dashboard/profile'">{{'profile'|translate}}</a>
-            <a class="nav-link text-end" ngbDropdownItem [routerLink]="'/dashboard/license'">{{'license'|translate}}</a>
-            <span class="text-end" ngbDropdownItem (click)="logout()">{{'logout'|translate}}</span>
+            <a class="dropdown-item text-end" ngbDropdownItem [routerLink]="'/dashboard/profile'">{{'profile'|translate}}</a>
+            <a class="dropdown-item text-end" ngbDropdownItem [routerLink]="'/dashboard/license'">{{'license'|translate}}</a>
+            <button type="button" class="dropdown-item text-end" ngbDropdownItem (click)="logout()">{{'logout'|translate}}</button>
           </div>
         </li>
       </ul>
@@ -46,7 +46,7 @@
 </nav>
 <div class="sidemenu py-5 ps-3 pe-2" [ngClass]="{'open': menuOpen}">
   <div class="d-flex justify-content-between">
-    <img [src]="(info$|async)?.logo" style="height: 37px;">
+    <img [src]="(info$|async)?.logo" class="header-logo" alt="">
     <button class="close" (click)="closeMenu()"><bi name="x" ></bi></button>
   </div>
   <div class="my-4">
@@ -55,6 +55,13 @@
   </div>
 
   <ul class="list-group mt-4">
+    <li class="ps-0 list-group-item border-0" *ngIf="showBackToDeviceList$ | async">
+      <a
+        class="nav-link sidemenu-link sidemenu-link--back"
+        routerLink="/dashboard/home/"
+        (click)="closeMenu()"
+      >{{ 'back' | translate }}</a>
+    </li>
     <li class="ps-0 list-group-item border-0">
       <a
         class="nav-link sidemenu-link"

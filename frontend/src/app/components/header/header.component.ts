@@ -1,11 +1,11 @@
 import {Component, ElementRef, EventEmitter, OnInit, Output, signal, ViewChild} from '@angular/core';
 import { StoreService } from "../../services/store.service";
 import { ModalService } from "../../services/modal.service";
-import { map, Observable, take, tap } from "rxjs";
+import { filter, map, Observable, startWith, take, tap } from "rxjs";
 import { Project } from "../../classes/interfaces";
 import { DeviceService } from "../../services/device.service";
 import { AuthService } from 'src/app/services/auth.service';
-import { Router } from '@angular/router'
+import { NavigationEnd, Router } from '@angular/router'
 import { ApiService } from 'src/app/services/api.service';
 import { TranslationService } from 'src/app/services/translation.service';
 @Component({
@@ -24,6 +24,7 @@ export class HeaderComponent {
   isAdmin$: Observable<boolean>;
   languages$: Observable<string[]>;
   currentLanguage$: Observable<string>;
+  showBackToDeviceList$: Observable<boolean>;
   menuOpen: boolean;
 
   constructor(
@@ -42,7 +43,17 @@ export class HeaderComponent {
     this.isAdmin$ = this.AuthService.getRoles().pipe(map(roles => roles.includes("administrator")))
     this.languages$ = this.Api.getTranslations().pipe(map(translations => translations.map(translation => translation.lang)));
     this.currentLanguage$ = this.Translation.getCurrentLanguage();
+    this.showBackToDeviceList$ = this.Router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      startWith(null),
+      map(() => this.isDeviceDetailRoute(this.Router.url)),
+    );
     this.menuOpen = false;
+  }
+
+  private isDeviceDetailRoute(url: string): boolean {
+    const path = url.split('?')[0].split('#')[0];
+    return /^\/dashboard\/home\/[^/]+\/[^/]+/.test(path);
   }
 
   onFileChange($event: Event) {

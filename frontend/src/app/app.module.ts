@@ -23,7 +23,7 @@ import { HeaderInterceptor } from './interceptors/header.interceptor';
 import { TranslationService } from './services/translation.service';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { HeaderComponent } from './components/header/header.component';
-import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle, QrCode, X} from 'ng-bootstrap-icons/icons';
+import {Eye, EyeSlash, Search, InfoCircle, Pen, PersonCircle, Wifi, List, QuestionCircle, QrCode, X, Bluetooth, Link45deg, ArrowRepeat} from 'ng-bootstrap-icons/icons';
 import { BootstrapIconsModule } from 'ng-bootstrap-icons';
 import { ToastManagerComponent } from './components/toast-manager/toast-manager.component';
 import { ToastService } from './services/toast.service';
@@ -43,7 +43,10 @@ const icons = {
   List,
   QuestionCircle,
   QrCode,
-  X
+  X,
+  Bluetooth,
+  Link45deg,
+  ArrowRepeat,
 };
 
 const jwtHelper = new JwtHelperService();

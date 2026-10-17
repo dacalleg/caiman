@@ -1,0 +1,41 @@
+// Palette restyling (PDF KLab / Klover). Modifica solo questo file per personalizzare colori e font.
+
+$theme-font-family: 'Rubik', sans-serif;
+$theme-font-url: 'https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap';
+$theme-font-weight-heading: 800;
+$theme-font-size-page-title: 2.5rem;
+$theme-font-size-eyebrow: 0.6875rem;
+
+$theme-accent: #cb4327;
+$theme-accent-subtle: #fdf6f4;
+$theme-ink: #171717;
+$theme-ink-muted: #262626;
+$theme-line: #e6e6e6;
+$theme-surface: #ffffff;
+$theme-on-ink: #ffffff;
+$theme-window-bar: $theme-ink-muted;
+
+$theme-radius-card: 10px;
+$theme-radius-control: 6px;
+$theme-header-height: 52px;
+$theme-header-logo-filter: brightness(0) invert(1);
+$theme-header-show-app-name: false;
+$theme-content-max-width: 1100px;
+$theme-sidebar-width: 200px;
+
+$theme-header-bg: $theme-ink;
+$theme-header-text: $theme-line;
+$theme-header-title: $theme-line;
+$theme-header-border-top-width: 0;
+$theme-header-border-bottom-width: 0;
+
+$theme-sidebar-bg: $theme-ink-muted;
+$theme-sidebar-link: $theme-line;
+$theme-sidebar-link-active: $theme-surface;
+
+$theme-mode-icons: (
+  only-op: '01_solo-intervento.svg',
+  wifi-client: '02_cloud-wifi-cliente.svg',
+  wifi-own: '03_modulo-wifi-proprio.svg',
+  offline: '04_offline-bluetooth.svg',
+);

@@ -3,9 +3,9 @@
     <app-header (onBurgerClicked)="openMobileMenu()"></app-header>
   </div>-->
   <div class="container-fluid flex-grow-1" *ngIf="(loadDeviceData$|async) as device; else loader">
-    <div class="row align-items-start d-flex d-md-none py-3 sticky-top bg-white">
+    <div class="row align-items-start d-flex d-md-none py-3 sticky-top device-mobile-nav">
       <div class="col">
-          <select class="form-select form-select-sm" (change)="selectTab($event.target)">
+          <select class="form-select form-select-sm device-mobile-nav__select" (change)="selectTab($event.target)">
             <option value="0">{{'home.deviceinfo'|translate}}</option>
             <option value="1" *ngIf="env.registry_enabled">{{'home.registry'|translate}}</option>
             <option value="2" *ngIf="env.operation_enabled">{{'home.operation'|translate}}</option>
@@ -21,7 +21,7 @@
       </div>
     </div>
     <div class="row align-items-start h-100">
-      <div class="col-md-3 sticky-md-top">
+      <div class="col-md-3 sticky-md-top device-sidebar d-none d-md-block">
         <div class="px-5 pt-5 d-none d-md-inline">
           <div class="row align-items-start">
             <div class="col">

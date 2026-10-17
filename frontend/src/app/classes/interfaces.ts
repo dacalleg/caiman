@@ -532,4 +532,5 @@ export interface EnvObj
   operation_enabled: boolean,
   only_op_enabled: boolean,
   hide_micronova_ref: boolean,
+  footer_text: string,
 }

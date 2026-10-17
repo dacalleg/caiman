@@ -1,41 +1,54 @@
-<div class="row align-items-start">
-    <div class="col-md text-center order-1 order-md-2 sticky-md-top">
-      <img [src]="device?.info?.image" class="w-100 image">
+<div class="row align-items-start device-info-page">
+    <div class="col-md text-center order-1 order-md-2 sticky-md-top device-info-page__media">
+      <img [src]="device?.info?.image" class="device-image">
     </div>
-    <div class="col-md order-2 order-md-1">
+    <div class="col-md order-2 order-md-1 device-info-page__content">
+      <h3 class="eyebrow">{{ 'home.deviceinfo' | translate }}</h3>
       <h1 class="fw-bold" [innerHTML]="device?.info?.name"></h1>
-      <div class="fw-bold" *ngIf="device?.mac !== '0000'">{{device?.mac}}</div>
-      <div class="fw-bold" *ngIf="device?.mac === '0000'">{{device?.serial}}</div>
+      <div class="device-serial" *ngIf="device?.mac !== '0000'">
+        <span class="device-serial__label">{{ 'serial' | translate }}</span>
+        <span class="device-serial__value">{{device?.mac}}</span>
+      </div>
+      <div class="device-serial" *ngIf="device?.mac === '0000'">
+        <span class="device-serial__label">{{ 'serial' | translate }}</span>
+        <span class="device-serial__value">{{device?.serial}}</span>
+      </div>
       <p class="my-5" [innerHTML]="device?.info?.description"></p>
 
-      <ul class="nav device-info-actions pb-5" *ngIf="device?.mac !== '0000'">
-        <li class="nav-item" *ngIf="!connected && !isOffline">
-          <button class="btn btn-lg btn-primary" (click)="wifiConnect()">
-            {{ 'home.deviceinfo.wifi' | translate }}
-          </button>
-        </li>
-        <li class="nav-item" *ngIf="!connected">
-          <button class="btn btn-lg btn-primary" (click)="bleConnect()">
-            {{ 'home.deviceinfo.ble' | translate }}
-          </button>
-        </li>
-        <li class="nav-item" *ngIf="!connected && !isOffline">
-          <button class="btn btn-lg btn-primary" (click)="bridgeConnect()">
-            {{ 'home.deviceinfo.bridge' | translate }}
-          </button>
-        </li>
-        <li class="nav-item" *ngIf="connected">
-          <button class="btn btn-lg btn-primary" (click)="disconnect()">
-            {{ 'home.deviceinfo.disconnect' | translate }}
-          </button>
-        </li>
-      </ul>
+      <ng-container *ngIf="device?.mac !== '0000'">
+        <h3 class="device-info-section-title">{{ 'home.deviceinfo.connection' | translate }}</h3>
+        <ul class="device-info-actions pb-5">
+          <li *ngIf="!connected && !isOffline">
+            <button class="btn btn-connection" type="button" (click)="wifiConnect()">
+              <bi name="wifi"></bi>
+              <span>{{ 'home.deviceinfo.wifi' | translate }}</span>
+            </button>
+          </li>
+          <li *ngIf="!connected">
+            <button class="btn btn-connection" type="button" (click)="bleConnect()">
+              <bi name="bluetooth"></bi>
+              <span>{{ 'home.deviceinfo.ble' | translate }}</span>
+            </button>
+          </li>
+          <li *ngIf="!connected && !isOffline">
+            <button class="btn btn-connection" type="button" (click)="bridgeConnect()">
+              <bi name="link-45deg"></bi>
+              <span>{{ 'home.deviceinfo.bridge' | translate }}</span>
+            </button>
+          </li>
+          <li *ngIf="connected">
+            <button class="btn btn-connection" type="button" (click)="disconnect()">
+              <span>{{ 'home.deviceinfo.disconnect' | translate }}</span>
+            </button>
+          </li>
+        </ul>
+      </ng-container>
 
       <ng-container *ngIf="(device?.info?.documents|withRole|async) as documents">
         <div class="row my-5" *ngIf="documents.length > 0">
             <div class="col">
-              <h3>{{ 'home.deviceinfo.documents' | translate }}</h3>
-              <ul>
+              <h3 class="device-info-section-title">{{ 'home.deviceinfo.documents' | translate }}</h3>
+              <ul class="list-unstyled doc-links">
                 <li *ngFor="let doc of documents">
                   <a [href]="doc.file|attachmentUrl|async" target="_blank">{{doc.name}}</a>
                 </li>
@@ -47,8 +60,8 @@
       <ng-container *ngIf="(device?.info?.links|withRole|async) as links">
         <div class="row my-5" *ngIf="links.length > 0">
             <div class="col">
-              <h3>{{ 'home.deviceinfo.links' | translate }}</h3>
-              <ul>
+              <h3 class="device-info-section-title">{{ 'home.deviceinfo.links' | translate }}</h3>
+              <ul class="list-unstyled doc-links">
                 <li *ngFor="let l of links">
                   <a [href]="l.link" target="_blank">{{l.name}}</a>
                 </li>

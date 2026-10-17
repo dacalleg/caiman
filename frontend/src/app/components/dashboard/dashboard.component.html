@@ -10,9 +10,16 @@
     </div>
     <div class="footer">
         <app-footer></app-footer>
-        <div class="text-center" *ngIf="!(completed$|async)">
+        <div class="sync-footer" *ngIf="!(completed$|async)">
           <ng-container *ngIf="(sync$|async) as value">
-            <ngb-progressbar type="success" class="sync" [value]="value * 100">Sincronizzazione in corso ... {{value|percent}}</ngb-progressbar>
+            <ngb-progressbar type="primary" class="sync sync-line" [value]="value * 100" [showValue]="false"></ngb-progressbar>
+            <div class="sync-status">
+              <span class="sync-status__label">
+                <bi name="arrow-repeat"></bi>
+                {{ 'sync.in_progress' | translate }}
+              </span>
+              <strong class="sync-status__percent">{{ value | percent }}</strong>
+            </div>
           </ng-container>
         </div>
     </div>

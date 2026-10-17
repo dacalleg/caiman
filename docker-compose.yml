@@ -34,7 +34,10 @@ services:
 
   caiman_frontend:
     restart: always
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        BUILD_CONFIGURATION: production
     image: caiman_frontend:latest
     container_name: caiman_frontend
     healthcheck:

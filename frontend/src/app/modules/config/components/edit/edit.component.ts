@@ -1,10 +1,15 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbNav } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, filter, map, switchMap, take, tap } from 'rxjs';
 import { SeramiEntry, SeramiGroup, Variable, VariableTemplate } from 'src/app/classes/interfaces';
 import { buildGroupTabs, renameGroup } from 'src/app/classes/serami-groups';
 import { Utils } from 'src/app/classes/utils';
+import {
+  buildVariableHash,
+  createVariableDefaults,
+} from 'src/app/classes/variable-json';
+import { PasteVariableModalComponent } from '../paste-variable-modal/paste-variable-modal.component';
 import { TemplateService } from '../../services/template.service';
 import { ApiService } from 'src/app/services/api.service';
 
@@ -31,6 +36,8 @@ export class EditComponent {
   logs: CheckLog[];
   search: string | undefined;
   expandedVariablePanelId: string | null = null;
+  copiedVariablePanelId: string | null = null;
+  copyFailedVariablePanelId: string | null = null;
   readonly variableTemplates: VariableTemplate[];
   variableSectionRefreshKeys: Record<string, number> = {};
   private readonly variablePanelKeys = new WeakMap<Variable, string>();
@@ -44,6 +51,7 @@ export class EditComponent {
     private Api: ApiService,
     private Router: Router,
     private templateService: TemplateService,
+    private modalService: NgbModal,
   ) {
     this.logs = [];
     this.seramiEntry = { data: [], name: "" };
@@ -233,7 +241,79 @@ export class EditComponent {
   }
 
   updateHash(v: Variable) {
-    v.hash = [v.memory == "eeprom" ? "E" : "R", "" + v.address, "" + v.mask].join("_")
+    v.hash = buildVariableHash(v.memory, v.address, v.mask ?? 255);
+  }
+
+  copyVariableJson(variable: Variable): void {
+    const json = JSON.stringify(variable, null, 2);
+    const panelId = this.variablePanelId(variable);
+    const showCopied = (): void => {
+      this.copyFailedVariablePanelId = null;
+      this.copiedVariablePanelId = panelId;
+      window.setTimeout(() => {
+        if (this.copiedVariablePanelId === panelId) {
+          this.copiedVariablePanelId = null;
+        }
+      }, 1500);
+    };
+    const showCopyFailed = (): void => {
+      this.copiedVariablePanelId = null;
+      this.copyFailedVariablePanelId = panelId;
+      window.setTimeout(() => {
+        if (this.copyFailedVariablePanelId === panelId) {
+          this.copyFailedVariablePanelId = null;
+        }
+      }, 1500);
+    };
+
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(json).then(showCopied).catch(() => {
+        if (this.copyVariableJsonFallback(json)) {
+          showCopied();
+        } else {
+          showCopyFailed();
+        }
+      });
+      return;
+    }
+    if (this.copyVariableJsonFallback(json)) {
+      showCopied();
+    } else {
+      showCopyFailed();
+    }
+  }
+
+  pasteVariable(group: string): void {
+    const modalRef = this.modalService.open(PasteVariableModalComponent, {
+      ariaLabelledBy: 'paste-variable-title',
+      centered: true,
+    });
+    modalRef.componentInstance.targetGroup = group;
+    modalRef.componentInstance.existingInGroup = this.variablesByGroup[group] ?? [];
+
+    modalRef.result.then(
+      (variable: Variable) => {
+        this.seramiEntry.data.push(variable);
+        this.expandedVariablePanelId = this.variablePanelId(variable);
+        this.changeGroup(group);
+        this.nav?.select(group);
+        this.rebuildVariablesForGroup(group);
+      },
+      () => undefined
+    );
+  }
+
+  private copyVariableJsonFallback(json: string): boolean {
+    const textarea = document.createElement('textarea');
+    textarea.value = json;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    const copied = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return copied;
   }
 
   applyVariableTemplate(variable: Variable, templateId: string): void {
@@ -359,32 +439,7 @@ export class EditComponent {
   }
 
   newVariable(group: string) {
-    const name = 'New Variable';
-    this.seramiEntry.data.push(
-      {
-        type: "RwmsParameterBase",
-        description: "",
-        varKey: undefined,
-        group: group,
-        name,
-        hash: "R_0_255",
-        sanitizedName: Utils.sanitizeString(name),
-        address: 0,
-        min: 0,
-        max: 1,
-        readonly: false,
-        memory: "ram",
-        mask: 255,
-        bit: 8,
-        readExp: "#",
-        writeExp: null,
-        values: [],
-        bits: null,
-        pattern: "B",
-        signed: false,
-        formatstring: "{0}",
-        acl: [],
-      })
+    this.seramiEntry.data.push(createVariableDefaults(group));
     this.rebuildVariablesForGroup(group);
   }
 

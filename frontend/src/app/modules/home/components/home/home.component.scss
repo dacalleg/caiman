@@ -1,35 +1,116 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
 
-app-variable-tease
-{
+app-variable-tease {
   height: 100%;
   display: block;
 }
 
-.content
-{
-  border-left: 1px solid var(--gray-300);
-  min-height: 100%;
-}
+.home-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 
-
-
-.back
-{
-  font-size: 0.8rem;
-}
-
-.menu-mobile
-{
-  background: rgba(255,255,255,0.5);
-  backdrop-filter: blur(10px);
-  z-index: 9999;
-  .btn-close
-  {
-    font-size:1 rem;
+  > .container-fluid {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
   }
 }
 
-.bg-white
-{
-  background: #FFF;
+.home-columns {
+  flex: 1 1 auto;
+}
+
+.content {
+  border-left: 1px solid var(--theme-line);
+}
+
+@media (max-width: 767.98px) {
+  .content {
+    border-left: none;
+  }
+}
+
+@media (min-width: 768px) {
+  :host {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .home-shell {
+    min-height: 0;
+
+    > .container-fluid {
+      min-height: 0;
+    }
+  }
+
+  .home-columns {
+    min-height: 0;
+  }
+
+  .content {
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+.device-mobile-nav {
+  flex: 0 0 auto;
+  background-color: var(--theme-surface);
+  border-bottom: 1px solid var(--theme-line);
+  z-index: 1020;
+
+  &__select {
+    border-radius: var(--theme-radius-control);
+    border-color: var(--theme-line);
+    color: var(--theme-ink);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+
+    &:focus {
+      border-color: var(--theme-accent);
+      box-shadow: 0 0 0 0.2rem rgba(203, 67, 39, 0.15);
+    }
+  }
+}
+
+.device-sidebar {
+  .px-5,
+  .p-5 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .pt-5 {
+    padding-top: 1.25rem !important;
+  }
+
+  .pt-2 {
+    padding-top: 0.5rem !important;
+  }
+}
+
+.back {
+  font-size: 0.8rem;
+}
+
+.menu-mobile {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+
+  .btn-close {
+    font-size: 1rem;
+  }
+}
+
+.bg-white {
+  background: #fff;
 }

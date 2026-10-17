@@ -1,0 +1,23 @@
+<div class="modal-header">
+  <h4 class="modal-title" id="paste-variable-title">Incolla variabile</h4>
+  <button type="button" class="btn-close" aria-label="Chiudi" (click)="cancel()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="mb-3">
+    <label for="paste-variable-json" class="form-label">JSON variabile</label>
+    <textarea
+      id="paste-variable-json"
+      class="form-control font-monospace"
+      rows="12"
+      [(ngModel)]="jsonText"
+      (ngModelChange)="onJsonTextChange()"
+      placeholder='{"name": "Esempio", "address": 0}'></textarea>
+  </div>
+  <div class="alert alert-danger mb-0" *ngIf="errorMessage">{{ errorMessage }}</div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="cancel()">Annulla</button>
+  <button type="button" class="btn btn-primary" (click)="confirm()">Inserisci</button>
+</div>

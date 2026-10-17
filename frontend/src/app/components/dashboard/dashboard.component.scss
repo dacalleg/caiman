@@ -1,18 +1,94 @@
-.dashboard-container
-{
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.dashboard-container {
   display: flex;
-  justify-content: space-between;
   flex-direction: column;
   min-height: 100vh;
 }
 
-.main
-{
-  flex-grow: 2;
-  overflow-y: scroll;
+.dashboard-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 }
 
-.sync
-{
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.footer {
+  flex: 0 0 auto;
+}
+
+@media (min-width: 768px) {
+  :host {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .dashboard-container {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .dashboard-body,
+  .dashboard-content {
+    min-height: 0;
+  }
+
+  .dashboard-content {
+    overflow-y: auto;
+  }
+}
+
+.sync-footer {
+  width: 100%;
+}
+
+.sync-line {
   border-radius: 0;
+  height: 3px;
+  margin: 0;
+
+  ::ng-deep .progress {
+    height: 3px;
+    background-color: transparent;
+    border-radius: 0;
+  }
+
+  ::ng-deep .progress-bar {
+    background-color: var(--theme-accent);
+  }
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 22px;
+  padding: 0 0.75rem;
+  background-color: var(--theme-ink);
+  color: var(--theme-line);
+  font-size: 0.6875rem;
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    bi {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  &__percent {
+    color: var(--theme-on-ink);
+    font-weight: 700;
+  }
 }

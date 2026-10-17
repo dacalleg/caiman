@@ -9,4 +9,5 @@ export const environment = {
   operation_enabled: true,
   only_op_enabled: true,
   hide_micronova_ref: true,
+  footer_text: 'www.klover.it',
 } as EnvObj;

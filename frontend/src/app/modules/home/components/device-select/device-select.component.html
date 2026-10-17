@@ -1,49 +1,43 @@
-<div class="h-100 d-flex flex-column">
-  <div class="container mt-5">
-    <div class="row mb-5">
-      <div class="col text-center">
-        <div class="d-flex align-items-center justify-content-center">
-          <img [src]="(info$|async)?.logo" width="200px">
-          <div class="text-start" *ngIf="!env.hide_micronova_ref">
-            <h1 class="fw-bold mb-0">CAIMAN</h1>
-            <small>{{ 'home.deviceselect.by_micronova' | translate }}</small>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="h-100 d-flex flex-column device-select-page">
+  <div class="container device-select-page__container">
     <div class="row mb-3">
       <div class="col">
         <h1>{{ 'home.deviceselect.title' | translate }}</h1>
+        <p class="mode-subtitle">{{ 'home.deviceselect.subtitle' | translate }}</p>
       </div>
     </div>
-    <div class="row">
+    <div class="row mode-cards-row">
       <div class="col-md-6 mb-3" *ngIf="env.only_op_enabled">
-        <div class="card h-100" (click)="selectOption(1)" [ngClass]="{'selected': selectedOption == 1}">
-          <div class="card-body d-flex justify-content-between flex-column h-100">
+        <div class="card h-100 mode-card" (click)="selectOption(1)" [ngClass]="{'selected': selectedOption == 1}">
+          <div class="card-body mode-card__body">
+            <span class="mode-icon mode-icon--only-op" aria-hidden="true"></span>
             <h5>{{ 'home.deviceselect.only_op.title' | translate }}</h5>
             <p>{{ 'home.deviceselect.only_op.description' | translate }}</p>
           </div>
         </div>
       </div>
       <div class="col-md-6 mb-3">
-        <div class="card h-100" (click)="selectOption(2)" [ngClass]="{'selected': selectedOption == 2}">
-          <div class="card-body d-flex justify-content-between flex-column h-100">
+        <div class="card h-100 mode-card" (click)="selectOption(2)" [ngClass]="{'selected': selectedOption == 2}">
+          <div class="card-body mode-card__body">
+            <span class="mode-icon mode-icon--wifi-client" aria-hidden="true"></span>
             <h5>{{ 'home.deviceselect.wifi_client.title' | translate }}</h5>
             <p>{{ 'home.deviceselect.wifi_client.description' | translate }}</p>
           </div>
         </div>
       </div>
       <div class="col-md-6 mb-3">
-        <div class="card h-100" (click)="selectOption(3)" [ngClass]="{'selected': selectedOption == 3}">
-          <div class="card-body d-flex justify-content-between flex-column h-100">
+        <div class="card h-100 mode-card" (click)="selectOption(3)" [ngClass]="{'selected': selectedOption == 3}">
+          <div class="card-body mode-card__body">
+            <span class="mode-icon mode-icon--wifi-own" aria-hidden="true"></span>
             <h5>{{ 'home.deviceselect.wifi_own.title' | translate }}</h5>
             <p>{{ 'home.deviceselect.wifi_own.description' | translate }}</p>
           </div>
         </div>
       </div>
       <div class="col-md-6 mb-3">
-        <div class="card h-100" (click)="selectOption(4)" [ngClass]="{'selected': selectedOption == 4}">
-          <div class="card-body d-flex justify-content-between flex-column h-100">
+        <div class="card h-100 mode-card" (click)="selectOption(4)" [ngClass]="{'selected': selectedOption == 4}">
+          <div class="card-body mode-card__body">
+            <span class="mode-icon mode-icon--offline" aria-hidden="true"></span>
             <h5>{{ 'home.deviceselect.offline.title' | translate }}</h5>
             <p>{{ 'home.deviceselect.offline.description' | translate }}</p>
           </div>
@@ -52,150 +46,156 @@
     </div>
     <div class="row mt-5" *ngIf="selectedOption == 1">
       <div class="col">
-        <div class="card h-100">
+        <div class="card h-100 identify-panel">
           <div class="card-body h-100">
-            <div class="row ">
-              <div class="col-md mb-3">
-                <label for="serial" class="form-label">{{ 'serial' | translate }}</label>
-                <div class="input-group mb-3">
-                  <button class="btn btn-outline-secondary" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
-                  <input type="text" id="serial" class="form-control" [placeholder]="'serial' | translate"
-                         [attr.aria-label]="'serial' | translate" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
+            <h3 class="identify-panel__title">{{ 'home.deviceselect.identify' | translate }}</h3>
+            <form #onlyOpForm="ngForm" class="identify-form">
+              <div class="row identify-form__fields">
+                <div class="col-md">
+                  <label for="serial-only-op" class="form-label">{{ 'serial' | translate }}</label>
+                  <div class="input-group">
+                    <button class="btn btn-outline-secondary btn-qr" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
+                    <input type="text" id="serial-only-op" name="serial" class="form-control" [placeholder]="'serial' | translate"
+                           [attr.aria-label]="'serial' | translate" required [(ngModel)]="serialNumber">
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col text-end">
-                <button class="btn btn-primary" (click)="connectUsingOnlySerial()">{{ 'home.deviceselect.open' | translate }}</button>
+              <div class="identify-form__actions">
+                <button class="btn btn-primary btn-open" type="button" (click)="connectUsingOnlySerial()" [disabled]="!isOnlyOpReady()">{{ 'home.deviceselect.open' | translate }}</button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
     </div>
     <div class="row mt-5" *ngIf="selectedOption == 2">
       <div class="col">
-        <div class="card">
+        <div class="card identify-panel">
           <div class="card-body">
-            <div class="row ">
-              <div class="col-md mb-3">
-                <label for="macaddress" class="form-label">{{ 'home.deviceselect.macaddress' | translate }}</label>
-                <div class="input-group mb-3">
-                  <button class="btn btn-outline-secondary" type="button" (click)="scanMac()"><bi name="qr-code" class="mx-1"></bi></button>
-                  <input type="text" class="form-control" [placeholder]="'home.deviceselect.macaddress' | translate"
-                         [attr.aria-label]="'home.deviceselect.macaddress' | translate" aria-describedby="button-addon2" [(ngModel)]="macAddress"
-                         id="macaddress">
+            <h3 class="identify-panel__title">{{ 'home.deviceselect.identify' | translate }}</h3>
+            <form #wifiClientForm="ngForm" class="identify-form">
+              <div class="row identify-form__fields">
+                <div class="col-md">
+                  <label for="macaddress-wifi-client" class="form-label">{{ 'home.deviceselect.macaddress' | translate }}</label>
+                  <div class="input-group">
+                    <button class="btn btn-outline-secondary btn-qr" type="button" (click)="scanMac()"><bi name="qr-code" class="mx-1"></bi></button>
+                    <input type="text" class="form-control" name="macAddress" [placeholder]="'home.deviceselect.macaddress' | translate"
+                           [attr.aria-label]="'home.deviceselect.macaddress' | translate" required [(ngModel)]="macAddress"
+                           id="macaddress-wifi-client">
+                  </div>
+                </div>
+                <div class="col-md">
+                  <label for="serial-wifi-client" class="form-label">{{ 'serial' | translate }}</label>
+                  <div class="input-group">
+                    <button class="btn btn-outline-secondary btn-qr" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
+                    <input type="text" id="serial-wifi-client" name="serial" class="form-control" [placeholder]="'serial' | translate"
+                           [attr.aria-label]="'serial' | translate" required [(ngModel)]="serialNumber">
+                  </div>
+                </div>
+                <div class="col-md">
+                  <label for="assistance-code-wifi-client" class="form-label">{{ 'home.deviceselect.assistance_code' | translate }}</label>
+                  <input type="text" class="form-control" id="assistance-code-wifi-client" name="assistanceCode" required
+                         [placeholder]="'home.deviceselect.assistance_code' | translate"
+                         [attr.aria-label]="'home.deviceselect.assistance_code' | translate" [(ngModel)]="assistanceCode">
                 </div>
               </div>
-              <div class="col-md mb-3">
-                <label for="serial-wifi-client" class="form-label">{{ 'serial' | translate }}</label>
-                <div class="input-group mb-3">
-                  <button class="btn btn-outline-secondary" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
-                  <input type="text" id="serial-wifi-client" class="form-control" [placeholder]="'serial' | translate"
-                         [attr.aria-label]="'serial' | translate" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
-                </div>
+              <div class="identify-form__actions">
+                <button class="btn btn-primary btn-open" type="button" (click)="connectUsingMAC()" [disabled]="!isWifiClientReady()">{{ 'home.deviceselect.open' | translate }}</button>
               </div>
-              <div class="col-md mb-3">
-                <label for="assistance-code-wifi-client" class="form-label">{{ 'home.deviceselect.assistance_code' | translate }}</label>
-                <input type="text" class="form-control" id="assistance-code-wifi-client" required
-                       [placeholder]="'home.deviceselect.assistance_code' | translate"
-                       [attr.aria-label]="'home.deviceselect.assistance_code' | translate" [(ngModel)]="assistanceCode">
-              </div>
-            </div>
-            <div class="row">
-              <div class="col text-end">
-                <button class="btn btn-primary" (click)="connectUsingMAC()" [disabled]="!assistanceCode.trim()">{{ 'home.deviceselect.open' | translate }}</button>
-              </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
     </div>
     <div class="row mt-5" *ngIf="selectedOption == 3">
       <div class="col">
-        <div class="card">
+        <div class="card identify-panel">
           <div class="card-body">
-            <div class="row">
-              <div class="col-md mb-3">
-                <label for="macaddress" class="form-label">{{ 'home.deviceselect.macaddress' | translate }}</label>
-                <div class="input-group mb-3">
-                  <button class="btn btn-outline-secondary" type="button" (click)="scanMac()"><bi name="qr-code" class="mx-1"></bi></button>
-                  <input type="text" class="form-control" [placeholder]="'home.deviceselect.macaddress' | translate"
-                         [attr.aria-label]="'home.deviceselect.macaddress' | translate" aria-describedby="button-addon2" [(ngModel)]="macAddress"
-                         id="macaddress">
+            <h3 class="identify-panel__title">{{ 'home.deviceselect.identify' | translate }}</h3>
+            <form #wifiOwnForm="ngForm" class="identify-form">
+              <div class="row identify-form__fields">
+                <div class="col-md">
+                  <label for="macaddress-wifi-own" class="form-label">{{ 'home.deviceselect.macaddress' | translate }}</label>
+                  <div class="input-group">
+                    <button class="btn btn-outline-secondary btn-qr" type="button" (click)="scanMac()"><bi name="qr-code" class="mx-1"></bi></button>
+                    <input type="text" class="form-control" name="macAddress" [placeholder]="'home.deviceselect.macaddress' | translate"
+                           [attr.aria-label]="'home.deviceselect.macaddress' | translate" required [(ngModel)]="macAddress"
+                           id="macaddress-wifi-own">
+                  </div>
+                </div>
+                <div class="col-md">
+                  <label for="serial-wifi-own" class="form-label">{{ 'serial' | translate }}</label>
+                  <div class="input-group">
+                    <button class="btn btn-outline-secondary btn-qr" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
+                    <input type="text" id="serial-wifi-own" name="serial" class="form-control" [placeholder]="'serial' | translate"
+                           [attr.aria-label]="'serial' | translate" required [(ngModel)]="serialNumber">
+                  </div>
+                </div>
+                <div class="col-md">
+                  <label for="assistance-code-wifi-own" class="form-label">{{ 'home.deviceselect.assistance_code' | translate }}</label>
+                  <input type="text" class="form-control" id="assistance-code-wifi-own" name="assistanceCode" required
+                         [placeholder]="'home.deviceselect.assistance_code' | translate"
+                         [attr.aria-label]="'home.deviceselect.assistance_code' | translate" [(ngModel)]="assistanceCode">
+                </div>
+                <div class="col-md">
+                  <label for="productlist-wifi-own" class="form-label">{{ 'home.deviceselect.select_product' | translate }}</label>
+                  <select id="productlist-wifi-own" name="selectedProduct" class="form-select" required [(ngModel)]="selectedProduct">
+                    <option [ngValue]="null" disabled>{{ 'home.deviceselect.select_product' | translate }}</option>
+                    <option *ngFor="let product of products$|async" [ngValue]="product.key"
+                            [innerHtml]="product.name"></option>
+                  </select>
                 </div>
               </div>
-              <div class="col-md mb-3">
-                <label for="serial-wifi-own" class="form-label">{{ 'serial' | translate }}</label>
-                <div class="input-group mb-3">
-                  <button class="btn btn-outline-secondary" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
-                  <input type="text" id="serial-wifi-own" class="form-control" [placeholder]="'serial' | translate"
-                         [attr.aria-label]="'serial' | translate" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
-                </div>
+              <div class="identify-form__actions">
+                <button class="btn btn-primary btn-open" type="button" (click)="connectUsingProduct()" [disabled]="!isWifiOwnReady()">{{ 'home.deviceselect.open' | translate }}</button>
               </div>
-              <div class="col-md mb-3">
-                <label for="assistance-code-wifi-own" class="form-label">{{ 'home.deviceselect.assistance_code' | translate }}</label>
-                <input type="text" class="form-control" id="assistance-code-wifi-own" required
-                       [placeholder]="'home.deviceselect.assistance_code' | translate"
-                       [attr.aria-label]="'home.deviceselect.assistance_code' | translate" [(ngModel)]="assistanceCode">
-              </div>
-              <div class="col-md mb-3">
-                <label for="productlist" class="form-label">{{ 'home.deviceselect.select_product' | translate }}</label>
-                <select id="productlist" class="form-select" [(ngModel)]="selectedProduct">
-                  <option selected [ngValue]="null">{{ 'home.deviceselect.select_product' | translate }}</option>
-                  <option *ngFor="let product of products$|async" [ngValue]="product.key"
-                          [innerHtml]="product.name"></option>
-                </select>
-              </div>
-            </div>
-            <div class="text-end">
-              <button class="btn btn-primary" (click)="connectUsingProduct()" [disabled]="!assistanceCode.trim()">{{ 'home.deviceselect.open' | translate }}</button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
     </div>
     <div class="row mt-5" *ngIf="selectedOption == 4">
       <div class="col">
-        <div class="card">
+        <div class="card identify-panel">
           <div class="card-body">
-            <div class="row">
-              <div class="col-md mb-3">
-                <label for="macaddress" class="form-label">{{ 'home.deviceselect.macaddress' | translate }}</label>
-                <div class="input-group mb-3">
-                  <button class="btn btn-outline-secondary" type="button" (click)="scanMac()"><bi name="qr-code" class="mx-1"></bi></button>
-                  <input type="text" class="form-control" [placeholder]="'home.deviceselect.macaddress' | translate"
-                         [attr.aria-label]="'home.deviceselect.macaddress' | translate" aria-describedby="button-addon2" [(ngModel)]="macAddress"
-                         id="macaddress">
+            <h3 class="identify-panel__title">{{ 'home.deviceselect.identify' | translate }}</h3>
+            <form #offlineForm="ngForm" class="identify-form">
+              <div class="row identify-form__fields">
+                <div class="col-md">
+                  <label for="macaddress-offline" class="form-label">{{ 'home.deviceselect.macaddress' | translate }}</label>
+                  <div class="input-group">
+                    <button class="btn btn-outline-secondary btn-qr" type="button" (click)="scanMac()"><bi name="qr-code" class="mx-1"></bi></button>
+                    <input type="text" class="form-control" name="macAddress" [placeholder]="'home.deviceselect.macaddress' | translate"
+                           [attr.aria-label]="'home.deviceselect.macaddress' | translate" required [(ngModel)]="macAddress"
+                           id="macaddress-offline">
+                  </div>
+                </div>
+                <div class="col-md">
+                  <label for="ap-password" class="form-label">{{ 'home.deviceselect.ap_password' | translate }}</label>
+                  <input type="text" class="form-control" id="ap-password" name="regCode" required [placeholder]="'home.deviceselect.ap_password' | translate"
+                         [attr.aria-label]="'home.deviceselect.ap_password' | translate" [(ngModel)]="regCode">
+                </div>
+                <div class="col-md">
+                  <label for="serial-offline" class="form-label">{{ 'serial' | translate }}</label>
+                  <div class="input-group">
+                    <button class="btn btn-outline-secondary btn-qr" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
+                    <input type="text" id="serial-offline" name="serial" class="form-control" [placeholder]="'serial' | translate"
+                           [attr.aria-label]="'serial' | translate" required [(ngModel)]="serialNumber">
+                  </div>
+                </div>
+                <div class="col-md">
+                  <label for="productlist-offline" class="form-label">{{ 'home.deviceselect.select_product' | translate }}</label>
+                  <select id="productlist-offline" name="selectedProduct" class="form-select" required [(ngModel)]="selectedProduct">
+                    <option [ngValue]="null" disabled>{{ 'home.deviceselect.select_product' | translate }}</option>
+                    <option *ngFor="let product of products$|async" [ngValue]="product.key"
+                            [innerHtml]="product.name"></option>
+                  </select>
                 </div>
               </div>
-              <div class="col-md mb-3">
-                <label for="ap-password" class="form-label">{{ 'home.deviceselect.ap_password' | translate }}</label>
-                <input type="text" class="form-control" id="ap-password" [placeholder]="'home.deviceselect.ap_password' | translate"
-                       [attr.aria-label]="'home.deviceselect.ap_password' | translate" aria-describedby="button-addon2" [(ngModel)]="regCode">
+              <div class="identify-form__actions">
+                <button class="btn btn-primary btn-open" type="button" (click)="connectOffline()" [disabled]="!isOfflineReady()">{{ 'home.deviceselect.open' | translate }}</button>
               </div>
-              <div class="col-md mb-3">
-                <label for="serial" class="form-label">{{ 'serial' | translate }}</label>
-                <div class="input-group mb-3">
-                  <button class="btn btn-outline-secondary" type="button" (click)="scanSerial()"><bi name="qr-code" class="mx-1"></bi></button>
-                  <input type="text" id="serial" class="form-control" [placeholder]="'serial' | translate"
-                         [attr.aria-label]="'serial' | translate" aria-describedby="button-addon2" [(ngModel)]="serialNumber">
-                </div>
-              </div>
-              <div class="col-md mb-3">
-                <label for="productlist" class="form-label">{{ 'home.deviceselect.select_product' | translate }}</label>
-                <select id="productlist" class="form-select" [(ngModel)]="selectedProduct">
-                  <option selected [ngValue]="null">{{ 'home.deviceselect.select_product' | translate }}</option>
-                  <option *ngFor="let product of products$|async" [ngValue]="product.key"
-                          [innerHtml]="product.name"></option>
-                </select>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col text-end">
-                <button class="btn btn-primary" (click)="connectOffline()">{{ 'home.deviceselect.open' | translate }}</button>
-              </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>

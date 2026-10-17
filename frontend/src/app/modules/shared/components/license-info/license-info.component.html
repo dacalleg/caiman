@@ -8,7 +8,7 @@
   <div class="d-flex">
     <ng-container *ngIf="userData$|async as userData">
       <ng-container *ngIf="(flatLicenseExpired$|async) === false">
-        <div class="box">
+        <div class="box license-validity">
           <small>Licenza valida fino a</small><br>
           <div class="info">{{ userData.fields.flat_license_expiration|date:"dd/MM/YYYY" }}</div>
         </div>
